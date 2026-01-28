@@ -1,0 +1,33 @@
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Tue Jan 27 16:04:10.379943 2026] [mpm_event:notice] [pid 54045:tid 8687643712] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Tue Jan 27 16:04:10.380423 2026] [core:notice] [pid 54045:tid 8687643712] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
+[Tue Jan 27 16:08:34.625374 2026] [mpm_event:notice] [pid 54045:tid 8687643712] AH00491: caught SIGTERM, shutting down
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Tue Jan 27 16:10:25.098932 2026] [mpm_event:notice] [pid 2784:tid 8394992704] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Tue Jan 27 16:10:25.099252 2026] [core:notice] [pid 2784:tid 8394992704] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
+[Tue Jan 27 16:10:39.600998 2026] [mpm_event:notice] [pid 2784:tid 8394992704] AH00491: caught SIGTERM, shutting down
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Tue Jan 27 16:10:47.306838 2026] [mpm_event:notice] [pid 3368:tid 8394992704] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Tue Jan 27 16:10:47.307112 2026] [core:notice] [pid 3368:tid 8394992704] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
+[Tue Jan 27 16:12:37.043345 2026] [mpm_event:notice] [pid 3368:tid 8394992704] AH00491: caught SIGTERM, shutting down
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Tue Jan 27 16:12:56.545115 2026] [mpm_event:notice] [pid 5188:tid 8394992704] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Tue Jan 27 16:12:56.545495 2026] [core:notice] [pid 5188:tid 8394992704] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
+[Tue Jan 27 16:13:52.237550 2026] [core:warn] [pid 5188:tid 8394992704] AH00045: child process 5194 still did not exit, sending a SIGTERM
+[Tue Jan 27 16:13:54.246143 2026] [core:warn] [pid 5188:tid 8394992704] AH00045: child process 5194 still did not exit, sending a SIGTERM
+[Tue Jan 27 16:13:56.252627 2026] [core:warn] [pid 5188:tid 8394992704] AH00045: child process 5194 still did not exit, sending a SIGTERM
+[Tue Jan 27 16:13:58.258705 2026] [core:error] [pid 5188:tid 8394992704] AH00046: child process 5194 still did not exit, sending a SIGKILL
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Wed Jan 28 14:29:25.735367 2026] [core:warn] [pid 28863:tid 8394992704] AH00098: pid file /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/apache/logs/httpd.pid overwritten -- Unclean shutdown of previous Apache run?
+[Wed Jan 28 14:29:25.740708 2026] [mpm_event:notice] [pid 28863:tid 8394992704] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Wed Jan 28 14:29:25.740731 2026] [core:notice] [pid 28863:tid 8394992704] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
+[Wed Jan 28 15:10:57.598415 2026] [mpm_event:notice] [pid 28863:tid 8394992704] AH00491: caught SIGTERM, shutting down
+AH00557: httpd: apr_sockaddr_info_get() failed for Anonymous
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1. Set the 'ServerName' directive globally to suppress this message
+[Wed Jan 28 15:11:01.976722 2026] [mpm_event:notice] [pid 43928:tid 8394992704] AH00489: Apache/2.4.43 (Unix) configured -- resuming normal operations
+[Wed Jan 28 15:11:01.977147 2026] [core:notice] [pid 43928:tid 8394992704] AH00094: Command line: '/Users/mariosshittas/Library/Application Support/Local/lightning-services/apache-2.4.43+11/bin/darwin-arm64/bin/httpd -D FOREGROUND -f /Users/mariosshittas/Library/Application Support/Local/run/EBjJAn2_O/conf/apache/apache2.conf'
