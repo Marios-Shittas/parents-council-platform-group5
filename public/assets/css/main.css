@@ -1,0 +1,46 @@
+/* Main CSS file for the Parents Council Platform */
+
+/* Logo styles */
+.logo {
+    width: 80px;
+    height: 80px;
+}
+
+/* Navigation bar styles */
+.navbar {
+    background-color: lightgray;
+    display: flex;
+    align-items: center;
+}
+
+/* Navigation links (Contents) styles */
+.nav-link {
+    border: 0.5px solid gray;
+    border-radius: 5px;
+    margin: 2px;
+    padding: 5px 10px;
+}
+
+/* Hover effect for navigation links */
+.nav-link:hover {
+    background-color: gray;
+    color: white !important;
+}
+
+/* Search bar styles */
+.form-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 50%;
+}
+
+/* Search input styles */
+.form-control {
+    width: 500px;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
