@@ -25,7 +25,7 @@ $site_title = "Γυμνάασιο Αγίου Αθανασίου";
         <!-- Navigation bar-->
         <nav class="navbar navbar-expand-lg navbar-light">
             <!-- Logo -->
-            <img src="../../public/assets/img/logo-icon.png" class="logo"> 
+            <img src="assets/img/logo-icon.png" class="logo"> 
 
             <!-- Search bar -->
             <form class="form-inline">
@@ -41,22 +41,22 @@ $site_title = "Γυμνάασιο Αγίου Αθανασίου";
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto text-center">
                     <li class="nav-item active">
-                        <a class="nav-link" href="home.php">Home<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="../public/home.php">Home<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="announcements.php">Announcements</a>
+                        <a class="nav-link" href="../public/announcements.php">Announcements</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="events.php">Events</a>
+                        <a class="nav-link" href="../public/events.php">Events</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="applications.php">Applications</a>
+                        <a class="nav-link" href="../public/applications.php">Applications</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="payments.php">Payments</a>
+                        <a class="nav-link" href="../public/payments.php">Payments</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="login.php">Login</a>
+                        <a class="nav-link" href="../public/login.php">Login</a>
                     </li>
                 </ul>
             </div>
