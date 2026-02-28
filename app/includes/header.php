@@ -20,44 +20,47 @@ $site_title = "Γυμνάασιο Αγίου Αθανασίου";
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Navigation bar-->
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <!-- Logo -->
-        <img src="../../public/assets/img/logo-icon.png" class="logo"> 
+    <!-- Header -->
+    <header>
+        <!-- Navigation bar-->
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <!-- Logo -->
+            <img src="../../public/assets/img/logo-icon.png" class="logo"> 
 
-        <!-- Search bar -->
-        <form class="form-inline">
-            <input class="form-control" type="search" placeholder="Search">
-        </form>
+            <!-- Search bar -->
+            <form class="form-inline">
+                <input class="form-control" type="search" placeholder="Search">
+            </form>
 
-        <!-- Hamburger menu for mobile view -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-expanded="false">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <!-- Hamburger menu for mobile view -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <!-- Navigation links (Contents) -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto text-center">
-                <li class="nav-item active">
-                    <a class="nav-link" href="home.php">Home<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="announcements.php">Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="events.php">Events</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="applications.php">Applications</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="payments.php">Payments</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.php">Login</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+            <!-- Navigation links (Contents) -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto text-center">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="home.php">Home<span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="announcements.php">Announcements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="events.php">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="applications.php">Applications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="payments.php">Payments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.php">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 </body>
 </html>
