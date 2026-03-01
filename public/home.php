@@ -18,17 +18,26 @@
     <!-- Header -->
     <?php include '../app/includes/header.php'; ?>
 
-    <h1>This is where the home page content goes</h1>
+    <div class="paragraph-container px-3">
+        <h1>Welcome to the Parent Association of Gymnasioum Agiou Athanasiou </h1>
+        <p>This is the home page of our website. Here you can find the latest announcements, calendar events, and upcoming events.</p>
+    </div>
 
-    <div class="row g-1">
-        <div class="col-12 col-md-4">
-            <div class="block-content">Announcements</div>
+    <div class="row g-0 px-3">
+        <div class="col-12 col-md-4 px-1">
+            <div class="block-content">
+                <h5>Announcements</h5>
+            </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="block-content" id="calendar-block">Calendar</div>
+        <div class="col-12 col-md-4 px-1">
+            <div class="block-content" id="calendar-block">
+                <h5>Calendar</h5>
+            </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="block-content">Events</div>
+        <div class="col-12 col-md-4 px-1">
+            <div class="block-content">
+                <h5>Upcoming Events</h5>
+            </div>
         </div>
     </div>
 
