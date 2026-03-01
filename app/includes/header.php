@@ -25,7 +25,9 @@ $site_title = "Γυμνάασιο Αγίου Αθανασίου";
         <!-- Navigation bar-->
         <nav class="navbar navbar-expand-lg navbar-light">
             <!-- Logo -->
-            <img src="assets/img/logo-icon.png" class="logo"> 
+            <a href="../public/home.php">
+                <img src="assets/img/logo-icon.png" class="logo">
+            </a>
 
             <!-- Search bar -->
             <form class="form-inline">
