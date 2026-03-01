@@ -49,5 +49,22 @@
     background-color: lightgray;
     text-align: center;
     padding: 20px;
+    margin-top: 10px;
     width: 100%;
+}
+
+.block-content {
+    background-color: #2a6496;
+    color:white;
+    border: 0.5px solid gray;
+    border-radius: 5px;
+    height: 200px;
+    margin: 2px 2px;
+    padding: 10px;
+}
+
+#calendar-block {
+    background-color: lightblue;
+    color: black;
+    height: 200px;
 }
