@@ -20,6 +20,18 @@
 
     <h1>This is where the home page content goes</h1>
 
+    <div class="row g-1">
+        <div class="col-12 col-md-4">
+            <div class="block-content">Announcements</div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="block-content" id="calendar-block">Calendar</div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="block-content">Events</div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <?php include '../app/includes/footer.php'; ?>
     </body>
