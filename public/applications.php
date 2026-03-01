@@ -4,6 +4,7 @@ require_once __DIR__ . '/../app/includes/header.php';
 
 <!-- Page-specific CSS (μόνο για τη σελίδα Applications) -->
 <link rel="stylesheet" href="assets/css/applications.css?v=1">
+<link rel="stylesheet" href="assets/css/main.css">
 
 <div class="applications-page">
 
