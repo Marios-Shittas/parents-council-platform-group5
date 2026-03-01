@@ -1,0 +1,159 @@
+/* Applications page specific styles */
+
+/* Logo sizing - prevent it from becoming too large */
+.logo {
+    width: 80px !important;
+    height: 80px !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+}
+
+/* Ensure navbar background matches footer on applications page */
+.navbar {
+    background-color: lightgray !important;
+}
+
+.applications-hero {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2a6496 100%);
+    color: #fff;
+    padding: 40px 0 30px;
+    margin-bottom: 30px;
+}
+
+.applications-hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+.applications-hero p {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card .card-body {
+    padding: 20px;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.stat-number {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.applications-table th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+.applications-table td {
+    vertical-align: middle;
+}
+
+.badge-status {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.btn-new-application {
+    background: #ffc107;
+    border: none;
+    padding: 10px 25px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s;
+    color: #1a3a5c !important;
+}
+
+.btn-new-application:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255,193,7,0.4);
+    color: #1a3a5c !important;
+}
+
+.section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #1a3a5c;
+    font-size: 1.3rem;
+}
+
+.app-type-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 0.9rem;
+}
+
+.quick-links .card {
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.quick-links .card:hover {
+    border-color: #2a6496;
+    background-color: #f0f7ff;
+}
+
+/* Small helpers moved from inline styles */
+.applications-search {
+    width: 250px;
+}
+
+.applications-table-card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.applications-note {
+    border-radius: 10px;
+}
+
+/* Footer styling for applications page - avoid affecting other icons */
+footer {
+    width: 100%;
+    clear: both;
+    margin-top: auto;
+}
+
+footer .footer-content {
+    background-color: lightgray;
+    text-align: center;
+    padding: 20px;
+    margin-top: 10px;
+    width: 100%;
+}
