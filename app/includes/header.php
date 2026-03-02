@@ -1,70 +1,364 @@
 <?php
-$site_title = "Γυμνάασιο Αγίου Αθανασίου";
-?>
+// Τίτλος που εμφανίζεται στο browser και στο λογότυπο.
+$site_title = "Γυμνάσιο Αγίου Αθανασίου";
 
-<!DOCTYPE html>
+// Βρίσκουμε ποια σελίδα είναι ανοιχτή για να τη χρωματίσουμε ως ενεργή.
+$current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
+
+// Παίρνουμε την τιμή αναζήτησης (αν υπάρχει) για να μένει μέσα στο input.
+$search_query = trim($_GET['q'] ?? '');
+
+// Εδώ ορίζουμε όλα τα links του menu σε ένα σημείο (εύκολη συντήρηση).
+// Αν θέλεις νέο κουμπί στο menu, το προσθέτεις εδώ.
+$nav_items = [
+    // Αρχική σελίδα.
+    [
+        'label' => 'Home',
+        'href' => '/parents-council-platform-group5/public/home.php',
+        'icon' => 'fas fa-home',
+        'match' => ['home.php', 'index.php', ''],
+    ],
+    // Σελίδα ανακοινώσεων.
+    [
+        'label' => 'Announcements',
+        'href' => '/parents-council-platform-group5/public/announcements.php',
+        'icon' => 'fas fa-bullhorn',
+        'match' => ['announcements.php'],
+    ],
+    // Σελίδα εκδηλώσεων.
+    [
+        'label' => 'Events',
+        'href' => '/parents-council-platform-group5/public/events.php',
+        'icon' => 'fas fa-calendar-alt',
+        'match' => ['events.php'],
+    ],
+    // Σελίδα αιτήσεων.
+    [
+        'label' => 'Applications',
+        'href' => '/parents-council-platform-group5/public/applications.php',
+        'icon' => 'fas fa-file-alt',
+        'match' => ['applications.php'],
+    ],
+    // Σελίδα πληρωμών.
+    [
+        'label' => 'Payments',
+        'href' => '/parents-council-platform-group5/public/payments.php',
+        'icon' => 'fas fa-credit-card',
+        'match' => ['payments.php'],
+    ],
+];
+?>
+<!doctype html>
 <html lang="el">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title><?php echo $site_title; ?></title>
 
-    <!-- Google fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <!-- Bootstrap 4.6 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="../../public/assets/css/main.css">
+
+    <style>
+        /* Βασικά χρώματα για ενιαίο design. */
+        :root {
+            /* Χρώμα φόντου του header. */
+            --header-bg: rgba(248, 249, 250, 0.95);
+            /* Λεπτή γραμμή/περίγραμμα του header. */
+            --header-border: rgba(0, 0, 0, 0.06);
+            /* Κύριο μπλε χρώμα brand. */
+            --brand-color: #1a3a5c;
+            /* Βασικό χρώμα κειμένου. */
+            --text-main: #3f4a56;
+            /* Πιο έντονο χρώμα για hover/active. */
+            --text-strong: #152536;
+            /* Απαλό hover φόντο στα links. */
+            --link-hover-bg: #eef3f8;
+            /* Απαλό active φόντο (κρατήθηκε για πιθανή χρήση). */
+            --link-active-bg: #e6edf5;
+        }
+
+        /* Κολλάει πάνω όταν κάνουμε scroll και μένει πάντα ορατό. */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: var(--header-bg);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid var(--header-border);
+            padding: .5rem 0;
+        }
+
+        /* Διακριτική μπλε γραμμή πάνω για πιο premium εμφάνιση. */
+        .navbar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
+            opacity: .65;
+        }
+
+        /* Στυλ λογοτύπου. */
+        .navbar-brand img {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 10px rgba(26, 58, 92, 0.22);
+        }
+
+        /* Κείμενο δίπλα στο λογότυπο. */
+        .brand-text {
+            font-weight: 700;
+            color: var(--brand-color);
+            font-size: 1.12rem;
+            letter-spacing: .1px;
+            white-space: nowrap;
+        }
+
+        /* Λίγο κενό ανάμεσα στα menu items. */
+        .navbar-nav .nav-item {
+            margin: 0 .06rem;
+        }
+
+        /* Βασικό στυλ links menu. */
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            color: var(--text-main) !important;
+            padding: .48rem .7rem;
+            border-radius: .65rem;
+            transition: all .2s ease;
+            position: relative;
+            border: 0 !important;
+            box-shadow: none !important;
+            background: transparent;
+            font-size: 0.95rem;
+        }
+
+        /* Ίδιο πλάτος στο icon ώστε να φαίνονται όλα ευθυγραμμισμένα. */
+        .navbar-nav .nav-link i {
+            width: 1rem;
+            text-align: center;
+        }
+
+        /* Hover κατάσταση για πιο καθαρό feedback στον χρήστη. */
+        .navbar-nav .nav-link:hover {
+            background: rgba(230, 237, 245, 0.55);
+            color: var(--text-strong) !important;
+            /* Μικρή κίνηση για πιο "ζωντανό" αποτέλεσμα. */
+            transform: translateY(-1px);
+        }
+
+        /* Όταν η σελίδα είναι ενεργή, φαίνεται καθαρά. */
+        .navbar-nav .active > .nav-link {
+            background: transparent;
+            color: #0f2134 !important;
+            font-weight: 700;
+        }
+
+        /* Μικρή μπλε μπάρα κάτω από το ενεργό link. */
+        .navbar-nav .active > .nav-link::after {
+            content: "";
+            position: absolute;
+            left: .8rem;
+            right: .8rem;
+            bottom: .28rem;
+            height: 2px;
+            border-radius: 10px;
+            background: rgba(26, 58, 92, 0.55);
+        }
+
+        /* Πεδίο αναζήτησης. */
+        .search-input {
+            /* Περιορίζει το search για να μη τρώει όλο το πλάτος. */
+            min-width: 180px;
+            max-width: 320px;
+            border-radius: 999px 0 0 999px;
+            border-color: #d6dce4;
+        }
+
+        /* Όταν ο χρήστης γράφει στο search, το πεδίο φωτίζεται. */
+        .search-input:focus {
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 .2rem rgba(26, 58, 92, 0.12);
+        }
+
+        /* Κουμπί search. */
+        .search-btn {
+            /* Ίδιο pill style με το input για ενιαίο κουμπί. */
+            border-radius: 0 999px 999px 0;
+            border-color: #d6dce4;
+        }
+
+        /* Κουμπί login. */
+        .login-btn {
+            border-radius: 999px;
+            font-weight: 600;
+            padding: .3rem .9rem;
+            border-width: 2px;
+            font-size: .9rem;
+        }
+
+        /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
+        .navbar-brand {
+            margin-right: .7rem;
+        }
+
+        /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
+        .navbar-collapse {
+            /* Χωρίζει menu και δεξιά εργαλεία σε 2 καθαρές ζώνες. */
+            justify-content: space-between;
+        }
+
+        .navbar-nav {
+            /* Τα κουμπιά απλώνονται ομοιόμορφα στον χώρο. */
+            flex: 1 1 auto;
+            justify-content: space-evenly;
+            margin: 0 1rem;
+        }
+
+        .navbar-tools {
+            /* Search + Login μένουν δεξιά. */
+            margin-left: auto;
+            min-width: 360px;
+            justify-content: flex-end;
+        }
+
+        .navbar .container {
+            /* Μεγαλύτερο max-width για να γεμίζει καλύτερα η μπάρα. */
+            max-width: 1500px;
+        }
+
+        /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
+        .navbar-nav .nav-link:focus-visible,
+        .search-btn:focus-visible,
+        .login-btn:focus-visible,
+        .navbar-toggler:focus-visible,
+        .search-input:focus-visible {
+            outline: 2px solid rgba(26, 58, 92, 0.45);
+            outline-offset: 2px;
+        }
+
+        /* Ρυθμίσεις για κινητό/tablet. */
+        @media (max-width: 991.98px) {
+            .navbar-nav {
+                margin-top: .75rem;
+                /* Σε κινητό πάμε στο κλασικό στοίχισμα αριστερά. */
+                justify-content: flex-start;
+            }
+
+            .navbar-nav .nav-item {
+                margin: .15rem 0;
+            }
+
+            .navbar-tools {
+                margin-top: .75rem;
+                padding-top: .5rem;
+                border-top: 1px solid #e7ebf0;
+                gap: .5rem;
+                min-width: 100%;
+            }
+
+            .search-input {
+                /* Σε κινητό το search γίνεται full width. */
+                min-width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Header -->
-    <header>
-        <!-- Navigation bar-->
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <!-- Logo -->
-            <a href="../public/home.php">
-                <img src="assets/img/logo-icon.png" class="logo">
-            </a>
+<header>
+<!-- Κύριο navigation όλου του site. -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
 
-            <!-- Search bar -->
-            <form class="form-inline">
-                <input class="form-control" type="search" placeholder="Search">
-            </form>
+        <!-- Λογότυπο + τίτλος σχολείου. -->
+        <a class="navbar-brand d-flex align-items-center" href="/parents-council-platform-group5/public/home.php">
+            <img src="/parents-council-platform-group5/public/assets/img/logo-icon.png" alt="Logo" class="mr-2">
+            <span class="brand-text d-none d-md-inline"><?php echo $site_title; ?></span>
+        </a>
 
-            <!-- Hamburger menu for mobile view -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-expanded="false">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Navigation links (Contents) -->
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto text-center">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="../public/home.php">Home<span class="sr-only">(current)</span></a>
+        <div class="collapse navbar-collapse" id="mainNavbar">
+
+            <!-- Τα βασικά links του site στο κέντρο. -->
+            <ul class="navbar-nav text-center">
+                <!-- Κάνουμε loop στο $nav_items για να αποφύγουμε επαναλαμβανόμενο HTML. -->
+                <?php foreach ($nav_items as $item): ?>
+                    <!-- Ελέγχουμε αν το link αντιστοιχεί στην τωρινή σελίδα. -->
+                    <?php $is_active = in_array($current_page, $item['match'], true); ?>
+                    <li class="nav-item<?php echo $is_active ? ' active' : ''; ?>">
+                        <!-- aria-current βοηθάει accessibility (screen readers). -->
+                        <a class="nav-link" href="<?php echo $item['href']; ?>" <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
+                            <i class="<?php echo $item['icon']; ?> mr-1"></i><?php echo $item['label']; ?>
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../public/announcements.php">Announcements</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../public/events.php">Events</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../public/applications.php">Applications</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../public/payments.php">Payments</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../public/login.php">Login</a>
-                    </li>
-                </ul>
+                <?php endforeach; ?>
+            </ul>
+
+            <!-- Δεξιά εργαλεία: αναζήτηση + login. -->
+            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center navbar-tools">
+
+                <!-- Form αναζήτησης (με GET για να φαίνεται το q στο URL). -->
+                <form class="my-2 my-lg-0 mr-lg-2" action="/parents-council-platform-group5/public/search.php" method="get">
+                    <div class="input-group input-group-sm">
+                        <!-- Φιλτράρουμε τιμή με htmlspecialchars για ασφάλεια. -->
+                        <input type="search" name="q" class="form-control search-input"
+                               placeholder="Αναζήτηση..." aria-label="Search"
+                               value="<?php echo htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary search-btn" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <a href="/parents-council-platform-group5/public/login.php"
+                   class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
+                    <!-- Κουμπί μετάβασης στη σελίδα login. -->
+                    <i class="fas fa-sign-in-alt mr-1"></i>Login
+                </a>
+
             </div>
-        </nav>
-    </header>
-</body>
-</html>
+        </div>
+
+    </div>
+</nav>
+</header>
+
+<script>
+    // Απλό fallback: αν δεν υπάρχει Bootstrap JS, ανοίγει/κλείνει το mobile menu.
+    (function () {
+        // Ελέγχουμε αν υπάρχει έτοιμο bootstrap collapse.
+        var hasBootstrapCollapse = window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
+        if (hasBootstrapCollapse) return;
+
+        // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+        var toggler = document.querySelector('[data-target="#mainNavbar"]');
+        var menu = document.getElementById('mainNavbar');
+        if (!toggler || !menu) return;
+
+        // Εναλλαγή open/close όταν πατάμε το hamburger.
+        toggler.addEventListener('click', function () {
+            var isOpen = menu.classList.contains('show');
+            menu.classList.toggle('show', !isOpen);
+            // Ενημέρωση του aria-expanded για accessibility.
+            toggler.setAttribute('aria-expanded', String(!isOpen));
+        });
+    })();
+</script>

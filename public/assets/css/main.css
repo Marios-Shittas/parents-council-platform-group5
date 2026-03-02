@@ -15,16 +15,16 @@
 
 /* Navigation links (Contents) styles */
 .nav-link {
-    border: 0.5px solid gray;
-    border-radius: 5px;
-    margin: 2px;
-    padding: 5px 10px;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
 }
 
 /* Hover effect for navigation links */
 .nav-link:hover {
-    background-color: gray;
-    color: white !important;
+    background-color: transparent;
+    color: inherit !important;
 }
 
 /* Search bar styles */
