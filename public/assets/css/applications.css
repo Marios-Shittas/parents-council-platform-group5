@@ -8,9 +8,9 @@
     max-height: 80px !important;
 }
 
-/* Ensure navbar background matches footer on applications page */
+/* Keep applications page header consistent with the shared white navbar */
 .navbar {
-    background-color: lightgray !important;
+    background-color: #fff !important;
 }
 
 .applications-hero {
