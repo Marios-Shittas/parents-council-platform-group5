@@ -123,6 +123,22 @@
         gap: 12px;
     }
 
+    /* Κουμπί About στο footer. */
+    .footer-about-btn {
+        background: none;
+        border: 1px solid #b0bec5;
+        border-radius: 4px;
+        color: #5f6f82;
+        font-size: 0.84rem;
+        padding: 2px 10px;
+        cursor: pointer;
+        transition: color .2s, border-color .2s;
+    }
+    .footer-about-btn:hover {
+        color: #1a3a5c;
+        border-color: #1a3a5c;
+    }
+
     /* Link "All rights reserved.". */
     .footer-policy {
         color: #5f6f82;
@@ -204,11 +220,38 @@
             <div class="footer-bottom-wrap">
                 <!-- Αυτό ενημερώνεται αυτόματα κάθε χρόνο με PHP date(\"Y\"). -->
                 <div>&copy; <?php echo date("Y"); ?> Γυμνάσιο Αγίου Αθανασίου — Σύλλογος Γονέων & Κηδεμόνων</div>
-                <a class="footer-policy" href="/parents-council-platform-group5/public/home.php">All rights reserved.</a>
+                <div class="d-flex align-items-center" style="gap:12px;">
+                    <button class="footer-about-btn" data-toggle="modal" data-target="#aboutModal">About</button>
+                    <a class="footer-policy" href="/parents-council-platform-group5/public/home.php">All rights reserved to Cyprus University of Technology</a>
+                </div>
             </div>
         </div>
     </div>
 </footer>
+
+<!-- About Modal -->
+<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#1a3a5c; color:#fff;">
+                <h5 class="modal-title" id="aboutModalLabel">Σχετικά με την Ιστοσελίδα</h5>
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" style="font-size:0.95rem; line-height:1.7; color:#344055;">
+                <p>Η ιστοσελίδα δημιουργήθηκε στο πλαίσιο ακαδημαϊκής εργασίας από φοιτητές του Τμήματος Πληροφορικής του Τεχνολογικού Πανεπιστημίου Κύπρου (ΤΕΠΑΚ), υπό την επίβλεψη του κ. Ανδρέα Ανδρέου.</p>
+                <p class="mb-1">Στη δημιουργία της ιστοσελίδας συμμετείχαν οι φοιτητές:</p>
+                <p class="mb-0">Μιχάλης Τσαδιώτης, Μάριος Σιήττας, Σοφία Κυριάκου, Κωνσταντίνος Αβραμίδης, Russell Vickramasingam.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Κλείσιμο</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (loaded here once for all pages) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
