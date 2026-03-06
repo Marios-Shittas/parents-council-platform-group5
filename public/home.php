@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Footer -->
     <?php include '../app/includes/footer.php'; ?>
     </body>
