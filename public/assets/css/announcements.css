@@ -1,0 +1,207 @@
+/* Announcements CSS - Styles for announcements pages */
+
+/* ===== ANNOUNCEMENT CARDS ===== */
+.announcement-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-gray-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.announcement-card:hover {
+    box-shadow: var(--shadow-md);
+    border-top: 3px solid var(--color-accent);
+    transform: translateY(-4px);
+}
+
+.announcement-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.announcement-card .card-body {
+    padding: var(--spacing-md);
+}
+
+.announcement-card .card-title {
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.announcement-card .card-date {
+    color: var(--color-muted-blue);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.announcement-card .card-text {
+    color: var(--color-navy);
+    line-height: 1.6;
+}
+
+/* ===== ADMIN STYLES ===== */
+.admin-container {
+    padding: var(--spacing-lg);
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-gray-light);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background: rgba(221, 229, 239, 0.3);
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    padding: var(--spacing-sm);
+    text-align: left;
+    border-bottom: 2px solid var(--color-gray-light);
+}
+
+.admin-table td {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-gray-light);
+    vertical-align: middle;
+}
+
+.admin-table tr:hover {
+    background: rgba(221, 229, 239, 0.2);
+}
+
+.admin-table .thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+/* ===== MODAL STYLES ===== */
+.modal-custom .modal-content {
+    border-radius: var(--radius-md);
+    border: none;
+}
+
+.modal-custom .modal-header {
+    background: rgba(221, 229, 239, 0.3);
+    border-bottom: 1px solid var(--color-gray-light);
+    padding: var(--spacing-md);
+}
+
+.modal-custom .modal-title {
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+.modal-custom .modal-body {
+    padding: var(--spacing-lg);
+}
+
+.modal-custom .modal-footer {
+    border-top: 1px solid var(--color-gray-light);
+    padding: var(--spacing-md);
+}
+
+/* ===== ALERTS ===== */
+.alert-custom {
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.alert-success-custom {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #155724;
+}
+
+.alert-danger-custom {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #721c24;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-muted-blue);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: var(--color-navy);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ===== ADMIN SIDEBAR ===== */
+.admin-sidebar {
+    background: var(--color-navy);
+    min-height: 100vh;
+    padding: var(--spacing-md);
+}
+
+.admin-sidebar .brand {
+    color: var(--color-bg);
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: var(--spacing-md);
+}
+
+.admin-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-xs);
+    transition: all 0.2s ease;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-bg);
+}
+
+.admin-sidebar .nav-link i {
+    width: 1.5rem;
+    margin-right: var(--spacing-sm);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+    
+    .announcement-card .card-img-top {
+        height: 150px;
+    }
+}
