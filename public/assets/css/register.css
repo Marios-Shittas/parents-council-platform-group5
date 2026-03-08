@@ -1,0 +1,94 @@
+
+
+.register {
+    background: linear-gradient(135deg, #0a2463 0%, #1566d1 50%, #6592db 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+
+.register label {
+    color: rgba(240, 237, 237, 0.75);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.register label.email-consent {
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 10px;
+}
+
+.register input.form-control {
+    background-color: transparent !important;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #ffffff !important;
+}
+
+.register input.form-control::placeholder {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+
+.credit-card {
+    background: linear-gradient(135deg, #0a2463 0%, #1566d1 50%, #6592db 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 560px;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.credit-card label {
+    color: rgba(240, 237, 237, 0.75);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.credit-card input.form-control {
+    background-color: transparent !important;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #ffffff !important;
+}
+
+.credit-card input.form-control::placeholder {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+.credit-card .row-card-number-cardholder {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.credit-card .row-cvv-expiry {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.credit-card .row-cvv-expiry .col-md-2 {
+    flex: 1;
+    min-width: 0;
+    max-width: 160px;
+}
