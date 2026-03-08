@@ -329,10 +329,8 @@ $announcements = $announcementsService->getAllAnnouncements();
     <!-- Εικονίδια -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- Δικά μας styles -->
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/announcements.css">
-    <!-- Admin announcements styles -->
     <link rel="stylesheet" href="../assets/css/admin_announcements.css">
 
     <title>Διαχείριση Ανακοινώσεων - Admin</title>
@@ -341,42 +339,8 @@ $announcements = $announcementsService->getAllAnnouncements();
 <body>
 
 <div class="admin-wrapper">
-    <!-- Αριστερό μενού admin -->
-    <nav class="admin-sidebar" style="width: 250px;">
-        <div class="brand">
-            <i class="fas fa-school mr-2"></i>
-            Admin Panel
-        </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="home.php">
-                    <i class="fas fa-home"></i>Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="announcements.php">
-                    <i class="fas fa-bullhorn"></i>Ανακοινώσεις
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="events.php">
-                    <i class="fas fa-calendar-alt"></i>Εκδηλώσεις
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="users.php">
-                    <i class="fas fa-users"></i>Χρήστες
-                </a>
-            </li>
-            <li class="nav-item mt-4">
-                <a class="nav-link" href="../home.php">
-                    <i class="fas fa-arrow-left"></i>Επιστροφή στο Site
-                </a>
-            </li>
-        </ul>
-    </nav>
+    <?php include __DIR__ . '/../../app/includes/admin_sidebar.php'; ?>
 
-    <!-- Κύριο περιεχόμενο σελίδας -->
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard

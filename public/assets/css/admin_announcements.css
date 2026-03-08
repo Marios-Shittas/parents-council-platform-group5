@@ -1,22 +1,9 @@
 /**
- * Admin Announcements Styles
- * Στυλ για τη σελίδα διαχείρισης ανακοινώσεων (admin panel)
+ * Admin Announcements - Announcements specific styles only
+ * Page-only CSS related to announcements functionality
  */
 
-/* Wrapper κύριου εχει flex layout: sidebar + content */
-.admin-wrapper {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* Κύριο περιεχόμενο, καταλαμβάνει το υπόλοιπο χώρο */
-.admin-content {
-    flex: 1;
-    padding: 2rem;
-    background: #f8f9fa;
-}
-
-/* Container για προεπισκόπηση εικόνων */
+/* Image preview container for announcement images */
 .image-preview {
     display: flex;
     flex-wrap: wrap;
@@ -24,14 +11,14 @@
     margin-top: 10px;
 }
 
-/* Κάθε εικόνα στη προεπισκόπηση */
+/* Individual image item in preview */
 .image-preview-item {
     position: relative;
     width: 100px;
     height: 100px;
 }
 
-/* Εικόνα fixture στη προεπισκόπηση */
+/* Image display in preview */
 .image-preview-item img {
     width: 100%;
     height: 100%;
@@ -39,7 +26,7 @@
     border-radius: 8px;
 }
 
-/* Κουμπί διαγραφής εικόνας (X) */
+/* Delete button for each image */
 .image-preview-item .delete-btn {
     position: absolute;
     top: -8px;
@@ -54,17 +41,11 @@
     cursor: pointer;
 }
 
-/* Link για επιστροφή στο dashboard */
-.back-link {
-    color: var(--color-navy);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-/* Όταν περνάμε το ποντίκι πάνω από το back-link */
-.back-link:hover {
-    color: var(--color-accent);
+/* Thumbnail in announcements table */
+.thumbnail {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #dfe5ee;
 }
