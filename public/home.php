@@ -19,25 +19,25 @@
     <?php include '../app/includes/header.php'; ?>
 
     <div class="paragraph-container px-3">
-        <h1>Welcome to the Parent Association of Gymnasioum Agiou Athanasiou </h1>
-        <p>This is the home page of our website. Here you can find the latest announcements, calendar events, and upcoming events.</p>
+        <h1>Καλώς ήρθατε στον Σύλλογο Γονέων του Γυμνασίου Αγίου Αθανασίου</h1>
+        <p>Αυτή είναι η αρχική σελίδα του ιστότοπού μας. Εδώ μπορείτε να βρείτε τις τελευταίες ανακοινώσεις, εκδηλώσεις ημερολογίου και επερχόμενες εκδηλώσεις.</p>
     </div>
 
     <div class="row">
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="announcements-block">
-                <h5>Announcements</h5>
+                <h5>Ανακοινώσεις</h5>
             </div>
         </div>
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="calendar-block">
-                <h5>Calendar</h5>
+                <h5>Ημερολόγιο</h5>
                 <div id="calendar-root"></div>
             </div>
         </div>
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="upcoming-events-block">
-                <h5>Upcoming Events</h5>
+                <h5>Επερχόμενες Εκδηλώσεις</h5>
             </div>
         </div>
     </div>

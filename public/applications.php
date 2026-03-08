@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
     $application_id = (int) ($_POST['application_id'] ?? 0);
 
     if ($application_id <= 0) {
-        $message = 'Invalid application.';
+        $message = 'Μη έγκυρη αίτηση.';
         $messageType = 'danger';
     } else {
         $checkStmt = $conn->prepare("SELECT application_id FROM Submissions WHERE application_id = ? AND user_id = ?");
@@ -40,11 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
         $checkResult = $checkStmt->get_result();
 
         if ($checkResult->num_rows > 0) {
-            $message = 'You have already submitted this application.';
+            $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
             $messageType = 'warning';
         } else {
             if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
-                $message = 'Please upload a valid file.';
+                $message = 'Παρακαλούμε ανεβάστε ένα έγκυρο αρχείο.';
                 $messageType = 'danger';
             } else {
                 $file = $_FILES['submission_file'];
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
                 $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
                 if (!in_array($extension, $allowedExtensions, true)) {
-                    $message = 'Allowed file types: pdf, doc, docx, jpg, jpeg, png.';
+                    $message = 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
                     $messageType = 'danger';
                 } else {
                     $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '.' . $extension;
@@ -67,14 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
                         $insertStmt->bind_param("iis", $application_id, $user_id, $dbPath);
 
                         if ($insertStmt->execute()) {
-                            $message = 'Application submitted successfully.';
+                            $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
                             $messageType = 'success';
                         } else {
-                            $message = 'Database error while saving submission.';
+                            $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
                             $messageType = 'danger';
                         }
                     } else {
-                        $message = 'File upload failed.';
+                        $message = 'Η μεταφόρτωση του αρχείου απέτυχε.';
                         $messageType = 'danger';
                     }
                 }
@@ -148,10 +148,10 @@ while ($row = $subRes->fetch_assoc()) {
 
 <div class="applications-hero">
     <div class="container">
-        <h1>Applications</h1>
+        <h1>Αιτήσεις</h1>
         <p>
-            This page allows parents and guardians to view available school applications
-            and submit them electronically.
+            Αυτή η σελίδα επιτρέπει σε γονείς και κηδεμόνες να βλέπουν τις διαθέσιμες σχολικές αιτήσεις 
+            και να τις υποβάλλουν ηλεκτρονικά.
         </p>
     </div>
 </div>
@@ -160,7 +160,7 @@ while ($row = $subRes->fetch_assoc()) {
     <?php if (!empty($message)): ?>
         <div class="alert alert-<?php echo htmlspecialchars($messageType); ?> alert-dismissible fade show" role="alert">
             <?php echo htmlspecialchars($message); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Κλείσιμο">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
@@ -170,10 +170,10 @@ while ($row = $subRes->fetch_assoc()) {
         <div class="col-lg-8">
             <div class="card applications-card mb-4">
                 <div class="card-body p-4">
-                    <h3 class="section-title">Available Applications</h3>
+                    <h3 class="section-title">Διαθέσιμες Αιτήσεις</h3>
 
                     <?php if (empty($applications)): ?>
-                        <div class="alert alert-info mb-0">No applications available.</div>
+                        <div class="alert alert-info mb-0">Δεν υπάρχουν διαθέσιμες αιτήσεις.</div>
                     <?php else: ?>
                         <div class="row">
                             <?php foreach ($applications as $application): ?>
@@ -184,17 +184,17 @@ while ($row = $subRes->fetch_assoc()) {
                                                 <?php echo htmlspecialchars($application['application_title']); ?>
                                             </h5>
                                             <span class="doc-badge">
-                                                <?php echo (int)$application['document_count']; ?> docs
+                                                <?php $dc = (int)$application['document_count']; echo $dc . ' ' . ($dc === 1 ? 'έγγραφο' : 'έγγραφα'); ?>
                                             </span>
                                         </div>
 
                                         <p class="application-description">
-                                            <?php echo nl2br(htmlspecialchars($application['application_description'] ?? 'No description available.')); ?>
+                                            <?php echo nl2br(htmlspecialchars($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.')); ?>
                                         </p>
 
                                         <?php if (!empty($documentsByApplication[$application['application_id']])): ?>
                                             <div class="mb-3">
-                                                <strong>Attached documents:</strong>
+                                                <strong>Συνημμένα έγγραφα:</strong>
                                                 <ul class="mt-2 mb-0">
                                                     <?php foreach ($documentsByApplication[$application['application_id']] as $doc): ?>
                                                         <?php
@@ -228,7 +228,7 @@ while ($row = $subRes->fetch_assoc()) {
                                             data-application-title="<?php echo htmlspecialchars($application['application_title']); ?>"
                                             data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? ''); ?>"
                                         >
-                                            Submit Application
+                                            Υποβολή Αίτησης
                                         </button>
                                     </div>
                                 </div>
@@ -240,18 +240,18 @@ while ($row = $subRes->fetch_assoc()) {
 
             <div class="card applications-card">
                 <div class="card-body p-4">
-                    <h3 class="section-title">My Submissions</h3>
+                    <h3 class="section-title">Οι Υποβολές Μου</h3>
 
                     <?php if (empty($mySubmissions)): ?>
-                        <div class="alert alert-secondary mb-0">You have not submitted any applications yet.</div>
+                        <div class="alert alert-secondary mb-0">Δεν έχετε υποβάλει ακόμη καμία αίτηση.</div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table submissions-table">
                                 <thead>
                                     <tr>
-                                        <th>Application</th>
-                                        <th>Submitted File</th>
-                                        <th>Status</th>
+                                        <th>Αίτηση</th>
+                                        <th>Υποβληθέν Αρχείο</th>
+                                        <th>Κατάσταση</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -281,13 +281,13 @@ while ($row = $subRes->fetch_assoc()) {
         <div class="col-lg-4">
             <div class="card applications-card">
                 <div class="card-body p-4">
-                    <h4 class="section-title">Instructions</h4>
+                    <h4 class="section-title">Οδηγίες</h4>
                     <ul class="instructions-list mb-0">
-                        <li>Read the application description carefully before submitting.</li>
-                        <li>Upload the correct file and required supporting document.</li>
-                        <li>Each parent can submit only one file per application type.</li>
-                        <li>The school administration will review all submissions.</li>
-                        <li>Your submission status will be updated by the administrator.</li>
+                        <li>Διαβάστε προσεκτικά την περιγραφή της αίτησης πριν την υποβάλετε.</li>
+                        <li>Ανεβάστε το σωστό αρχείο και τα απαιτούμενα δικαιολογητικά.</li>
+                        <li>Κάθε γονέας μπορεί να υποβάλει μόνο ένα αρχείο ανά τύπο αίτησης.</li>
+                        <li>Η σχολική διοίκηση θα εξετάσει όλες τις υποβολές.</li>
+                        <li>Η κατάσταση της υποβολής σας θα ενημερώνεται από τον διαχειριστή.</li>
                     </ul>
                 </div>
             </div>
@@ -299,8 +299,8 @@ while ($row = $subRes->fetch_assoc()) {
     <div class="modal-dialog modal-lg" role="document">
         <form method="POST" enctype="multipart/form-data" class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Submit Application</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title">Υποβολή Αίτησης</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
                     <span>&times;</span>
                 </button>
             </div>
@@ -309,24 +309,24 @@ while ($row = $subRes->fetch_assoc()) {
                 <input type="hidden" name="application_id" id="modal_application_id">
 
                 <div class="form-group">
-                    <label><strong>Application Title</strong></label>
+                    <label><strong>Τίτλος Αίτησης</strong></label>
                     <input type="text" id="modal_application_title" class="form-control" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label><strong>Description</strong></label>
+                    <label><strong>Περιγραφή</strong></label>
                     <textarea id="modal_application_description" class="form-control" rows="4" readonly></textarea>
                 </div>
 
                 <div class="upload-box">
-                    <label for="submission_file"><strong>Upload File</strong></label>
+                    <label for="submission_file"><strong>Μεταφόρτωση Αρχείου</strong></label>
                     <input type="file" name="submission_file" id="submission_file" class="form-control-file" required>
-                    <small class="text-muted d-block mt-2" id="selectedFileName">No file selected</small>
+                    <small class="text-muted d-block mt-2" id="selectedFileName">Δεν έχει επιλεγεί αρχείο</small>
                 </div>
             </div>
 
             <div class="modal-footer">
-                <button type="submit" name="submit_application" class="btn btn-primary">Submit</button>
+                <button type="submit" name="submit_application" class="btn btn-primary">Υποβολή</button>
             </div>
         </form>
     </div>
