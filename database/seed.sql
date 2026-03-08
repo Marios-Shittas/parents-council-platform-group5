@@ -1,3 +1,5 @@
+USE parents_council;
+
 -- USERS
 INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status)
 VALUES
