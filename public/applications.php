@@ -150,8 +150,8 @@ while ($row = $subRes->fetch_assoc()) {
     <div class="container">
         <h1>Applications</h1>
         <p>
-            This page allows parents and guardians to view available school applications
-            and submit them electronically.
+            Αυτή η σελίδα επιτρέπει σε γονείς και κηδεμόνες να βλέπουν τις διαθέσιμες σχολικές αιτήσεις 
+            και να τις υποβάλλουν ηλεκτρονικά.
         </p>
     </div>
 </div>
@@ -170,10 +170,10 @@ while ($row = $subRes->fetch_assoc()) {
         <div class="col-lg-8">
             <div class="card applications-card mb-4">
                 <div class="card-body p-4">
-                    <h3 class="section-title">Available Applications</h3>
+                    <h3 class="section-title">Διαθέσιμες Αιτήσεις</h3>
 
                     <?php if (empty($applications)): ?>
-                        <div class="alert alert-info mb-0">No applications available.</div>
+                        <div class="alert alert-info mb-0">Δεν υπάρχουν διαθέσιμες αιτήσεις.</div>
                     <?php else: ?>
                         <div class="row">
                             <?php foreach ($applications as $application): ?>
