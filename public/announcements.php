@@ -41,8 +41,8 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
 <!-- Page Header -->
-<div class="container">
-    <div class="page-header">
+<div class="announcement-hero">
+    <div class="container">
         <h1><i class="fas fa-bullhorn mr-2"></i>Ανακοινώσεις</h1>
         <p class="lead">Ενημερωθείτε για τα τελευταία νέα του σχολείου</p>
     </div>

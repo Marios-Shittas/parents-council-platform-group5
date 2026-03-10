@@ -1,6 +1,14 @@
 <?php
+/**
+ * Admin Applications Management Page
+ * Create, update, delete applications and manage documents
+ */
+
 session_start();
-require_once __DIR__ . '/../../app/config/db.php';
+require_once __DIR__ . '/../../app/services/ApplicationsService.php';
+
+// Initialize the service
+$applicationsService = new ApplicationsService();
 
 $message = $_SESSION['flash_message'] ?? '';
 $messageType = $_SESSION['flash_message_type'] ?? '';
@@ -27,10 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Ο τίτλος της αίτησης είναι υποχρεωτικός.';
             $messageType = 'danger';
         } else {
-            $stmt = $conn->prepare("INSERT INTO Applications (application_title, application_description) VALUES (?, ?)");
-            $stmt->bind_param("ss", $title, $description);
-
-            if ($stmt->execute()) {
+            if ($applicationsService->createApplication($title, $description)) {
                 $message = 'Η αίτηση δημιουργήθηκε επιτυχώς!';
                 $messageType = 'success';
             } else {
@@ -46,14 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = trim($_POST['application_description'] ?? '');
 
         if ($application_id > 0 && $title !== '') {
-            $stmt = $conn->prepare("
-                UPDATE Applications
-                SET application_title = ?, application_description = ?
-                WHERE application_id = ?
-            ");
-            $stmt->bind_param("ssi", $title, $description, $application_id);
-
-            if ($stmt->execute()) {
+            if ($applicationsService->updateApplication($application_id, $title, $description)) {
                 $message = 'Η αίτηση ενημερώθηκε επιτυχώς!';
                 $messageType = 'success';
             } else {
@@ -70,10 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $application_id = (int)($_POST['application_id'] ?? 0);
 
         if ($application_id > 0) {
-            $stmt = $conn->prepare("DELETE FROM Applications WHERE application_id = ?");
-            $stmt->bind_param("i", $application_id);
-
-            if ($stmt->execute()) {
+            if ($applicationsService->deleteApplication($application_id)) {
                 $message = 'Η αίτηση διαγράφηκε επιτυχώς!';
                 $messageType = 'success';
             } else {
@@ -106,10 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $dbPath = 'storage/uploads/application-documents/' . $newFileName;
 
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                    $stmt = $conn->prepare("INSERT INTO ApplicationsDocuments (application_id, file_path) VALUES (?, ?)");
-                    $stmt->bind_param("is", $application_id, $dbPath);
-
-                    if ($stmt->execute()) {
+                    if ($applicationsService->addDocument($application_id, $dbPath)) {
                         $message = 'Το έγγραφο ανέβηκε επιτυχώς!';
                         $messageType = 'success';
                     } else {
@@ -128,11 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $doc_id = (int)($_POST['ap_document_id'] ?? 0);
 
         if ($doc_id > 0) {
-            $stmt = $conn->prepare("SELECT file_path FROM ApplicationsDocuments WHERE ap_document_id = ?");
-            $stmt->bind_param("i", $doc_id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $doc = $res->fetch_assoc();
+            $doc = $applicationsService->getDocumentById($doc_id);
 
             if ($doc) {
                 $filePath = __DIR__ . '/../../' . $doc['file_path'];
@@ -140,12 +128,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     unlink($filePath);
                 }
 
-                $deleteStmt = $conn->prepare("DELETE FROM ApplicationsDocuments WHERE ap_document_id = ?");
-                $deleteStmt->bind_param("i", $doc_id);
-                $deleteStmt->execute();
-
-                $message = 'Το έγγραφο διαγράφηκε επιτυχώς!';
-                $messageType = 'success';
+                if ($applicationsService->deleteDocument($doc_id)) {
+                    $message = 'Το έγγραφο διαγράφηκε επιτυχώς!';
+                    $messageType = 'success';
+                } else {
+                    $message = 'Σφάλμα κατά τη διαγραφή του εγγράφου.';
+                    $messageType = 'danger';
+                }
             }
         }
     }
@@ -156,14 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sub_status = $_POST['sub_status'] ?? '';
 
         if ($application_id > 0 && $user_id > 0 && in_array($sub_status, ['waiting', 'approved', 'rejected'], true)) {
-            $stmt = $conn->prepare("
-                UPDATE Submissions
-                SET sub_status = ?
-                WHERE application_id = ? AND user_id = ?
-            ");
-            $stmt->bind_param("sii", $sub_status, $application_id, $user_id);
-
-            if ($stmt->execute()) {
+            if ($applicationsService->updateSubmissionStatus($application_id, $user_id, $sub_status)) {
                 $message = 'Η κατάσταση της υποβολής ενημερώθηκε επιτυχώς!';
                 $messageType = 'success';
             } else {
@@ -185,48 +167,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 | Load data
 |--------------------------------------------------------------------------
 */
-$applications = [];
-$appRes = $conn->query("SELECT * FROM Applications ORDER BY application_id DESC");
-while ($row = $appRes->fetch_assoc()) {
-    $applications[] = $row;
-}
-
-$documents = [];
-$docSql = "
-    SELECT 
-        ad.ap_document_id,
-        ad.application_id,
-        ad.file_path,
-        a.application_title
-    FROM ApplicationsDocuments ad
-    INNER JOIN Applications a ON ad.application_id = a.application_id
-    ORDER BY ad.ap_document_id DESC
-";
-$docRes = $conn->query($docSql);
-while ($row = $docRes->fetch_assoc()) {
-    $documents[] = $row;
-}
-
-$submissions = [];
-$subSql = "
-    SELECT
-        s.application_id,
-        s.user_id,
-        s.file_path,
-        s.sub_status,
-        a.application_title,
-        u.name,
-        u.surname,
-        u.email
-    FROM Submissions s
-    INNER JOIN Applications a ON s.application_id = a.application_id
-    INNER JOIN Users u ON s.user_id = u.user_id
-    ORDER BY a.application_title ASC, u.surname ASC, u.name ASC
-";
-$subRes = $conn->query($subSql);
-while ($row = $subRes->fetch_assoc()) {
-    $submissions[] = $row;
-}
+$applications = $applicationsService->getAllApplications();
+$documents = $applicationsService->getAllDocuments();
+$submissions = $applicationsService->getAllSubmissions();
 ?>
 <!DOCTYPE html>
 <html lang="el">

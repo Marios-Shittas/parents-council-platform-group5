@@ -1,6 +1,21 @@
 /* Announcements CSS - Styles for announcements pages */
 
+/* ===== PAGE HEADER BANNER ===== */
+/* .announcement-hero = the blue banner at the top of the announcements page */
+.announcement-hero {
+    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 3rem;
+}
+
+/* .announcement-hero .lead = the subtitle text inside the blue banner */
+.announcement-hero .lead {
+    color: white;
+}
+
 /* ===== ANNOUNCEMENT CARDS ===== */
+/* .announcement-card = the individual white card boxes that contain each announcement */
 .announcement-card {
     background: var(--color-bg);
     border: 1px solid var(--color-gray-light);
@@ -10,6 +25,7 @@
     height: 100%;
 }
 
+/* .announcement-card:hover = what happens when you hover your mouse over an announcement card */
 .announcement-card:hover {
     box-shadow: var(--shadow-md);
     border-top: 3px solid var(--color-accent);

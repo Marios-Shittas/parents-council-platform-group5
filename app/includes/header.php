@@ -13,35 +13,35 @@ $search_query = trim($_GET['q'] ?? '');
 $nav_items = [
     // Αρχική σελίδα.
     [
-        'label' => 'Home',
+        'label' => 'Αρχική',
         'href' => '/parents-council-platform-group5/public/home.php',
         'icon' => 'fas fa-home',
         'match' => ['home.php', 'index.php', ''],
     ],
     // Σελίδα ανακοινώσεων.
     [
-        'label' => 'Announcements',
+        'label' => 'Ανακοινώσεις',
         'href' => '/parents-council-platform-group5/public/announcements.php',
         'icon' => 'fas fa-bullhorn',
         'match' => ['announcements.php'],
     ],
     // Σελίδα εκδηλώσεων.
     [
-        'label' => 'Events',
+        'label' => 'Εκδηλώσεις',
         'href' => '/parents-council-platform-group5/public/events.php',
         'icon' => 'fas fa-calendar-alt',
         'match' => ['events.php'],
     ],
     // Σελίδα αιτήσεων.
     [
-        'label' => 'Applications',
+        'label' => 'Αιτήσεις',
         'href' => '/parents-council-platform-group5/public/applications.php',
         'icon' => 'fas fa-file-alt',
         'match' => ['applications.php'],
     ],
     // Σελίδα πληρωμών.
     [
-        'label' => 'Payments',
+        'label' => 'Πληρωμές',
         'href' => '/parents-council-platform-group5/public/payments.php',
         'icon' => 'fas fa-credit-card',
         'match' => ['payments.php'],
