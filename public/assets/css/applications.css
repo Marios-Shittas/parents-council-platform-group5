@@ -1,27 +1,34 @@
+/* Applications Page Styles */
+
+/* ===== PAGE HEADER BANNER ===== */
+/* .applications-hero = the blue banner at the top of the applications page */
 .applications-hero {
-    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-    color: #fff;
-    padding: 60px 0;
-    border-radius: 0 0 24px 24px;
-    margin-bottom: 30px;
+    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 3rem;
 }
 
-.applications-hero h1 {
-    font-weight: 700;
-    margin-bottom: 12px;
+/* .applications-hero .lead = the subtitle text under the title in the hero banner */
+.applications-hero .lead {
+    color: white;
 }
 
+/* ===== APPLICATION CARD STYLES ===== */
+/* .applications-card = the white card containers for main sections */
 .applications-card {
     border: none;
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
+/* .section-title = the heading text for each main section ("Available Applications", "My Submissions") */
 .section-title {
     font-weight: 700;
     margin-bottom: 20px;
 }
 
+/* .application-item = individual application boxes within the grid */
 .application-item {
     background: #fff;
     border: 1px solid #eef1f5;
@@ -32,16 +39,19 @@
     flex-direction: column;
 }
 
+/* .application-title = the title of each application */
 .application-title {
     font-weight: 700;
     margin-bottom: 8px;
 }
 
+/* .application-description = the description text of each application */
 .application-description {
     color: #6c757d;
     min-height: 90px;
 }
 
+/* .doc-badge = the small blue badge showing document count */
 .doc-badge {
     background: #e7f1ff;
     color: #0d6efd;
@@ -51,14 +61,19 @@
     font-weight: 700;
 }
 
+/* .submit-btn = the "Submit Application" button */
 .submit-btn {
     margin-top: auto;
 }
 
+/* ===== INSTRUCTIONS SIDEBAR ===== */
+/* .instructions-list = the bullet list in the instructions sidebar */
 .instructions-list li {
     margin-bottom: 10px;
 }
 
+/* ===== UPLOAD STYLES ===== */
+/* .upload-box = the file upload area in the modal */
 .upload-box {
     border: 2px dashed #ced4da;
     border-radius: 14px;
@@ -66,6 +81,8 @@
     background: #fff;
 }
 
+/* ===== STATUS BADGES ===== */
+/* .status-badge = the status indicators for submitted applications */
 .status-badge {
     display: inline-block;
     padding: 6px 12px;
@@ -75,16 +92,19 @@
     text-transform: capitalize;
 }
 
+/* .status-waiting = yellow badge for applications waiting for review */
 .status-waiting {
     background: #fff3cd;
     color: #856404;
 }
 
+/* .status-approved = green badge for approved applications */
 .status-approved {
     background: #d4edda;
     color: #155724;
 }
 
+/* .status-rejected = red badge for rejected applications */
 .status-rejected {
     background: #f8d7da;
     color: #721c24;

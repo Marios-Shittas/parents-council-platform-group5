@@ -1,6 +1,14 @@
 <?php
+/**
+ * Public Applications Page
+ * Displays all applications and allows users to submit them
+ */
+
 session_start();
-require_once __DIR__ . '/../app/config/db.php';
+require_once __DIR__ . '/../app/services/ApplicationsService.php';
+
+// Initialize the service
+$applicationsService = new ApplicationsService();
 
 /*
  |------------------------------------------------------------
@@ -34,12 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
         $message = 'Μη έγκυρη αίτηση.';
         $messageType = 'danger';
     } else {
-        $checkStmt = $conn->prepare("SELECT application_id FROM Submissions WHERE application_id = ? AND user_id = ?");
-        $checkStmt->bind_param("ii", $application_id, $user_id);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
-
-        if ($checkResult->num_rows > 0) {
+        // Check if user already submitted this application
+        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
             $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
             $messageType = 'warning';
         } else {
@@ -60,13 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
                     $dbPath = 'storage/uploads/submissions/' . $newFileName;
 
                     if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                        $insertStmt = $conn->prepare("
-                            INSERT INTO Submissions (application_id, user_id, file_path, sub_status)
-                            VALUES (?, ?, ?, 'waiting')
-                        ");
-                        $insertStmt->bind_param("iis", $application_id, $user_id, $dbPath);
-
-                        if ($insertStmt->execute()) {
+                        if ($applicationsService->createSubmission($application_id, $user_id, $dbPath)) {
                             $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
                             $messageType = 'success';
                         } else {
@@ -88,71 +86,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
  | Get applications
  |------------------------------------------------------------
 */
-$applications = [];
-$appSql = "
-    SELECT 
-        a.application_id,
-        a.application_title,
-        a.application_description,
-        COUNT(ad.ap_document_id) AS document_count
-    FROM Applications a
-    LEFT JOIN ApplicationsDocuments ad ON a.application_id = ad.application_id
-    GROUP BY a.application_id
-    ORDER BY a.application_id DESC
-";
-$appResult = $conn->query($appSql);
-while ($row = $appResult->fetch_assoc()) {
-    $applications[] = $row;
-}
+$applications = $applicationsService->getAllApplications();
 
 /*
  |------------------------------------------------------------
  | Get documents grouped by application
  |------------------------------------------------------------
 */
-$documentsByApplication = [];
-$docsResult = $conn->query("SELECT ap_document_id, application_id, file_path FROM ApplicationsDocuments ORDER BY ap_document_id DESC");
-while ($doc = $docsResult->fetch_assoc()) {
-    $documentsByApplication[$doc['application_id']][] = $doc;
-}
+$documentsByApplication = $applicationsService->getDocumentsByApplication();
 
 /*
  |------------------------------------------------------------
  | My submissions
  |------------------------------------------------------------
 */
-$mySubmissions = [];
-$subStmt = $conn->prepare("
-    SELECT 
-        s.application_id,
-        s.file_path,
-        s.sub_status,
-        a.application_title
-    FROM Submissions s
-    INNER JOIN Applications a ON s.application_id = a.application_id
-    WHERE s.user_id = ?
-    ORDER BY a.application_title ASC
-");
-$subStmt->bind_param("i", $user_id);
-$subStmt->execute();
-$subRes = $subStmt->get_result();
-
-while ($row = $subRes->fetch_assoc()) {
-    $mySubmissions[] = $row;
-}
+$mySubmissions = $applicationsService->getUserSubmissions($user_id);
 ?>
 
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
+<!-- Google fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="assets/css/main.css">
 <link rel="stylesheet" href="assets/css/applications.css">
 
 <div class="applications-hero">
     <div class="container">
-        <h1>Αιτήσεις</h1>
-        <p>
-            Αυτή η σελίδα επιτρέπει σε γονείς και κηδεμόνες να βλέπουν τις διαθέσιμες σχολικές αιτήσεις 
-            και να τις υποβάλλουν ηλεκτρονικά.
-        </p>
+        <h1><i class="fas fa-file-alt mr-2"></i>Αιτήσεις</h1>
+        <p class="lead">Υποβάλλετε τις δικές σας αιτήσεις και παρακολουθήστε την κατάστασή τους</p>
     </div>
 </div>
 

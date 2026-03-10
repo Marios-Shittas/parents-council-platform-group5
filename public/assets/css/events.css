@@ -1,0 +1,114 @@
+/* Events Page Styles */
+
+/* ===== PAGE HEADER BANNER ===== */
+/* .events-hero = the blue banner at the top of the events page */
+.events-hero {
+    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 3rem;
+}
+
+/* .events-hero .lead = the subtitle text "Ενημερωθείτε για..." inside the blue banner */
+.events-hero .lead {
+    color: white;
+}
+
+/* ===== EVENT CARD STYLES ===== */
+/* .event-card = the individual white card boxes that contain each event */
+.event-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+/* .event-card:hover = what happens when you hover your mouse over an event card */
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* .event-card img = the image inside each event card (the photo of the event) */
+.event-card img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* .event-date-badge = the small blue box showing date in the corner of each card (e.g., "09 Mar") */
+.event-date-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #0057a8;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* .event-card .card-body = the white content area inside the card (text, buttons) */
+.event-card .card-body {
+    padding: 1.5rem;
+}
+
+/* .event-card .card-title = the event title text inside the card (e.g., "School Concert") */
+.event-card .card-title {
+    color: #0057a8;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* ===== EVENT INFO STYLES ===== */
+/* .event-info = the date/time information rows shown in the card and modal (with icon + text) */
+.event-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* .event-info i = the calendar/clock icons next to the date/time text */
+.event-info i {
+    margin-right: 8px;
+    color: #0057a8;
+    width: 20px;
+}
+
+/* ===== BUTTON STYLES ===== */
+/* .btn-primary-custom = the blue "More Details" button on each card */
+.btn-primary-custom {
+    background: #0057a8;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    color: white;
+    transition: background 0.3s;
+}
+
+/* .btn-primary-custom:hover = what happens when you hover over the button */
+.btn-primary-custom:hover {
+    background: #003d7a;
+    color: white;
+}
+
+/* ===== EMPTY STATE STYLES ===== */
+/* .empty-state = the message shown when there are no events (centered, with sad icon) */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #999;
+}
+
+/* .empty-state i = the large calendar icon shown in the empty state message */
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #ddd;
+}
