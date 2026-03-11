@@ -106,7 +106,7 @@ INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order
 
 INSERT INTO `Payments` (`payment_id`, `user_id`, `amount`, `payment_date`, `payment_status`) VALUES
 (1, 2, 28.50, '2026-03-07 11:59:24', 'completed'),
-(2, 3, 25.00, '2026-03-07 11:59:24', '');
+(2, 3, 25.00, '2026-03-07 11:59:24', 'failed');
 
 --
 -- Dumping data for table `PaymentsDetails`
