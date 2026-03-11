@@ -41,10 +41,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </a>
         </li>
 
-        <li class="nav-item mt-4">
-            <a class="nav-link" href="../home.php">
-                <i class="fas fa-arrow-left"></i>Επιστροφή στο Site
-            </a>
-        </li>
+      
+        
     </ul>
 </nav>

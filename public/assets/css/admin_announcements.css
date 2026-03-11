@@ -49,3 +49,78 @@
     border-radius: 10px;
     border: 1px solid #dfe5ee;
 }
+
+/* Create modal header — blue like events admin */
+#createModal .modal-header {
+    background: #0057a8;
+    color: white;
+}
+
+#createModal .modal-header .close {
+    color: white;
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+#createModal .modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Modal content rounded corners */
+#createModal .modal-content {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+
+/* Admin announcements table tuning */
+.admin-table {
+    table-layout: fixed;
+}
+
+.admin-table th {
+    font-size: 16px;
+    line-height: 1.25;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.admin-table td {
+    font-size: 15px;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 120px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    width: 170px;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    width: 210px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    width: 170px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(5) {
+    text-align: left;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+    width: 150px;
+    text-align: center;
+}

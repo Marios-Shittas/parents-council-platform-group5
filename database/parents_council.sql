@@ -16,6 +16,7 @@ create table if not exists Users(
 create table if not exists Announcements(
 	announcement_id          INT           NOT NULL AUTO_INCREMENT,
     announcement_title       VARCHAR(255)  NOT NULL,
+    announcement_date        DATE          DEFAULT NULL,
     publish_date             DATE          NOT NULL,
     announcement_description TEXT          DEFAULT NULL,
     PRIMARY KEY (announcement_id)
