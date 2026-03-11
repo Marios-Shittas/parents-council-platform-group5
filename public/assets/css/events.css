@@ -4,7 +4,7 @@
 /* .events-hero = the blue banner at the top of the events page */
 .events-hero {
     background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
-    color: white;
+    color: rgb(255, 255, 255);
     padding: 3rem 0;
     margin-bottom: 3rem;
 }
