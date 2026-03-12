@@ -215,7 +215,7 @@ class ApplicationsService {
      * @return bool True if already submitted, false otherwise
      */
     public function hasUserSubmitted($applicationId, $userId) {
-        $sql = "SELECT submission_id FROM Submissions WHERE application_id = ? AND user_id = ?";
+        $sql = "SELECT 1 FROM Submissions WHERE application_id = ? AND user_id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("ii", $applicationId, $userId);
         $stmt->execute();
@@ -225,19 +225,28 @@ class ApplicationsService {
     }
     
     /**
-     * Create a new submission
-     * @param int $applicationId Application ID
-     * @param int $userId User ID
-     * @param string $filePath Path to the submission file
-     * @return bool True on success, false on failure
+     * Create a new submission (legacy file-upload path)
      */
     public function createSubmission($applicationId, $userId, $filePath) {
         $sql = "INSERT INTO Submissions (application_id, user_id, file_path, sub_status)
                 VALUES (?, ?, ?, 'waiting')";
-        
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("iis", $applicationId, $userId, $filePath);
-        
+        return $stmt->execute();
+    }
+
+    /**
+     * Create a new submission with JSON form data (no file required)
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @param string $submissionDataJson JSON-encoded form fields
+     * @return bool True on success, false on failure
+     */
+    public function createSubmissionWithData($applicationId, $userId, $submissionDataJson) {
+        $sql = "INSERT INTO Submissions (application_id, user_id, file_path, submission_data, sub_status)
+                VALUES (?, ?, NULL, ?, 'waiting')";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("iis", $applicationId, $userId, $submissionDataJson);
         return $stmt->execute();
     }
     
@@ -251,11 +260,13 @@ class ApplicationsService {
                     s.application_id,
                     s.file_path,
                     s.sub_status,
+                    s.submission_data,
+                    s.submitted_at,
                     a.application_title
                 FROM Submissions s
                 INNER JOIN Applications a ON s.application_id = a.application_id
                 WHERE s.user_id = ?
-                ORDER BY a.application_title ASC";
+                ORDER BY s.submitted_at DESC";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $userId);
@@ -275,6 +286,8 @@ class ApplicationsService {
                     s.user_id,
                     s.file_path,
                     s.sub_status,
+                    s.submission_data,
+                    s.submitted_at,
                     a.application_title,
                     u.name,
                     u.surname,
@@ -282,7 +295,7 @@ class ApplicationsService {
                 FROM Submissions s
                 INNER JOIN Applications a ON s.application_id = a.application_id
                 INNER JOIN Users u ON s.user_id = u.user_id
-                ORDER BY a.application_title ASC, u.surname ASC, u.name ASC";
+                ORDER BY s.submitted_at DESC, u.surname ASC, u.name ASC";
         
         $result = $this->conn->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);

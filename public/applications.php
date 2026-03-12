@@ -22,8 +22,55 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = (int) $_SESSION['user_id'];
 
-$message = '';
-$messageType = 'success';
+/*
+ |------------------------------------------------------------
+ | AJAX: Submit application with form data (no file upload)
+ |------------------------------------------------------------
+*/
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
+    ob_start();                                          // suppress any stray output
+    try {
+        $application_id = (int)($_POST['application_id'] ?? 0);
+        $raw            = $_POST['submission_data'] ?? '';
+
+        if ($application_id <= 0) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Μη έγκυρη αίτηση.']);
+            exit;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Μη έγκυρα δεδομένα φόρμας.']);
+            exit;
+        }
+
+        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
+            exit;
+        }
+
+        if ($applicationsService->createSubmissionWithData($application_id, $user_id, $raw)) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => true, 'message' => 'Η αίτηση υποβλήθηκε επιτυχώς.']);
+        } else {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Σφάλμα βάσης δεδομένων. Δοκιμάστε ξανά.']);
+        }
+    } catch (Throwable $e) {
+        ob_end_clean();
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Σφάλμα διακομιστή: ' . $e->getMessage()]);
+    }
+    exit;
+}
 
 $uploadDir = __DIR__ . '/../storage/uploads/submissions/';
 if (!is_dir($uploadDir)) {
@@ -101,6 +148,7 @@ $documentsByApplication = $applicationsService->getDocumentsByApplication();
  |------------------------------------------------------------
 */
 $mySubmissions = $applicationsService->getUserSubmissions($user_id);
+$appliedIds = array_map('intval', array_column($mySubmissions, 'application_id'));
 ?>
 
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
@@ -144,32 +192,51 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                     <?php if (empty($applications)): ?>
                         <div class="alert alert-info mb-0">Δεν υπάρχουν διαθέσιμες αιτήσεις.</div>
                     <?php else: ?>
-                        <div class="row">
-                            <?php foreach ($applications as $application): ?>
+                        <div class="row" id="applications-grid">
+                            <?php $appIndex = 0; foreach ($applications as $application):
+                                $appId = (int)$application['application_id'];
+                                $isDbApplied = in_array($appId, $appliedIds);
+                            ?>
                                 <div class="col-md-6 mb-4">
-                                    <div class="application-item h-100">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="application-item h-100 app-card-wrapper"
+                                         id="app-card-<?php echo $appId; ?>"
+                                         data-app-id="<?php echo $appId; ?>"
+                                         data-app-index="<?php echo $appIndex; ?>"
+                                         data-db-applied="<?php echo $isDbApplied ? 'true' : 'false'; ?>">
+
+                                        <!-- Status badge & category tag – filled by JS -->
+                                        <div class="app-meta-top d-flex justify-content-between align-items-center mb-2">
+                                            <span class="js-status-placeholder"></span>
+                                            <span class="js-category-placeholder"></span>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
                                             <h5 class="application-title">
                                                 <?php echo htmlspecialchars($application['application_title']); ?>
                                             </h5>
-                                            <span class="doc-badge">
-                                                <?php $dc = (int)$application['document_count']; echo $dc . ' ' . ($dc === 1 ? 'έγγραφο' : 'έγγραφα'); ?>
-                                            </span>
+                                            <?php $dc = (int)$application['document_count']; ?>
+                                            <?php if ($dc > 0): ?>
+                                                <span class="doc-badge">
+                                                    <i class="fas fa-paperclip mr-1"></i><?php echo $dc; ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
 
                                         <p class="application-description">
                                             <?php echo nl2br(htmlspecialchars($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.')); ?>
                                         </p>
 
+                                        <!-- Open / close date row – filled by JS -->
+                                        <div class="js-dates-placeholder mb-3"></div>
+
                                         <?php if (!empty($documentsByApplication[$application['application_id']])): ?>
-                                            <div class="mb-3">
-                                                <strong>Συνημμένα έγγραφα:</strong>
-                                                <ul class="mt-2 mb-0">
+                                            <div class="attachments-box mb-3">
+                                                <div class="attachments-label"><i class="fas fa-paperclip mr-1"></i> Συνημμένα έγγραφα</div>
+                                                <ul class="attachments-list mt-2 mb-0">
                                                     <?php foreach ($documentsByApplication[$application['application_id']] as $doc): ?>
                                                         <?php
                                                             $rawPath = $doc['file_path'];
                                                             $prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
-
                                                             $pos = strpos($rawPath, $prefix);
                                                             if ($pos !== false) {
                                                                 $rest = substr($rawPath, $pos + strlen($prefix));
@@ -181,7 +248,7 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                                                         ?>
                                                         <li>
                                                             <a href="<?php echo htmlspecialchars($cleanPath); ?>" target="_blank">
-                                                                <?php echo htmlspecialchars(basename($cleanPath)); ?>
+                                                                <i class="fas fa-file-pdf mr-1 text-danger"></i><?php echo htmlspecialchars(basename($cleanPath)); ?>
                                                             </a>
                                                         </li>
                                                     <?php endforeach; ?>
@@ -190,18 +257,19 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                                         <?php endif; ?>
 
                                         <button
-                                            class="btn btn-primary submit-btn"
+                                            class="btn btn-primary submit-btn mt-auto"
                                             data-toggle="modal"
                                             data-target="#submitModal"
-                                            data-application-id="<?php echo (int)$application['application_id']; ?>"
+                                            data-application-id="<?php echo $appId; ?>"
                                             data-application-title="<?php echo htmlspecialchars($application['application_title']); ?>"
                                             data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? ''); ?>"
+                                            data-app-index="<?php echo $appIndex; ?>"
                                         >
-                                            Υποβολή Αίτησης
+                                            <i class="fas fa-paper-plane mr-1"></i> Υποβολή Αίτησης
                                         </button>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php $appIndex++; endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -211,38 +279,58 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                 <div class="card-body p-4">
                     <h3 class="section-title">Οι Υποβολές Μου</h3>
 
-                    <?php if (empty($mySubmissions)): ?>
-                        <div class="alert alert-secondary mb-0">Δεν έχετε υποβάλει ακόμη καμία αίτηση.</div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table submissions-table">
-                                <thead>
-                                    <tr>
-                                        <th>Αίτηση</th>
-                                        <th>Υποβληθέν Αρχείο</th>
-                                        <th>Κατάσταση</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($mySubmissions as $submission): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($submission['application_title']); ?></td>
-                                            <td>
-                                                <a href="../<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank">
-                                                    <?php echo htmlspecialchars(basename($submission['file_path'])); ?>
+                    <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' style="display:none"' : ''; ?>>
+                        <i class="fas fa-inbox mr-2"></i>Δεν έχετε υποβάλει ακόμη καμία αίτηση.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table submissions-table" id="submissions-table"<?php echo empty($mySubmissions) ? ' style="display:none"' : ''; ?>>
+                            <thead>
+                                <tr>
+                                    <th>Αίτηση</th>
+                                    <th>Όνομα Μαθητή</th>
+                                    <th>Τάξη</th>
+                                    <th>Ημ. Υποβολής</th>
+                                    <th>Κατάσταση</th>
+                                    <th>Ενέργεια</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissions-tbody">
+                                <?php foreach ($mySubmissions as $submission):
+                                    $subStatusMap  = ['waiting' => 'Υπό Εξέταση', 'approved' => 'Εγκρίθηκε', 'rejected' => 'Απορρίφθηκε'];
+                                    $subStatusLabel = $subStatusMap[$submission['sub_status']] ?? ucfirst($submission['sub_status']);
+                                    $formData      = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
+                                    $studentName   = htmlspecialchars($formData['student_name'] ?? '—');
+                                    $studentClass  = htmlspecialchars($formData['class']         ?? '—');
+                                    $submittedDate = !empty($submission['submitted_at'])
+                                        ? date('d/m/Y', strtotime($submission['submitted_at']))
+                                        : '—';
+                                ?>
+                                    <tr data-db-row="1">
+                                        <td><strong><?php echo htmlspecialchars($submission['application_title']); ?></strong></td>
+                                        <td><?php echo $studentName; ?></td>
+                                        <td><?php echo $studentClass; ?></td>
+                                        <td><?php echo $submittedDate; ?></td>
+                                        <td><span class="sub-status-badge status-<?php echo htmlspecialchars($submission['sub_status']); ?>"><?php echo $subStatusLabel; ?></span></td>
+                                        <td>
+                                            <?php if (!empty($submission['file_path'])): ?>
+                                                <a href="../<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye mr-1"></i>Αρχείο
                                                 </a>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge status-<?php echo htmlspecialchars($submission['sub_status']); ?>">
-                                                    <?php echo htmlspecialchars($submission['sub_status']); ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-outline-primary view-db-submission"
+                                                        data-sub-data="<?php echo htmlspecialchars($submission['submission_data'] ?? '{}'); ?>"
+                                                        data-sub-title="<?php echo htmlspecialchars($submission['application_title']); ?>"
+                                                        data-sub-status="<?php echo htmlspecialchars($submission['sub_status']); ?>">
+                                                    <i class="fas fa-eye mr-1"></i>Προβολή
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -264,40 +352,66 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
     </div>
 </div>
 
+<!-- ── Submit Application Modal ────────────────────────────────────── -->
 <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <form method="POST" enctype="multipart/form-data" class="modal-content">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Υποβολή Αίτησης</h5>
+                <div class="modal-title-group">
+                    <span id="modal-type-badge" class="category-tag mr-2"></span>
+                    <h5 class="modal-title d-inline" id="modal-title">Υποβολή Αίτησης</h5>
+                </div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
-                    <span>&times;</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-
             <div class="modal-body">
-                <input type="hidden" name="application_id" id="modal_application_id">
-
-                <div class="form-group">
-                    <label><strong>Τίτλος Αίτησης</strong></label>
-                    <input type="text" id="modal_application_title" class="form-control" readonly>
+                <p id="modal-description" class="text-muted small mb-3"></p>
+                <div class="row modal-dates-info mb-3">
+                    <div class="col-6">
+                        <small><i class="fas fa-calendar-plus mr-1 text-success"></i><strong>Άνοιξε:</strong> <span id="modal-open-date"></span></small>
+                    </div>
+                    <div class="col-6">
+                        <small><i class="fas fa-calendar-times mr-1 text-danger"></i><strong>Λήγει:</strong> <span id="modal-close-date"></span></small>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label><strong>Περιγραφή</strong></label>
-                    <textarea id="modal_application_description" class="form-control" rows="4" readonly></textarea>
-                </div>
-
-                <div class="upload-box">
-                    <label for="submission_file"><strong>Μεταφόρτωση Αρχείου</strong></label>
-                    <input type="file" name="submission_file" id="submission_file" class="form-control-file" required>
-                    <small class="text-muted d-block mt-2" id="selectedFileName">Δεν έχει επιλεγεί αρχείο</small>
+                <hr class="my-2">
+                <div id="modal-dynamic-fields">
+                    <!-- Rendered by JavaScript -->
                 </div>
             </div>
-
             <div class="modal-footer">
-                <button type="submit" name="submit_application" class="btn btn-primary">Υποβολή</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Ακύρωση
+                </button>
+                <button type="button" id="modal-submit-btn" class="btn btn-primary">
+                    <i class="fas fa-paper-plane mr-1"></i> Υποβολή
+                </button>
             </div>
-        </form>
+        </div>
+    </div>
+</div>
+
+<!-- ── View Submission Details Modal ─────────────────────────────────── -->
+<div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-file-alt mr-2 text-primary"></i>Λεπτομέρειες Αίτησης</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" id="view-modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Success Toast ──────────────────────────────────────────────────── -->
+<div id="submission-toast" class="position-fixed" style="bottom:1.5rem;right:1.5rem;z-index:9999;display:none;">
+    <div class="alert alert-success shadow py-3 px-4 mb-0">
+        <i class="fas fa-check-circle mr-2"></i> Η αίτησή σας υποβλήθηκε επιτυχώς!
     </div>
 </div>
 

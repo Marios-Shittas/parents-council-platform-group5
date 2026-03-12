@@ -188,6 +188,7 @@ $submissions = $applicationsService->getAllSubmissions();
 </head>
 <body>
 
+
 <div class="admin-wrapper">
     <?php include __DIR__ . '/../../app/includes/admin_sidebar.php'; ?>
 
@@ -363,21 +364,38 @@ $submissions = $applicationsService->getAllSubmissions();
                                     <th>Γονέας</th>
                                     <th>Email</th>
                                     <th>Αίτηση</th>
+                                    <th>Μαθητής</th>
+                                    <th>Τάξη</th>
+                                    <th>Ημ/νία</th>
                                     <th>Αρχείο</th>
                                     <th>Κατάσταση</th>
                                     <th>Ενημέρωση</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($submissions as $submission): ?>
+                                <?php foreach ($submissions as $submission):
+                                    $formData     = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
+                                    $studentName  = htmlspecialchars($formData['student_name'] ?? '—');
+                                    $studentClass = htmlspecialchars($formData['class']         ?? '—');
+                                    $submittedAt  = !empty($submission['submitted_at'])
+                                        ? date('d/m/Y H:i', strtotime($submission['submitted_at']))
+                                        : '—';
+                                ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($submission['name'] . ' ' . $submission['surname']); ?></td>
                                         <td><?php echo htmlspecialchars($submission['email']); ?></td>
                                         <td><?php echo htmlspecialchars($submission['application_title']); ?></td>
+                                        <td><?php echo $studentName; ?></td>
+                                        <td><?php echo $studentClass; ?></td>
+                                        <td><small><?php echo $submittedAt; ?></small></td>
                                         <td>
-                                            <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank">
-                                                <?php echo htmlspecialchars(basename($submission['file_path'])); ?>
-                                            </a>
+                                            <?php if (!empty($submission['file_path'])): ?>
+                                                <a href="<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank">
+                                                    <?php echo htmlspecialchars(basename($submission['file_path'])); ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="text-muted">—</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <span class="status-badge status-<?php echo htmlspecialchars($submission['sub_status']); ?>">

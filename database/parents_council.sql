@@ -120,7 +120,9 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments(
 CREATE TABLE IF NOT EXISTS Submissions(
     application_id    INT NOT NULL,
     user_id           INT NOT NULL,
-    file_path         VARCHAR(255) NOT NULL,
+    file_path         VARCHAR(255) NULL DEFAULT NULL,
+    submission_data   TEXT DEFAULT NULL,
+    submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sub_status        ENUM('waiting','approved','rejected') DEFAULT 'waiting',
     PRIMARY KEY (application_id, user_id),
     CONSTRAINT fk_sub_ap
