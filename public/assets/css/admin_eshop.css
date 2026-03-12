@@ -1,0 +1,61 @@
+:root{
+  --color-navy: #1A374D;
+  --color-teal: #3A7CA5;
+  --color-muted-blue: #6998AB;
+  --color-gray-light: #9FB1BC;
+  --color-accent: #FA7E61;
+  --color-bg: #ffffff;
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Lato', sans-serif;
+}
+
+/* ίδιο admin style, μόνο page-specific additions */
+
+.thumbnail {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #dfe5ee;
+    background: rgba(159, 177, 188, 0.12);
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: var(--color-gray-light);
+    margin-bottom: 10px;
+}
+
+.empty-state h3 {
+    color: var(--color-navy);
+    font-family: var(--font-heading);
+}
+
+.empty-state p {
+    color: var(--color-muted-blue);
+    font-family: var(--font-body);
+}
+
+.admin-table td:nth-child(3) {
+    font-weight: 700;
+    color: var(--color-navy);
+}
+
+.admin-table td:nth-child(4) {
+    color: var(--color-muted-blue);
+}
+
+.btn-outline-primary {
+    border-color: var(--color-muted-blue);
+    color: var(--color-muted-blue);
+}
+
+.btn-outline-primary:hover {
+    background: rgba(105, 152, 171, 0.10);
+    border-color: var(--color-muted-blue);
+    color: var(--color-navy);
+}
+
+.btn-outline-danger:hover {
+    background: rgba(220, 53, 69, 0.08);
+}
