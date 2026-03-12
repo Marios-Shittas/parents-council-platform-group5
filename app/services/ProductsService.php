@@ -4,17 +4,27 @@ require_once __DIR__ . '/../includes/db.php';
 
 class ProductsService
 {
-    private PDO $pdo;
+    private $conn;
 
     public function __construct()
     {
-        $this->pdo = getDB();
+        global $conn;
+        $this->conn = $conn;
     }
 
-    public function getAllProducts(): array
+    public function getAllProducts()
     {
         $sql = "SELECT * FROM Products ORDER BY product_id DESC";
-        $stmt = $this->pdo->query($sql);
-        return $stmt->fetchAll();
+        $result = mysqli_query($this->conn, $sql);
+
+        $products = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $products[] = $row;
+            }
+        }
+
+        return $products;
     }
 }

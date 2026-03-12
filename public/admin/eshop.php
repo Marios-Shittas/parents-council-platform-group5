@@ -8,16 +8,6 @@ if (session_status() === PHP_SESSION_NONE) {
 $productsService = new ProductsService();
 $products = $productsService->getAllProducts();
 ?>
-<?php
-require_once __DIR__ . '/../../app/services/ProductsService.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-$productsService = new ProductsService();
-$products = $productsService->getAllProducts();
-?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -97,8 +87,8 @@ $products = $productsService->getAllProducts();
                                         <td>
                                             <?php
                                                 $desc = $product['product_description'] ?? '';
-                                                echo htmlspecialchars(mb_substr($desc, 0, 80));
-                                                if (mb_strlen($desc) > 80) echo '...';
+                                                echo htmlspecialchars(substr($desc, 0, 80));
+                                                if (strlen($desc) > 80) echo '...';
                                             ?>
                                         </td>
 
