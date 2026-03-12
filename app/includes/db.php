@@ -1,25 +1,14 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+$host = "localhost";
+$user = "root";
+$password = "";     // XAMPP default
+$database = "parents_council";
 
-function getDB(): PDO
-{
-    static $pdo = null;
+$conn = new mysqli($host, $user, $password, $database);
 
-    if ($pdo === null) {
-        $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            error_log('[DB] Connection failed: ' . $e->getMessage());
-            die('Σφάλμα βάσης. Προσπάθησε ξανά αργότερα.');
-        }
-    }
-
-    return $pdo;
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+$conn->set_charset("utf8mb4");
+?>
