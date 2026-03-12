@@ -44,10 +44,10 @@ VALUES
 (2, '/parents-council-platform-group5/public/assets/Posts_img/dancers.jpg');
 
 -- APPLICATIONS
-INSERT INTO Applications (application_title, application_description)
+INSERT INTO Applications (application_title, application_description, submission_type)
 VALUES
-('Field Trip Permission', 'Form to allow your child to attend field trip'),
-('Library Membership', 'Sign up for school library access');
+('Field Trip Permission', 'Form to allow your child to attend field trip', 'file'),
+('Library Membership', 'Sign up for school library access - fill in your child''s details below', 'text');
 
 -- APPLICATIONS DOCUMENTS
 INSERT INTO ApplicationsDocuments (application_id, file_path)
@@ -56,10 +56,10 @@ VALUES
 (2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
 
 -- SUBMISSIONS
-INSERT INTO Submissions (application_id, user_id, file_path, sub_status)
+INSERT INTO Submissions (application_id, user_id, file_path, text_content, sub_status)
 VALUES
-(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', 'approved'),
-(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', 'waiting');
+(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, 'approved'),
+(2, 3, NULL, 'Child name: Alice Smith, Class: B2, Age: 8', 'waiting');
 
 -- PRODUCTS
 INSERT INTO Products (product_name, product_description, price)

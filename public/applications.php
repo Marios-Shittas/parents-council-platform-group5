@@ -37,6 +37,7 @@ if (!is_dir($uploadDir)) {
 */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])) {
     $application_id = (int) ($_POST['application_id'] ?? 0);
+    $submission_type = $_POST['submission_type'] ?? 'file';
 
     if ($application_id <= 0) {
         $message = 'Μη έγκυρη αίτηση.';
@@ -47,33 +48,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
             $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
             $messageType = 'warning';
         } else {
-            if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
-                $message = 'Παρακαλούμε ανεβάστε ένα έγκυρο αρχείο.';
-                $messageType = 'danger';
-            } else {
-                $file = $_FILES['submission_file'];
-                $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
-                $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-                if (!in_array($extension, $allowedExtensions, true)) {
-                    $message = 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+            if ($submission_type === 'text') {
+                $textContent = trim($_POST['text_content'] ?? '');
+                if (empty($textContent)) {
+                    $message = 'Παρακαλούμε συμπληρώστε τα απαιτούμενα πεδία.';
                     $messageType = 'danger';
                 } else {
-                    $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '.' . $extension;
-                    $targetPath = $uploadDir . $newFileName;
-                    $dbPath = 'storage/uploads/submissions/' . $newFileName;
+                    if ($applicationsService->createSubmission($application_id, $user_id, null, $textContent)) {
+                        $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
+                        $messageType = 'success';
+                    } else {
+                        $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
+                        $messageType = 'danger';
+                    }
+                }
+            } else {
+                if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
+                    $message = 'Παρακαλούμε ανεβάστε ένα έγκυρο αρχείο.';
+                    $messageType = 'danger';
+                } else {
+                    $file = $_FILES['submission_file'];
+                    $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+                    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
-                    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                        if ($applicationsService->createSubmission($application_id, $user_id, $dbPath)) {
-                            $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
-                            $messageType = 'success';
+                    if (!in_array($extension, $allowedExtensions, true)) {
+                        $message = 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+                        $messageType = 'danger';
+                    } else {
+                        $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '.' . $extension;
+                        $targetPath = $uploadDir . $newFileName;
+                        $dbPath = 'storage/uploads/submissions/' . $newFileName;
+
+                        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                            if ($applicationsService->createSubmission($application_id, $user_id, $dbPath)) {
+                                $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
+                                $messageType = 'success';
+                            } else {
+                                $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
+                                $messageType = 'danger';
+                            }
                         } else {
-                            $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
+                            $message = 'Η μεταφόρτωση του αρχείου απέτυχε.';
                             $messageType = 'danger';
                         }
-                    } else {
-                        $message = 'Η μεταφόρτωση του αρχείου απέτυχε.';
-                        $messageType = 'danger';
                     }
                 }
             }
@@ -152,9 +169,16 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                                             <h5 class="application-title">
                                                 <?php echo htmlspecialchars($application['application_title']); ?>
                                             </h5>
-                                            <span class="doc-badge">
-                                                <?php $dc = (int)$application['document_count']; echo $dc . ' ' . ($dc === 1 ? 'έγγραφο' : 'έγγραφα'); ?>
-                                            </span>
+                                            <div class="d-flex flex-column align-items-end" style="gap:4px;">
+                                                <span class="doc-badge">
+                                                    <?php $dc = (int)$application['document_count']; echo $dc . ' ' . ($dc === 1 ? 'έγγραφο' : 'έγγραφα'); ?>
+                                                </span>
+                                                <?php if ($application['submission_type'] === 'text'): ?>
+                                                    <span class="badge badge-info" style="font-size:11px;">Συμπλήρωση φόρμας</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-secondary" style="font-size:11px;">Μεταφόρτωση αρχείου</span>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
 
                                         <p class="application-description">
@@ -196,6 +220,7 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                                             data-application-id="<?php echo (int)$application['application_id']; ?>"
                                             data-application-title="<?php echo htmlspecialchars($application['application_title']); ?>"
                                             data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? ''); ?>"
+                                            data-submission-type="<?php echo htmlspecialchars($application['submission_type'] ?? 'file'); ?>"
                                         >
                                             Υποβολή Αίτησης
                                         </button>
@@ -228,9 +253,17 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                                         <tr>
                                             <td><?php echo htmlspecialchars($submission['application_title']); ?></td>
                                             <td>
-                                                <a href="../<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank">
-                                                    <?php echo htmlspecialchars(basename($submission['file_path'])); ?>
-                                                </a>
+                                                <?php if (!empty($submission['file_path'])): ?>
+                                                    <a href="../<?php echo htmlspecialchars($submission['file_path']); ?>" target="_blank">
+                                                        <?php echo htmlspecialchars(basename($submission['file_path'])); ?>
+                                                    </a>
+                                                <?php elseif (!empty($submission['text_content'])): ?>
+                                                    <span class="text-muted" title="<?php echo htmlspecialchars($submission['text_content']); ?>">
+                                                        <i class="fas fa-align-left mr-1"></i><?php echo htmlspecialchars(mb_strimwidth($submission['text_content'], 0, 60, '…')); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">—</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <span class="status-badge status-<?php echo htmlspecialchars($submission['sub_status']); ?>">
@@ -276,6 +309,7 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
 
             <div class="modal-body">
                 <input type="hidden" name="application_id" id="modal_application_id">
+                <input type="hidden" name="submission_type" id="modal_submission_type" value="file">
 
                 <div class="form-group">
                     <label><strong>Τίτλος Αίτησης</strong></label>
@@ -287,10 +321,21 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
                     <textarea id="modal_application_description" class="form-control" rows="4" readonly></textarea>
                 </div>
 
-                <div class="upload-box">
+                <!-- File upload (shown for submission_type=file) -->
+                <div class="upload-box" id="modal_file_section">
                     <label for="submission_file"><strong>Μεταφόρτωση Αρχείου</strong></label>
-                    <input type="file" name="submission_file" id="submission_file" class="form-control-file" required>
+                    <input type="file" name="submission_file" id="submission_file" class="form-control-file">
                     <small class="text-muted d-block mt-2" id="selectedFileName">Δεν έχει επιλεγεί αρχείο</small>
+                    <small class="text-muted">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png</small>
+                </div>
+
+                <!-- Text form (shown for submission_type=text) -->
+                <div id="modal_text_section" style="display:none;">
+                    <div class="form-group">
+                        <label for="text_content"><strong>Συμπλήρωση Στοιχείων</strong></label>
+                        <textarea name="text_content" id="text_content" class="form-control" rows="6"
+                            placeholder="Συμπληρώστε εδώ τα απαιτούμενα στοιχεία..."></textarea>
+                    </div>
                 </div>
             </div>
 

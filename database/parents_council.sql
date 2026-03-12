@@ -75,6 +75,7 @@ create table if not exists Applications(
     application_id          INT           NOT NULL AUTO_INCREMENT,
     application_title       VARCHAR(255)  NOT NULL,
     application_description TEXT          DEFAULT NULL,
+    submission_type         ENUM('file','text') NOT NULL DEFAULT 'file',
     PRIMARY KEY (application_id)
 );
 
@@ -91,7 +92,8 @@ create table if not exists ApplicationsDocuments(
 create table if not exists Submissions(
 	application_id		INT		NOT NULL,
     user_id  			INT		NOT NULL,
-    file_path			VARCHAR(255)	NOT NULL,
+    file_path			VARCHAR(255)	NULL,
+    text_content		TEXT			NULL,
     sub_status			ENUM('waiting','approved','rejected'),
     PRIMARY KEY (application_id,user_id),
     CONSTRAINT fk_sub_ap

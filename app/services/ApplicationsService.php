@@ -26,6 +26,7 @@ class ApplicationsService {
                     a.application_id,
                     a.application_title,
                     a.application_description,
+                    a.submission_type,
                     COUNT(ad.ap_document_id) AS document_count
                 FROM Applications a
                 LEFT JOIN ApplicationsDocuments ad ON a.application_id = ad.application_id
@@ -225,18 +226,19 @@ class ApplicationsService {
     }
     
     /**
-     * Create a new submission
+     * Create a new submission (file upload or text)
      * @param int $applicationId Application ID
      * @param int $userId User ID
-     * @param string $filePath Path to the submission file
+     * @param string|null $filePath Path to the submission file (null for text submissions)
+     * @param string|null $textContent Text content (null for file submissions)
      * @return bool True on success, false on failure
      */
-    public function createSubmission($applicationId, $userId, $filePath) {
-        $sql = "INSERT INTO Submissions (application_id, user_id, file_path, sub_status)
-                VALUES (?, ?, ?, 'waiting')";
+    public function createSubmission($applicationId, $userId, $filePath, $textContent = null) {
+        $sql = "INSERT INTO Submissions (application_id, user_id, file_path, text_content, sub_status)
+                VALUES (?, ?, ?, ?, 'waiting')";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("iis", $applicationId, $userId, $filePath);
+        $stmt->bind_param("iiss", $applicationId, $userId, $filePath, $textContent);
         
         return $stmt->execute();
     }
@@ -250,8 +252,10 @@ class ApplicationsService {
         $sql = "SELECT 
                     s.application_id,
                     s.file_path,
+                    s.text_content,
                     s.sub_status,
-                    a.application_title
+                    a.application_title,
+                    a.submission_type
                 FROM Submissions s
                 INNER JOIN Applications a ON s.application_id = a.application_id
                 WHERE s.user_id = ?
