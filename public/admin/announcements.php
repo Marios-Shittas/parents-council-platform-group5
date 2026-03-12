@@ -24,10 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
         if (!empty($title)) {
-            $announcementId = $announcementsService->createAnnouncement($title, $description, $publishDate);
+            $announcementId = $announcementsService->createAnnouncement($title, $description, $announcementDate, $publishDate);
             
             if ($announcementId) {
                 $uploadedCount = 0;
@@ -139,10 +140,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
         if ($id > 0 && !empty($title)) {
-            if ($announcementsService->updateAnnouncement($id, $title, $description, $publishDate)) {
+            if ($announcementsService->updateAnnouncement($id, $title, $description, $announcementDate, $publishDate)) {
                 $uploadedCount = 0;
                 $uploadErrors = [];
                 
@@ -330,7 +332,6 @@ $announcements = $announcementsService->getAllAnnouncements();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/announcements.css">
     <link rel="stylesheet" href="../assets/css/admin_announcements.css">
 
     <title>Διαχείριση Ανακοινώσεων - Admin</title>
@@ -380,6 +381,12 @@ $announcements = $announcementsService->getAllAnnouncements();
                                value="<?php echo htmlspecialchars($editAnnouncement['announcement_title']); ?>" required>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="edit_announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
+                        <input type="date" class="form-control form-control-custom" id="edit_announcement_date" name="announcement_date"
+                               value="<?php echo htmlspecialchars($editAnnouncement['announcement_date'] ?? $editAnnouncement['publish_date']); ?>">
+                    </div>
+
                     <div class="form-group">
                         <label for="edit_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
                         <input type="date" class="form-control form-control-custom" id="edit_date" name="publish_date"
@@ -450,7 +457,8 @@ $announcements = $announcementsService->getAllAnnouncements();
                                 <tr>
                                     <th>Εικόνα</th>
                                     <th>Τίτλος</th>
-                                    <th>Ημερομηνία</th>
+                                    <th>Ημ. Ανακοίνωσης</th>
+                                    <th>Ημ. Δημοσίευσης</th>
                                     <th>Περιγραφή</th>
                                     <th style="width: 150px;">Ενέργειες</th>
                                 </tr>
@@ -470,6 +478,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                                             <?php endif; ?>
                                         </td>
                                         <td><strong><?php echo htmlspecialchars($ann['announcement_title']); ?></strong></td>
+                                        <td><?php echo date('d/m/Y', strtotime($ann['announcement_date'] ?? $ann['publish_date'])); ?></td>
                                         <td><?php echo date('d/m/Y', strtotime($ann['publish_date'])); ?></td>
                                         <td>
                                             <?php 
@@ -505,7 +514,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 </div>
 
 <!-- Παράθυρο (modal) για νέα ανακοίνωση -->
-<div class="modal fade modal-custom" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <form method="POST" enctype="multipart/form-data">
@@ -524,6 +533,12 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <input type="text" class="form-control form-control-custom" id="title" name="title" required>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
+                        <input type="date" class="form-control form-control-custom" id="announcement_date" name="announcement_date" 
+                               value="<?php echo date('Y-m-d'); ?>">
+                    </div>
+
                     <div class="form-group">
                         <label for="publish_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
                         <input type="date" class="form-control form-control-custom" id="publish_date" name="publish_date" 

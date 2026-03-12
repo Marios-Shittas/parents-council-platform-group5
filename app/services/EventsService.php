@@ -56,7 +56,7 @@ class EventsService {
                        GROUP_CONCAT(ei.image_path) as images
                 FROM Events e
                 LEFT JOIN EventsImages ei ON e.event_id = ei.event_id
-                WHERE e.event_date >= NOW()
+                WHERE DATE(e.event_date) >= CURDATE()
                 GROUP BY e.event_id
                 ORDER BY e.event_date ASC";
         
@@ -68,6 +68,30 @@ class EventsService {
             $events[] = $row;
         }
         
+        return $events;
+    }
+
+    /**
+     * Get past events
+     * @return array Array of past events
+     */
+    public function getPastEvents() {
+        $sql = "SELECT e.*, 
+                       GROUP_CONCAT(ei.image_path) as images
+                FROM Events e
+                LEFT JOIN EventsImages ei ON e.event_id = ei.event_id
+                WHERE DATE(e.event_date) < CURDATE()
+                GROUP BY e.event_id
+                ORDER BY e.event_date DESC";
+
+        $result = $this->conn->query($sql);
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $row['images'] = $row['images'] ? explode(',', $row['images']) : [];
+            $events[] = $row;
+        }
+
         return $events;
     }
     

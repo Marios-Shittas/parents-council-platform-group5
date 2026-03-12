@@ -7,10 +7,26 @@ require_once __DIR__ . '/../config/db.php';
 
 class AnnouncementsService {
     private $conn;
+    private static $announcementDateChecked = false;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
+        $this->ensureAnnouncementDateColumn();
+    }
+
+    private function ensureAnnouncementDateColumn() {
+        if (self::$announcementDateChecked) {
+            return;
+        }
+
+        $result = $this->conn->query("SHOW COLUMNS FROM Announcements LIKE 'announcement_date'");
+        if ($result && $result->num_rows === 0) {
+            $this->conn->query("ALTER TABLE Announcements ADD COLUMN announcement_date DATE NULL AFTER announcement_title");
+            $this->conn->query("UPDATE Announcements SET announcement_date = publish_date WHERE announcement_date IS NULL");
+        }
+
+        self::$announcementDateChecked = true;
     }
     
     /**
@@ -20,12 +36,13 @@ class AnnouncementsService {
      * @return array Array of announcements with images
      */
     public function getAllAnnouncements($limit = null, $offset = 0) {
-        $sql = "SELECT a.*, 
+        $sql = "SELECT a.*,
+                       COALESCE(a.announcement_date, a.publish_date) as announcement_date,
                        GROUP_CONCAT(ai.image_path) as images
                 FROM Announcements a
                 LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id
                 GROUP BY a.announcement_id
-                ORDER BY a.publish_date DESC";
+                ORDER BY COALESCE(a.announcement_date, a.publish_date) DESC, a.publish_date DESC";
         
         if ($limit !== null) {
             $sql .= " LIMIT ? OFFSET ?";
@@ -53,7 +70,8 @@ class AnnouncementsService {
      * @return array|null Announcement data or null if not found
      */
     public function getAnnouncementById($id) {
-        $sql = "SELECT a.*, 
+        $sql = "SELECT a.*,
+                       COALESCE(a.announcement_date, a.publish_date) as announcement_date,
                        GROUP_CONCAT(ai.image_path) as images
                 FROM Announcements a
                 LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id
@@ -77,15 +95,16 @@ class AnnouncementsService {
      * Create a new announcement
      * @param string $title Announcement title
      * @param string $description Announcement description
+     * @param string $announcementDate Announcement date (Y-m-d format)
      * @param string $publishDate Publish date (Y-m-d format)
      * @return int|false The new announcement ID or false on failure
      */
-    public function createAnnouncement($title, $description, $publishDate) {
-        $sql = "INSERT INTO Announcements (announcement_title, announcement_description, publish_date) 
-                VALUES (?, ?, ?)";
+    public function createAnnouncement($title, $description, $announcementDate, $publishDate) {
+        $sql = "INSERT INTO Announcements (announcement_title, announcement_date, announcement_description, publish_date) 
+                VALUES (?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("sss", $title, $description, $publishDate);
+        $stmt->bind_param("ssss", $title, $announcementDate, $description, $publishDate);
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
@@ -99,18 +118,20 @@ class AnnouncementsService {
      * @param int $id Announcement ID
      * @param string $title Announcement title
      * @param string $description Announcement description
+     * @param string $announcementDate Announcement date (Y-m-d format)
      * @param string $publishDate Publish date (Y-m-d format)
      * @return bool True on success, false on failure
      */
-    public function updateAnnouncement($id, $title, $description, $publishDate) {
+    public function updateAnnouncement($id, $title, $description, $announcementDate, $publishDate) {
         $sql = "UPDATE Announcements 
                 SET announcement_title = ?, 
+                    announcement_date = ?,
                     announcement_description = ?, 
                     publish_date = ?
                 WHERE announcement_id = ?";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("sssi", $title, $description, $publishDate, $id);
+        $stmt->bind_param("ssssi", $title, $announcementDate, $description, $publishDate, $id);
         
         return $stmt->execute();
     }
@@ -192,13 +213,14 @@ class AnnouncementsService {
      * @return array Array of matching announcements
      */
     public function searchAnnouncements($query) {
-        $sql = "SELECT a.*, 
+        $sql = "SELECT a.*,
+                       COALESCE(a.announcement_date, a.publish_date) as announcement_date,
                        GROUP_CONCAT(ai.image_path) as images
                 FROM Announcements a
                 LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id
                 WHERE a.announcement_title LIKE ? OR a.announcement_description LIKE ?
                 GROUP BY a.announcement_id
-                ORDER BY a.publish_date DESC";
+                ORDER BY COALESCE(a.announcement_date, a.publish_date) DESC, a.publish_date DESC";
         
         $searchTerm = "%{$query}%";
         $stmt = $this->conn->prepare($sql);
