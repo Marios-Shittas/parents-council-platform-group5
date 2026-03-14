@@ -121,6 +121,13 @@ class EpikoinoniaService {
      * @return int|false The new message ID or false on failure
      */
     public function createMessage($name, $email, $phone, $subject, $message) {
+        // Remove all leading and trailing whitespace (including newlines)
+        $name = preg_replace('/^\s+|\s+$/u', '', $name);
+        $email = preg_replace('/^\s+|\s+$/u', '', $email);
+        $phone = preg_replace('/^\s+|\s+$/u', '', $phone);
+        $subject = preg_replace('/^\s+|\s+$/u', '', $subject);
+        $message = preg_replace('/^\s+|\s+$/u', '', $message);
+        
         $sql = "INSERT INTO contact_messages (name, email, phone, subject, message) 
                 VALUES (?, ?, ?, ?, ?)";
         
