@@ -7,6 +7,12 @@ $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) 
 
 // Παίρνουμε την τιμή αναζήτησης (αν υπάρχει) για να μένει μέσα στο input.
 $search_query = trim($_GET['q'] ?? '');
+$useful_info_item = [
+    'label' => 'Χρήσιμες Πληροφορίες',
+    'href' => '/parents-council-platform-group5/public/useful-information.php',
+    'icon' => 'fas fa-info-circle',
+    'match' => ['useful-information.php'],
+];
 
 // Εδώ ορίζουμε όλα τα links του menu σε ένα σημείο (εύκολη συντήρηση).
 // Αν θέλεις νέο κουμπί στο menu, το προσθέτεις εδώ.
@@ -114,8 +120,8 @@ $nav_items = [
 
         /* Στυλ λογοτύπου. */
         .navbar-brand img {
-            width: 68px;
-            height: 68px;
+            width: 82px;
+            height: 82px;
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 2px 10px rgba(26, 58, 92, 0.22);
@@ -213,6 +219,34 @@ $nav_items = [
             font-size: .9rem;
         }
 
+        .info-icon-link {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d6dce4;
+            color: var(--text-main);
+            background: #fff;
+            transition: all .2s ease;
+        }
+
+        .info-icon-link:hover {
+            color: var(--text-strong);
+            background: rgba(230, 237, 245, 0.65);
+            border-color: #c8d5e3;
+            transform: translateY(-1px);
+        }
+
+        .info-icon-link.active {
+            color: #0f2134;
+            background: rgba(230, 237, 245, 0.8);
+            border-color: #c8d5e3;
+            box-shadow: inset 0 0 0 1px rgba(26, 58, 92, 0.06);
+        }
+
         /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
         .navbar-brand {
             margin-right: .7rem;
@@ -247,6 +281,7 @@ $nav_items = [
         .navbar-nav .nav-link:focus-visible,
         .search-btn:focus-visible,
         .login-btn:focus-visible,
+        .info-icon-link:focus-visible,
         .navbar-toggler:focus-visible,
         .search-input:focus-visible {
             outline: 2px solid rgba(26, 58, 92, 0.45);
@@ -339,6 +374,15 @@ $nav_items = [
                    class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
                     <!-- Κουμπί μετάβασης στη σελίδα login. -->
                     <i class="fas fa-sign-in-alt mr-1"></i>Login
+                </a>
+
+                <?php $is_useful_info_active = in_array($current_page, $useful_info_item['match'], true); ?>
+                <a href="<?php echo $useful_info_item['href']; ?>"
+                   class="ml-lg-2 mt-2 mt-lg-0 info-icon-link<?php echo $is_useful_info_active ? ' active' : ''; ?>"
+                   aria-label="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
+                   title="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
+                   <?php echo $is_useful_info_active ? 'aria-current="page"' : ''; ?>>
+                    <i class="<?php echo $useful_info_item['icon']; ?>"></i>
                 </a>
 
             </div>

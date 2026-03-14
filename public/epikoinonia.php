@@ -96,22 +96,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
     <link rel="stylesheet" href="assets/css/user_css/epikoinonia.css">
 </head>
 <body>
     <!-- Header -->
     <?php include '../app/includes/header.php'; ?>
 
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="container">
-            <h1>Επικοινωνία</h1>
-            <p>Επικοινωνήστε μαζί μας για οποιαδήποτε ερώτηση ή πληροφορία</p>
-        </div>
-    </div>
+    <?php
+    $pageHeaderTitle = 'Επικοινωνία';
+    $pageHeaderSubtitle = 'Επικοινωνήστε μαζί μας για οποιαδήποτε ερώτηση ή πληροφορία.';
+    $pageHeaderIcon = 'fas fa-envelope';
+    $pageHeaderEyebrow = 'Υποστήριξη Και Στοιχεία';
+    include __DIR__ . '/../app/includes/public_page_header.php';
+    ?>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content epikoinonia-page">
         <div class="container">
             <!-- Contact Information Section -->
             <div class="contact-section">

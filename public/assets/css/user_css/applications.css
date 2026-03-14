@@ -1,19 +1,5 @@
 /* Applications Page Styles */
 
-/* ===== PAGE HEADER BANNER ===== */
-/* .applications-hero = the blue banner at the top of the applications page */
-.applications-hero {
-    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
-    color: white;
-    padding: 3rem 0;
-    margin-bottom: 3rem;
-}
-
-/* .applications-hero .lead = the subtitle text under the title in the hero banner */
-.applications-hero .lead {
-    color: white;
-}
-
 /* ===== APPLICATION CARD STYLES ===== */
 /* .applications-card = the white card containers for main sections */
 .applications-card {
