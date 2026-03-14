@@ -1,52 +1,5 @@
 /* ===== EVENTS PAGE — MODERN REDESIGN ===== */
 
-/* ---- Hero Banner ---- */
-.events-hero {
-    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
-    color: white;
-    padding: 4.5rem 0;
-    margin-bottom: 3rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.events-hero::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -5%;
-    width: 420px;
-    height: 420px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.events-hero::after {
-    content: '';
-    position: absolute;
-    bottom: -60%;
-    left: -5%;
-    width: 320px;
-    height: 320px;
-    background: rgba(255,255,255,0.04);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.events-hero h1 {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.events-hero .lead {
-    color: rgba(255,255,255,0.85);
-    font-size: 1.1rem;
-    margin: 0;
-}
-
 /* ---- Section Titles ---- */
 .events-section-title {
     font-family: 'Montserrat', sans-serif;

@@ -31,9 +31,6 @@ function Payments() {
 
     return (
         <>
-        <div className="title">
-            <h1>Σελίδα Αγορών</h1>
-        </div>        
         <div className="Page">
             <div className="container md-4">
                 <div className="row">

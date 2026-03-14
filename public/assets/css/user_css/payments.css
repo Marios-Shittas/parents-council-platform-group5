@@ -24,15 +24,6 @@
     padding: 0.5rem 0;
 }
 
-.title {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.5rem;
-    font-weight: bold;
-    background: linear-gradient(135deg, #0a2463 0%, #1566d1 50%, #042253 100%);
-    padding: 10px;
-}
-
 .carousel {
     max-width: 100 px;
     min-width: 30 px;

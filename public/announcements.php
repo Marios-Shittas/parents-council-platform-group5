@@ -30,6 +30,7 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
     <link rel="stylesheet" href="assets/css/user_css/announcements.css">
 
     <title>Ανακοινώσεις - Γυμνάσιο Αγίου Αθανασίου</title>
@@ -40,13 +41,13 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 <!-- Header -->
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
-<!-- Page Header -->
-<div class="announcements-hero">
-    <div class="container">
-        <h1><i class="fas fa-bullhorn mr-2"></i>Ανακοινώσεις</h1>
-        <p class="lead">Ενημερωθείτε για τα τελευταία νέα του σχολείου</p>
-    </div>
-</div>
+<?php
+$pageHeaderTitle = 'Ανακοινώσεις';
+$pageHeaderSubtitle = 'Ενημερωθείτε για τα τελευταία νέα του σχολείου.';
+$pageHeaderIcon = 'fas fa-bullhorn';
+$pageHeaderEyebrow = 'Νέα Και Ενημερώσεις';
+include __DIR__ . '/../app/includes/public_page_header.php';
+?>
 
 <!-- Announcements Grid -->
 <div class="container">

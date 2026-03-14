@@ -15,6 +15,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
     <link rel="stylesheet" href="assets/css/user_css/payments.css">
 
     <title>Αγορές</title>
@@ -22,6 +23,14 @@
 <body>
     <!-- Header -->
     <?php include '../app/includes/header.php'; ?>
+
+    <?php
+    $pageHeaderTitle = 'Αγορές';
+    $pageHeaderSubtitle = 'Περιηγηθείτε στα διαθέσιμα προϊόντα και διαχειριστείτε το καλάθι σας.';
+    $pageHeaderIcon = 'fas fa-shopping-bag';
+    $pageHeaderEyebrow = 'Ηλεκτρονικές Αγορές';
+    include __DIR__ . '/../app/includes/public_page_header.php';
+    ?>
 
     <!-- React will render here -->
     <div id="payments"></div>

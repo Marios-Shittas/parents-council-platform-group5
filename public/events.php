@@ -31,6 +31,7 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
     <link rel="stylesheet" href="assets/css/user_css/events.css">
 
     <title>Εκδηλώσεις - Γυμνάσιο Αγίου Αθανασίου</title>
@@ -41,13 +42,13 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 <!-- Header -->
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
-<!-- Page Header -->
-<div class="events-hero">
-    <div class="container">
-        <h1><i class="fas fa-calendar-alt mr-2"></i>Εκδηλώσεις</h1>
-        <p class="lead">Ενημερωθείτε για τις επερχόμενες εκδηλώσεις του σχολείου</p>
-    </div>
-</div>
+<?php
+$pageHeaderTitle = 'Εκδηλώσεις';
+$pageHeaderSubtitle = 'Δείτε τις επερχόμενες και τις προηγούμενες δράσεις του σχολείου.';
+$pageHeaderIcon = 'fas fa-calendar-alt';
+$pageHeaderEyebrow = 'Σχολική Ζωή';
+include __DIR__ . '/../app/includes/public_page_header.php';
+?>
 
 <!-- Events Grid -->
 <div class="container">
