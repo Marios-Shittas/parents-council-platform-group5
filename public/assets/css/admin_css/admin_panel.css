@@ -1,0 +1,125 @@
+
+/* Admin Dashboard Main Styles */
+
+/* ===== WRAPPER ===== */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== SIDEBAR ===== */
+.admin-sidebar {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2f6ea0 100%);
+    color: white;
+    padding: 20px 0;
+    width: 260px;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+}
+
+.admin-sidebar h3 {
+    margin: 20px 0;
+    padding: 0 20px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.admin-sidebar .nav-link {
+    color: rgba(255,255,255,0.8);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-left-color: white;
+}
+
+.admin-sidebar .nav-link i {
+    width: 1.5rem;
+    margin-right: 12px;
+    text-align: center;
+}
+
+/* ===== MAIN CONTENT ===== */
+.admin-content {
+    margin-left: 260px;
+    padding: 20px;
+    width: calc(100% - 260px);
+    flex: 1;
+}
+
+.admin-main {
+    margin-left: 260px;
+    padding: 20px;
+}
+
+/* ===== BACK LINK ===== */
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #2f6ea0;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    background: #f0f5ff;
+    color: #1a3a5c;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 200px;
+    }
+
+    .admin-content {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+    }
+
+    .admin-main {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-sidebar {
+        position: fixed;
+        left: -260px;
+        width: 260px;
+        transition: left 0.3s ease;
+        z-index: 1000;
+    }
+
+    .admin-sidebar.show {
+        left: 0;
+    }
+
+    .admin-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+}

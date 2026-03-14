@@ -48,6 +48,20 @@ class ProductsService
         ");
 
         $stmt->bind_param("ssd", $name, $description, $price);
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
+        }
+        return false;
+    }
+
+    public function addProductImage($productId, $imagePath)
+    {
+        $stmt = $this->conn->prepare("
+            INSERT INTO ProductsImages (product_id, image_path)
+            VALUES (?, ?)
+        ");
+
+        $stmt->bind_param("is", $productId, $imagePath);
         return $stmt->execute();
     }
 }

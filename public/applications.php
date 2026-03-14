@@ -114,11 +114,8 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- Custom CSS -->
-<link rel="stylesheet" href="assets/css/main.css">
-<link rel="stylesheet" href="assets/css/applications.css">
-
-<div class="applications-hero">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
     <div class="container">
         <h1><i class="fas fa-file-alt mr-2"></i>Αιτήσεις</h1>
         <p class="lead">Υποβάλλετε τις δικές σας αιτήσεις και παρακολουθήστε την κατάστασή τους</p>

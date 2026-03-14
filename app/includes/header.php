@@ -46,6 +46,13 @@ $nav_items = [
         'icon' => 'fas fa-credit-card',
         'match' => ['payments.php'],
     ],
+    // Σελίδα επικοινωνίας.
+    [
+        'label' => 'Επικοινωνία',
+        'href' => '/parents-council-platform-group5/public/epikoinonia.php',
+        'icon' => 'fas fa-envelope',
+        'match' => ['epikoinonia.php'],
+    ],
 ];
 ?>
 <!doctype html>

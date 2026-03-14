@@ -1,0 +1,260 @@
+
+/* Admin Events Page */
+
+/* Page header */
+.events-admin-hero {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2f6ea0 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.events-admin-hero h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.events-admin-hero p {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
+/* Section title */
+.events-section-admin-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Add event button */
+.btn-add-event {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2f6ea0 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.btn-add-event:hover {
+    opacity: 0.9;
+    color: white;
+}
+
+/* Event card in admin list */
+.admin-event-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-event-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.event-card-image-admin {
+    width: 120px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.event-card-image-admin img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-admin-info {
+    flex: 1;
+}
+
+.event-admin-title {
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 8px;
+}
+
+.event-admin-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.event-admin-description {
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.event-admin-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Form for adding/editing event */
+.event-form-admin {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.event-form-admin label {
+    display: block;
+    margin-bottom: 5px;
+    color: #1a3a5c;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.event-form-admin input[type="text"],
+.event-form-admin input[type="date"],
+.event-form-admin input[type="time"],
+.event-form-admin textarea,
+.event-form-admin select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dde5ef;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.event-form-admin textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.event-form-admin input[type="text"]:focus,
+.event-form-admin input[type="date"]:focus,
+.event-form-admin input[type="time"]:focus,
+.event-form-admin textarea:focus,
+.event-form-admin select:focus {
+    outline: none;
+    border-color: #2f6ea0;
+    box-shadow: 0 0 0 3px rgba(47, 110, 160, 0.1);
+}
+
+/* Image upload area */
+.image-upload-area {
+    border: 2px dashed #dde5ef;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.image-upload-area:hover {
+    border-color: #2f6ea0;
+    background: #f8fafb;
+}
+
+.image-upload-area.dragover {
+    border-color: #2f6ea0;
+    background: #f0f5ff;
+}
+
+.image-upload-area i {
+    font-size: 2.5rem;
+    color: #2f6ea0;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.image-upload-area p {
+    margin: 0;
+    color: #6c757d;
+}
+
+/* Image preview */
+.image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.image-preview-item {
+    position: relative;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+
+.image-preview-item .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.image-preview-item .remove-btn:hover {
+    background: #c82333;
+}
+
+/* Submit buttons */
+.form-button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-save-event {
+    background: linear-gradient(135deg, #1a3a5c 0%, #2f6ea0 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-save-event:hover {
+    opacity: 0.9;
+}
+
+.btn-cancel-form {
+    background: #e9ecef;
+    color: #1a3a5c;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+}
+
+.btn-cancel-form:hover {
+    background: #dee2e6;
+}

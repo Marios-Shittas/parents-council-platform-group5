@@ -30,7 +30,7 @@ $defaultImage = '/parents-council-platform-group5/public/assets/img/placeholder.
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/announcements.css">
+    <link rel="stylesheet" href="assets/css/user_css/announcements.css">
 
     <title>Ανακοινώσεις - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
