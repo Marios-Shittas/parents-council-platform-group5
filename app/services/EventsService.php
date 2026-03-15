@@ -265,5 +265,31 @@ class EventsService {
         
         return $events;
     }
+
+    public function get5LatestEvents() {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+
+        $eventsQuery = "SELECT event_title, event_description FROM events ORDER BY event_date DESC LIMIT 5";
+        $result = $this->conn->query($eventsQuery);
+
+        if (!$result) {
+            echo json_encode(["error" => "Query failed: " . $this->conn->error]);
+            exit;
+        }
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+        echo json_encode($events);
+    }
+
 }
+
+if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
+        $service = new EventsService();
+        $service->get5LatestEvents();
+}
+
 ?>

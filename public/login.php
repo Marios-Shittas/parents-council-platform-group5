@@ -19,7 +19,11 @@
     
     <body class="body">
         <div class="page-content">
+            <a href="index.php">
+                <button id="back-button"><i class="fas fa-arrow-left"></i></button>
+            </a>
             <h1 id="login-title">Login</h1>
+            <span id="error-message"></span>
             <div class="login-container">
                 <p id="email-label">Please enter your email:</p>
                 <input type="email" id="email-input" placeholder="Email">
@@ -29,9 +33,6 @@
                     <span id="password-toggle-root"></span>
                 </div>
                 <button id="login-button">Login</button>
-                <a href="index.php">
-                    <button id="back-button">Back</button>
-                </a>
                 <p class="forgot-password">
                     <a href="forgot-password.php" id="forgot-password-link">Forgot password?</a>
                 </p>

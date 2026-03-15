@@ -236,5 +236,30 @@ class AnnouncementsService {
         
         return $announcements;
     }
+
+    public function get5LatestAnnouncements() {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+
+        $announcementsQuery = "SELECT announcement_title, announcement_description FROM Announcements ORDER BY publish_date DESC LIMIT 5";
+        $result = $this->conn->query($announcementsQuery);
+
+        if (!$result) {
+            echo json_encode(["error" => "Query failed: " . $this->conn->error]);
+            exit;
+        }
+
+        $announcements = [];
+        while ($row = $result->fetch_assoc()) {
+            $announcements[] = $row;
+        }
+        echo json_encode($announcements);
+    }
+
 }
+
+if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
+        $service = new AnnouncementsService();
+        $service->get5LatestAnnouncements();
+    }
 ?>
