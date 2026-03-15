@@ -3,52 +3,35 @@ function RegisterForm() {
         first_name: '',
         last_name: '',
         phone: '',
-        children_count: '',
         email: '',
-        password: '',
-        password_confirm: '',
-        cc_number: '',
-        cc_name: '',
-        cc_exp: '',
-        cc_cvv: '',
+        viber_consent: false,
         consent: false
     });
 
-    const handleSubmit = (e) => {
+    const [children, setChildren] = React.useState([
+        { child_name: '', child_last_name: '', child_dob: '', child_class: '' }
+    ]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!emailVerified) {
-            alert("Πρέπει πρώτα να επικυρώσετε το email σας!");
-            return;
-        }
-
-        if (form.password !== form.password_confirm) {
-            alert("Ο κωδικός και η επιβεβαίωση δεν ταιριάζουν!");
-            return;
-        }
-
-        if (!/^\d{16,19}$/.test(form.cc_number.replace(/\s/g, ''))) {
-            alert("Ο αριθμός κάρτας πρέπει να είναι 16-19 ψηφία.");
-            return;
-        }
-
-        if (!/^\d{2}\/\d{2}$/.test(form.cc_exp)) {
-            alert("Η ημερομηνία λήξης πρέπει να είναι στο format MM/YY.");
-            return;
-        }
-
-        if (!/^\d{3}$/.test(form.cc_cvv)) {
-            alert("Το CVV πρέπει να είναι 3 ψηφία.");
-            return;
-        }
-
         if (!form.consent) {
             alert("Πρέπει να συμφωνήσετε με την πολιτική απορρήτου.");
             return;
         }
 
-        alert("Επιτυχής εγγραφή και πληρωμή!");
-            // εδώ μπορείς να στείλεις τα δεδομένα στο backend
-    }
+        try {
+            const response = await fetch('../app/services/RegisteringService.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...form, children })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        } catch (error) {
+            alert("Σφάλμα επικοινωνίας με τον server.");
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -56,213 +39,136 @@ function RegisterForm() {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
-    }
-
-    const [emailVerified, setEmailVerified] = React.useState(false);
-
-    const EmailhandleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
-    }));
-
-    // Reset email verification if email is changed
-    if (name === 'email') setEmailVerified(false);
-};
-
-    const formatCardNumber = (value) => {
-            return value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
-        };
-
-        const handleCardNumberChange = (e) => {
-            const formatted = formatCardNumber(e.target.value);
-            setForm(prev => ({
-                ...prev,
-                cc_number: formatted
-            }));
-        };
-    
-    const formatExpiry = (value) => {
-    // Remove non-digit characters
-        let digits = value.replace(/\D/g, '');
-
-        // Limit month to 12
-        if (digits.length >= 2) {
-            let month = parseInt(digits.slice(0, 2), 10);
-            if (month > 12) month = 12;
-            digits = month.toString().padStart(2, '0') + digits.slice(2);
-        }
-
-        // Add '/' after 2 digits
-        if (digits.length > 2) {
-            return digits.slice(0, 2) + '/' + digits.slice(2, 4);
-        }
-        return digits;
     };
 
-    const handleExpiryChange = (e) => {
-        const formatted = formatExpiry(e.target.value);
-            setForm(prev => ({
-                ...prev,
-                cc_exp: formatted
-        }));
+    const handleChildChange = (index, e) => {
+        const { name, value } = e.target;
+        setChildren(prev => prev.map((child, i) =>
+            i === index ? { ...child, [name]: value } : child
+        ));
     };
-    
-    const handleEmailVerify = () => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(form.email)) {
-            alert("Το email δεν είναι έγκυρο!");
-            setEmailVerified(false);
-            return;
-        }
-        alert("Το email επικυρώθηκε!");
-        setEmailVerified(true);
+
+    const addChild = () => {
+        setChildren(prev => [...prev, { child_name: '', child_last_name: '', child_dob: '', child_class: '' }]);
+    };
+
+    const removeChild = (index) => {
+        setChildren(prev => prev.filter((_, i) => i !== index));
     };
 
     return (
-        <div className="container mt-3">
-            <form onSubmit={handleSubmit}>
-                <h1 className="mt-1">Εγγραφή Μελών στον Σύνδεσμο Γονέων</h1>
-                <p>Με την εγγραφή σας στον Σύνδεσμο Γονέων μπορείτε να αποκτήσετε πρόσβαση στο σύστημα και να επωφεληθείτε από τις διαθέσιμες υπηρεσίες και λειτουργίες της πλατφόρμας. Μέσω της συνδρομής σας θα έχετε τη δυνατότητα να ενημερώνεστε για εκδηλώσεις και δραστηριότητες, να συμμετέχετε σε events, να πραγματοποιείτε αγορές προϊόντων που προσφέρει ο σύνδεσμος, καθώς και να υποβάλλετε αιτήσεις για διάφορες δράσεις και υπηρεσίες. Συμπληρώστε τα προσωπικά σας στοιχεία και τα στοιχεία της κάρτας σας στα παρακάτω πεδία, ώστε να ολοκληρωθεί η εγγραφή και η πληρωμή της συνδρομής σας με ασφάλεια.</p>
-                <div className="register">
-                    <h2>Εγγραφή</h2>
-                    <p>Για να εγγραφείτε στον Σύνδεσμο Γονέων, παρακαλούμε συμπληρώστε τα παρακάτω πεδία με τα προσωπικά σας στοιχεία. Η εγγραφή σας θα σας επιτρέψει να αποκτήσετε πρόσβαση σε όλες τις υπηρεσίες και λειτουργίες της πλατφόρμας μας.</p>
-                    <div className="row px-3">
-                        <div className="col-md-4">
-                            <label>Όνομα:</label>
-                            <input name="first_name"
-                                type="text"
-                                onChange={handleChange}
-                                className="form-control"
-                                required/>
-                        </div>
-                        <div className="col-md-4">
-                            <label>Επώνυμο:</label>
-                            <input name="last_name"
-                                type="text"
-                                onChange={handleChange}
-                                className="form-control"
-                                required/>
-                        </div>
-                        <div className="col-md-4">
-                            <label>Τηλέφωνο:</label>
-                            <input 
-                                name="phone"
-                                type="text"
-                                onChange={handleChange}
-                                pattern="[0-9]{8}"
-                                className="form-control"
-                                required/>
-                        </div>
-                        <div className="col-md-4 mt-3">
-                            <label>Αριθμός παιδιών που φοιτούν στο γυμνάσιο:</label>
-                            <input 
-                                name="children_count"
-                                type="text"
-                                maxlength="1"
-                                onChange={handleChange}
-                                pattern="[0-9]{1}"
-                                className="form-control"
-                                required/>
-                        </div>
-                        <div className="col-md-4 mt-3">
-                            <label>Email:</label>
-                            <input name="email"
-                                type="email"
-                                onChange={EmailhandleChange}
-                                className="form-control"
-                                required/>
+        <div>
+            <div className="title">
+                <h1>Εγγραφή Μελών στον Σύνδεσμο Γονέων</h1>
+            </div>
+            <div className="container mt-3">
+                <p>Με την εγγραφή σας στον Σύνδεσμο Γονέων μπορείτε να αποκτήσετε πρόσβαση στο σύστημα και να επωφεληθείτε από τις διαθέσιμες υπηρεσίες και λειτουργίες της πλατφόρμας, όπως ενημέρωση για εκδηλώσεις και δραστηριότητες, συμμετοχή σε events, αγορές προϊόντων που προσφέρει ο σύνδεσμος, καθώς και υποβολή αιτήσεων για διάφορες δράσεις και υπηρεσίες κατά τη διάρκεια της σχολικής χρονιάς. Πριν προχωρήσετε, παρακαλούμε συμπληρώστε προσεκτικά τα στοιχεία σας. <strong>Μετά την υποβολή, η αίτησή σας θα τεθεί σε αναμονή μέχρι να εγκριθεί από τον Σύνδεσμο. Θα λάβετε email με περαιτέρω οδηγίες.</strong></p>
+                <form onSubmit={handleSubmit}>
+
+                    {/* Στοιχεία Κηδεμόνα */}
+                    <div className="register">
+                        <p>Στοιχεία Κηδεμόνα:</p>
+                        <div className="row px-3">
+                            <div className="col-md-6">
+                                <div className="form-group-inline">
+                                    <label>Όνομα:</label>
+                                    <input name="first_name" type="text" onChange={handleChange} className="form-control" required/>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group-inline">
+                                    <label>Επώνυμο:</label>
+                                    <input name="last_name" type="text" onChange={handleChange} className="form-control" required/>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group-inline">
+                                    <label>Τηλέφωνο:</label>
+                                    <input name="phone" type="text" onChange={handleChange} pattern="[0-9]{8}" className="form-control" required/>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group-inline">
+                                    <label>Email:</label>
+                                    <input name="email" type="email" onChange={handleChange} className="form-control" required/>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="row md-4 px-3">
-                        <div className="col-md-4 mt-3">
-                            <label>Κωδικός:</label>
-                            <input name="password"
-                                type="password"
-                                minlength="8"
-                                onChange={handleChange}
-                                className="form-control"
-                                required/>
-                        </div>
-                        <div className="col-md-4 mt-3">
-                            <label>Επιβεβαίωση Κωδικού:</label>
-                            <input name="password_confirm"
-                                type="password"
-                                onChange={handleChange}
-                                className="form-control"
-                                required/>
-                        </div>
+
+                    {/* Στοιχεία Παιδιών */}
+                    <div className="register mt-4">
+                        <p>Στοιχεία Παιδιών:</p>
+                        {children.map((child, index) => (
+                            <div key={index} className="border rounded p-3 mb-3" style={{borderColor: 'rgba(255,255,255,0.3)'}}>
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <strong>Παιδί {index + 1}</strong>
+                                    {children.length > 1 && (
+                                        <button type="button" className="btn btn-danger btn-sm" onClick={() => removeChild(index)}>
+                                            Αφαίρεση
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        <div className="form-group-inline">
+                                            <label>Όνομα:</label>
+                                            <input name="child_name" type="text" value={child.child_name} onChange={(e) => handleChildChange(index, e)} className="form-control" required/>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="form-group-inline">
+                                            <label>Επώνυμο:</label>
+                                            <input name="child_last_name" type="text" value={child.child_last_name} onChange={(e) => handleChildChange(index, e)} className="form-control" required/>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="form-group-inline">
+                                            <label>Ημ. Γέννησης:</label>
+                                            <input name="child_dob" type="date" value={child.child_dob} onChange={(e) => handleChildChange(index, e)} className="form-control" required/>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="form-group-inline">
+                                            <label>Τάξη:</label>
+                                            <input name="child_class" type="text" value={child.child_class} onChange={(e) => handleChildChange(index, e)} className="form-control" placeholder="πχ. Α΄3" required/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <button type="button" className="btn btn-secondary" onClick={addChild}>
+                            + Προσθήκη Παιδιού
+                        </button>
                     </div>
-                    <div className="col-md-4">
-                        <button className="mt-4 btn btn-primary" type="button" onClick={handleEmailVerify}>Επικύρωση email</button>
+
+                    {/* Viber */}
+                    <div className="m-3 mt-4 d-flex align-items-center gap-2">
+                        <input type="checkbox" name="viber_consent" onChange={handleChange} required/>
+                        <label className="email-consent px-3">
+                            Αποδέχομαι να προστεθώ στην ομάδα Viber του Συνδέσμου Γονέων.
+                        </label>
                     </div>
-                </div>
-                
-                <div className="mt-3">
-                    <h3>Πληρωμή Συνδρομής</h3>
-                </div>
-                <div className="credit-card">
-                    <h4>Στοιχεία Κάρτας</h4>
-                    <div className="row-card-number-cardholder">
-                        <div>
-                            <label>Αριθμός Κάρτας:</label>
-                            <input name="cc_number"
-                                type="text" 
-                                value={form.cc_number}
-                                onChange={handleCardNumberChange}
-                                pattern="[0-9]{16/19}"
-                                className="form-control"  
-                                maxlength="19"
-                                placeholder="0000 0000 0000 0000"
-                                required/>
-                        </div>
-                        <div>
-                            <label>Ονοματεπώνυμο Κατόχου:</label>
-                            <input name="cc_name"
-                                type="text" 
-                                className="form-control" 
-                                onChange={handleChange}
-                                placeholder="NAME & SURNAME"
-                                required/>
-                        </div>
+
+                    {/* Πολιτική Απορρήτου */}
+                    <div className="m-3 d-flex align-items-start gap-2">
+                        <input type="checkbox" name="consent" onChange={handleChange} className="mt-1" required/>
+                        <label className="email-consent px-3">
+                            Επιλέγοντας αυτό το πλαίσιο ελέγχου, επιβεβαιώνετε ότι έχετε διαβάσει
+                            και κατανοήσει τις πληροφορίες που παρέχονται και συναινείτε στη
+                            συλλογή και αποθήκευση των προσωπικών σας δεδομένων. Τα δεδομένα
+                            που παρέχετε θα χρησιμοποιηθούν αποκλειστικά για τους σκοπούς της
+                            επεξεργασίας του αιτήματός σας και θα αντιμετωπιστούν σύμφωνα με
+                            τους ισχύοντες κανονισμούς προστασίας δεδομένων.
+                        </label>
                     </div>
-                    <div className="row-cvv-expiry">
-                        <div className="col-md-2">
-                            <label>Ημ.Λήξης:</label>
-                            <input name="cc_exp"  
-                                value={form.cc_exp}
-                                onChange={handleExpiryChange} 
-                                pattern="[0-9//]{5}" 
-                                type="text" 
-                                className="form-control" 
-                                maxlength="5" 
-                                placeholder="00/00" 
-                                required/>
-                        </div>
-                        <div className="col-md-2">
-                            <label>CVV:</label>
-                            <input name="cc_cvv" onChange={handleChange} pattern="[0-9]{3}" type="password" className="form-control" maxlength="3" placeholder="•••" required/>
-                        </div>
-                    </div>
-                </div>
-                <div className="m-3">
-                    <label>
-                    Επιλέγοντας αυτό το πλαίσιο ελέγχου, επιβεβαιώνετε ότι έχετε διαβάσει 
-                    και κατανοήσει τις πληροφορίες που παρέχονται και συναινείτε στη 
-                    συλλογή και αποθήκευση των προσωπικών σας δεδομένων. Τα δεδομένα 
-                    που παρέχετε θα χρησιμοποιηθούν αποκλειστικά για τους σκοπούς της 
-                    επεξεργασίας του αιτήματός σας και θα αντιμετωπιστούν σύμφωνα με 
-                    τους ισχύοντες κανονισμούς προστασίας δεδομένων.
-                    </label>
-                    <input type="checkbox" name="consent" onChange={handleChange} required/>
-                </div>
-                <button className="btn btn-primary mt-3 m-5" type="submit">Εγγραφή & Πληρωμή €9.99</button>
-            </form>
+
+                    <button className="btn btn-primary mt-3 m-5" type="submit">Υποβολή Αίτησης</button>
+                </form>
+            </div>
         </div>
     );
 }
 
-// Mount React
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<RegisterForm />);
