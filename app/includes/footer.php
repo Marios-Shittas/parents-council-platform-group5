@@ -222,7 +222,7 @@
                        <li><a href="/parents-council-platform-group5/public/announcements.php">Ανακοινώσεις</a></li>
                        <li><a href="/parents-council-platform-group5/public/events.php">Εκδηλώσεις</a></li>
                        <li><a href="/parents-council-platform-group5/public/applications.php">Αιτήσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/payments.php">Πληρωμές</a></li>
+                       <li><a href="/parents-council-platform-group5/public/eshop.php">Κατάστημα</a></li>
                        <li><a href="/parents-council-platform-group5/public/epikoinonia.php">Επικοινωνία</a></li>
                    </ul>
                </div>

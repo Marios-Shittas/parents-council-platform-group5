@@ -45,12 +45,12 @@ $nav_items = [
         'icon' => 'fas fa-file-alt',
         'match' => ['applications.php'],
     ],
-    // Σελίδα πληρωμών.
+    // Σελίδα καταστήματος.
     [
-        'label' => 'Πληρωμές',
-        'href' => '/parents-council-platform-group5/public/payments.php',
-        'icon' => 'fas fa-credit-card',
-        'match' => ['payments.php'],
+        'label' => 'Κατάστημα',
+        'href' => '/parents-council-platform-group5/public/eshop.php',
+        'icon' => 'fas fa-store',
+        'match' => ['eshop.php'],
     ],
     // Σελίδα επικοινωνίας.
     [
