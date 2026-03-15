@@ -12,7 +12,8 @@ function usefulInfoTrim($value)
 
 function usefulInfoTextareaToList($value)
 {
-    $lines = preg_split('/\R/', (string)$value);
+    $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
+    $lines = explode("\n", $normalized);
     $items = [];
 
     foreach ($lines as $line) {
@@ -27,7 +28,8 @@ function usefulInfoTextareaToList($value)
 
 function usefulInfoTextareaToPairs($value)
 {
-    $lines = preg_split('/\R/', (string)$value);
+    $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
+    $lines = explode("\n", $normalized);
     $rows = [];
 
     foreach ($lines as $line) {
