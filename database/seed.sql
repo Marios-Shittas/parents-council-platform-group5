@@ -5,9 +5,14 @@ START TRANSACTION;
 SET time_zone = "+00:00";
 
 INSERT INTO Users (user_id, name, surname, email, password, phone_number, number_of_children, role, account_status, token, token_expiry) VALUES
-(1, 'Admin', 'User', 'admin@test.com', 'admin', '1234567890', 0, 'admin', 'approved', NULL, NULL),
-(2, 'John', 'Doe', 'parent1@test.com', 'parent1', '1112223333', 2, 'parent', 'approved', NULL, NULL),
+(1, 'Admin', 'User', 'admin@test.com', 'admin', '1234567890', 0, 'admin', 'active', NULL, NULL),
+(2, 'John', 'Doe', 'parent1@test.com', 'parent1', '1112223333', 2, 'parent', 'active', NULL, NULL),
 (3, 'Jane', 'Smith', 'parent2@test.com', 'parent2', '4445556666', 1, 'parent', 'approved', NULL, NULL);
+
+INSERT INTO Children (child_id, user_id, name, surname, date_of_birth, school_class) VALUES
+(1, 2, 'Chris', 'Doe', '2015-05-10', '5A'),
+(2, 2, 'Anna', 'Doe', '2017-09-22', '3B'),
+(3, 3, 'Mike', 'Smith', '2016-02-11', '4A');
 
 INSERT INTO Announcements (announcement_id, announcement_title, announcement_date, publish_date, announcement_description) VALUES
 (37, 'Ενημέρωση για Εξετάσεις', '2026-03-11', '2026-03-11', 'Οι τελικές εξετάσεις θα ξεκινήσουν τον Ιούνιο. Παρακαλούνται οι μαθητές να προετοιμαστούν κατάλληλα.'),
@@ -59,9 +64,18 @@ INSERT INTO Orders (order_id, user_id, total_price, created_at, order_status) VA
 (1, 2, 28.50, '2026-03-07 11:59:24', 'paid'),
 (2, 3, 25.00, '2026-03-07 11:59:24', 'pending');
 
-INSERT INTO Payments (payment_id, user_id, amount, payment_date, payment_status) VALUES
-(1, 2, 28.50, '2026-03-07 11:59:24', 'completed'),
-(2, 3, 25.00, '2026-03-07 11:59:24', 'failed');
+INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES
+(1, 1, 25.00, 1, NULL),
+(1, 2, 3.50, 1, NULL),
+(2, 1, 25.00, 1, NULL);
+
+INSERT INTO Payments (payment_id, user_id, amount, payment_date, payment_status, payment_type) VALUES
+(1, 2, 28.50, '2026-03-07 11:59:24', 'completed', 'product'),
+(2, 3, 25.00, '2026-03-07 11:59:24', 'failed', 'membership');
+
+INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, price_at_purchase, size) VALUES
+(1, 1, 1, 1, 25.00, NULL),
+(2, 1, 2, 1, 3.50, NULL);
 
 INSERT INTO AnnouncementsImages (an_image_id, announcement_id, image_path) VALUES
 (31, 37, '/parents-council-platform-group5/public/assets/Announcements_img/69b16b4e53d13_1773235022.png'),
@@ -95,15 +109,6 @@ INSERT INTO EventsImages (ev_image_id, event_id, image_path) VALUES
 INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES
 (1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', 'approved'),
 (2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', 'waiting');
-
-INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES
-(1, 1, 25.00, 1, NULL),
-(1, 2, 3.50, 1, NULL),
-(2, 1, 25.00, 1, NULL);
-
-INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, price_at_purchase, size) VALUES
-(1, 1, 1, 1, 25.00, NULL),
-(2, 1, 2, 1, 3.50, NULL);
 
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
