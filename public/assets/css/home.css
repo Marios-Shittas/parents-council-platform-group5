@@ -11,22 +11,31 @@
     padding: 10px;
 }
 
+.block-title {
+    font-weight: bold;
+}
+
 #announcements-block {
     background: #EEF1FA;
     border: 1px solid #4A6CC8;
     color: #1E2D5A;
+    box-shadow: #4A6CC8 0px 2px 4px;
+}
+
+.announcement-item, .event-item{
+    padding: 10px;
+    border-bottom: 2px solid black;
+}
+
+.announcement-title {
+    font-weight: bold;
 }
 
 #calendar-block {
     background: #E8F0F7;
     border: 1px solid #2E6DA4;
     color: #163048;
-}
-
-#upcoming-events-block {
-    background: #E4EDF7;
-    border: 1px solid #1E3A6E;
-    color: #1E2D5A;
+    box-shadow: #2E6DA4 0px 2px 4px;
 }
 
 #calendar-root {
@@ -103,4 +112,20 @@
     text-align: center;
     font-size: 18px;
     padding: 4px 0 10px;
+}
+
+#upcoming-events-block {
+    background: #E4EDF7;
+    border: 1px solid #1E3A6E;
+    color: #1E2D5A;
+    box-shadow: #1E3A6E 0px 2px 4px;
+}
+
+.upcoming-event-item {
+    padding: 10px;
+    border-bottom: 2px solid black;
+}
+
+.event-title {
+    font-weight: bold;
 }
