@@ -32,6 +32,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </li>
 
         <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
+                <i class="fas fa-info-circle"></i> Χρήσιμες Πληροφορίες
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
                 <i class="fas fa-users"></i> Χρήστες
             </a>
