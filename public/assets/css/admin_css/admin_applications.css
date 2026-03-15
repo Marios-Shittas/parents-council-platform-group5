@@ -1,0 +1,231 @@
+/**
+ * Admin Applications - Applications specific styles only
+ * Page-only CSS related to applications functionality
+ */
+
+.admin-page-header {
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.stats-grid {
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e3ebf4;
+}
+
+.stat-card .card-body {
+    position: relative;
+}
+
+.stat-label {
+    display: block;
+    color: #607286;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 800;
+    color: #163a63;
+}
+
+.stat-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #eef4fb;
+    color: #1f6fd0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-card-info .stat-icon,
+.stat-card-info .stat-value {
+    color: #0c6ea8;
+}
+
+.stat-card-success .stat-icon,
+.stat-card-success .stat-value {
+    color: #1e7f4f;
+}
+
+.stat-card-danger .stat-icon,
+.stat-card-danger .stat-value {
+    color: #b33a47;
+}
+
+.section-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-dashboard-table {
+    margin-bottom: 0;
+}
+
+.admin-dashboard-table thead th {
+    background: #f4f7fb;
+    color: #183f6b;
+    border-bottom: 1px solid #d9e3ef;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.admin-dashboard-table tbody td {
+    vertical-align: middle;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.admin-dashboard-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.text-truncate-two-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 340px;
+}
+
+/* Application box for displaying application items */
+.application-box {
+    background: #fff;
+    border-radius: 16px;
+}
+
+.submission-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.submission-actions form {
+    margin: 0;
+}
+
+.detail-card {
+    height: 100%;
+    padding: 0.95rem 1rem;
+    border-radius: 14px;
+    background: #f6f9fc;
+    border: 1px solid #e4ebf3;
+}
+
+.detail-card span {
+    display: block;
+    color: #6c7d90;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+}
+
+.detail-card strong {
+    color: #163a63;
+    font-size: 1rem;
+}
+
+.detail-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.9rem;
+}
+
+.detail-field-item {
+    padding: 0.85rem 0.95rem;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e6edf4;
+}
+
+.detail-field-item span {
+    display: block;
+    color: #718395;
+    font-size: 0.78rem;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+}
+
+.detail-field-item strong {
+    color: #20364d;
+    word-break: break-word;
+}
+
+.dropdown-menu form {
+    margin: 0;
+}
+
+.dropdown-menu .dropdown-item {
+    cursor: pointer;
+}
+
+/* Reduced empty state for smaller sections */
+.small-empty {
+    padding: 30px 20px;
+}
+
+#createApplicationModal .modal-content,
+#editApplicationModal .modal-content {
+    max-height: calc(100vh - 2rem);
+}
+
+#createApplicationModal .modal-body,
+#editApplicationModal .modal-body {
+    overflow-y: auto;
+    max-height: calc(100vh - 210px);
+}
+
+#createApplicationModal .modal-header,
+#createApplicationModal .modal-footer,
+#editApplicationModal .modal-header,
+#editApplicationModal .modal-footer {
+    flex-shrink: 0;
+}
+
+@media (max-width: 991.98px) {
+    .admin-page-header {
+        align-items: flex-start;
+    }
+
+    .text-truncate-two-lines {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .stat-value {
+        font-size: 1.7rem;
+    }
+
+    .submission-actions {
+        flex-direction: column;
+    }
+
+    .submission-actions .btn,
+    .submission-actions form,
+    .submission-actions form .btn {
+        width: 100%;
+    }
+
+    .detail-fields-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,107 @@
+.public-page-header {
+    padding: 1rem 0 0;
+    margin-bottom: 2rem;
+}
+
+.public-page-header__card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 24px;
+    border: 1px solid #d9e5f1;
+    background:
+        radial-gradient(circle at top right, rgba(38, 96, 160, 0.12), transparent 35%),
+        linear-gradient(135deg, #ffffff 0%, #f5f9fd 100%);
+    box-shadow: 0 14px 34px rgba(16, 55, 92, 0.08);
+    overflow: hidden;
+}
+
+.public-page-header__card::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(0, 87, 168, 0.06);
+    pointer-events: none;
+}
+
+.public-page-header__icon {
+    position: relative;
+    z-index: 1;
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f5fae 0%, #0b3e73 100%);
+    color: #ffffff;
+    font-size: 1.45rem;
+    box-shadow: 0 12px 24px rgba(0, 87, 168, 0.22);
+    flex-shrink: 0;
+}
+
+.public-page-header__content {
+    position: relative;
+    z-index: 1;
+}
+
+.public-page-header__eyebrow {
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    color: #0f5fae;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.public-page-header h1 {
+    margin: 0;
+    color: #15324d;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.public-page-header__subtitle {
+    max-width: 720px;
+    margin: 0.35rem 0 0;
+    color: #597189;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 767.98px) {
+    .public-page-header {
+        padding-top: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .public-page-header__card {
+        padding: 1rem;
+        border-radius: 20px;
+        align-items: flex-start;
+    }
+
+    .public-page-header__icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+    }
+
+    .public-page-header h1 {
+        font-size: 1.55rem;
+    }
+
+    .public-page-header__subtitle {
+        font-size: 0.92rem;
+    }
+}

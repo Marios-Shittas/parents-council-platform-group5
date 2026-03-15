@@ -243,10 +243,30 @@ class ApplicationsService {
      * @return bool True on success, false on failure
      */
     public function createSubmissionWithData($applicationId, $userId, $submissionDataJson) {
+        return $this->createSubmissionWithDataAndFile($applicationId, $userId, $submissionDataJson, null);
+    }
+
+    /**
+     * Create a new submission with JSON form data and optional uploaded file path.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @param string $submissionDataJson JSON-encoded form fields
+     * @param string|null $filePath Optional uploaded file path
+     * @return bool True on success, false on failure
+     */
+    public function createSubmissionWithDataAndFile($applicationId, $userId, $submissionDataJson, $filePath = null) {
+        if ($filePath === null || $filePath === '') {
+            $sql = "INSERT INTO Submissions (application_id, user_id, file_path, submission_data, sub_status)
+                    VALUES (?, ?, NULL, ?, 'waiting')";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("iis", $applicationId, $userId, $submissionDataJson);
+            return $stmt->execute();
+        }
+
         $sql = "INSERT INTO Submissions (application_id, user_id, file_path, submission_data, sub_status)
-                VALUES (?, ?, NULL, ?, 'waiting')";
+                VALUES (?, ?, ?, ?, 'waiting')";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("iis", $applicationId, $userId, $submissionDataJson);
+        $stmt->bind_param("iiss", $applicationId, $userId, $filePath, $submissionDataJson);
         return $stmt->execute();
     }
     
@@ -316,6 +336,19 @@ class ApplicationsService {
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("sii", $status, $applicationId, $userId);
         
+        return $stmt->execute();
+    }
+
+    /**
+     * Delete a submission so user can submit again.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @return bool True on success, false on failure
+     */
+    public function deleteSubmission($applicationId, $userId) {
+        $sql = "DELETE FROM Submissions WHERE application_id = ? AND user_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ii", $applicationId, $userId);
         return $stmt->execute();
     }
     

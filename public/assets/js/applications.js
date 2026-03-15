@@ -110,6 +110,161 @@ function escHtml(str) {
         .replace(/'/g,  '&#039;');
 }
 
+function draftStorageKey(appId) {
+    return 'applications_draft_' + String(appId);
+}
+
+function saveDraft(appId, data) {
+    try {
+        localStorage.setItem(draftStorageKey(appId), JSON.stringify(data));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function loadDraft(appId) {
+    try {
+        var raw = localStorage.getItem(draftStorageKey(appId));
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (e) {
+        return null;
+    }
+}
+
+function clearDraft(appId) {
+    try {
+        localStorage.removeItem(draftStorageKey(appId));
+    } catch (e) {
+        // ignore localStorage errors silently
+    }
+}
+
+function getAllDraftAppIds() {
+    var ids = [];
+    var prefix = 'applications_draft_';
+
+    try {
+        for (var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
+            if (!key || key.indexOf(prefix) !== 0) continue;
+
+            var appId = parseInt(key.slice(prefix.length), 10);
+            if (!Number.isNaN(appId) && appId > 0) {
+                ids.push(appId);
+            }
+        }
+    } catch (e) {
+        return [];
+    }
+
+    return ids;
+}
+
+function toggleSubmissionsVisibility() {
+    var tbody = document.getElementById('submissions-tbody');
+    var table = document.getElementById('submissions-table');
+    var noMsg = document.getElementById('no-submissions-msg');
+    if (!tbody || !table || !noMsg) return;
+
+    var hasRows = tbody.querySelectorAll('tr').length > 0;
+    noMsg.style.display = hasRows ? 'none' : '';
+    table.style.display = hasRows ? '' : 'none';
+}
+
+function getAppCardById(appId) {
+    return document.getElementById('app-card-' + String(appId));
+}
+
+function getAppTitleById(appId) {
+    var card = getAppCardById(appId);
+    if (!card) return 'Αίτηση #' + String(appId);
+    var titleEl = card.querySelector('.application-title');
+    return titleEl ? titleEl.textContent.trim() : 'Αίτηση #' + String(appId);
+}
+
+function getDraftStudentInfo(draftData) {
+    return {
+        studentName: draftData && draftData.student_name ? draftData.student_name : '—',
+        studentClass: draftData && draftData.class ? draftData.class : '—'
+    };
+}
+
+function upsertDraftSubmissionRow(appId, draftData) {
+    var tbody = document.getElementById('submissions-tbody');
+    if (!tbody) return;
+
+    var row = tbody.querySelector('tr[data-draft-row="' + String(appId) + '"]');
+    if (!row) {
+        row = document.createElement('tr');
+        row.setAttribute('data-draft-row', String(appId));
+        tbody.appendChild(row);
+    }
+
+    var appTitle = getAppTitleById(appId);
+    var info = getDraftStudentInfo(draftData);
+
+    row.innerHTML =
+        '<td><strong>' + escHtml(appTitle) + '</strong></td>' +
+        '<td>' + escHtml(info.studentName) + '</td>' +
+        '<td>' + escHtml(info.studentClass) + '</td>' +
+        '<td>' + escHtml(todayLabel()) + '</td>' +
+        '<td>' +
+            '<span class="sub-status-badge sub-submitted">Draft</span>' +
+        '</td>' +
+        '<td>' +
+            '<button type="button" class="btn btn-sm btn-outline-primary continue-draft-btn" data-app-id="' + String(appId) + '">' +
+                '<i class="fas fa-edit mr-1"></i>Συνέχεια αίτησης' +
+            '</button>' +
+        '</td>';
+
+    toggleSubmissionsVisibility();
+}
+
+function removeDraftSubmissionRow(appId) {
+    var tbody = document.getElementById('submissions-tbody');
+    if (!tbody) return;
+    var row = tbody.querySelector('tr[data-draft-row="' + String(appId) + '"]');
+    if (row) row.remove();
+    toggleSubmissionsVisibility();
+}
+
+function renderDraftRowsFromStorage() {
+    getAllDraftAppIds().forEach(function (appId) {
+        var draft = loadDraft(appId);
+        if (draft) {
+            upsertDraftSubmissionRow(appId, draft);
+        }
+    });
+}
+
+function restoreDraftToForm(form, draftData) {
+    if (!form || !draftData || typeof draftData !== 'object') return;
+
+    Object.keys(draftData).forEach(function (key) {
+        if (key === '_formType' || key === '_category') return;
+
+        var field = form.elements.namedItem(key);
+        if (!field) return;
+
+        if (field instanceof RadioNodeList) {
+            Array.prototype.forEach.call(field, function (el) {
+                if (el.value === draftData[key]) {
+                    el.checked = true;
+                }
+            });
+            return;
+        }
+
+        if (field.type === 'file') {
+            return;
+        }
+
+        field.value = draftData[key];
+    });
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    BADGE / TAG HTML BUILDERS
 ───────────────────────────────────────────────────────────────────────────── */
@@ -145,6 +300,8 @@ function augmentCards() {
         var appId      = parseInt(card.dataset.appId,    10);
         var dbApplied  = card.dataset.dbApplied === 'true';
         var meta       = getMeta(idx);
+        var openDate   = card.dataset.appOpenDate || meta.openDate;
+        var closeDate  = card.dataset.appCloseDate || meta.closeDate;
         var applied    = dbApplied || isJsApplied(appId);
 
         // Status badge
@@ -156,9 +313,7 @@ function augmentCards() {
         // Category tag
         var catSlot = card.querySelector('.js-category-placeholder');
         if (catSlot) {
-            catSlot.innerHTML =
-                '<span class="category-tag">' +
-                '<i class="fas fa-tag"></i>' + escHtml(meta.category) + '</span>';
+            catSlot.innerHTML = '';
         }
 
         // Dates
@@ -167,9 +322,9 @@ function augmentCards() {
             datesSlot.innerHTML =
                 '<div class="app-dates-row">' +
                 '<span class="app-date-item"><i class="fas fa-calendar-plus text-success"></i>' +
-                '<small>Άνοιγμα: <strong>' + escHtml(meta.openDate) + '</strong></small></span>' +
+                '<small>Άνοιγμα: <strong>' + escHtml(openDate) + '</strong></small></span>' +
                 '<span class="app-date-item"><i class="fas fa-calendar-times text-danger"></i>' +
-                '<small>Λήξη: <strong>' + escHtml(meta.closeDate) + '</strong></small></span>' +
+                '<small>Λήξη: <strong>' + escHtml(closeDate) + '</strong></small></span>' +
                 '</div>';
         }
 
@@ -293,16 +448,146 @@ function showToast() {
    MODAL STATE  – shared between "show" & "submit" handlers
 ───────────────────────────────────────────────────────────────────────────── */
 var _modal = {};
+var _viewAppId = 0;
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DOM READY
 ───────────────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
+    var bodyScrollLockCount = 0;
+
+    function cleanupModalArtifacts() {
+        var openModals = document.querySelectorAll('.modal.show').length;
+        if (openModals > 0) {
+            return;
+        }
+
+        document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+            el.parentNode && el.parentNode.removeChild(el);
+        });
+
+        document.body.classList.remove('modal-open');
+        document.body.style.paddingRight = '';
+    }
+
+    function lockBodyScroll() {
+        if (bodyScrollLockCount === 0) {
+            var currentY = window.pageYOffset || document.documentElement.scrollTop || 0;
+            document.body.setAttribute('data-lock-scroll-y', String(currentY));
+            document.body.style.position = 'fixed';
+            document.body.style.top = '-' + currentY + 'px';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+        }
+
+        bodyScrollLockCount++;
+    }
+
+    function unlockBodyScroll() {
+        bodyScrollLockCount = Math.max(0, bodyScrollLockCount - 1);
+        if (bodyScrollLockCount > 0) {
+            return;
+        }
+
+        var savedY = parseInt(document.body.getAttribute('data-lock-scroll-y') || '0', 10) || 0;
+        document.body.removeAttribute('data-lock-scroll-y');
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, savedY);
+        cleanupModalArtifacts();
+    }
+
+    $('#submitModal, #applicationViewModal, #viewModal').on('show.bs.modal', function () {
+        lockBodyScroll();
+    });
+
+    $('#submitModal, #applicationViewModal, #viewModal').on('hidden.bs.modal', function () {
+        unlockBodyScroll();
+        setTimeout(cleanupModalArtifacts, 0);
+    });
 
     // 1. Augment cards on load
     augmentCards();
 
     // 2. Init submissions table visibility (table/noMsg already correct from PHP)
+    renderDraftRowsFromStorage();
+    toggleSubmissionsVisibility();
+
+    var viewModalTitle = document.getElementById('application-view-title');
+    var viewModalDesc = document.getElementById('application-view-description');
+    var viewModalAttachments = document.getElementById('application-view-attachments-list');
+    var viewModalContinueBtn = document.getElementById('application-view-continue-btn');
+
+    function normalizeDocPath(rawPath) {
+        var prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
+        if (!rawPath) return '';
+        var idx = String(rawPath).indexOf(prefix);
+        if (idx !== -1) {
+            return prefix + String(rawPath).slice(idx + prefix.length).split(prefix)[0];
+        }
+        return String(rawPath);
+    }
+
+    document.querySelectorAll('.post-open-trigger').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            var submitButton = e.target.closest('.submit-btn');
+            if (submitButton) return;
+
+            var appId = parseInt(card.dataset.appId, 10);
+            var title = card.dataset.applicationTitle || 'Λεπτομέρειες Αίτησης';
+            var description = card.dataset.applicationDescription || 'Δεν υπάρχει διαθέσιμη περιγραφή.';
+            var docsRaw = card.dataset.applicationDocuments || '[]';
+            var docs = [];
+
+            try {
+                docs = JSON.parse(docsRaw);
+                if (!Array.isArray(docs)) docs = [];
+            } catch (err) {
+                docs = [];
+            }
+
+            _viewAppId = appId;
+
+            if (viewModalTitle) viewModalTitle.textContent = title;
+            if (viewModalDesc) viewModalDesc.textContent = description;
+
+            if (viewModalAttachments) {
+                if (docs.length === 0) {
+                    viewModalAttachments.innerHTML = '<li class="text-muted">Δεν υπάρχουν συνημμένα έγγραφα.</li>';
+                } else {
+                    viewModalAttachments.innerHTML = docs.map(function (doc) {
+                        var rawPath = doc && doc.file_path ? doc.file_path : '';
+                        var url = normalizeDocPath(rawPath);
+                        var name = rawPath ? rawPath.split('/').pop() : 'Έγγραφο';
+                        return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
+                    }).join('');
+                }
+            }
+
+            $('#applicationViewModal').modal('show');
+        });
+    });
+
+    if (viewModalContinueBtn) {
+        viewModalContinueBtn.addEventListener('click', function () {
+            if (!_viewAppId) return;
+
+            var submitBtn = document.querySelector('#app-card-' + _viewAppId + ' .submit-btn');
+            if (!submitBtn || submitBtn.disabled) {
+                alert('Η αίτηση δεν είναι διαθέσιμη για υποβολή.');
+                return;
+            }
+
+            $('#applicationViewModal').modal('hide');
+            submitBtn.click();
+        });
+    }
 
     /* ── Open modal: populate header + dynamic fields ─────────────────── */
     $('#submitModal').on('show.bs.modal', function (event) {
@@ -312,6 +597,14 @@ document.addEventListener('DOMContentLoaded', function () {
         var appDesc  = btn.data('application-description') || '';
         var appIndex = parseInt(btn.data('app-index'), 10);
         var meta     = getMeta(appIndex);
+        var appOpenDate = btn.data('app-open-date') || '';
+        var appCloseDate = btn.data('app-close-date') || '';
+        if (appOpenDate) {
+            meta.openDate = appOpenDate;
+        }
+        if (appCloseDate) {
+            meta.closeDate = appCloseDate;
+        }
 
         _modal = { appId: appId, appTitle: appTitle, appIndex: appIndex, meta: meta };
 
@@ -340,12 +633,21 @@ document.addEventListener('DOMContentLoaded', function () {
         container.querySelectorAll('input[type="date"]').forEach(function (el) {
             el.value = today;
         });
+
+        // Restore saved draft for this application, if available.
+        var form = document.getElementById('application-form');
+        var draft = loadDraft(appId);
+        if (form && draft) {
+            restoreDraftToForm(form, draft);
+        }
     });
 
     /* ── Clear form on modal close ─────────────────────────────────────── */
     $('#submitModal').on('hidden.bs.modal', function () {
         var container = document.getElementById('modal-dynamic-fields');
         if (container) container.innerHTML = '';
+        var fileInput = document.getElementById('modal-submission-file');
+        if (fileInput) fileInput.value = '';
         _modal = {};
     });
 
@@ -368,15 +670,19 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Αποστολή...';
 
-        var body = new URLSearchParams();
-        body.append('ajax_submit',    '1');
-        body.append('application_id', _modal.appId);
+        var body = new FormData();
+        body.append('ajax_submit', '1');
+        body.append('application_id', String(_modal.appId));
         body.append('submission_data', JSON.stringify(data));
+
+        var fileInput = document.getElementById('modal-submission-file');
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            body.append('submission_file', fileInput.files[0]);
+        }
 
         fetch('applications.php', {
             method:  'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body:    body.toString()
+            body:    body
         })
         .then(function (res) { return res.json(); })
         .then(function (json) {
@@ -389,7 +695,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             _justApplied.add(_modal.appId);
+            clearDraft(_modal.appId);
+            removeDraftSubmissionRow(_modal.appId);
             $('#submitModal').modal('hide');
+            setTimeout(cleanupModalArtifacts, 120);
             showToast();
 
             // Update the card button/badge immediately
@@ -410,6 +719,32 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
         });
     });
+
+    var saveDraftBtn = document.getElementById('modal-save-draft-btn');
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener('click', function () {
+            var form = document.getElementById('application-form');
+            if (!form || !_modal.appId) {
+                alert('Δεν υπάρχει ενεργή αίτηση για αποθήκευση πρόχειρου.');
+                return;
+            }
+
+            var data = {};
+            new FormData(form).forEach(function (value, key) {
+                data[key] = value;
+            });
+
+            data._formType = _modal.meta && _modal.meta.formType ? _modal.meta.formType : '';
+            data._category = _modal.meta && _modal.meta.category ? _modal.meta.category : '';
+
+            if (saveDraft(_modal.appId, data)) {
+                upsertDraftSubmissionRow(_modal.appId, data);
+                alert('Το πρόχειρο αποθηκεύτηκε. Μπορείτε να συνεχίσετε αργότερα.');
+            } else {
+                alert('Δεν ήταν δυνατή η αποθήκευση πρόχειρου σε αυτή τη συσκευή.');
+            }
+        });
+    }
 
     /* ── View submission details (event delegation on tbody) ──────────── */
     var tbody = document.getElementById('submissions-tbody');
@@ -435,6 +770,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 } catch (err) {
                     alert('Δεν είναι δυνατή η εμφάνιση λεπτομερειών.');
                 }
+            }
+
+            var continueBtn = e.target.closest('.continue-draft-btn');
+            if (continueBtn) {
+                var appId = parseInt(continueBtn.dataset.appId, 10);
+                if (!appId) return;
+
+                var submitBtn = document.querySelector('#app-card-' + appId + ' .submit-btn');
+                if (!submitBtn || submitBtn.disabled) {
+                    alert('Δεν είναι δυνατή η συνέχεια αυτής της αίτησης.');
+                    return;
+                }
+
+                submitBtn.click();
             }
         });
     }

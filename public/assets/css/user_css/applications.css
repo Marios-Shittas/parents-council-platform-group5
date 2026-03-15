@@ -1,19 +1,5 @@
 /* Applications Page Styles */
 
-/* ===== PAGE HEADER BANNER ===== */
-/* .applications-hero = the blue banner at the top of the applications page */
-.applications-hero {
-    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
-    color: white;
-    padding: 3rem 0;
-    margin-bottom: 3rem;
-}
-
-/* .applications-hero .lead = the subtitle text under the title in the hero banner */
-.applications-hero .lead {
-    color: white;
-}
-
 /* ===== APPLICATION CARD STYLES ===== */
 /* .applications-card = the white card containers for main sections */
 .applications-card {
@@ -109,6 +95,7 @@
     background: #f8d7da;
     color: #721c24;
 }
+<<<<<<< HEAD:public/assets/css/applications.css
 
 /* ===== APP CARD META TOP ROW ===== */
 .app-meta-top {
@@ -326,3 +313,5 @@
         padding: 8px 6px;
     }
 }
+=======
+>>>>>>> 255a525350469852b38102511dd163576b9e090d:public/assets/css/user_css/applications.css

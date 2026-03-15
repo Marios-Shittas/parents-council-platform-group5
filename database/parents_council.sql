@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS AnnouncementsImages;
 DROP TABLE IF EXISTS Announcements;
 DROP TABLE IF EXISTS SystemSchedule;
 DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Children;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -33,12 +34,25 @@ CREATE TABLE IF NOT EXISTS Users(
     email                VARCHAR(150) NOT NULL UNIQUE,
     password             VARCHAR(255) NOT NULL,
     phone_number         VARCHAR(20) DEFAULT NULL,
-    number_of_children   INT DEFAULT 0,
     role                 ENUM('parent','admin') NOT NULL DEFAULT 'parent',
-    account_status       ENUM('pending','approved') NOT NULL DEFAULT 'pending',
+    account_status       ENUM('pending','approved','rejected','waiting_payment','active') NOT NULL DEFAULT 'pending',
     token                VARCHAR(255) DEFAULT NULL,
     token_expiry         DATETIME DEFAULT NULL,
+    created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS Children(
+    child_id            INT NOT NULL AUTO_INCREMENT,
+    user_id             INT NOT NULL,
+    name                VARCHAR(100) NOT NULL,
+    surname             VARCHAR(100) NOT NULL,
+    date_of_birth       DATE NOT NULL,
+    school_class        VARCHAR(20) NOT NULL,
+    PRIMARY KEY (child_id),
+    CONSTRAINT fk_child_user
+        FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS Announcements(
@@ -184,6 +198,7 @@ CREATE TABLE IF NOT EXISTS Payments(
     amount             DECIMAL(10,2) NOT NULL,
     payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     payment_status     ENUM('completed','failed','refunded') NOT NULL DEFAULT 'completed',
+    payment_type       ENUM('membership','insurance','product') NOT NULL,
     PRIMARY KEY (payment_id),
     CONSTRAINT fk_pay_user
         FOREIGN KEY (user_id) REFERENCES Users(user_id)

@@ -10,6 +10,35 @@ require_once __DIR__ . '/../app/services/ApplicationsService.php';
 // Initialize the service
 $applicationsService = new ApplicationsService();
 
+function loadApplicationUiMetaPublic(): array {
+    $path = __DIR__ . '/../storage/application_ui_meta.json';
+    if (!is_file($path)) {
+        return [];
+    }
+
+    $raw = file_get_contents($path);
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function formatUiDatePublic(string $date): string {
+    $date = trim($date);
+    if ($date === '') {
+        return '';
+    }
+
+    $dt = DateTime::createFromFormat('Y-m-d', $date);
+    if ($dt && $dt->format('Y-m-d') === $date) {
+        return $dt->format('d/m/Y');
+    }
+
+    return $date;
+}
+
 /*
  |------------------------------------------------------------
  | Προσωρινό demo user id μόνο για testing submissions
@@ -21,6 +50,11 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = (int) $_SESSION['user_id'];
+
+$uploadDir = __DIR__ . '/../storage/uploads/submissions/';
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
 
 /*
  |------------------------------------------------------------
@@ -55,11 +89,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
             exit;
         }
 
-        if ($applicationsService->createSubmissionWithData($application_id, $user_id, $raw)) {
+        $uploadedDbPath = null;
+        $uploadedAbsPath = null;
+
+        if (isset($_FILES['submission_file']) && ($_FILES['submission_file']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            $file = $_FILES['submission_file'];
+            if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Σφάλμα ανεβάσματος αρχείου.']);
+                exit;
+            }
+
+            $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+            $extension = strtolower(pathinfo((string)$file['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, $allowedExtensions, true)) {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.']);
+                exit;
+            }
+
+            $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+            $uploadedAbsPath = $uploadDir . $newFileName;
+            $uploadedDbPath = 'storage/uploads/submissions/' . $newFileName;
+
+            if (!move_uploaded_file((string)$file['tmp_name'], $uploadedAbsPath)) {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Η αποθήκευση του αρχείου απέτυχε.']);
+                exit;
+            }
+        }
+
+        if ($applicationsService->createSubmissionWithDataAndFile($application_id, $user_id, $raw, $uploadedDbPath)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => true, 'message' => 'Η αίτηση υποβλήθηκε επιτυχώς.']);
         } else {
+            if ($uploadedAbsPath && file_exists($uploadedAbsPath)) {
+                unlink($uploadedAbsPath);
+            }
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Σφάλμα βάσης δεδομένων. Δοκιμάστε ξανά.']);
@@ -70,11 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
         echo json_encode(['success' => false, 'message' => 'Σφάλμα διακομιστή: ' . $e->getMessage()]);
     }
     exit;
-}
-
-$uploadDir = __DIR__ . '/../storage/uploads/submissions/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
 }
 
 /*
@@ -134,6 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
  |------------------------------------------------------------
 */
 $applications = $applicationsService->getAllApplications();
+$applicationUiMeta = loadApplicationUiMetaPublic();
 
 /*
  |------------------------------------------------------------
@@ -151,27 +217,93 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
 $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id'));
 ?>
 
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
+    <link rel="stylesheet" href="assets/css/user_css/applications.css">
+
+    <style>
+        .post-card {
+            cursor: pointer;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .post-image-wrap {
+            width: 100%;
+            height: 190px;
+            overflow: hidden;
+            background: #eef3fb;
+        }
+
+        .post-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-content {
+            padding: 16px 16px 18px;
+        }
+
+        .post-excerpt {
+            color: #6c757d;
+            margin-bottom: 12px;
+            min-height: 66px;
+        }
+
+        .post-read-more {
+            color: #0d6efd;
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .application-view-attachments a {
+            text-decoration: none;
+        }
+
+        #submitModal .modal-dialog {
+            margin: 0.75rem auto;
+        }
+
+        #submitModal .modal-content {
+            max-height: calc(100vh - 1.5rem);
+        }
+
+        #submitModal .modal-body {
+            overflow-y: auto;
+        }
+    </style>
+
+    <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
+</head>
+<body>
+
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
-<!-- Google fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
-
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-<!-- Custom CSS -->
-<link rel="stylesheet" href="assets/css/main.css">
-<link rel="stylesheet" href="assets/css/applications.css">
-
-<div class="applications-hero">
-    <div class="container">
-        <h1><i class="fas fa-file-alt mr-2"></i>Αιτήσεις</h1>
-        <p class="lead">Υποβάλλετε τις δικές σας αιτήσεις και παρακολουθήστε την κατάστασή τους</p>
-    </div>
-</div>
+<?php
+$pageHeaderTitle = 'Αιτήσεις';
+$pageHeaderSubtitle = 'Υποβάλλετε αιτήσεις και παρακολουθήστε εύκολα την πορεία τους.';
+$pageHeaderIcon = 'fas fa-file-alt';
+$pageHeaderEyebrow = 'Υποβολές Και Έγγραφα';
+include __DIR__ . '/../app/includes/public_page_header.php';
+?>
 
 <div class="container py-5">
     <?php if (!empty($message)): ?>
@@ -183,8 +315,8 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
         </div>
     <?php endif; ?>
 
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
             <div class="card applications-card mb-4">
                 <div class="card-body p-4">
                     <h3 class="section-title">Διαθέσιμες Αιτήσεις</h3>
@@ -196,13 +328,47 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
                             <?php $appIndex = 0; foreach ($applications as $application):
                                 $appId = (int)$application['application_id'];
                                 $isDbApplied = in_array($appId, $appliedIds);
+                                $appMeta = $applicationUiMeta[(string)$appId] ?? [];
+                                $openDateRaw = (string)($appMeta['open_date'] ?? '');
+                                $closeDateRaw = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ''));
+                                $openDateFormatted = formatUiDatePublic($openDateRaw);
+                                $closeDateFormatted = formatUiDatePublic($closeDateRaw);
+                                $fullDescription = (string)($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.');
+                                $excerpt = mb_strlen($fullDescription) > 130
+                                    ? mb_substr($fullDescription, 0, 130) . '...'
+                                    : $fullDescription;
+                                $postSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1b4de4"/><stop offset="100%" stop-color="#1aa7ec"/></linearGradient></defs><rect width="1200" height="600" fill="url(#g)"/><circle cx="980" cy="120" r="220" fill="rgba(255,255,255,0.16)"/><circle cx="260" cy="500" r="180" fill="rgba(255,255,255,0.12)"/><rect x="70" y="420" width="420" height="24" rx="12" fill="rgba(255,255,255,0.5)"/><rect x="70" y="460" width="320" height="20" rx="10" fill="rgba(255,255,255,0.45)"/></svg>';
+                                $defaultImageSrc = 'data:image/svg+xml;utf8,' . rawurlencode($postSvg);
+                                $profileImagePath = (string)($appMeta['image_path'] ?? '');
+                                $postImageSrc = $profileImagePath !== '' ? $profileImagePath : $defaultImageSrc;
+
+                                $allDocs = $documentsByApplication[$application['application_id']] ?? [];
+                                $filteredDocs = array_values(array_filter($allDocs, function ($doc) use ($profileImagePath) {
+                                    $path = (string)($doc['file_path'] ?? '');
+                                    if ($profileImagePath !== '' && $path === $profileImagePath) {
+                                        return false;
+                                    }
+                                    return true;
+                                }));
+                                $attachmentsJson = json_encode($filteredDocs);
                             ?>
-                                <div class="col-md-6 mb-4">
-                                    <div class="application-item h-100 app-card-wrapper"
+                                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                                    <article class="application-item h-100 app-card-wrapper post-card"
                                          id="app-card-<?php echo $appId; ?>"
                                          data-app-id="<?php echo $appId; ?>"
                                          data-app-index="<?php echo $appIndex; ?>"
-                                         data-db-applied="<?php echo $isDbApplied ? 'true' : 'false'; ?>">
+                                         data-db-applied="<?php echo $isDbApplied ? 'true' : 'false'; ?>"
+                                         data-application-title="<?php echo htmlspecialchars($application['application_title'], ENT_QUOTES, 'UTF-8'); ?>"
+                                         data-application-description="<?php echo htmlspecialchars($fullDescription, ENT_QUOTES, 'UTF-8'); ?>"
+                                         data-app-open-date="<?php echo htmlspecialchars($openDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
+                                         data-app-close-date="<?php echo htmlspecialchars($closeDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
+                                         data-application-documents="<?php echo htmlspecialchars($attachmentsJson ?: '[]', ENT_QUOTES, 'UTF-8'); ?>">
+
+                                        <div class="post-image-wrap">
+                                            <img src="<?php echo htmlspecialchars($postImageSrc); ?>" alt="Εικόνα αίτησης">
+                                        </div>
+
+                                        <div class="post-content d-flex flex-column h-100">
 
                                         <!-- Status badge & category tag – filled by JS -->
                                         <div class="app-meta-top d-flex justify-content-between align-items-center mb-2">
@@ -214,47 +380,14 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
                                             <h5 class="application-title">
                                                 <?php echo htmlspecialchars($application['application_title']); ?>
                                             </h5>
-                                            <?php $dc = (int)$application['document_count']; ?>
-                                            <?php if ($dc > 0): ?>
-                                                <span class="doc-badge">
-                                                    <i class="fas fa-paperclip mr-1"></i><?php echo $dc; ?>
-                                                </span>
-                                            <?php endif; ?>
                                         </div>
 
                                         <p class="application-description">
-                                            <?php echo nl2br(htmlspecialchars($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.')); ?>
+                                            <?php echo nl2br(htmlspecialchars($excerpt)); ?>
                                         </p>
 
                                         <!-- Open / close date row – filled by JS -->
                                         <div class="js-dates-placeholder mb-3"></div>
-
-                                        <?php if (!empty($documentsByApplication[$application['application_id']])): ?>
-                                            <div class="attachments-box mb-3">
-                                                <div class="attachments-label"><i class="fas fa-paperclip mr-1"></i> Συνημμένα έγγραφα</div>
-                                                <ul class="attachments-list mt-2 mb-0">
-                                                    <?php foreach ($documentsByApplication[$application['application_id']] as $doc): ?>
-                                                        <?php
-                                                            $rawPath = $doc['file_path'];
-                                                            $prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
-                                                            $pos = strpos($rawPath, $prefix);
-                                                            if ($pos !== false) {
-                                                                $rest = substr($rawPath, $pos + strlen($prefix));
-                                                                $rest = explode($prefix, $rest)[0];
-                                                                $cleanPath = $prefix . $rest;
-                                                            } else {
-                                                                $cleanPath = $rawPath;
-                                                            }
-                                                        ?>
-                                                        <li>
-                                                            <a href="<?php echo htmlspecialchars($cleanPath); ?>" target="_blank">
-                                                                <i class="fas fa-file-pdf mr-1 text-danger"></i><?php echo htmlspecialchars(basename($cleanPath)); ?>
-                                                            </a>
-                                                        </li>
-                                                    <?php endforeach; ?>
-                                                </ul>
-                                            </div>
-                                        <?php endif; ?>
 
                                         <button
                                             class="btn btn-primary submit-btn mt-auto"
@@ -264,10 +397,13 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
                                             data-application-title="<?php echo htmlspecialchars($application['application_title']); ?>"
                                             data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? ''); ?>"
                                             data-app-index="<?php echo $appIndex; ?>"
+                                            data-app-open-date="<?php echo htmlspecialchars($openDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-app-close-date="<?php echo htmlspecialchars($closeDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
                                         >
                                             <i class="fas fa-paper-plane mr-1"></i> Υποβολή Αίτησης
                                         </button>
-                                    </div>
+                                        </div>
+                                    </article>
                                 </div>
                             <?php $appIndex++; endforeach; ?>
                         </div>
@@ -334,19 +470,30 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-lg-4">
-            <div class="card applications-card">
-                <div class="card-body p-4">
-                    <h4 class="section-title">Οδηγίες</h4>
-                    <ul class="instructions-list mb-0">
-                        <li>Διαβάστε προσεκτικά την περιγραφή της αίτησης πριν την υποβάλετε.</li>
-                        <li>Ανεβάστε το σωστό αρχείο και τα απαιτούμενα δικαιολογητικά.</li>
-                        <li>Κάθε γονέας μπορεί να υποβάλει μόνο ένα αρχείο ανά τύπο αίτησης.</li>
-                        <li>Η σχολική διοίκηση θα εξετάσει όλες τις υποβολές.</li>
-                        <li>Η κατάσταση της υποβολής σας θα ενημερώνεται από τον διαχειριστή.</li>
-                    </ul>
+<div class="modal fade" id="applicationViewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="application-view-title">Λεπτομέρειες Αίτησης</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3" id="application-view-description"></p>
+                <div class="application-view-attachments">
+                    <h6 class="mb-2">Συνημμένα</h6>
+                    <ul class="mb-0 pl-3" id="application-view-attachments-list"></ul>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
+                <button type="button" class="btn btn-primary" id="application-view-continue-btn">
+                    <i class="fas fa-paper-plane mr-1"></i>Συνέχεια για Υποβολή
+                </button>
             </div>
         </div>
     </div>
@@ -379,8 +526,18 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
                 <div id="modal-dynamic-fields">
                     <!-- Rendered by JavaScript -->
                 </div>
+                <div class="form-group mt-3 mb-0">
+                    <label class="form-label-custom mb-2">
+                        <i class="fas fa-paperclip text-primary mr-1"></i>Προαιρετικό αρχείο υποβολής
+                    </label>
+                    <input type="file" id="modal-submission-file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <small class="text-muted d-block mt-1">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png.</small>
+                </div>
             </div>
             <div class="modal-footer">
+                <button type="button" id="modal-save-draft-btn" class="btn btn-outline-secondary">
+                    <i class="fas fa-save mr-1"></i> Αποθήκευση Πρόχειρου
+                </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times mr-1"></i> Ακύρωση
                 </button>
@@ -415,6 +572,10 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/applications.js"></script>
 
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>
+</body>
+</html>
