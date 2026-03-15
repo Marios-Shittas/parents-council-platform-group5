@@ -1,0 +1,117 @@
+/**
+ * Admin Useful Information page styles
+ */
+
+.page-intro {
+    padding: 1.5rem 1.6rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-intro p:last-child {
+    margin-bottom: 0;
+    color: #5d7186;
+}
+
+.admin-sections-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.section-editor {
+    padding: 1.6rem;
+}
+
+.section-editor__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.section-editor__header h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem;
+    color: #183f6b;
+    margin: 0 0 0.35rem;
+}
+
+.section-editor__header p {
+    margin: 0;
+    color: #61778d;
+}
+
+.section-editor__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1f7aec 0%, #183f6b 100%);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(24, 63, 107, 0.16);
+    flex-shrink: 0;
+}
+
+.section-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.2rem;
+}
+
+.section-form-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+.editor-subcard {
+    border: 1px solid #dfe5ee;
+    border-radius: 16px;
+    padding: 1rem;
+    background: #f9fbfe;
+    height: 100%;
+}
+
+.editor-subcard h3 {
+    font-size: 1rem;
+    color: #183f6b;
+    margin-bottom: 0.85rem;
+}
+
+.editor-help {
+    display: block;
+    color: #6d7f92;
+    font-size: 0.9rem;
+    margin-top: 0.35rem;
+}
+
+.section-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.2rem;
+}
+
+.textarea-tall {
+    min-height: 140px;
+}
+
+.textarea-xl {
+    min-height: 180px;
+}
+
+@media (max-width: 991.98px) {
+    .section-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .section-editor,
+    .page-intro {
+        padding: 1.2rem;
+    }
+
+    .section-editor__header {
+        flex-direction: column;
+    }
+}
