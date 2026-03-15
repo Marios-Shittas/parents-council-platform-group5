@@ -103,27 +103,39 @@ $documentsByApplication = $applicationsService->getDocumentsByApplication();
 $mySubmissions = $applicationsService->getUserSubmissions($user_id);
 ?>
 
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
+    <link rel="stylesheet" href="assets/css/user_css/applications.css">
+
+    <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
+</head>
+<body>
+
 <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
-<!-- Google fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
-
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-<!-- Custom CSS -->
-<link rel="stylesheet" href="assets/css/main.css">
-<link rel="stylesheet" href="assets/css/applications.css">
-
-<div class="applications-hero">
-    <div class="container">
-        <h1><i class="fas fa-file-alt mr-2"></i>Αιτήσεις</h1>
-        <p class="lead">Υποβάλλετε τις δικές σας αιτήσεις και παρακολουθήστε την κατάστασή τους</p>
-    </div>
-</div>
+<?php
+$pageHeaderTitle = 'Αιτήσεις';
+$pageHeaderSubtitle = 'Υποβάλλετε αιτήσεις και παρακολουθήστε εύκολα την πορεία τους.';
+$pageHeaderIcon = 'fas fa-file-alt';
+$pageHeaderEyebrow = 'Υποβολές Και Έγγραφα';
+include __DIR__ . '/../app/includes/public_page_header.php';
+?>
 
 <div class="container py-5">
     <?php if (!empty($message)): ?>
@@ -301,6 +313,10 @@ $mySubmissions = $applicationsService->getUserSubmissions($user_id);
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/applications.js"></script>
 
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>
+</body>
+</html>

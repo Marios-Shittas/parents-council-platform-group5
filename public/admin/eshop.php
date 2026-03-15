@@ -105,9 +105,8 @@ $products = $productsService->getAllProducts();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/announcements.css">
-    <link rel="stylesheet" href="../assets/css/admin_announcements.css">
-    <link rel="stylesheet" href="../assets/css/admin_eshop.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css">
 </head>
 <body>
 

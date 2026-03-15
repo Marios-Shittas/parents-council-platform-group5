@@ -1,6 +1,5 @@
 /**
- * Admin Announcements - Announcements specific styles only
- * Page-only CSS related to announcements functionality
+ * Admin Announcements - aligned with admin events layout
  */
 
 /* Image preview container for announcement images */
@@ -50,28 +49,37 @@
     border: 1px solid #dfe5ee;
 }
 
-/* Create modal header — blue like events admin */
-#createModal .modal-header {
+/* Modal styles aligned with events admin */
+#createModal .modal-header,
+#editModal .modal-header {
     background: #0057a8;
     color: white;
 }
 
-#createModal .modal-header .close {
+#createModal .modal-header .close,
+#editModal .modal-header .close {
     color: white;
     opacity: 0.8;
     text-shadow: none;
 }
 
-#createModal .modal-header .close:hover {
+#createModal .modal-header .close:hover,
+#editModal .modal-header .close:hover {
     opacity: 1;
 }
 
 /* Modal content rounded corners */
-#createModal .modal-content {
+#createModal .modal-content,
+#editModal .modal-content {
     border: none;
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+
+.announcement-form-group label {
+    font-weight: 600;
+    color: #333;
 }
 
 /* Admin announcements table tuning */

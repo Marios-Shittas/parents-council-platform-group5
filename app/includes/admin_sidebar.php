@@ -2,7 +2,7 @@
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
-<link rel="stylesheet" href="../assets/css/admin_panel.css">
+<link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
 
 <nav class="admin-sidebar">
     
@@ -32,6 +32,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </li>
 
         <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
+                <i class="fas fa-info-circle"></i> Χρήσιμες Πληροφορίες
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
                 <i class="fas fa-users"></i> Χρήστες
             </a>
@@ -46,6 +52,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'eshop.php' ? 'active' : ''; ?>" href="eshop.php">
                 <i class="fas fa-shopping-cart"></i> E-shop
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'epikoinonia.php' ? 'active' : ''; ?>" href="epikoinonia.php">
+                <i class="fas fa-envelope"></i> Επικοινωνία
             </a>
         </li>
 

@@ -332,7 +332,8 @@ $announcements = $announcementsService->getAllAnnouncements();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/admin_announcements.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_announcements.css">
 
     <title>Διαχείριση Ανακοινώσεων - Admin</title>
 </head>
@@ -381,16 +382,17 @@ $announcements = $announcementsService->getAllAnnouncements();
                                value="<?php echo htmlspecialchars($editAnnouncement['announcement_title']); ?>" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="edit_announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
-                        <input type="date" class="form-control form-control-custom" id="edit_announcement_date" name="announcement_date"
-                               value="<?php echo htmlspecialchars($editAnnouncement['announcement_date'] ?? $editAnnouncement['publish_date']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
-                        <input type="date" class="form-control form-control-custom" id="edit_date" name="publish_date"
-                               value="<?php echo $editAnnouncement['publish_date']; ?>">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit_announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
+                            <input type="date" class="form-control form-control-custom" id="edit_announcement_date" name="announcement_date"
+                                   value="<?php echo htmlspecialchars($editAnnouncement['announcement_date'] ?? $editAnnouncement['publish_date']); ?>">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="edit_publish_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
+                            <input type="date" class="form-control form-control-custom" id="edit_publish_date" name="publish_date"
+                                   value="<?php echo htmlspecialchars($editAnnouncement['publish_date']); ?>">
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -514,7 +516,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 </div>
 
 <!-- Παράθυρο (modal) για νέα ανακοίνωση -->
-<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade modal-custom" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <form method="POST" enctype="multipart/form-data">
@@ -533,16 +535,17 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <input type="text" class="form-control form-control-custom" id="title" name="title" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
-                        <input type="date" class="form-control form-control-custom" id="announcement_date" name="announcement_date" 
-                               value="<?php echo date('Y-m-d'); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="publish_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
-                        <input type="date" class="form-control form-control-custom" id="publish_date" name="publish_date" 
-                               value="<?php echo date('Y-m-d'); ?>">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="announcement_date"><strong>Ημερομηνία Ανακοίνωσης</strong></label>
+                            <input type="date" class="form-control form-control-custom" id="announcement_date" name="announcement_date" 
+                                   value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="publish_date"><strong>Ημερομηνία Δημοσίευσης</strong></label>
+                            <input type="date" class="form-control form-control-custom" id="publish_date" name="publish_date" 
+                                   value="<?php echo date('Y-m-d'); ?>">
+                        </div>
                     </div>
                     
                     <div class="form-group">

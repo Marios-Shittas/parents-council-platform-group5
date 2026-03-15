@@ -209,8 +209,8 @@
                        <h5 class="footer-brand-title">Γυμνάσιο Αγίου Αθανασίου</h5>
                    </div>
                    <p class="footer-text">Σύλλογος Γονέων & Κηδεμόνων</p>
-                   <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>Άγιος Αθανάσιος, Λεμεσός</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>info@gymnasio-agiou-athanasiou.cy</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΧΡΙΣΤΟΥ ΠΑΠΑΔΟΥΡΗ 50, 4105 ΑΓΙΟΣ ΑΘΑΝΑΣΙΟΣ, Λεμεσός</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>gym-ag-athanasios-lem@schools.ac.cy</span></div>
                </div>
 
 
@@ -222,7 +222,8 @@
                        <li><a href="/parents-council-platform-group5/public/announcements.php">Ανακοινώσεις</a></li>
                        <li><a href="/parents-council-platform-group5/public/events.php">Εκδηλώσεις</a></li>
                        <li><a href="/parents-council-platform-group5/public/applications.php">Αιτήσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/payments.php">Πληρωμές</a></li>
+                       <li><a href="/parents-council-platform-group5/public/eshop.php">Κατάστημα</a></li>
+                       <li><a href="/parents-council-platform-group5/public/epikoinonia.php">Επικοινωνία</a></li>
                    </ul>
                </div>
 
@@ -230,9 +231,9 @@
                <!-- 3η στήλη: στοιχεία επικοινωνίας. -->
                <div class="col-lg-3 col-md-6 mb-3">
                    <h5 class="footer-title">Επικοινωνία</h5>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>info@gymnasio-agiou-athanasiou.cy</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-phone"></i><span>+357 99999999</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-clock"></i><span>Δευ - Παρ: 08:00 - 14:00</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>Τηλεομοιότυπο: 25694755</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-phone"></i><span>25694750 , 25694752</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-clock"></i><span>Δευ - Παρ: 07:30 - 13:35</span></div>
                </div>
 
 
