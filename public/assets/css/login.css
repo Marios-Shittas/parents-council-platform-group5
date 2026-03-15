@@ -5,7 +5,7 @@
 .page-content {
     background: #ffffff;
     width: 340px;
-    height: 508px;
+    height: 520px;
     border-radius: 12px;
     padding: 2rem 2rem 1.5rem;
     margin: 100px auto;
@@ -17,6 +17,11 @@
     margin: 20px;
     width: 120px;
     color: #1E2D5A;
+}
+#error-message {
+    color: red;
+    font-size: 10px;
+    margin-left: 20px;
 }
 
 .login-container {
@@ -106,10 +111,9 @@
 }
 
 #back-button {
-    background: #1E2D5A; 
-    color: #fff; 
+    background: transparent; 
+    color: lightgray; 
     margin-top: 5px;
-    width: 100%;
     padding: 10px;
     border: none;
     border-radius: 6px;
@@ -118,11 +122,12 @@
     cursor: pointer;
     font-family: 'Montserrat', sans-serif;
     letter-spacing: 0.04em;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 #login-button:hover, #back-button:hover {
     background: #2A3F7E;
+    color: #fff; 
 }
 
 .forgot-password {
@@ -164,6 +169,7 @@
 
 .register-container {
     text-align: center;
+    font-size: 14px;
 }
 
 #register-prompt {
@@ -172,8 +178,7 @@
 
 #register-link {
     color: #1E2D5A;
-    text-decoration: none; 
-    font-weight: 600;
+    text-decoration: none;
 }
 
 #register-link:hover {
