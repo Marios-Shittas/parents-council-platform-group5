@@ -27,18 +27,22 @@
     <div class="row">
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="announcements-block">
-                <h5>Ανακοινώσεις</h5>
+                <h5 class="block-title">Ανακοινώσεις</h5>
+                <div id="announcements-root"></div>
+                <a href="announcements.php" class="btn btn-primary mt-3">Περισσότερα</a>
             </div>
         </div>
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="calendar-block">
-                <h5>Ημερολόγιο</h5>
+                <h5 class="block-title">Ημερολόγιο</h5>
                 <div id="calendar-root"></div>
             </div>
         </div>
         <div class="col-12 col-md-4 px-1">
             <div class="block-content" id="upcoming-events-block">
-                <h5>Επερχόμενες Εκδηλώσεις</h5>
+                <h5 class="block-title">Επερχόμενες Εκδηλώσεις</h5>
+                <div id="upcoming-events-root"></div>
+                <a href="events.php" class="btn btn-primary mt-3">Περισσότερα</a>
             </div>
         </div>
     </div>
@@ -50,6 +54,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <script type="text/babel" src="assets/js/home.jsx"></script>
+    <script type="text/babel" src="assets/js/home-page-announcements.jsx"></script>
+    <script type="text/babel" src="assets/js/home-page-upcoming-events.jsx"></script>
 
     </body>
 </html>

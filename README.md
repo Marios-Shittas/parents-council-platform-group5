@@ -85,7 +85,7 @@ parents-council-platform-group5/
 - 📢 Announcements - Ανακοινώσεις
 - 📅 Events - Εκδηλώσεις
 - 📝 Applications - Αιτήσεις
-- 💳 Payments - Πληρωμές
+- 🛍️ Eshop - Κατάστημα
 
 ### Admin Panel
 - 📋 Dashboard

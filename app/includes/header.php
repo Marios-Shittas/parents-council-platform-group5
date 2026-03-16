@@ -45,12 +45,12 @@ $nav_items = [
         'icon' => 'fas fa-file-alt',
         'match' => ['applications.php'],
     ],
-    // Σελίδα πληρωμών.
+    // Σελίδα καταστήματος.
     [
-        'label' => 'Πληρωμές',
-        'href' => '/parents-council-platform-group5/public/payments.php',
-        'icon' => 'fas fa-credit-card',
-        'match' => ['payments.php'],
+        'label' => 'Κατάστημα',
+        'href' => '/parents-council-platform-group5/public/eshop.php',
+        'icon' => 'fas fa-store',
+        'match' => ['eshop.php'],
     ],
     // Σελίδα επικοινωνίας.
     [
@@ -227,24 +227,24 @@ $nav_items = [
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #d6dce4;
-            color: var(--text-main);
-            background: #fff;
+            border: 1px solid #b9e3c8;
+            color: #5cab78;
+            background: #effaf3;
             transition: all .2s ease;
         }
 
         .info-icon-link:hover {
-            color: var(--text-strong);
-            background: rgba(230, 237, 245, 0.65);
-            border-color: #c8d5e3;
+            color: #3f9660;
+            background: #e0f5e8;
+            border-color: #9ed4b1;
             transform: translateY(-1px);
         }
 
         .info-icon-link.active {
-            color: #0f2134;
-            background: rgba(230, 237, 245, 0.8);
-            border-color: #c8d5e3;
-            box-shadow: inset 0 0 0 1px rgba(26, 58, 92, 0.06);
+            color: #2f7e4f;
+            background: #d5f0df;
+            border-color: #8bc7a0;
+            box-shadow: inset 0 0 0 1px rgba(76, 153, 106, 0.08);
         }
 
         /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
