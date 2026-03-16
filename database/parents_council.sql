@@ -146,6 +146,7 @@ CREATE TABLE IF NOT EXISTS Applications (
     application_id          INT NOT NULL AUTO_INCREMENT,
     application_title       VARCHAR(255) NOT NULL,
     application_description TEXT DEFAULT NULL,
+    submission_type         ENUM('file', 'text') NOT NULL DEFAULT 'file',
     PRIMARY KEY (application_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -162,15 +163,11 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
 CREATE TABLE IF NOT EXISTS Submissions (
     application_id    INT NOT NULL,
     user_id           INT NOT NULL,
-<<<<<<< HEAD
     file_path         VARCHAR(255) NULL DEFAULT NULL,
+    text_content      TEXT DEFAULT NULL,
     submission_data   TEXT DEFAULT NULL,
     submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    sub_status        ENUM('waiting','approved','rejected') DEFAULT 'waiting',
-=======
-    file_path         VARCHAR(255) NOT NULL,
     sub_status        ENUM('waiting', 'approved', 'rejected') DEFAULT 'waiting',
->>>>>>> d125027024a7198ed49eb8fc05f98b1ca2a75900
     PRIMARY KEY (application_id, user_id),
     CONSTRAINT fk_sub_ap
         FOREIGN KEY (application_id) REFERENCES Applications(application_id)
