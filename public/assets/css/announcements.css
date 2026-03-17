@@ -1,0 +1,414 @@
+/* ===== ANNOUNCEMENTS PAGE — MODERN REDESIGN ===== */
+
+/* ---- Hero Banner ---- */
+.announcements-hero {
+    background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
+    color: white;
+    padding: 4.5rem 0;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.announcements-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -5%;
+    width: 420px;
+    height: 420px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.announcements-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60%;
+    left: -5%;
+    width: 320px;
+    height: 320px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.announcements-hero h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.announcements-hero .lead {
+    color: rgba(255,255,255,0.85);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* ---- Section Title ---- */
+.announcements-section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.announcements-section-title .section-badge {
+    background: #0057a8;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ---- Announcement Card ---- */
+.announcement-card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.announcement-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.14);
+}
+
+/* ---- Image Area ---- */
+.announcement-card-img-wrap {
+    position: relative;
+    height: 230px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.announcement-card-img-wrap > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+}
+
+.announcement-card:hover .announcement-card-img-wrap > img {
+    transform: scale(1.06);
+}
+
+/* Carousel inside card */
+.announcement-card .carousel,
+.announcement-card .carousel-inner,
+.announcement-card .carousel-item {
+    height: 230px;
+}
+
+.announcement-card .carousel-item img {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    display: block;
+}
+
+.announcement-card .carousel-control-prev,
+.announcement-card .carousel-control-next {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.45);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.announcement-card:hover .carousel-control-prev,
+.announcement-card:hover .carousel-control-next {
+    opacity: 1;
+}
+
+.announcement-card .carousel-control-prev { left: 10px; }
+.announcement-card .carousel-control-next { right: 10px; }
+
+.announcement-card .carousel-control-prev-icon,
+.announcement-card .carousel-control-next-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* Date badge */
+.announcement-date-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #0057a8;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 10px rgba(0,87,168,0.45);
+    z-index: 10;
+}
+
+/* Photo count badge */
+.announcement-photo-count {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.52);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+}
+
+/* ---- Card Body ---- */
+.announcement-card .card-body {
+    padding: 1.3rem 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.announcement-card .card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.7rem;
+    line-height: 1.4;
+}
+
+.announcement-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: #6c757d;
+    font-size: 0.84rem;
+}
+
+.announcement-info i {
+    margin-right: 7px;
+    color: #0057a8;
+    width: 15px;
+    text-align: center;
+}
+
+.announcement-card .card-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-top: 0.8rem;
+    margin-bottom: 1.1rem;
+    flex: 1;
+}
+
+.btn-announcement-details {
+    background: linear-gradient(135deg, #0057a8, #003d7a);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    transition: opacity 0.2s, transform 0.2s;
+    align-self: flex-start;
+}
+
+.btn-announcement-details,
+.btn-announcement-details i,
+.btn-announcement-details:hover,
+.btn-announcement-details:hover i,
+.btn-announcement-details:focus,
+.btn-announcement-details:focus i,
+.btn-announcement-details:active,
+.btn-announcement-details:active i {
+    color: white !important;
+}
+
+.btn-announcement-details:hover {
+    opacity: 0.88;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+/* ---- Modal ---- */
+.announcement-modal .modal-content {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.announcement-modal .modal-header {
+    background: linear-gradient(135deg, #0057a8, #003d7a);
+    color: white;
+    border: none;
+    padding: 1.2rem 1.5rem;
+}
+
+.announcement-modal .modal-header .close {
+    color: white;
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+.announcement-modal .modal-header .close:hover {
+    opacity: 1;
+}
+
+.announcement-modal .modal-body {
+    padding: 1.5rem;
+}
+
+/* Modal carousel container */
+.announcement-modal .carousel {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: #000;
+    height: 380px;
+}
+
+.announcement-modal .carousel-inner {
+    height: 380px;
+}
+
+.announcement-modal .carousel-item {
+    height: 380px;
+}
+
+.announcement-modal .carousel-item img {
+    height: 380px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Modal carousel controls — always visible */
+.announcement-modal .carousel-control-prev,
+.announcement-modal .carousel-control-next {
+    width: 42px;
+    height: 42px;
+    background: rgba(0,0,0,0.55);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+    opacity: 1;
+}
+
+.announcement-modal .carousel-control-prev { left: 12px; }
+.announcement-modal .carousel-control-next { right: 12px; }
+
+.announcement-modal .carousel-control-prev:hover,
+.announcement-modal .carousel-control-next:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+/* Dot indicators */
+.announcement-modal .carousel-indicators {
+    bottom: 10px;
+    margin-bottom: 0;
+}
+
+.announcement-modal .carousel-indicators li {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.6);
+    border: none;
+    margin: 0 4px;
+}
+
+.announcement-modal .carousel-indicators li.active {
+    background-color: #fff;
+}
+
+/* Announcement meta info box */
+.modal-announcement-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    padding: 0.9rem 1.1rem;
+    background: #f7f9fc;
+    border-radius: 10px;
+}
+
+.modal-announcement-meta .announcement-info {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.announcement-modal .announcement-content h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #aaa;
+}
+
+.empty-state i {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    color: #d0d7e2;
+    display: block;
+}
+
+.empty-state h3 {
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-bg);
+}
+
+.admin-sidebar .nav-link i {
+    width: 1.5rem;
+    margin-right: var(--spacing-sm);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+    
+    .announcement-card .card-img-top {
+        height: 150px;
+    }
+}

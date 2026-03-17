@@ -1,0 +1,185 @@
+body {
+    font-family: 'Lato', sans-serif;
+    background: #f5f7fb;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #163a63 0%, #183f6b 100%);
+    color: #fff;
+    padding: 30px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+}
+
+.admin-sidebar .brand {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    line-height: 1.4;
+}
+
+.admin-sidebar .nav-link {
+    color: rgba(255,255,255,0.9);
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    transition: 0.2s ease;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    text-decoration: none;
+}
+
+.admin-content {
+    margin-left: 250px;
+    flex: 1;
+    padding: 35px 40px;
+    background: #f5f7fb;
+    min-height: 100vh;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #183f6b;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.7rem;
+    color: #183f6b;
+    margin: 0;
+    font-weight: 700;
+}
+
+.card-custom {
+    border: 1px solid #dfe5ee;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+}
+
+.btn-primary-custom {
+    background: #1f7aec;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-weight: 700;
+}
+
+.btn-primary-custom:hover {
+    background: #1267d1;
+    color: #fff;
+}
+
+.btn-secondary-custom {
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-weight: 700;
+}
+
+.btn-secondary-custom:hover {
+    background: #5b636a;
+    color: #fff;
+}
+
+.form-control-custom {
+    border-radius: 12px;
+    min-height: 46px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background: #f3f6fb;
+    color: #183f6b;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 16px;
+    border-bottom: 2px solid #dce3ec;
+}
+
+.admin-table td {
+    padding: 16px;
+    border-bottom: 1px solid #e7edf4;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 14px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.status-waiting {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.modal-custom .modal-content {
+    border-radius: 18px;
+    border: none;
+}

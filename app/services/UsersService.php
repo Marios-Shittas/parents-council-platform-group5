@@ -15,6 +15,23 @@
             $result = $stmt->get_result();
             return $result->fetch_assoc();
         }
-    }
 
+        public function login($inputEmail, $inputPassword) {
+            $user = $this->getUserByEmail($inputEmail);
+            $password = password_verify($inputPassword, $user['password']);
+
+            if (!$user || $inputEmail !== $user['email'] || !$password) {
+                return ['success' => false, 'message' => 'Invalid email or password.'];
+            }
+            return ['success' => true, 'role' => $user['role'], 'message' => 'Login successful.'];
+        }
+
+        public function forgot($email) {
+            $user = $this->getUserByEmail($email);
+            if (!$user || $email !== $user['email']) {
+                return ['success' => false, 'message' => 'Invalid email.'];
+            }
+            return ['success' => true, 'message' => 'Link Sent.'];
+        }
+    }
 ?>
