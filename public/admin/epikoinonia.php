@@ -430,12 +430,12 @@ if ($viewDetail) {
                                                 <?php if ($message['is_read'] == 0): ?>
                                                     <span class="badge-unread">
                                                         <i class="fas fa-circle"></i>
-                                                        Νέο
+                                                        ΝΕΟ
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="badge-read">
                                                         <i class="fas fa-check-circle"></i>
-                                                        Αναγνωσμένο
+                                                        ΑΝΑΓΝΩΣΜΕΝΟ
                                                     </span>
                                                 <?php endif; ?>
                                             </td>

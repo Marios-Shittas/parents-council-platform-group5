@@ -872,12 +872,6 @@ if ($selectedApplicationId > 0) {
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Ακύρωση</button>
-                    <button type="submit" class="btn btn-success js-create-publish-btn" id="create_publish_btn">
-                        <i class="fas fa-bullhorn me-1"></i>Δημοσίευση Αίτησης
-                    </button>
-                    <button type="submit" class="btn btn-primary-custom">
-                        <i class="fas fa-save me-1"></i>Δημιουργία
-                    </button>
                 </div>
             </form>
         </div>
