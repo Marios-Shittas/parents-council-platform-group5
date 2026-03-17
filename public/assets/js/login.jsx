@@ -1,5 +1,6 @@
 const { useState } = React;
 
+/* SHOW/HIDE PASSWORD */
 function PasswordToggle() {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -17,10 +18,11 @@ function PasswordToggle() {
     />
   );
 }
-
 const root = document.getElementById("password-toggle-root");
 ReactDOM.render(<PasswordToggle />, root);
 
+
+/* LOGIN FUNCTIONALITY */
 function handleLogin() {
   const email = document.getElementById("email-input").value;
   const password = document.getElementById("password-input").value;
@@ -46,7 +48,7 @@ function handleLogin() {
   .then(data => {
       if (data.success) {
           if (data.role === 'admin') {
-            window.location.href = 'admin/index.php';
+            window.location.href = 'admin/announcements.php';
           }
           else if (data.role === 'parent') {
             window.location.href = 'parent/index.php';
@@ -57,5 +59,4 @@ function handleLogin() {
   })
   .catch(error => console.error('Error during login:', error));
 }
-
 document.getElementById("login-button").addEventListener("click", handleLogin);

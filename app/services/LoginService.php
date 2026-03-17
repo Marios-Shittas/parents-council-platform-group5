@@ -7,12 +7,5 @@ $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
 
 $service = new UsersService();
-$userdb = $service->getUserByEmail($email);
-
-if (!$userdb || $email !== $userdb['email'] || $password !== $userdb['password']) {
-    echo json_encode(['success' => false, 'message' => 'Invalid email or password.']);
-    exit;
-}
-
-echo json_encode(['success' => true, 'role' => $userdb['role'], 'message' => 'Login successful.']);
+echo json_encode($service->login($email, $password));
 ?>
