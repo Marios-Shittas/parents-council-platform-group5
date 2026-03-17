@@ -18,35 +18,66 @@ require_once __DIR__ . '/../../includes/site_context.php';
     <body>
     <?php include __DIR__ . '/../../includes/header.php'; ?>
 
-    <div class="paragraph-container px-3">
-        <h1>Καλώς ήρθατε στον Σύλλογο Γονέων του Γυμνασίου Αγίου Αθανασίου</h1>
-        <p>Αυτή είναι η αρχική σελίδα του ιστότοπού μας. Εδώ μπορείτε να βρείτε τις τελευταίες ανακοινώσεις, εκδηλώσεις ημερολογίου και επερχόμενες εκδηλώσεις.</p>
-    </div>
+    <main class="home-page">
+        <section class="home-hero container-fluid px-0">
+            <div class="home-hero-inner container">
+                <div class="hero-copy">
+                    <p class="hero-kicker">Σύλλογος Γονέων &amp; Κηδεμόνων</p>
+                    <h1>Γυμνάσιο Αγίου Αθανασίου</h1>
+                    <p class="hero-description">Ένας σύγχρονος, οργανωμένος χώρος ενημέρωσης για την καθημερινότητα του σχολείου. Παρακολουθήστε ανακοινώσεις, ημερολόγιο και επερχόμενες δράσεις σε μία κεντρική αρχική σελίδα.</p>
+                    <div class="hero-actions">
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary">Ανακοινώσεις</a>
+                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">Εκδηλώσεις</a>
+                    </div>
+                </div>
+                <div class="hero-highlights">
+                    <div class="highlight-card">
+                        <span class="highlight-label">Ενημέρωση</span>
+                        <p>Ανακοινώσεις με άμεση πληροφόρηση για γονείς και μαθητές.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-label">Οργάνωση</span>
+                        <p>Ημερολόγιο σχολικών δράσεων με καθαρή προβολή ανά μήνα.</p>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-label">Συμμετοχή</span>
+                        <p>Προβολή επερχόμενων εκδηλώσεων και ενεργός συμμετοχή της κοινότητας.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <div class="row">
-        <div class="col-12 col-md-4 px-1">
-            <div class="block-content" id="announcements-block">
-                <h5 class="block-title">Ανακοινώσεις</h5>
-                <div id="announcements-root"></div>
-                <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary mt-3">Περισσότερα</a>
+        <section class="home-content container">
+            <div class="row home-grid">
+                <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                    <div class="block-content" id="announcements-block">
+                        <div class="block-heading-wrap">
+                            <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i>Ανακοινώσεις</h5>
+                        </div>
+                        <div id="announcements-root"></div>
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn">Περισσότερα</a>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                    <div class="block-content" id="calendar-block">
+                        <div class="block-heading-wrap">
+                            <h5 class="block-title"><i class="fas fa-calendar-alt mr-2"></i>Ημερολόγιο</h5>
+                        </div>
+                        <div id="calendar-root"></div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <div class="block-content" id="upcoming-events-block">
+                        <div class="block-heading-wrap">
+                            <h5 class="block-title"><i class="fas fa-star mr-2"></i>Επερχόμενες Εκδηλώσεις</h5>
+                        </div>
+                        <div id="upcoming-events-root"></div>
+                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn">Περισσότερα</a>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-12 col-md-4 px-1">
-            <div class="block-content" id="calendar-block">
-                <h5 class="block-title">Ημερολόγιο</h5>
-                <div id="calendar-root"></div>
-            </div>
-        </div>
-        <div class="col-12 col-md-4 px-1">
-            <div class="block-content" id="upcoming-events-block">
-                <h5 class="block-title">Επερχόμενες Εκδηλώσεις</h5>
-                <div id="upcoming-events-root"></div>
-                <?php if (site_is_parent()): ?>
-                    <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary mt-3">Περισσότερα</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
