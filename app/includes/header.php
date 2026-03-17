@@ -26,15 +26,15 @@ $nav_items = [
         'icon' => 'fas fa-bullhorn',
         'match' => ['announcements.php'],
     ],
-];
-
-if (site_is_parent()) {
-    $nav_items[] = [
+    [
         'label' => 'Εκδηλώσεις',
         'href' => site_section_url('events.php'),
         'icon' => 'fas fa-calendar-alt',
-        'match' => ['events.php'],
-    ];
+        'match' => ['events.php', 'event.php'],
+    ],
+];
+
+if (site_is_parent()) {
     $nav_items[] = [
         'label' => 'Αιτήσεις',
         'href' => site_section_url('applications.php'),

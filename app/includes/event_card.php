@@ -21,7 +21,7 @@ $isPast        = $eventDateTime < new DateTime();
                             <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
                                 <img src="<?php echo htmlspecialchars($img); ?>"
                                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
-                                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                                      onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -35,7 +35,7 @@ $isPast        = $eventDateTime < new DateTime();
             <?php else: ?>
                 <img src="<?php echo htmlspecialchars($images[0]); ?>"
                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
-                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
             <?php endif; ?>
 
             <!-- Ημερομηνία badge -->
