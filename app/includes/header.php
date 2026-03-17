@@ -1,81 +1,62 @@
 <?php
-// Τίτλος που εμφανίζεται στο browser και στο λογότυπο.
-$site_title = "Γυμνάσιο Αγίου Αθανασίου";
+require_once __DIR__ . '/site_context.php';
 
-// Βρίσκουμε ποια σελίδα είναι ανοιχτή για να τη χρωματίσουμε ως ενεργή.
+$site_title = 'Γυμνάσιο Αγίου Αθανασίου';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
-
-// Παίρνουμε την τιμή αναζήτησης (αν υπάρχει) για να μένει μέσα στο input.
 $search_query = trim($_GET['q'] ?? '');
+$portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
+
 $useful_info_item = [
     'label' => 'Χρήσιμες Πληροφορίες',
-    'href' => '/parents-council-platform-group5/public/useful-information.php',
+    'href' => site_section_url('useful-information.php'),
     'icon' => 'fas fa-info-circle',
     'match' => ['useful-information.php'],
 ];
 
-// Εδώ ορίζουμε όλα τα links του menu σε ένα σημείο (εύκολη συντήρηση).
-// Αν θέλεις νέο κουμπί στο menu, το προσθέτεις εδώ.
 $nav_items = [
-    // Αρχική σελίδα.
     [
         'label' => 'Αρχική',
-        'href' => '/parents-council-platform-group5/public/home.php',
+        'href' => site_section_url('home.php'),
         'icon' => 'fas fa-home',
         'match' => ['home.php', 'index.php', ''],
     ],
-    // Σελίδα ανακοινώσεων.
     [
         'label' => 'Ανακοινώσεις',
-        'href' => '/parents-council-platform-group5/public/announcements.php',
+        'href' => site_section_url('announcements.php'),
         'icon' => 'fas fa-bullhorn',
         'match' => ['announcements.php'],
     ],
-    // Σελίδα εκδηλώσεων.
     [
         'label' => 'Εκδηλώσεις',
-        'href' => '/parents-council-platform-group5/public/events.php',
+        'href' => site_section_url('events.php'),
         'icon' => 'fas fa-calendar-alt',
-        'match' => ['events.php'],
-    ],
-    // Σελίδα αιτήσεων.
-    [
-        'label' => 'Αιτήσεις',
-        'href' => '/parents-council-platform-group5/public/applications.php',
-        'icon' => 'fas fa-file-alt',
-        'match' => ['applications.php'],
-    ],
-    // Σελίδα καταστήματος.
-    [
-        'label' => 'Κατάστημα',
-        'href' => '/parents-council-platform-group5/public/eshop.php',
-        'icon' => 'fas fa-store',
-        'match' => ['eshop.php'],
-    ],
-    // Σελίδα επικοινωνίας.
-    [
-        'label' => 'Επικοινωνία',
-        'href' => '/parents-council-platform-group5/public/epikoinonia.php',
-        'icon' => 'fas fa-envelope',
-        'match' => ['epikoinonia.php'],
+        'match' => ['events.php', 'event.php'],
     ],
 ];
+
+if (site_is_parent()) {
+    $nav_items[] = [
+        'label' => 'Αιτήσεις',
+        'href' => site_section_url('applications.php'),
+        'icon' => 'fas fa-file-alt',
+        'match' => ['applications.php'],
+    ];
+    $nav_items[] = [
+        'label' => 'Κατάστημα',
+        'href' => site_section_url('eshop.php'),
+        'icon' => 'fas fa-store',
+        'match' => ['eshop.php'],
+    ];
+}
+
+$nav_items[] = [
+    'label' => 'Επικοινωνία',
+    'href' => site_section_url('epikoinonia.php'),
+    'icon' => 'fas fa-envelope',
+    'match' => ['epikoinonia.php'],
+];
 ?>
-<!doctype html>
-<html lang="el">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <title><?php echo $site_title; ?></title>
-
-    <!-- Bootstrap 4.6 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <style>
+<style>
         /* Βασικά χρώματα για ενιαίο design. */
         :root {
             /* Χρώμα φόντου του header. */
@@ -94,6 +75,23 @@ $nav_items = [
             --link-active-bg: #e6edf5;
         }
 
+        /* Scoped βάση για να μη βασίζεται το header σε global κανόνες της main.css. */
+        .site-header,
+        .site-header * {
+            box-sizing: border-box;
+        }
+
+        .site-header {
+            font-family: 'Lato', sans-serif;
+            color: var(--text-main);
+        }
+
+        .site-header a,
+        .site-header button,
+        .site-header input {
+            font-family: 'Lato', sans-serif;
+        }
+
         /* Κολλάει πάνω όταν κάνουμε scroll και μένει πάντα ορατό. */
         .navbar {
             position: sticky;
@@ -104,6 +102,7 @@ $nav_items = [
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
             border-bottom: 1px solid var(--header-border);
             padding: .5rem 0;
+            font-family: 'Lato', sans-serif;
         }
 
         /* Διακριτική μπλε γραμμή πάνω για πιο premium εμφάνιση. */
@@ -129,6 +128,7 @@ $nav_items = [
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
+            font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
             font-size: 1.12rem;
@@ -143,6 +143,7 @@ $nav_items = [
 
         /* Βασικό στυλ links menu. */
         .navbar-nav .nav-link {
+            font-family: 'Lato', sans-serif;
             font-weight: 600;
             color: var(--text-main) !important;
             padding: .48rem .7rem;
@@ -190,6 +191,7 @@ $nav_items = [
 
         /* Πεδίο αναζήτησης. */
         .search-input {
+            font-family: 'Lato', sans-serif;
             /* Περιορίζει το search για να μη τρώει όλο το πλάτος. */
             min-width: 180px;
             max-width: 320px;
@@ -205,6 +207,7 @@ $nav_items = [
 
         /* Κουμπί search. */
         .search-btn {
+            font-family: 'Lato', sans-serif;
             /* Ίδιο pill style με το input για ενιαίο κουμπί. */
             border-radius: 0 999px 999px 0;
             border-color: #d6dce4;
@@ -212,6 +215,7 @@ $nav_items = [
 
         /* Κουμπί login. */
         .login-btn {
+            font-family: 'Lato', sans-serif;
             border-radius: 999px;
             font-weight: 600;
             padding: .3rem .9rem;
@@ -219,7 +223,19 @@ $nav_items = [
             font-size: .9rem;
         }
 
+        .login-btn:visited,
+        .login-btn:focus,
+        .login-btn:active {
+            color: var(--text-main) !important;
+            font-weight: 600;
+        }
+
+        .login-btn:hover {
+            color: var(--text-strong) !important;
+        }
+
         .info-icon-link {
+            font-family: 'Lato', sans-serif;
             width: 38px;
             height: 38px;
             padding: 0;
@@ -315,17 +331,14 @@ $nav_items = [
             }
         }
     </style>
-</head>
-
-<body>
-<header>
+<header class="site-header">
 <!-- Κύριο navigation όλου του site. -->
 <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">
 
         <!-- Λογότυπο + τίτλος σχολείου. -->
-        <a class="navbar-brand d-flex align-items-center" href="/parents-council-platform-group5/public/home.php">
-            <img src="/parents-council-platform-group5/public/assets/img/logo-icon.png" alt="Logo" class="mr-2">
+        <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
+            <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo" class="mr-2">
             <span class="brand-text d-none d-md-inline"><?php echo $site_title; ?></span>
         </a>
 
@@ -356,7 +369,7 @@ $nav_items = [
             <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center navbar-tools">
 
                 <!-- Form αναζήτησης (με GET για να φαίνεται το q στο URL). -->
-                <form class="my-2 my-lg-0 mr-lg-2" action="/parents-council-platform-group5/public/search.php" method="get">
+                <form class="my-2 my-lg-0 mr-lg-2" action="<?php echo site_public_url('search.php'); ?>" method="get">
                     <div class="input-group input-group-sm">
                         <!-- Φιλτράρουμε τιμή με htmlspecialchars για ασφάλεια. -->
                         <input type="search" name="q" class="form-control search-input"
@@ -370,11 +383,17 @@ $nav_items = [
                     </div>
                 </form>
 
-                <a href="/parents-council-platform-group5/public/login.php"
-                   class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
-                    <!-- Κουμπί μετάβασης στη σελίδα login. -->
-                    <i class="fas fa-sign-in-alt mr-1"></i>Login
-                </a>
+                <?php if (site_is_parent()): ?>
+                    <a href="<?php echo site_public_url('home.php'); ?>"
+                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
+                        <i class="fas fa-globe mr-1"></i>Δημόσιο Site
+                    </a>
+                <?php else: ?>
+                    <a href="<?php echo site_login_url(); ?>"
+                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </a>
+                <?php endif; ?>
 
                 <?php $is_useful_info_active = in_array($current_page, $useful_info_item['match'], true); ?>
                 <a href="<?php echo $useful_info_item['href']; ?>"

@@ -1,10 +1,34 @@
+<?php
+require_once __DIR__ . '/site_context.php';
+
+$footer_links = [
+    ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
+    ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
+    ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
+];
+
+if (site_is_parent()) {
+    $footer_links[] = ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')];
+    $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
+}
+
+$footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
+$footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')];
+?>
 <style>
+   /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */
+   .site-footer,
+   .site-footer * {
+       box-sizing: border-box;
+   }
+
    /* Κύριο footer block (όλο το κάτω μέρος της σελίδας). */
    .site-footer {
        margin-top: 56px;
        background: #f7f9fc;
        border-top: 1px solid #dde5ef;
        position: relative;
+       font-family: 'Lato', sans-serif;
    }
 
 
@@ -35,6 +59,7 @@
 
    /* Τίτλοι στηλών (π.χ. Γρήγοροι Σύνδεσμοι, Επικοινωνία). */
    .footer-title {
+       font-family: 'Montserrat', sans-serif;
        font-weight: 700;
        font-size: 1.04rem;
        margin-bottom: 14px;
@@ -60,6 +85,7 @@
 
    /* Κύριος τίτλος σχολείου στο footer. */
    .footer-brand-title {
+       font-family: 'Montserrat', sans-serif;
        font-size: 1.35rem;
        font-weight: 800;
        color: #183555;
@@ -104,6 +130,7 @@
 
    /* Εμφάνιση links στο footer. */
    .footer-links a {
+       font-family: 'Lato', sans-serif;
        color: #475569;
        text-decoration: none;
        font-size: 0.93rem;
@@ -122,6 +149,7 @@
 
    /* Κάτω άσπρη μπάρα με copyright/trademark. */
    .footer-bottom {
+       font-family: 'Lato', sans-serif;
        border-top: 1px solid #dbe3ec;
        padding: 8px 0 9px;
        color: #5f6f82;
@@ -141,6 +169,7 @@
 
    /* Κουμπί About στο footer. */
    .footer-about-btn {
+       font-family: 'Lato', sans-serif;
        background: none;
        border: 1px solid #b0bec5;
        border-radius: 4px;
@@ -167,6 +196,18 @@
    .footer-policy:hover {
        color: #1a3a5c;
        text-decoration: none;
+   }
+
+   /* Ο τίτλος του About modal μένει σταθερά λευκός. */
+   #aboutModal .modal-title {
+       font-family: 'Montserrat', sans-serif;
+       color: #ffffff !important;
+   }
+
+   #aboutModal .modal-body,
+   #aboutModal .modal-footer,
+   #aboutModal .btn {
+       font-family: 'Lato', sans-serif;
    }
 
 
@@ -218,12 +259,9 @@
                <div class="col-lg-4 col-md-6 mb-4 mb-lg-3">
                    <h5 class="footer-title">Γρήγοροι Σύνδεσμοι</h5>
                    <ul class="footer-links">
-                       <li><a href="/parents-council-platform-group5/public/home.php">Αρχική</a></li>
-                       <li><a href="/parents-council-platform-group5/public/announcements.php">Ανακοινώσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/events.php">Εκδηλώσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/applications.php">Αιτήσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/eshop.php">Κατάστημα</a></li>
-                       <li><a href="/parents-council-platform-group5/public/epikoinonia.php">Επικοινωνία</a></li>
+                       <?php foreach ($footer_links as $footer_link): ?>
+                           <li><a href="<?php echo htmlspecialchars($footer_link['href']); ?>"><?php echo htmlspecialchars($footer_link['label']); ?></a></li>
+                       <?php endforeach; ?>
                    </ul>
                </div>
 
@@ -267,7 +305,7 @@
            </div>
            <div class="modal-body" style="font-size:0.95rem; line-height:1.7; color:#344055;">
                <p class="mb-1">Η ιστοσελίδα δημιουργήθηκε από τους φοιτητές:</p>
-               <p class="mb-3">Μιχάλης Τσαδιώτης, Μάριος Σιήττας, Σοφία Κυριάκου, Κωνσταντίνος Αβραμίδης, Russel Vickramasingam.</p>
+               <p class="mb-3">Μιχάλης Τσαδιώτης, Μάριος Σιήττας, Σοφία Κυριάκου, Κωνσταντίνος Αβραμίδης, Ράσσελλ Βικραμασίγκαμ.</p>
                <p class="mb-3">Η ανάπτυξη της πραγματοποιήθηκε στο πλαίσιο ακαδημαϊκής εργασίας του τμήματος Μηχανικών Ηλεκτρονικών Υπολογιστών και Πληροφορικής του Τεχνολογικού Πανεπιστημίου Κύπρου (ΤΕΠΑΚ), υπό την επίβλεψη του καθηγητή κ. Ανδρέα Ανδρέου.</p>
                <p class="mt-3">© 2026 Cyprus University of Technology. All rights reserved.</p>
            </div>
@@ -288,6 +326,5 @@
 
 </body>
 </html>
-
 
 
