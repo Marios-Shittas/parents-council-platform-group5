@@ -75,6 +75,23 @@ $nav_items[] = [
             --link-active-bg: #e6edf5;
         }
 
+        /* Scoped βάση για να μη βασίζεται το header σε global κανόνες της main.css. */
+        .site-header,
+        .site-header * {
+            box-sizing: border-box;
+        }
+
+        .site-header {
+            font-family: 'Lato', sans-serif;
+            color: var(--text-main);
+        }
+
+        .site-header a,
+        .site-header button,
+        .site-header input {
+            font-family: 'Lato', sans-serif;
+        }
+
         /* Κολλάει πάνω όταν κάνουμε scroll και μένει πάντα ορατό. */
         .navbar {
             position: sticky;
@@ -314,7 +331,7 @@ $nav_items[] = [
             }
         }
     </style>
-<header>
+<header class="site-header">
 <!-- Κύριο navigation όλου του site. -->
 <nav class="navbar navbar-expand-lg navbar-light">
     <div class="container">

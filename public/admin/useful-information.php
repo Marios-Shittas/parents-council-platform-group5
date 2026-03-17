@@ -260,7 +260,7 @@ $uniform = $sections['uniform'];
                 <div class="section-editor__header">
                     <div>
                         <h2>Header Σελίδας</h2>
-                        <p>Τίτλος, υπότιτλος και μικρό label στην κορυφή της σελίδας.</p>
+                        <p>Τίτλος, υπότιτλος και υπέρτιτλος στην κορυφή της σελίδας.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-heading"></i></span>
                 </div>
@@ -271,7 +271,7 @@ $uniform = $sections['uniform'];
 
                     <div class="section-form-grid">
                         <div>
-                            <label><strong>Eyebrow</strong></label>
+                            <label><strong>Υπέρτιτλος</strong></label>
                             <input type="text" name="eyebrow" class="form-control form-control-custom" value="<?php echo htmlspecialchars($pageHeader['content']['eyebrow'] ?? ''); ?>">
                         </div>
                         <div>
@@ -285,7 +285,7 @@ $uniform = $sections['uniform'];
                     </div>
 
                     <div class="section-actions">
-                        <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Header</button>
+                        <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Κεφαλίδας</button>
                     </div>
                 </form>
             </section>
@@ -316,7 +316,7 @@ $uniform = $sections['uniform'];
                         <?php for ($i = 0; $i < 3; $i++): ?>
                             <?php $item = $quickLinks['content']['items'][$i] ?? ['title' => '', 'description' => '', 'url' => '', 'icon' => '']; ?>
                             <div class="editor-subcard">
-                                <h3>Link <?php echo $i + 1; ?></h3>
+                                <h3>Σύνδεσμος <?php echo $i + 1; ?></h3>
                                 <div class="form-group">
                                     <label><strong>Τίτλος</strong></label>
                                     <input type="text" name="link_<?php echo $i + 1; ?>_title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['title']); ?>">
@@ -330,7 +330,7 @@ $uniform = $sections['uniform'];
                                     <input type="url" name="link_<?php echo $i + 1; ?>_url" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['url']); ?>">
                                 </div>
                                 <div class="form-group mb-0">
-                                    <label><strong>Icon class</strong></label>
+                                    <label><strong>Κλάση Εικονιδίου</strong></label>
                                     <input type="text" name="link_<?php echo $i + 1; ?>_icon" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['icon']); ?>">
                                     <small class="editor-help">Παράδειγμα: <code>fas fa-school</code></small>
                                 </div>
@@ -372,7 +372,7 @@ $uniform = $sections['uniform'];
                             <div class="editor-subcard">
                                 <h3>Κάρτα <?php echo $i + 1; ?></h3>
                                 <div class="form-group">
-                                    <label><strong>Label</strong></label>
+                                    <label><strong>Ετικέτα Κάρτας</strong></label>
                                     <input type="text" name="item_<?php echo $i + 1; ?>_label" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['label']); ?>">
                                 </div>
                                 <div class="form-group">
@@ -387,7 +387,7 @@ $uniform = $sections['uniform'];
                         <?php endfor; ?>
 
                         <div class="full-width">
-                            <label><strong>Note</strong></label>
+                            <label><strong>Σημείωση Ενότητας</strong></label>
                             <textarea name="note" class="form-control form-control-custom"><?php echo htmlspecialchars($schoolYear['content']['note'] ?? ''); ?></textarea>
                         </div>
                     </div>
@@ -456,7 +456,7 @@ $uniform = $sections['uniform'];
                             <input type="text" name="subtitle" class="form-control form-control-custom" value="<?php echo htmlspecialchars($safety['subtitle']); ?>">
                         </div>
                         <div class="editor-subcard">
-                            <h3>Bullet Points</h3>
+                            <h3>Σημεία Λίστας</h3>
                             <label><strong>Ένα item ανά γραμμή</strong></label>
                             <textarea name="bullets" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(usefulInfoListToTextarea($safety['content']['bullets'] ?? [])); ?></textarea>
                         </div>
@@ -521,7 +521,7 @@ $uniform = $sections['uniform'];
                         <?php endfor; ?>
 
                         <div class="full-width">
-                            <label><strong>Note</strong></label>
+                            <label><strong>Σημείωση Ενότητας</strong></label>
                             <textarea name="note" class="form-control form-control-custom"><?php echo htmlspecialchars($uniform['content']['note'] ?? ''); ?></textarea>
                         </div>
                         <div>

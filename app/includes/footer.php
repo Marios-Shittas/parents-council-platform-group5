@@ -4,10 +4,10 @@ require_once __DIR__ . '/site_context.php';
 $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
     ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
+    ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
 ];
 
 if (site_is_parent()) {
-    $footer_links[] = ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')];
     $footer_links[] = ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')];
     $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
 }
@@ -16,12 +16,19 @@ $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_u
 $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')];
 ?>
 <style>
+   /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */
+   .site-footer,
+   .site-footer * {
+       box-sizing: border-box;
+   }
+
    /* Κύριο footer block (όλο το κάτω μέρος της σελίδας). */
    .site-footer {
        margin-top: 56px;
        background: #f7f9fc;
        border-top: 1px solid #dde5ef;
        position: relative;
+       font-family: 'Lato', sans-serif;
    }
 
 
@@ -52,6 +59,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Τίτλοι στηλών (π.χ. Γρήγοροι Σύνδεσμοι, Επικοινωνία). */
    .footer-title {
+       font-family: 'Montserrat', sans-serif;
        font-weight: 700;
        font-size: 1.04rem;
        margin-bottom: 14px;
@@ -77,6 +85,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Κύριος τίτλος σχολείου στο footer. */
    .footer-brand-title {
+       font-family: 'Montserrat', sans-serif;
        font-size: 1.35rem;
        font-weight: 800;
        color: #183555;
@@ -121,6 +130,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Εμφάνιση links στο footer. */
    .footer-links a {
+       font-family: 'Lato', sans-serif;
        color: #475569;
        text-decoration: none;
        font-size: 0.93rem;
@@ -139,6 +149,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Κάτω άσπρη μπάρα με copyright/trademark. */
    .footer-bottom {
+       font-family: 'Lato', sans-serif;
        border-top: 1px solid #dbe3ec;
        padding: 8px 0 9px;
        color: #5f6f82;
@@ -158,6 +169,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Κουμπί About στο footer. */
    .footer-about-btn {
+       font-family: 'Lato', sans-serif;
        background: none;
        border: 1px solid #b0bec5;
        border-radius: 4px;
@@ -184,6 +196,18 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
    .footer-policy:hover {
        color: #1a3a5c;
        text-decoration: none;
+   }
+
+   /* Ο τίτλος του About modal μένει σταθερά λευκός. */
+   #aboutModal .modal-title {
+       font-family: 'Montserrat', sans-serif;
+       color: #ffffff !important;
+   }
+
+   #aboutModal .modal-body,
+   #aboutModal .modal-footer,
+   #aboutModal .btn {
+       font-family: 'Lato', sans-serif;
    }
 
 
