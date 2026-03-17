@@ -234,6 +234,19 @@ $nav_items[] = [
             color: var(--text-strong) !important;
         }
 
+        .logout-btn {
+            border-color: #dc3545;
+            color: #dc3545 !important;
+        }
+
+        .logout-btn:hover,
+        .logout-btn:focus,
+        .logout-btn:active {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff !important;
+        }
+
         .info-icon-link {
             font-family: 'Lato', sans-serif;
             width: 38px;
@@ -385,8 +398,8 @@ $nav_items[] = [
 
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('home.php'); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
-                        <i class="fas fa-globe mr-1"></i>Δημόσιο Site
+                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn logout-btn">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Log out
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
