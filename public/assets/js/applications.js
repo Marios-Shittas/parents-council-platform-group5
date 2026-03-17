@@ -527,6 +527,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function normalizeDocPath(rawPath) {
         var prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
         if (!rawPath) return '';
+        if (String(rawPath).indexOf('storage/') === 0) {
+            return '/parents-council-platform-group5/' + String(rawPath).replace(/^\/+/, '');
+        }
+        if (String(rawPath).indexOf('/storage/') === 0) {
+            return '/parents-council-platform-group5' + String(rawPath);
+        }
         var idx = String(rawPath).indexOf(prefix);
         if (idx !== -1) {
             return prefix + String(rawPath).slice(idx + prefix.length).split(prefix)[0];

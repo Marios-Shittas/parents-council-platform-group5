@@ -1,3 +1,20 @@
+<?php
+require_once __DIR__ . '/site_context.php';
+
+$footer_links = [
+    ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
+    ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
+];
+
+if (site_is_parent()) {
+    $footer_links[] = ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')];
+    $footer_links[] = ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')];
+    $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
+}
+
+$footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
+$footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')];
+?>
 <style>
    /* Κύριο footer block (όλο το κάτω μέρος της σελίδας). */
    .site-footer {
@@ -218,12 +235,9 @@
                <div class="col-lg-4 col-md-6 mb-4 mb-lg-3">
                    <h5 class="footer-title">Γρήγοροι Σύνδεσμοι</h5>
                    <ul class="footer-links">
-                       <li><a href="/parents-council-platform-group5/public/home.php">Αρχική</a></li>
-                       <li><a href="/parents-council-platform-group5/public/announcements.php">Ανακοινώσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/events.php">Εκδηλώσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/applications.php">Αιτήσεις</a></li>
-                       <li><a href="/parents-council-platform-group5/public/eshop.php">Κατάστημα</a></li>
-                       <li><a href="/parents-council-platform-group5/public/epikoinonia.php">Επικοινωνία</a></li>
+                       <?php foreach ($footer_links as $footer_link): ?>
+                           <li><a href="<?php echo htmlspecialchars($footer_link['href']); ?>"><?php echo htmlspecialchars($footer_link['label']); ?></a></li>
+                       <?php endforeach; ?>
                    </ul>
                </div>
 
@@ -288,6 +302,5 @@
 
 </body>
 </html>
-
 
 
