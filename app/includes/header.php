@@ -247,6 +247,19 @@ $nav_items[] = [
             color: #ffffff !important;
         }
 
+        .login-btn-green {
+            border-color: #28a745;
+            color: #28a745 !important;
+        }
+
+        .login-btn-green:hover,
+        .login-btn-green:focus,
+        .login-btn-green:active {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff !important;
+        }
+
         .info-icon-link {
             font-family: 'Lato', sans-serif;
             width: 38px;
@@ -403,7 +416,7 @@ $nav_items[] = [
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn">
+                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn login-btn-green">
                         <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </a>
                 <?php endif; ?>
