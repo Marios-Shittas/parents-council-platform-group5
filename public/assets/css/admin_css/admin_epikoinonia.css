@@ -153,6 +153,29 @@ body {
     margin-bottom: 28px;
 }
 
+.epikoinonia-list-layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.epikoinonia-list-layout .stats-container {
+    order: 1;
+}
+
+.epikoinonia-list-layout .search-filters-section {
+    order: 2;
+}
+
+.epikoinonia-list-layout .messages-container {
+    order: 3;
+}
+
+.epikoinonia-list-layout .content-management {
+    order: 4;
+    margin-bottom: 0;
+    margin-top: 28px;
+}
+
 .content-management__intro {
     background: white;
     border: 1px solid var(--border-color);

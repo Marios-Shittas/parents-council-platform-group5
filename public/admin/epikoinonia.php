@@ -374,6 +374,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                     </h1>
                 </div>
 
+                <div class="epikoinonia-list-layout">
                 <div id="content-management" class="content-management">
                     <div class="content-management__intro">
                         <div>
@@ -387,7 +388,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Page Header</h3>
-                                    <p>Τίτλος, υπότιτλος και eyebrow της κορυφής της σελίδας.</p>
+                                    <p>Τίτλος, υπότιτλος και μικρός τίτλος που εμφανίζεται πάνω από την κορυφή της σελίδας.</p>
                                 </div>
                                 <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
                             </div>
@@ -403,7 +404,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="page-header-eyebrow">Eyebrow</label>
+                                        <label for="page-header-eyebrow">Μικρός τίτλος πάνω από το header</label>
                                         <input type="text" class="form-control" id="page-header-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['eyebrow'] ?? ''); ?>">
                                     </div>
 
@@ -879,6 +880,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             </nav>
                         <?php endif; ?>
                     <?php endif; ?>
+                </div>
                 </div>
 
             <?php endif; ?>
