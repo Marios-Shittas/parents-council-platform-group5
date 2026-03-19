@@ -54,7 +54,7 @@ INSERT INTO Events (event_id, event_title, event_description, event_date, publis
 
 INSERT INTO Products (product_id, product_name, product_description, price) VALUES
 (1, 'School Hoodie', 'Blue hoodie with school logo', 25.00),
-(2, 'Notebook', 'A4 lined notebook', 3.50);
+(2, 'Black School Trousers', 'Black school uniform trousers', 15.00);
 
 INSERT INTO SystemSchedule (ss_id, feature, start_date, end_date, ss_status) VALUES
 (1, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active'),
@@ -112,6 +112,6 @@ INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES
 
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
-(2, 2, '/parents-council-platform-group5/public/assets/Products_img/jeans.jpg');
+(2, 2, '/parents-council-platform-group5/public/assets/Products_img/black-school-trousers.jpg');
 
 COMMIT;

@@ -210,6 +210,32 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
        font-family: 'Lato', sans-serif;
    }
 
+   #aboutModal .modal-header .close {
+       color: #ffffff;
+       opacity: 1;
+       transition: color .2s ease, transform .2s ease;
+   }
+
+   #aboutModal .modal-header .close:hover {
+       color: #dc3545;
+       transform: scale(1.05);
+   }
+
+   #aboutModal .modal-footer .btn-secondary {
+       border-color: #c7d1db;
+       background: #eef2f6;
+       color: #344055;
+       transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+   }
+
+   #aboutModal .modal-footer .btn-secondary:hover,
+   #aboutModal .modal-footer .btn-secondary:focus {
+       background: #dc3545;
+       border-color: #dc3545;
+       color: #ffffff;
+       transform: translateY(-1px);
+   }
+
 
    /* Mobile βελτιώσεις footer. */
    @media (max-width: 991.98px) {
@@ -326,5 +352,4 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
 </body>
 </html>
-
 
