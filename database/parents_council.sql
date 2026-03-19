@@ -102,6 +102,17 @@ CREATE TABLE IF NOT EXISTS UsefulInformationSections (
     UNIQUE KEY uq_useful_information_section_key (section_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
+    section_id        INT NOT NULL AUTO_INCREMENT,
+    section_key       VARCHAR(100) NOT NULL,
+    section_title     VARCHAR(255) NOT NULL,
+    section_subtitle  TEXT DEFAULT NULL,
+    content_json      LONGTEXT DEFAULT NULL,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_id),
+    UNIQUE KEY uq_epikoinonia_page_section_key (section_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS Events (
     event_id          INT NOT NULL AUTO_INCREMENT,
     event_title       VARCHAR(255) NOT NULL,
