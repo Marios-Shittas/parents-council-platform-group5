@@ -1,39 +1,141 @@
 <?php
-session_start();
-
 require_once __DIR__ . '/../../app/services/EpikoinoniaService.php';
+require_once __DIR__ . '/../../app/services/EpikoinoniaPageService.php';
 
-// Handle session properly
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$service = new EpikoinoniaService();
+function epikoinoniaAdminTrim($value)
+{
+    return trim((string)$value);
+}
 
-// Handle delete action
+function epikoinoniaAdminTextarea($value)
+{
+    $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
+    return trim($value);
+}
+
+$service = new EpikoinoniaService();
+$pageService = new EpikoinoniaPageService();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'delete' && isset($_POST['message_id'])) {
+    $action = $_POST['action'];
+    $redirectUrl = 'epikoinonia.php';
+
+    if ($action === 'update_content_section') {
+        $sectionKey = $_POST['section_key'] ?? '';
+        $saved = false;
+
+        switch ($sectionKey) {
+            case 'page_header':
+                $saved = $pageService->updateSection(
+                    'page_header',
+                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
+                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    [
+                        'eyebrow' => epikoinoniaAdminTrim($_POST['eyebrow'] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($_POST['icon'] ?? ''),
+                    ]
+                );
+                break;
+
+            case 'contact_info':
+                $cards = [];
+                for ($i = 1; $i <= 4; $i++) {
+                    $cards[] = [
+                        'title' => epikoinoniaAdminTrim($_POST["card_{$i}_title"] ?? ''),
+                        'text' => epikoinoniaAdminTextarea($_POST["card_{$i}_text"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($_POST["card_{$i}_icon"] ?? ''),
+                        'link_label' => epikoinoniaAdminTrim($_POST["card_{$i}_link_label"] ?? ''),
+                        'link_url' => epikoinoniaAdminTrim($_POST["card_{$i}_link_url"] ?? ''),
+                    ];
+                }
+
+                $saved = $pageService->updateSection(
+                    'contact_info',
+                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
+                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    ['cards' => $cards]
+                );
+                break;
+
+            case 'map_section':
+                $saved = $pageService->updateSection(
+                    'map_section',
+                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
+                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    [
+                        'embed_url' => epikoinoniaAdminTrim($_POST['embed_url'] ?? ''),
+                    ]
+                );
+                break;
+
+            case 'form_section':
+                $saved = $pageService->updateSection(
+                    'form_section',
+                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
+                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    [
+                        'description' => epikoinoniaAdminTextarea($_POST['description'] ?? ''),
+                        'button_text' => epikoinoniaAdminTrim($_POST['button_text'] ?? ''),
+                        'success_message' => epikoinoniaAdminTrim($_POST['success_message'] ?? ''),
+                    ]
+                );
+                break;
+
+            case 'social_section':
+                $items = [];
+                for ($i = 1; $i <= 3; $i++) {
+                    $items[] = [
+                        'title' => epikoinoniaAdminTrim($_POST["social_{$i}_title"] ?? ''),
+                        'url' => epikoinoniaAdminTrim($_POST["social_{$i}_url"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($_POST["social_{$i}_icon"] ?? ''),
+                    ];
+                }
+
+                $saved = $pageService->updateSection(
+                    'social_section',
+                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
+                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    ['items' => $items]
+                );
+                break;
+        }
+
+        $_SESSION['flash_message'] = $saved
+            ? 'Το περιεχόμενο της σελίδας επικοινωνίας ενημερώθηκε επιτυχώς.'
+            : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $pageService->getLastError();
+        $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
+        $redirectUrl .= '#content-management';
+    } elseif ($action === 'delete' && isset($_POST['message_id'])) {
         $messageId = intval($_POST['message_id']);
         if ($service->deleteMessage($messageId)) {
-            $_SESSION['flash_message'] = 'Message deleted successfully';
+            $_SESSION['flash_message'] = 'Το μήνυμα διαγράφηκε επιτυχώς.';
             $_SESSION['flash_type'] = 'success';
         } else {
-            $_SESSION['flash_message'] = 'Failed to delete message';
+            $_SESSION['flash_message'] = 'Αποτυχία διαγραφής του μηνύματος.';
             $_SESSION['flash_type'] = 'danger';
         }
-    } elseif ($_POST['action'] === 'mark_read' && isset($_POST['message_id'])) {
+        if (isset($_GET['id'])) {
+            $redirectUrl .= '?id=' . intval($_GET['id']);
+        }
+    } elseif ($action === 'mark_read' && isset($_POST['message_id'])) {
         $messageId = intval($_POST['message_id']);
         if ($service->markAsRead($messageId)) {
-            $_SESSION['flash_message'] = 'Message marked as read';
+            $_SESSION['flash_message'] = 'Το μήνυμα σημειώθηκε ως αναγνωσμένο.';
             $_SESSION['flash_type'] = 'success';
         }
+        if (isset($_GET['id'])) {
+            $redirectUrl .= '?id=' . intval($_GET['id']);
+        }
     }
-    
-    header('Location: ' . $_SERVER['PHP_SELF'] . (isset($_GET['id']) ? '?id=' . $_GET['id'] : ''));
+
+    header('Location: ' . $redirectUrl);
     exit;
 }
 
-// Get search and filter parameters
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $status = isset($_GET['status']) ? $_GET['status'] : '';
 $dateFrom = isset($_GET['date_from']) ? $_GET['date_from'] : '';
@@ -42,11 +144,16 @@ $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $itemsPerPage = 20;
 $offset = ($page - 1) * $itemsPerPage;
 
-// Get all messages for filtering/searching
-$allMessages = $service->getAllMessages(999999, 0);  // Get all messages
+$contentSections = $pageService->getAllSections();
+$pageHeaderSection = $contentSections['page_header'];
+$contactInfoSection = $contentSections['contact_info'];
+$mapSection = $contentSections['map_section'];
+$formSection = $contentSections['form_section'];
+$socialSection = $contentSections['social_section'];
+
+$allMessages = $service->getAllMessages(999999, 0);
 $filteredMessages = $allMessages;
 
-// Apply search filter
 if (!empty($search)) {
     $searchLower = strtolower($search);
     $filteredMessages = array_filter($filteredMessages, function($msg) use ($searchLower) {
@@ -56,7 +163,6 @@ if (!empty($search)) {
     });
 }
 
-// Apply status filter
 if (!empty($status)) {
     if ($status === 'new') {
         $filteredMessages = array_filter($filteredMessages, function($msg) {
@@ -69,7 +175,6 @@ if (!empty($status)) {
     }
 }
 
-// Apply date range filter
 if (!empty($dateFrom)) {
     $dateFromObj = new DateTime($dateFrom);
     $filteredMessages = array_filter($filteredMessages, function($msg) use ($dateFromObj) {
@@ -86,29 +191,22 @@ if (!empty($dateTo)) {
     });
 }
 
-// Re-index array after filtering
 $filteredMessages = array_values($filteredMessages);
 
-// Total count for pagination
 $totalMessages = count($filteredMessages);
 $totalPages = ceil($totalMessages / $itemsPerPage);
 
-// Get paginated messages
 $paginatedMessages = array_slice($filteredMessages, $offset, $itemsPerPage);
-
-// Get page messages with their details
 $pageMessages = array_map(function($msg) {
     return $msg;
 }, $paginatedMessages);
 
-// Get statistics
 $totalCount = count($allMessages);
 $readCount = count(array_filter($allMessages, function($msg) {
     return $msg['is_read'] == 1;
 }));
 $unreadCount = $totalCount - $readCount;
 
-// Check if viewing detail
 $viewDetail = isset($_GET['id']) && !empty($_GET['id']);
 $detailMessage = null;
 if ($viewDetail) {
@@ -117,6 +215,10 @@ if ($viewDetail) {
         $service->markAsRead(intval($_GET['id']));
     }
 }
+
+$flashMessage = $_SESSION['flash_message'] ?? '';
+$flashType = $_SESSION['flash_type'] ?? 'success';
+unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -142,12 +244,11 @@ if ($viewDetail) {
             <?php endif; ?>
 
             <!-- Flash Messages -->
-            <?php if (isset($_SESSION['flash_message'])): ?>
-                <div class="alert alert-<?php echo htmlspecialchars($_SESSION['flash_type']); ?>">
+            <?php if ($flashMessage): ?>
+                <div class="alert alert-<?php echo htmlspecialchars($flashType); ?>">
                     <i class="fas fa-check-circle"></i>
-                    <span><?php echo htmlspecialchars($_SESSION['flash_message']); ?></span>
+                    <span><?php echo htmlspecialchars($flashMessage); ?></span>
                 </div>
-                <?php unset($_SESSION['flash_message'], $_SESSION['flash_type']); ?>
             <?php endif; ?>
 
             <?php if ($viewDetail && $detailMessage): ?>
@@ -271,6 +372,273 @@ if ($viewDetail) {
                         <i class="fas fa-comments"></i>
                         Διαχείριση Επικοινωνίας
                     </h1>
+                </div>
+
+                <div id="content-management" class="content-management">
+                    <div class="content-management__intro">
+                        <div>
+                            <h2><i class="fas fa-edit"></i> Διαχείριση Public Περιεχομένου</h2>
+                            <p>Από εδώ αλλάζεις το κοινό περιεχόμενο που εμφανίζεται και στο <code>public/epikoinonia.php</code> και στο <code>public/parent/epikoinonia.php</code>. Κάθε ενότητα αποθηκεύεται ξεχωριστά, όπως και στο <code>useful-information</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-sections-grid">
+                        <section class="content-editor-card">
+                            <div class="content-editor-card__header">
+                                <div>
+                                    <h3>Page Header</h3>
+                                    <p>Τίτλος, υπότιτλος και eyebrow της κορυφής της σελίδας.</p>
+                                </div>
+                                <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
+                            </div>
+
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_content_section">
+                                <input type="hidden" name="section_key" value="page_header">
+
+                                <div class="content-form-grid">
+                                    <div class="form-group">
+                                        <label for="page-header-title">Τίτλος</label>
+                                        <input type="text" class="form-control" id="page-header-title" name="title" value="<?php echo htmlspecialchars($pageHeaderSection['title']); ?>">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="page-header-eyebrow">Eyebrow</label>
+                                        <input type="text" class="form-control" id="page-header-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['eyebrow'] ?? ''); ?>">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="page-header-subtitle">Υπότιτλος</label>
+                                        <textarea class="form-control content-textarea" id="page-header-subtitle" name="subtitle"><?php echo htmlspecialchars($pageHeaderSection['subtitle']); ?></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="page-header-icon">Icon class</label>
+                                        <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-envelope'); ?>">
+                                    </div>
+                                </div>
+
+                                <div class="content-editor-card__actions">
+                                    <button type="submit" class="btn-save-section">
+                                        <i class="fas fa-save"></i> Αποθήκευση Header
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="content-editor-card">
+                            <div class="content-editor-card__header">
+                                <div>
+                                    <h3>Πληροφορίες Επικοινωνίας</h3>
+                                    <p>Οι 4 κάρτες που εμφανίζονται στο πρώτο section της front-end σελίδας.</p>
+                                </div>
+                                <span class="content-editor-card__icon"><i class="fas fa-address-card"></i></span>
+                            </div>
+
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_content_section">
+                                <input type="hidden" name="section_key" value="contact_info">
+
+                                <div class="content-form-grid">
+                                    <div class="form-group">
+                                        <label for="contact-info-title">Τίτλος section</label>
+                                        <input type="text" class="form-control" id="contact-info-title" name="title" value="<?php echo htmlspecialchars($contactInfoSection['title']); ?>">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="contact-info-subtitle">Υπότιτλος section</label>
+                                        <textarea class="form-control content-textarea" id="contact-info-subtitle" name="subtitle"><?php echo htmlspecialchars($contactInfoSection['subtitle']); ?></textarea>
+                                    </div>
+
+                                    <?php for ($index = 0; $index < 4; $index++): ?>
+                                        <?php
+                                        $card = $contactInfoSection['content']['cards'][$index] ?? [];
+                                        $cardNumber = $index + 1;
+                                        ?>
+                                        <div class="content-subcard">
+                                            <h4>Κάρτα <?php echo $cardNumber; ?></h4>
+
+                                            <div class="form-group">
+                                                <label for="card-<?php echo $cardNumber; ?>-title">Τίτλος</label>
+                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-title" name="card_<?php echo $cardNumber; ?>_title" value="<?php echo htmlspecialchars($card['title'] ?? ''); ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="card-<?php echo $cardNumber; ?>-icon">Icon class</label>
+                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-icon" name="card_<?php echo $cardNumber; ?>_icon" value="<?php echo htmlspecialchars($card['icon'] ?? ''); ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="card-<?php echo $cardNumber; ?>-text">Κείμενο</label>
+                                                <textarea class="form-control content-textarea" id="card-<?php echo $cardNumber; ?>-text" name="card_<?php echo $cardNumber; ?>_text"><?php echo htmlspecialchars($card['text'] ?? ''); ?></textarea>
+                                                <small class="content-help">Χρησιμοποίησε νέα γραμμή όπου θέλεις αλλαγή σειράς.</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="card-<?php echo $cardNumber; ?>-link-label">Link label</label>
+                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-link-label" name="card_<?php echo $cardNumber; ?>_link_label" value="<?php echo htmlspecialchars($card['link_label'] ?? ''); ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="card-<?php echo $cardNumber; ?>-link-url">Link URL</label>
+                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-link-url" name="card_<?php echo $cardNumber; ?>_link_url" value="<?php echo htmlspecialchars($card['link_url'] ?? ''); ?>">
+                                            </div>
+                                        </div>
+                                    <?php endfor; ?>
+                                </div>
+
+                                <div class="content-editor-card__actions">
+                                    <button type="submit" class="btn-save-section">
+                                        <i class="fas fa-save"></i> Αποθήκευση Καρτών
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="content-editor-card">
+                            <div class="content-editor-card__header">
+                                <div>
+                                    <h3>Χάρτης</h3>
+                                    <p>Τίτλος, περιγραφή και το iframe URL του Google Maps.</p>
+                                </div>
+                                <span class="content-editor-card__icon"><i class="fas fa-map-marked-alt"></i></span>
+                            </div>
+
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_content_section">
+                                <input type="hidden" name="section_key" value="map_section">
+
+                                <div class="content-form-grid">
+                                    <div class="form-group">
+                                        <label for="map-title">Τίτλος</label>
+                                        <input type="text" class="form-control" id="map-title" name="title" value="<?php echo htmlspecialchars($mapSection['title']); ?>">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="map-subtitle">Υπότιτλος</label>
+                                        <textarea class="form-control content-textarea" id="map-subtitle" name="subtitle"><?php echo htmlspecialchars($mapSection['subtitle']); ?></textarea>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="map-embed-url">Iframe URL</label>
+                                        <textarea class="form-control content-textarea content-textarea--large" id="map-embed-url" name="embed_url"><?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="content-editor-card__actions">
+                                    <button type="submit" class="btn-save-section">
+                                        <i class="fas fa-save"></i> Αποθήκευση Χάρτη
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="content-editor-card">
+                            <div class="content-editor-card__header">
+                                <div>
+                                    <h3>Φόρμα Επικοινωνίας</h3>
+                                    <p>Τα κείμενα που εμφανίζονται πριν και μετά την αποστολή του μηνύματος.</p>
+                                </div>
+                                <span class="content-editor-card__icon"><i class="fas fa-paper-plane"></i></span>
+                            </div>
+
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_content_section">
+                                <input type="hidden" name="section_key" value="form_section">
+
+                                <div class="content-form-grid">
+                                    <div class="form-group">
+                                        <label for="form-title">Τίτλος</label>
+                                        <input type="text" class="form-control" id="form-title" name="title" value="<?php echo htmlspecialchars($formSection['title']); ?>">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="form-button-text">Κείμενο κουμπιού</label>
+                                        <input type="text" class="form-control" id="form-button-text" name="button_text" value="<?php echo htmlspecialchars($formSection['content']['button_text'] ?? ''); ?>">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="form-subtitle">Υπότιτλος</label>
+                                        <textarea class="form-control content-textarea" id="form-subtitle" name="subtitle"><?php echo htmlspecialchars($formSection['subtitle']); ?></textarea>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="form-description">Προαιρετική περιγραφή πάνω από τη φόρμα</label>
+                                        <textarea class="form-control content-textarea" id="form-description" name="description"><?php echo htmlspecialchars($formSection['content']['description'] ?? ''); ?></textarea>
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="form-success-message">Μήνυμα επιτυχίας</label>
+                                        <textarea class="form-control content-textarea" id="form-success-message" name="success_message"><?php echo htmlspecialchars($formSection['content']['success_message'] ?? ''); ?></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="content-editor-card__actions">
+                                    <button type="submit" class="btn-save-section">
+                                        <i class="fas fa-save"></i> Αποθήκευση Φόρμας
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="content-editor-card">
+                            <div class="content-editor-card__header">
+                                <div>
+                                    <h3>Social Links</h3>
+                                    <p>Τίτλος section, περιγραφή και οι σύνδεσμοι των social buttons.</p>
+                                </div>
+                                <span class="content-editor-card__icon"><i class="fas fa-share-alt"></i></span>
+                            </div>
+
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_content_section">
+                                <input type="hidden" name="section_key" value="social_section">
+
+                                <div class="content-form-grid">
+                                    <div class="form-group">
+                                        <label for="social-title">Τίτλος</label>
+                                        <input type="text" class="form-control" id="social-title" name="title" value="<?php echo htmlspecialchars($socialSection['title']); ?>">
+                                    </div>
+
+                                    <div class="form-group full-width">
+                                        <label for="social-subtitle">Υπότιτλος</label>
+                                        <textarea class="form-control content-textarea" id="social-subtitle" name="subtitle"><?php echo htmlspecialchars($socialSection['subtitle']); ?></textarea>
+                                    </div>
+
+                                    <?php for ($index = 0; $index < 3; $index++): ?>
+                                        <?php
+                                        $item = $socialSection['content']['items'][$index] ?? [];
+                                        $socialNumber = $index + 1;
+                                        ?>
+                                        <div class="content-subcard">
+                                            <h4>Social <?php echo $socialNumber; ?></h4>
+
+                                            <div class="form-group">
+                                                <label for="social-<?php echo $socialNumber; ?>-title">Τίτλος</label>
+                                                <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-title" name="social_<?php echo $socialNumber; ?>_title" value="<?php echo htmlspecialchars($item['title'] ?? ''); ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="social-<?php echo $socialNumber; ?>-icon">Icon class</label>
+                                                <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-icon" name="social_<?php echo $socialNumber; ?>_icon" value="<?php echo htmlspecialchars($item['icon'] ?? ''); ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="social-<?php echo $socialNumber; ?>-url">URL</label>
+                                                <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-url" name="social_<?php echo $socialNumber; ?>_url" value="<?php echo htmlspecialchars($item['url'] ?? ''); ?>">
+                                            </div>
+                                        </div>
+                                    <?php endfor; ?>
+                                </div>
+
+                                <div class="content-editor-card__actions">
+                                    <button type="submit" class="btn-save-section">
+                                        <i class="fas fa-save"></i> Αποθήκευση Social Links
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
                 </div>
 
                 <!-- Statistics Cards -->
