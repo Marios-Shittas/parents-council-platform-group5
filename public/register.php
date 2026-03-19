@@ -1,5 +1,4 @@
 <?php
-require_once '../app/includes/site_context.php';
 ?>
 <!DOCTYPE html>
 <html lang="el">
