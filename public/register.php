@@ -1,3 +1,6 @@
+<?php
+require_once '../app/includes/site_context.php';
+?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -7,8 +10,15 @@
     <!-- Google fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap">
 
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/user_css/public-page-header.css">
     <link rel="stylesheet" href="assets/css/register.css">
 
     <title>Εγγραφή</title>
@@ -19,10 +29,9 @@
     <?php include '../app/includes/header.php'; ?>
 
     <!-- React will render here -->
-    <div id="root"></div>
-
-    <!-- Footer -->
-    <?php include '../app/includes/footer.php'; ?>
+    <div class="container">
+        <div id="root"></div>
+    </div>
 
     <!-- React / ReactDOM -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
@@ -34,5 +43,5 @@
     <!-- Your React JSX -->
     <script type="text/babel" src="assets/js/register.jsx"></script>
 
-</body>
-</html>
+    <!-- Footer -->
+    <?php include '../app/includes/footer.php'; ?>
