@@ -801,9 +801,16 @@ if ($selectedApplicationId > 0) {
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create">
 
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Νέα Αίτηση</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-plus me-2" style="color:#ffffff !important;"></i>Νέα Αίτηση
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -891,9 +898,16 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="application_id" id="edit_application_id">
 
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Επεξεργασία Αίτησης</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-edit me-2" style="color:#ffffff !important;"></i>Επεξεργασία Αίτησης
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -972,9 +986,16 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="submissionDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-id-card me-2"></i>Λεπτομέρειες Υποβολής</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            <div class="modal-header" style="background:#2f6fb3;">
+                <h5 class="modal-title" style="color:#ffffff !important;">
+                    <i class="fas fa-id-card me-2" style="color:#ffffff !important;"></i>Λεπτομέρειες Υποβολής
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Κλείσιμο"
+                        style="filter: brightness(0) invert(1); opacity:1;">
+                </button>
             </div>
 
             <div class="modal-body">
@@ -1053,9 +1074,16 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="application_id" id="delete_application_id">
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-exclamation-triangle me-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body text-center">
@@ -1083,9 +1111,16 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="return_view_submissions" id="delete_submission_return_view_submissions" value="0">
                 <input type="hidden" name="return_scroll_y" id="delete_submission_return_scroll_y" value="0">
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής Υποβολής</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-exclamation-triangle me-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής Υποβολής
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body text-center">
@@ -1275,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem(currentSubmissionNoteKey, noteField.value || '');
             noteSaveButton.classList.remove('btn-outline-primary');
             noteSaveButton.classList.add('btn-success');
-                noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Αποθηκεύτηκε';
+            noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Αποθηκεύτηκε';
             window.setTimeout(function () {
                 noteSaveButton.classList.remove('btn-success');
                 noteSaveButton.classList.add('btn-outline-primary');
