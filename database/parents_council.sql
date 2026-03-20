@@ -245,7 +245,6 @@ CREATE TABLE IF NOT EXISTS Logs(
     user_id       INT NULL,
     action        VARCHAR(100) NOT NULL,
     description   TEXT,
-    ip_address    VARCHAR(45),
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (log_id),
 

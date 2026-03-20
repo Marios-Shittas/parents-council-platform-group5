@@ -132,9 +132,9 @@ INSERT INTO InsurancePayments (insurance_payment_id, payment_id, child_id, creat
 (2, 101, 2, '2026-03-10 10:07:00'),
 (3, 101, 3, '2026-03-10 10:08:00');
 
-INSERT INTO Logs (log_id, user_id, action, description, ip_address, created_at) VALUES
-(1, 2, 'USER_REGISTER', 'User registered successfully', '192.168.1.1', '2026-03-10 09:55:00'),
-(2, 2, 'PAYMENT_SUCCESS', 'Membership and insurance payment completed', '192.168.1.1', '2026-03-10 10:10:00'),
-(3, 3, 'PAYMENT_FAILED', 'Product payment failed', '192.168.1.2', '2026-03-11 12:05:00');
+INSERT INTO Logs (log_id, user_id, action, description, created_at) VALUES
+(1, 2, 'USER_REGISTER', 'User registered successfully', '2026-03-10 09:55:00'),
+(2, 2, 'PAYMENT_SUCCESS', 'Membership and insurance payment completed', '2026-03-10 10:10:00'),
+(3, 3, 'PAYMENT_FAILED', 'Product payment failed', '2026-03-11 12:05:00');
 
 COMMIT;
