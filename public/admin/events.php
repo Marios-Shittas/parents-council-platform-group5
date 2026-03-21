@@ -466,10 +466,16 @@ $events = $eventsService->getAllEvents();
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create">
 
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus mr-2"></i>Νέα Εκδήλωση</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-plus mr-2" style="color:#ffffff !important;"></i>Νέα Εκδήλωση
+                    </h5>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                            style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;">
+                        <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
                     </button>
                 </div>
 
@@ -489,8 +495,6 @@ $events = $eventsService->getAllEvents();
                             <input type="time" class="form-control form-control-custom" id="event_time" name="event_time" value="09:00">
                         </div>
                     </div>
-
-
 
                     <div class="form-group">
                         <label for="description"><strong>Περιγραφή</strong></label>

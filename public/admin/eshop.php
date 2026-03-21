@@ -222,7 +222,7 @@ $products = $productsService->getAllProducts();
 
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
-    <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css?v=12">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css?v=13">
 </head>
 <body>
 
@@ -356,7 +356,12 @@ $products = $productsService->getAllProducts();
 
                     <div class="form-group">
                         <label><strong>Τιμή *</strong></label>
-                        <input type="number" step="0.01" name="price" class="form-control" required>
+                        <div class="input-group">
+                            <input type="number" step="0.01" min="0" name="price" class="form-control" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text">€</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -416,12 +421,18 @@ $products = $productsService->getAllProducts();
 
                     <div class="form-group">
                         <label><strong>Τιμή *</strong></label>
-                        <input type="number"
-                               step="0.01"
-                               name="price"
-                               class="form-control"
-                               value="<?php echo htmlspecialchars($editProduct['price'] ?? ''); ?>"
-                               required>
+                        <div class="input-group">
+                            <input type="number"
+                                   step="0.01"
+                                   min="0"
+                                   name="price"
+                                   class="form-control"
+                                   value="<?php echo htmlspecialchars($editProduct['price'] ?? ''); ?>"
+                                   required>
+                            <div class="input-group-append">
+                                <span class="input-group-text">€</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
