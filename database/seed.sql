@@ -96,7 +96,12 @@ INSERT INTO EpikoinoniaPageSections (section_id, section_key, section_title, sec
 (2, 'contact_info', 'Πληροφορίες Επικοινωνίας', 'Βρείτε τη διεύθυνση, τα τηλέφωνα, το email και το ωράριο της σχολικής μονάδας.', '{"cards":[{"title":"Διεύθυνση","text":"Χρίστου Παπαδούρη 50\\n4105 Άγιος Αθανάσιος, Λεμεσός","icon":"fas fa-map-marker-alt","link_label":"","link_url":""},{"title":"Τηλέφωνο","text":"Τηλέφωνα: 25694750, 25694752\\nΤηλεομοιότυπο: 25694755","icon":"fas fa-phone","link_label":"","link_url":""},{"title":"Email","text":"","icon":"fas fa-envelope","link_label":"gym-ag-athanasios-lem@schools.ac.cy","link_url":"mailto:gym-ag-athanasios-lem@schools.ac.cy"},{"title":"Ώρες Λειτουργίας","text":"Δευ-Παρ - 7.30-13.35","icon":"fas fa-clock","link_label":"","link_url":""}]}'),
 (3, 'map_section', 'Βρείτε μας στο Χάρτη', 'Η τοποθεσία της σχολικής μονάδας στο Google Maps.', '{"embed_url":"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3279.4575341666614!2d33.0611131!3d34.7188599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14e734bc13013dc9%3A0x9c01ea2ef75a5b4d!2zzpPPhc68zr3OrM-DzrnOvyDOkc6zzq_Ov8-FIM6RzrjOsc69zrHPg86vzr_PhQ!5e0!3m2!1sel!2s!4v1773496500123!5m2!1sel!2s"}'),
 (4, 'form_section', 'Στείλτε μας Μήνυμα', 'Συμπληρώστε τη φόρμα και θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό.', '{"description":"","button_text":"Αποστολή Μηνύματος","success_message":"Το μήνυμά σας λήφθηκε. Θα σας απαντήσουμε το συντομότερο δυνατό."}'),
-(5, 'social_section', 'Βρείτε μας στα social networks', 'Ακολουθήστε τις επίσημες σελίδες μας για νέα και ενημερώσεις.', '{"items":[{"title":"Facebook","url":"https://www.facebook.com/profile.php?id=100085835704152","icon":"fab fa-facebook-f"},{"title":"X","url":"https://x.com/cymoec","icon":"fab fa-twitter"},{"title":"YouTube","url":"https://www.youtube.com/cymoec","icon":"fab fa-youtube"}]}');
+(5, 'social_section', 'Βρείτε μας στα social networks', 'Ακολουθήστε τις επίσημες σελίδες μας για νέα και ενημερώσεις.', '{"items":[{"title":"Facebook","url":"https://www.facebook.com/profile.php?id=100085835704152","icon":"fab fa-facebook-f"},{"title":"X","url":"https://x.com/cymoec","icon":"fab fa-twitter"},{"title":"YouTube","url":"https://www.youtube.com/cymoec","icon":"fab fa-youtube"}]}')
+ON DUPLICATE KEY UPDATE
+section_key = VALUES(section_key),
+section_title = VALUES(section_title),
+section_subtitle = VALUES(section_subtitle),
+content_json = VALUES(content_json);
 
 INSERT INTO ApplicationsDocuments (ap_document_id, application_id, file_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),

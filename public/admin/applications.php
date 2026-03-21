@@ -438,9 +438,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
-    $_SESSION['flash_message_type'] = $messageType ?: 'info';
-
     $redirectUrl = 'applications.php';
     if ($returnViewSubmissions > 0) {
         $redirectUrl .= '?view_submissions=' . $returnViewSubmissions;
@@ -450,6 +447,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($returnScrollY > 0) {
         $redirectUrl .= '?scroll_y=' . $returnScrollY;
     }
+
+    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
+    $_SESSION['flash_message_type'] = $messageType ?: 'info';
 
     header('Location: ' . $redirectUrl);
     exit;
@@ -557,33 +557,6 @@ if ($selectedApplicationId > 0) {
                         <span class="stat-label">Σύνολο Υποβολών</span>
                         <div class="stat-value"><?php echo count($submissions); ?></div>
                         <div class="stat-icon"><i class="fas fa-inbox"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-info">
-                    <div class="card-body">
-                        <span class="stat-label">Υπό Εξέταση</span>
-                        <div class="stat-value"><?php echo $pendingReviews; ?></div>
-                        <div class="stat-icon"><i class="fas fa-search"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-success">
-                    <div class="card-body">
-                        <span class="stat-label">Εγκεκριμένες</span>
-                        <div class="stat-value"><?php echo $approvedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-danger">
-                    <div class="card-body">
-                        <span class="stat-label">Απορριφθείσες</span>
-                        <div class="stat-value"><?php echo $rejectedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
                     </div>
                 </div>
             </div>
