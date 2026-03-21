@@ -8,7 +8,7 @@ SET time_zone = "+00:00";
 INSERT INTO Users (user_id, name, surname, email, password, phone_number, role, account_status, token, token_expiry) VALUES
 (1, 'Admin', 'User', 'admin@test.com', 'admin', '1234567890', 'admin', 'active', NULL, NULL),
 (2, 'John', 'Doe', 'parent1@test.com', 'parent1', '1112223333', 'parent', 'active', NULL, NULL),
-(3, 'Jane', 'Smith', 'parent2@test.com', 'parent2', '4445556666', 'parent', 'approved', NULL, NULL);
+(3, 'Jane', 'Smith', 'parent2@test.com', 'parent2', '4445556666', 'parent', 'waiting_payment', NULL, NULL);
 
 
 INSERT INTO Children (child_id, user_id, name, surname, date_of_birth, school_class) VALUES
@@ -136,5 +136,8 @@ INSERT INTO Logs (log_id, user_id, action, description, created_at) VALUES
 (1, 2, 'USER_REGISTER', 'User registered successfully', '2026-03-10 09:55:00'),
 (2, 2, 'PAYMENT_SUCCESS', 'Membership and insurance payment completed', '2026-03-10 10:10:00'),
 (3, 3, 'PAYMENT_FAILED', 'Product payment failed', '2026-03-11 12:05:00');
+
+INSERT INTO PricingSettings (id, subscription_price, insurance_price, updated_at) VALUES
+(1, 20.00, 15.00, '2026-03-01 00:00:00');
 
 COMMIT;
