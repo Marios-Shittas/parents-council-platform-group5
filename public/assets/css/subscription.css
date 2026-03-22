@@ -1,0 +1,38 @@
+.subscription-wrapper {
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.subscription-header {
+    margin-bottom: 30px;
+}
+
+.subscription-icon {
+    font-size: 50px;
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.subscription-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.subscription-amount {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+.btn-pay {
+    margin-top: 15px;
+}
+
+.note {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
