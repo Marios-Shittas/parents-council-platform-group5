@@ -28,7 +28,7 @@ function DayHeader() {
   );
 }
 
-function Daygrid({cor}) {
+function Daygrid({cor, events, selectedDay, onDayClick}) {
   const firstDay = new Date(cor.y, cor.m, 1).getDay();
   const daysInMonth = new Date(cor.y, cor.m + 1, 0).getDate();
   const startOffset = (firstDay == 0 ? 6 : firstDay - 1);
@@ -44,24 +44,49 @@ function Daygrid({cor}) {
 
   return (
     <div className="cal-row">
-      {cells.map((d, i) => (
-        <div 
-          key={i}
-          className = {
-            `cal-cell ${
+      {cells.map((d, i) => {
+        const dayEvents = events.filter(event => {
+          const eventDate = new Date(event.event_date);
+          return eventDate.getDate() === d && eventDate.getMonth() === cor.m && eventDate.getFullYear() === cor.y;
+        });
+
+        return (
+          <div 
+            key={i}
+            className={`cal-cell ${
               d && d == today.getDate() && cor.m == today.getMonth() && cor.y == today.getFullYear() ? "current-day" : "normal-day"
-            }`
-          }
-        >
+            } ${d === selectedDay ? "selected-day" : ""}`}
+            onClick={dayEvents.length > 0 ? () => onDayClick(d) : null}
+            style={dayEvents.length > 0 ? { cursor: 'pointer' } : {}}
+          >
             {d || ''}
-        </div>
-      ))}
+            {dayEvents.length > 0 && (
+              <div className="event-titles">
+                {dayEvents.map(event => (
+                  <div key={event.event_id} className="event-title">{event.title}</div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 function Calendar() {
   const [cor, setCor] = React.useState({m: new Date().getMonth(), y: new Date().getFullYear()});
+  const [events, setEvents] = React.useState([]);
+  const [selectedDay, setSelectedDay] = React.useState(null);
+  
+  React.useEffect(() => {
+    fetch('/parents-council-platform-group5/app/services/EventsService.php')
+      .then(result => result.json())
+      .then(data => {
+        setEvents(data);
+      })
+      .catch(error => console.error('Error fetching events:', error));
+  }, []);
   
   function chM(d) {
     let m = cor.m + d;
@@ -77,6 +102,11 @@ function Calendar() {
     }
 
     setCor({m, y});
+    setSelectedDay(null); // Clear selection when changing month
+  }
+
+  function handleDayClick(d) {
+    setSelectedDay(d);
   }
 
   return (
@@ -107,7 +137,17 @@ function Calendar() {
         </div>
       </div>
       <DayHeader />
-      <Daygrid cor={cor} />
+      <Daygrid cor={cor} events={events} selectedDay={selectedDay} onDayClick={handleDayClick} />
+      {selectedDay && (
+        <div className="selected-events">
+          {events.filter(event => {
+            const eventDate = new Date(event.event_date);
+            return eventDate.getDate() === selectedDay && eventDate.getMonth() === cor.m && eventDate.getFullYear() === cor.y;
+          }).map(event => (
+            <div key={event.event_id}>Title: {event.title}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
