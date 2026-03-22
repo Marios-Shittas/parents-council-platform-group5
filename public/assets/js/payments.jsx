@@ -6,7 +6,7 @@ function Payments() {
 
     // Fetch products from PHP API
     React.useEffect(() => {
-        fetch("/parents-council-platform-group5/app/services/PaymentsService.php")
+        fetch("/parents-council-platform-group5/app/services/ProductFetch.php")
             .then(res => res.json())
             .then(data => setProducts(data))
             .catch(err => console.error("Fetch error:", err));

@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS Announcements;
 DROP TABLE IF EXISTS SystemSchedule;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Children;
+DROP TABLE IF EXISTS PricingSettings;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Users(
     password             VARCHAR(255) NOT NULL,
     phone_number         VARCHAR(20) DEFAULT NULL,
     role                 ENUM('parent','admin') NOT NULL DEFAULT 'parent',
-    account_status       ENUM('pending','approved','rejected','waiting_payment','active') NOT NULL DEFAULT 'pending',
+    account_status       ENUM('pending','rejected','waiting_payment','active') NOT NULL DEFAULT 'pending',
     token                VARCHAR(255) DEFAULT NULL,
     token_expiry         DATETIME DEFAULT NULL,
     created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -197,7 +198,7 @@ CREATE TABLE IF NOT EXISTS Payments(
     user_id            INT NOT NULL,
     amount             DECIMAL(10,2) NOT NULL,
     payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    payment_status     ENUM('completed','failed','refunded') NOT NULL DEFAULT 'completed',
+    payment_status     ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
     payment_type       ENUM('membership','insurance','product') NOT NULL,
     transaction_id     VARCHAR(255) UNIQUE,
     PRIMARY KEY (payment_id),
@@ -261,4 +262,13 @@ CREATE TABLE IF NOT EXISTS SystemSchedule(
     end_date          DATETIME NOT NULL,
     ss_status         ENUM('active','inactive') DEFAULT 'inactive',
     PRIMARY KEY (ss_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS PricingSettings (
+    id INT NOT NULL AUTO_INCREMENT,
+    subscription_price DECIMAL(10,2) NOT NULL,
+    insurance_price DECIMAL(10,2) NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
