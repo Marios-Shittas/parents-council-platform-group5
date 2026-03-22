@@ -27,6 +27,7 @@ DROP TABLE IF EXISTS SystemSchedule;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Children;
 DROP TABLE IF EXISTS PricingSettings;
+DROP TABLE IF EXISTS UsefulInformationSections;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -271,4 +272,15 @@ CREATE TABLE IF NOT EXISTS PricingSettings (
     insurance_price DECIMAL(10,2) NOT NULL,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS UsefulInformationSections (
+    section_id        INT NOT NULL AUTO_INCREMENT,
+    section_key       VARCHAR(100) NOT NULL,
+    section_title     VARCHAR(255) NOT NULL,
+    section_subtitle  TEXT DEFAULT NULL,
+    content_json      LONGTEXT DEFAULT NULL,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_id),
+    UNIQUE KEY uq_useful_information_section_key (section_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

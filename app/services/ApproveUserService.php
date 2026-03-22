@@ -1,0 +1,96 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+header('Content-Type: application/json; charset=utf-8');
+
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use Kozzy\ParentsCouncilPlatformGroup5\services\EmailApproval;
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    exit;
+}
+
+$payload = json_decode(file_get_contents('php://input'), true) ?? [];
+$email = trim((string) ($payload['email'] ?? ''));
+
+if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Valid email is required']);
+    exit;
+}
+
+$token = bin2hex(random_bytes(32));
+$expiryHours = defined('APPROVAL_LINK_EXPIRY_HOURS') ? max(1, APPROVAL_LINK_EXPIRY_HOURS) : 168;
+$expiry = date('Y-m-d H:i:s', strtotime('+' . $expiryHours . ' hours'));
+$link = rtrim(APP_BASE_URL, '/') . '/public/subscription.php?token=' . urlencode($token);
+
+try {
+    $conn->begin_transaction();
+
+    $stmt = $conn->prepare(
+        "UPDATE Users
+         SET account_status = 'waiting_payment', token = ?, token_expiry = ?
+         WHERE email = ? AND role = 'parent'"
+    );
+
+    if (!$stmt) {
+        throw new RuntimeException('Failed to prepare user update statement');
+    }
+
+    $stmt->bind_param('sss', $token, $expiry, $email);
+
+    if (!$stmt->execute()) {
+        throw new RuntimeException('Failed to update approved user');
+    }
+
+    if ($stmt->affected_rows < 1) {
+        throw new RuntimeException('No parent user was updated. Check email and current status.');
+    }
+
+    $stmt->close();
+
+    $emailService = new EmailApproval([
+        'host' => SMTP_HOST,
+        'port' => SMTP_PORT,
+        'encryption' => SMTP_ENCRYPTION,
+        'username' => SMTP_USER,
+        'password' => SMTP_PASS,
+        'from_email' => SMTP_FROM_EMAIL,
+        'from_name' => SMTP_FROM_NAME,
+    ]);
+
+    $emailService->sendApprovalEmail($email, $link);
+
+    $logStmt = $conn->prepare(
+        "INSERT INTO Logs (user_id, action, description)
+         SELECT user_id, 'USER_APPROVED', CONCAT('Approval email sent to: ', email)
+         FROM Users WHERE email = ? LIMIT 1"
+    );
+
+    if ($logStmt) {
+        $logStmt->bind_param('s', $email);
+        $logStmt->execute();
+        $logStmt->close();
+    }
+
+    $conn->commit();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'User approved and email sent successfully.',
+        'subscription_link' => $link,
+    ]);
+} catch (Throwable $e) {
+    $conn->rollback();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage(),
+    ]);
+}
