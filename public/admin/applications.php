@@ -438,9 +438,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
-    $_SESSION['flash_message_type'] = $messageType ?: 'info';
-
     $redirectUrl = 'applications.php';
     if ($returnViewSubmissions > 0) {
         $redirectUrl .= '?view_submissions=' . $returnViewSubmissions;
@@ -450,6 +447,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($returnScrollY > 0) {
         $redirectUrl .= '?scroll_y=' . $returnScrollY;
     }
+
+    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
+    $_SESSION['flash_message_type'] = $messageType ?: 'info';
 
     header('Location: ' . $redirectUrl);
     exit;
@@ -557,33 +557,6 @@ if ($selectedApplicationId > 0) {
                         <span class="stat-label">Σύνολο Υποβολών</span>
                         <div class="stat-value"><?php echo count($submissions); ?></div>
                         <div class="stat-icon"><i class="fas fa-inbox"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-info">
-                    <div class="card-body">
-                        <span class="stat-label">Υπό Εξέταση</span>
-                        <div class="stat-value"><?php echo $pendingReviews; ?></div>
-                        <div class="stat-icon"><i class="fas fa-search"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-success">
-                    <div class="card-body">
-                        <span class="stat-label">Εγκεκριμένες</span>
-                        <div class="stat-value"><?php echo $approvedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-danger">
-                    <div class="card-body">
-                        <span class="stat-label">Απορριφθείσες</span>
-                        <div class="stat-value"><?php echo $rejectedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
                     </div>
                 </div>
             </div>
@@ -798,12 +771,19 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="createApplicationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="create_application_form">
                 <input type="hidden" name="action" value="create">
 
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Νέα Αίτηση</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-plus me-2" style="color:#ffffff !important;"></i>Νέα Αίτηση
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -819,11 +799,6 @@ if ($selectedApplicationId > 0) {
                                     <label class="form-label"><strong>Περιγραφή</strong></label>
                                     <textarea name="application_description" class="form-control form-control-custom" rows="5"></textarea>
                                 </div>
-
-                                <div>
-                                    <label class="form-label"><strong>Οδηγίες για γονείς</strong></label>
-                                    <textarea name="application_instructions_ui" class="form-control" rows="4" placeholder="Εμφανίζονται ως UI πεδίο στο admin."></textarea>
-                                </div>
                             </div>
                         </div>
 
@@ -833,11 +808,11 @@ if ($selectedApplicationId > 0) {
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <label class="form-label"><strong>Ημερομηνία Ανοίγματος</strong></label>
-                                            <input type="date" name="application_open_date_ui" class="form-control">
+                                            <input type="date" name="application_open_date_ui" id="create_application_open_date" class="form-control">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
-                                            <input type="date" name="application_close_date_ui" class="form-control">
+                                            <input type="date" name="application_close_date_ui" id="create_application_close_date" class="form-control">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label"><strong>Κατάσταση</strong></label>
@@ -881,13 +856,20 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="editApplicationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="edit_application_form">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="application_id" id="edit_application_id">
 
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Επεξεργασία Αίτησης</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-edit me-2" style="color:#ffffff !important;"></i>Επεξεργασία Αίτησης
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -966,9 +948,16 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="submissionDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-id-card me-2"></i>Λεπτομέρειες Υποβολής</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            <div class="modal-header" style="background:#2f6fb3;">
+                <h5 class="modal-title" style="color:#ffffff !important;">
+                    <i class="fas fa-id-card me-2" style="color:#ffffff !important;"></i>Λεπτομέρειες Υποβολής
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Κλείσιμο"
+                        style="filter: brightness(0) invert(1); opacity:1;">
+                </button>
             </div>
 
             <div class="modal-body">
@@ -1047,9 +1036,16 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="application_id" id="delete_application_id">
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-exclamation-triangle me-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body text-center">
@@ -1077,9 +1073,16 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="return_view_submissions" id="delete_submission_return_view_submissions" value="0">
                 <input type="hidden" name="return_scroll_y" id="delete_submission_return_scroll_y" value="0">
 
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής Υποβολής</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+                <div class="modal-header" style="background:#2f6fb3;">
+                    <h5 class="modal-title" style="color:#ffffff !important;">
+                        <i class="fas fa-exclamation-triangle me-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής Υποβολής
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Κλείσιμο"
+                            style="filter: brightness(0) invert(1); opacity:1;">
+                    </button>
                 </div>
 
                 <div class="modal-body text-center">
@@ -1099,6 +1102,40 @@ if ($selectedApplicationId > 0) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    function bindDateRangeValidation(openInput, closeInput, form) {
+        if (!openInput || !closeInput) return;
+
+        function syncCloseMinDate() {
+            var openVal = openInput.value || '';
+            closeInput.min = openVal;
+
+            if (openVal && closeInput.value && closeInput.value < openVal) {
+                closeInput.value = '';
+            }
+        }
+
+        openInput.addEventListener('change', syncCloseMinDate);
+        syncCloseMinDate();
+
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                var openVal = openInput.value || '';
+                var closeVal = closeInput.value || '';
+
+                if (openVal && closeVal && closeVal < openVal) {
+                    event.preventDefault();
+                    alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                    closeInput.focus();
+                }
+            });
+        }
+    }
+
+    var createOpenDate = document.getElementById('create_application_open_date');
+    var createCloseDate = document.getElementById('create_application_close_date');
+    var createForm = document.getElementById('create_application_form');
+    bindDateRangeValidation(createOpenDate, createCloseDate, createForm);
+
     var urlParams = new URLSearchParams(window.location.search);
     var scrollYParam = parseInt(urlParams.get('scroll_y') || '0', 10);
     if (!Number.isNaN(scrollYParam) && scrollYParam > 0) {
@@ -1115,6 +1152,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var editModal = document.getElementById('editApplicationModal');
+    var editOpenDate = document.getElementById('edit_application_open_date');
+    var editCloseDate = document.getElementById('edit_application_close_date');
+    var editForm = document.getElementById('edit_application_form');
+    bindDateRangeValidation(editOpenDate, editCloseDate, editForm);
+
     if (editModal) {
         editModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -1126,6 +1168,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit_application_open_date').value = button.getAttribute('data-application-open-date') || '';
             document.getElementById('edit_application_close_date').value = button.getAttribute('data-application-close-date') || '';
             document.getElementById('edit_application_status').value = button.getAttribute('data-application-status') || 'active';
+
+            if (editOpenDate) {
+                editOpenDate.dispatchEvent(new Event('change'));
+            }
         });
     }
 
@@ -1269,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem(currentSubmissionNoteKey, noteField.value || '');
             noteSaveButton.classList.remove('btn-outline-primary');
             noteSaveButton.classList.add('btn-success');
-                noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Αποθηκεύτηκε';
+            noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Αποθηκεύτηκε';
             window.setTimeout(function () {
                 noteSaveButton.classList.remove('btn-success');
                 noteSaveButton.classList.add('btn-outline-primary');

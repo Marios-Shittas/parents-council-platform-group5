@@ -1,0 +1,25 @@
+{
+    "name": "kozzy/parents-council-platform-group5",
+    "autoload": {
+        "psr-4": {
+            "Kozzy\\ParentsCouncilPlatformGroup5\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Konstandinos Avramidis",
+            "email": "konstadinosavramdis2015@gmail.com"
+        }
+    ],
+    "require": {
+        "railsware/mailtrap-php": "^3.10",
+        "symfony/mime": "^7.4",
+        "symfony/http-client": "^7.4",
+        "nyholm/psr7": "^1.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

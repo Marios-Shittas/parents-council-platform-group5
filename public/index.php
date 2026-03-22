@@ -1,1 +1,2 @@
-    <?php include '../public/home.php'; ?>
+<?php
+require __DIR__ . '/home.php';

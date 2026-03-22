@@ -21,7 +21,7 @@ $isPast        = $eventDateTime < new DateTime();
                             <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
                                 <img src="<?php echo htmlspecialchars($img); ?>"
                                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
-                                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -35,7 +35,7 @@ $isPast        = $eventDateTime < new DateTime();
             <?php else: ?>
                 <img src="<?php echo htmlspecialchars($images[0]); ?>"
                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
-                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
             <?php endif; ?>
 
             <!-- Ημερομηνία badge -->
@@ -93,12 +93,16 @@ $isPast        = $eventDateTime < new DateTime();
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-calendar-alt mr-2"></i><?php echo htmlspecialchars($event['event_title']); ?>
+            <div class="modal-header" style="background: linear-gradient(135deg, #0057a8, #003d7a); border: none;">
+                <h5 class="modal-title" style="color:#ffffff !important; font-weight:700;">
+                    <i class="fas fa-calendar-alt mr-2" style="color:#ffffff !important;"></i><?php echo htmlspecialchars($event['event_title']); ?>
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                        style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;">
+                    <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
                 </button>
             </div>
 

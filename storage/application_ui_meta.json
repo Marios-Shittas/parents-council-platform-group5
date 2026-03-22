@@ -3,5 +3,17 @@
         "open_date": "2026-03-04",
         "close_date": "2026-03-14",
         "status": "active"
+    },
+    "10": {
+        "open_date": "2026-03-19",
+        "close_date": "2026-03-25",
+        "status": "active",
+        "image_path": "\/parents-council-platform-group5\/public\/assets\/Applications_docs\/application_10_application_image_69b955cb7921b1.75139597.jpg"
+    },
+    "11": {
+        "open_date": "2026-03-17",
+        "close_date": "2026-03-19",
+        "status": "active",
+        "image_path": "\/parents-council-platform-group5\/public\/assets\/Applications_docs\/application_11_application_image_69b958d7dad778.80067516.jpg"
     }
 }
