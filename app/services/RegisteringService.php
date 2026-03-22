@@ -20,7 +20,7 @@ $email    = trim($data['email']);
 $phone    = trim($data['phone']);
 $children = $data['children'];
 
-// Check if email already exists
+
 $check = $conn->prepare("SELECT user_id FROM Users WHERE email = ?");
 $check->bind_param("s", $email);
 $check->execute();
@@ -64,13 +64,33 @@ try {
     }
     $stmtChild->close();
 
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    $action = "user_registration";
+    $description = "New parent registered with email: $email";
+
+    $stmtLog = $conn->prepare("
+        INSERT INTO Logs (user_id, action, description)
+        VALUES (?, ?, ?)
+    ");
+
+    $stmtLog->bind_param("iss", $userId, $action, $description);
+    $stmtLog->execute();
+    $stmtLog->close();
+
     $conn->commit();
-    echo json_encode(["success" => true, "message" => "Η αίτησή σας υποβλήθηκε και βρίσκεται σε αναμονή έγκρισης."]);
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Η αίτησή σας υποβλήθηκε και βρίσκεται σε αναμονή έγκρισης."
+    ]);
 
 } catch (Exception $e) {
     $conn->rollback();
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Σφάλμα: " . $e->getMessage()]);
+    echo json_encode([
+        "success" => false,
+        "message" => "Σφάλμα: " . $e->getMessage()
+    ]);
 }
 
 $conn->close();

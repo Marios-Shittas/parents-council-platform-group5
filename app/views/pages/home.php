@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
                     <h1>Γυμνάσιο Αγίου Αθανασίου</h1>
                     <p class="hero-description">Ένας σύγχρονος, οργανωμένος χώρος ενημέρωσης για την καθημερινότητα του σχολείου. Παρακολουθήστε ανακοινώσεις, ημερολόγιο και επερχόμενες δράσεις σε μία κεντρική αρχική σελίδα.</p>
                     <div class="hero-actions">
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary">Ανακοινώσεις</a>
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn hero-outline-btn">Ανακοινώσεις</a>
                         <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">Εκδηλώσεις</a>
                     </div>
                 </div>

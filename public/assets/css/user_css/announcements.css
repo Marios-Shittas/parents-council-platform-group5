@@ -223,10 +223,23 @@
     padding: 1.2rem 1.5rem;
 }
 
+.announcement-modal .modal-header .modal-title {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.announcement-modal .modal-header .modal-title i {
+    color: #ffffff !important;
+}
+
 .announcement-modal .modal-header .close {
-    color: white;
+    color: white !important;
     opacity: 0.8;
     text-shadow: none;
+}
+
+.announcement-modal .modal-header .close span {
+    color: white !important;
 }
 
 .announcement-modal .modal-header .close:hover {
@@ -365,3 +378,4 @@
         height: 150px;
     }
 }
+
