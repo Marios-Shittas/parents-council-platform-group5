@@ -2,10 +2,55 @@
 header("Content-Type: application/json");
 require_once "../config/db.php";
 
-$user_id = 2;
-
 $data = json_decode(file_get_contents("php://input"), true);
+$token = trim((string)($data['token'] ?? ''));
 $includeInsurance = isset($data['includeInsurance']) ? $data['includeInsurance'] : true;
+
+if ($token === '') {
+    http_response_code(400);
+    echo json_encode([
+        "success" => false,
+        "message" => "Missing approval token."
+    ]);
+    exit;
+}
+
+$userStmt = $conn->prepare(
+    "SELECT user_id
+     FROM Users
+     WHERE token = ?
+       AND role = 'parent'
+       AND account_status = 'waiting_payment'
+       AND token_expiry IS NOT NULL
+       AND token_expiry >= NOW()
+     LIMIT 1"
+);
+
+if (!$userStmt) {
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "message" => "Failed to validate token."
+    ]);
+    exit;
+}
+
+$userStmt->bind_param("s", $token);
+$userStmt->execute();
+$userResult = $userStmt->get_result();
+$userData = $userResult ? $userResult->fetch_assoc() : null;
+$userStmt->close();
+
+if (!$userData) {
+    http_response_code(401);
+    echo json_encode([
+        "success" => false,
+        "message" => "Invalid or expired approval token."
+    ]);
+    exit;
+}
+
+$user_id = (int)$userData['user_id'];
 
 // Get children count
 $stmt = $conn->prepare("SELECT COUNT(*) as children_count FROM Children WHERE user_id = ?");
@@ -22,9 +67,6 @@ $pricing = $res->fetch_assoc();
 $subscription_price = (float)$pricing['subscription_price'];
 $insurance_price = (float)$pricing['insurance_price'];
 
-/* ---------------------------
-   1. Membership payment
-----------------------------*/
 $stmt1 = $conn->prepare("
     INSERT INTO Payments (user_id, amount, payment_status, payment_type)
     VALUES (?, ?, 'pending', 'membership')
@@ -35,9 +77,6 @@ $stmt1->execute();
 
 $membership_payment_id = $stmt1->insert_id;
 
-/* ---------------------------
-   2. Insurance payment (optional)
-----------------------------*/
 $insurance_payment_id = null;
 
 if ($includeInsurance) {
@@ -54,11 +93,7 @@ if ($includeInsurance) {
     $insurance_payment_id = $stmt2->insert_id;
 }
 
-/* ---------------------------
-   3. LOGGING 🔥
-----------------------------*/
 
-// Log main payment creation
 $log_desc = "User created membership payment (ID: $membership_payment_id)";
 
 if ($includeInsurance) {
@@ -73,9 +108,6 @@ $stmtLog = $conn->prepare("
 $stmtLog->bind_param("is", $user_id, $log_desc);
 $stmtLog->execute();
 
-/* ---------------------------
-   Response
-----------------------------*/
 echo json_encode([
     "success" => true,
     "membership_payment_id" => $membership_payment_id,

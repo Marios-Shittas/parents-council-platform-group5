@@ -28,6 +28,7 @@ DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Children;
 DROP TABLE IF EXISTS PricingSettings;
 DROP TABLE IF EXISTS UsefulInformationSections;
+DROP TABLE IF EXISTS EpikoinoniaPageSections;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -138,7 +139,9 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments(
 CREATE TABLE IF NOT EXISTS Submissions(
     application_id    INT NOT NULL,
     user_id           INT NOT NULL,
-    file_path         VARCHAR(255) NOT NULL,
+    file_path         VARCHAR(255) DEFAULT NULL,
+    submission_data   LONGTEXT DEFAULT NULL,
+    submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sub_status        ENUM('waiting','approved','rejected') DEFAULT 'waiting',
     PRIMARY KEY (application_id, user_id),
     CONSTRAINT fk_sub_ap
@@ -201,7 +204,7 @@ CREATE TABLE IF NOT EXISTS Payments(
     payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     payment_status     ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
     payment_type       ENUM('membership','insurance','product') NOT NULL,
-    transaction_id     VARCHAR(255) UNIQUE,
+    transaction_id     VARCHAR(255) UNIQUE NULL,
     PRIMARY KEY (payment_id),
     CONSTRAINT fk_pay_user
         FOREIGN KEY (user_id) REFERENCES Users(user_id)
@@ -283,4 +286,15 @@ CREATE TABLE IF NOT EXISTS UsefulInformationSections (
     updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (section_id),
     UNIQUE KEY uq_useful_information_section_key (section_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
+    section_id        INT NOT NULL AUTO_INCREMENT,
+    section_key       VARCHAR(100) NOT NULL,
+    section_title     VARCHAR(255) NOT NULL,
+    section_subtitle  TEXT DEFAULT NULL,
+    content_json      LONGTEXT DEFAULT NULL,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_id),
+    UNIQUE KEY uq_epikoinonia_section_key (section_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

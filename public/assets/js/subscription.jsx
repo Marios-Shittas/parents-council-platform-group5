@@ -1,47 +1,69 @@
 function SubscriptionPage() {
 
     const [data, setData] = React.useState(null);
+    const [error, setError] = React.useState("");
     const [includeInsurance, setIncludeInsurance] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
+    const token = window.APPROVAL_TOKEN || "";
+    const baseServiceUrl = "/parents-council-platform-group5/app/services";
 
-    // ✅ Fetch data ONLY
     React.useEffect(() => {
-        fetch("../app/services/Subscription.php")
-            .then(res => res.json())
-            .then(data => setData(data))
-            .catch(err => console.error(err));
-    }, []);
+        fetch(baseServiceUrl + "/Subscription.php?token=" + encodeURIComponent(token))
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Αποτυχία φόρτωσης στοιχείων πληρωμής.");
+                }
+                return res.json();
+            })
+            .then(response => {
+                if (!response.success) {
+                    throw new Error(response.message || "Μη έγκυρο token.");
+                }
+                setData(response.data);
+                setError("");
+            })
+            .catch(err => {
+                console.error(err);
+                setError(err.message || "Δεν ήταν δυνατή η φόρτωση των τιμών.");
+            });
+    }, [token, baseServiceUrl]);
 
-    // ✅ ONE handlePayment ONLY
+
     const handlePayment = () => {
         if (loading) return;
 
         setLoading(true);
 
-        fetch("../app/services/InsertPayment.php", {
+        fetch(baseServiceUrl + "/InsertPayment.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                includeInsurance: includeInsurance
+                includeInsurance: includeInsurance,
+                token: token
             })
         })
         .then(res => res.json())
         .then(response => {
-            console.log(response);
+            if (!response.success) {
+                alert(response.message || "Αποτυχία πληρωμής.");
+                return;
+            }
             alert("Η πληρωμή δημιουργήθηκε!");
         })
         .catch(err => console.error(err))
         .finally(() => setLoading(false));
     };
 
-    // ✅ Loading state
+    if (error) {
+        return <div className="alert alert-danger mt-5 text-center">{error}</div>;
+    }
+
     if (!data) {
         return <div className="text-center mt-5">Loading...</div>;
     }
 
-    // ✅ Calculations
     const insuranceTotal = includeInsurance ? data.insurance_total : 0;
     const total = data.subscription_price + insuranceTotal;
 
