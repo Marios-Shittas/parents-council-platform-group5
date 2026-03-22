@@ -799,12 +799,12 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                                 <?php if ($message['is_read'] == 0): ?>
                                                     <span class="badge-unread">
                                                         <i class="fas fa-circle"></i>
-                                                        Νέο
+                                                        ΝΕΟ
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="badge-read">
                                                         <i class="fas fa-check-circle"></i>
-                                                        Αναγνωσμένο
+                                                        ΑΝΑΓΝΩΣΜΕΝΟ
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
@@ -899,11 +899,9 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                 <p class="text-muted">Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</p>
             </div>
             <div class="delete-modal-footer">
-                <button id="cancelBtn" class="btn btn-secondary">
-                    Όχι
-                </button>
+                <button id="cancelBtn" class="btn btn-secondary">Όχι</button>
                 <button id="confirmBtn" class="btn btn-danger">
-                    Ναι, Διαγραφή
+                    Ναι,Διαγραφή
                 </button>
             </div>
         </div>

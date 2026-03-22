@@ -277,8 +277,42 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             max-height: calc(100vh - 1.5rem);
         }
 
+        #submitModal .modal-header {
+            background: #1f7aec;
+            border-bottom: 0;
+        }
+
+        #submitModal .modal-title {
+            color: #ffffff;
+        }
+
+        #submitModal .modal-header .close {
+            color: #ffffff;
+            opacity: 1;
+            text-shadow: none;
+        }
+
+        #submitModal .modal-header .close:hover {
+            color: #ffffff;
+            opacity: 0.85;
+        }
+
         #submitModal .modal-body {
             overflow-y: auto;
+        }
+
+        #modal-submission-file {
+            font-size: 0.9rem;
+            line-height: 1.2;
+            padding: 0.28rem 0.5rem;
+        }
+
+        #modal-submission-file::file-selector-button,
+        #modal-submission-file::-webkit-file-upload-button {
+            font-size: 0.82rem;
+            line-height: 1.2;
+            padding: 0.28rem 0.62rem;
+            margin-right: 0.5rem;
         }
     </style>
 
@@ -450,6 +484,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                                 <button class="btn btn-sm btn-outline-primary view-db-submission"
                                                         data-sub-data="<?php echo htmlspecialchars($submission['submission_data'] ?? '{}'); ?>"
                                                         data-sub-title="<?php echo htmlspecialchars($submission['application_title']); ?>"
+                                                        data-submitted-at="<?php echo htmlspecialchars($submittedDate); ?>"
                                                         data-sub-status="<?php echo htmlspecialchars($submission['sub_status']); ?>">
                                                     <i class="fas fa-eye mr-1"></i>Προβολή
                                                 </button>
@@ -498,8 +533,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title-group">
-                    <span id="modal-type-badge" class="category-tag mr-2"></span>
-                    <h5 class="modal-title d-inline" id="modal-title">Υποβολή Αίτησης</h5>
+                    <h5 class="modal-title" id="modal-title">Υποβολή Αίτησης</h5>
                 </div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
                     <span aria-hidden="true">&times;</span>
@@ -507,14 +541,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
             </div>
             <div class="modal-body">
                 <p id="modal-description" class="text-muted small mb-3"></p>
-                <div class="row modal-dates-info mb-3">
-                    <div class="col-6">
-                        <small><i class="fas fa-calendar-plus mr-1 text-success"></i><strong>Άνοιξε:</strong> <span id="modal-open-date"></span></small>
-                    </div>
-                    <div class="col-6">
-                        <small><i class="fas fa-calendar-times mr-1 text-danger"></i><strong>Λήγει:</strong> <span id="modal-close-date"></span></small>
-                    </div>
-                </div>
                 <hr class="my-2">
                 <div id="modal-dynamic-fields">
                     <!-- Rendered by JavaScript -->
