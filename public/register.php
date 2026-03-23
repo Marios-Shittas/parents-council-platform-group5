@@ -1,5 +1,11 @@
 <?php
-?>
+declare(strict_types=1);
+
+class RegisterPage
+{
+    public function render(): void
+    {
+        ?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -39,8 +45,16 @@
     <!-- Babel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-    <!-- Your React JSX -->
+    <!-- Register JSX -->
     <script type="text/babel" src="assets/js/register.jsx"></script>
 
     <!-- Footer -->
     <?php include '../app/includes/footer.php'; ?>
+</body>
+</html>
+        <?php
+    }
+}
+
+$page = new RegisterPage();
+$page->render();
