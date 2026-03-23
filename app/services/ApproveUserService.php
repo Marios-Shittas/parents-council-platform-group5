@@ -16,12 +16,33 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$payload = json_decode(file_get_contents('php://input'), true) ?? [];
+$rawBody = file_get_contents('php://input');
+$payload = json_decode($rawBody, true);
+
+// Windows cmd curl often wraps JSON in single quotes; try to recover that payload shape.
+if (!is_array($payload) && is_string($rawBody)) {
+    $trimmed = trim($rawBody);
+    $len = strlen($trimmed);
+
+    if ($len >= 2 && $trimmed[0] === '\'' && $trimmed[$len - 1] === '\'') {
+        $trimmed = substr($trimmed, 1, -1);
+        $payload = json_decode($trimmed, true);
+    }
+}
+
+if (!is_array($payload) && !empty($_POST)) {
+    $payload = $_POST;
+}
+
+$payload = is_array($payload) ? $payload : [];
 $email = trim((string) ($payload['email'] ?? ''));
 
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Valid email is required']);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Valid email is required. For Windows cmd, use: -d "{\"email\":\"user@example.com\"}"',
+    ]);
     exit;
 }
 

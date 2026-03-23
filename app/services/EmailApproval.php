@@ -8,6 +8,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 class EmailApproval
 {
     private PHPMailer $mailer;
+    private array $transportModes = [];
 
     public function __construct(array $smtpConfig)
     {
@@ -43,27 +44,95 @@ class EmailApproval
             $mailer->SMTPSecure = $encryption;
         }
 
+        $mailer->SMTPAutoTLS = true;
+        $mailer->Timeout = 20;
+        $mailer->isHTML(false);
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $mailer->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
+        }
+
         $mailer->CharSet = 'UTF-8';
         $mailer->setFrom($fromEmail, $fromName !== '' ? $fromName : 'Parents Council');
         $this->mailer = $mailer;
+        $this->transportModes = $this->resolveTransportModes($encryption, $port);
     }
 
     public function sendApprovalEmail(string $toEmail, string $link): void
     {
-        try {
-            $this->mailer->clearAllRecipients();
-            $this->mailer->addAddress($toEmail);
-            $this->mailer->Subject = 'Η αίτησή σας εγκρίθηκε';
-            $this->mailer->Body =
-                "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-                "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-                "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
-                $link . "\n\n" .
-                "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
+        $lastError = null;
 
-            $this->mailer->send();
-        } catch (PHPMailerException $e) {
-            throw new \RuntimeException('Failed to send approval email: ' . $e->getMessage(), 0, $e);
+        foreach ($this->transportModes as $mode) {
+            try {
+                $this->applyTransportMode($mode);
+                $this->mailer->clearAllRecipients();
+                $this->mailer->addAddress($toEmail);
+                $this->mailer->Subject = 'Η αίτησή σας εγκρίθηκε';
+                $this->mailer->Body =
+                    "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
+                    "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
+                    "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
+                    $link . "\n\n" .
+                    "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
+
+                $this->mailer->send();
+                return;
+            } catch (PHPMailerException $e) {
+                $lastError = $e;
+            }
         }
+
+        if ($lastError instanceof PHPMailerException) {
+            throw new \RuntimeException('Failed to send approval email: ' . $lastError->getMessage(), 0, $lastError);
+        }
+
+        throw new \RuntimeException('Failed to send approval email.');
+    }
+
+    private function resolveTransportModes(string $encryption, int $port): array
+    {
+        $normalized = strtolower(trim($encryption));
+
+        if ($normalized === PHPMailer::ENCRYPTION_STARTTLS || $normalized === 'tls') {
+            return ['starttls', 'smtps', 'none'];
+        }
+
+        if ($normalized === PHPMailer::ENCRYPTION_SMTPS || $normalized === 'ssl') {
+            return ['smtps', 'starttls', 'none'];
+        }
+
+        if ($port === 465) {
+            return ['smtps', 'starttls', 'none'];
+        }
+
+        if ($port === 587) {
+            return ['starttls', 'smtps', 'none'];
+        }
+
+        return ['starttls', 'smtps', 'none'];
+    }
+
+    private function applyTransportMode(string $mode): void
+    {
+        if ($mode === 'smtps') {
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $this->mailer->SMTPAutoTLS = false;
+            return;
+        }
+
+        if ($mode === 'none') {
+            $this->mailer->SMTPSecure = '';
+            $this->mailer->SMTPAutoTLS = false;
+            return;
+        }
+
+        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $this->mailer->SMTPAutoTLS = true;
     }
 }
