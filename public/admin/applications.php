@@ -4,7 +4,20 @@
  * Create, update, delete applications and manage documents
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /parents-council-platform-group5/public/login.php');
+    exit;
+}
+
 require_once __DIR__ . '/../../app/services/ApplicationsService.php';
 
 // Initialize the service
@@ -512,7 +525,8 @@ if ($selectedApplicationId > 0) {
     <link rel="stylesheet" href="../assets/css/admin_css/admin_applications.css">
 
     <title>Διαχείριση Αιτήσεων - Admin</title>
-</head>
+    <script>
+        (function() {
 <body>
 
 

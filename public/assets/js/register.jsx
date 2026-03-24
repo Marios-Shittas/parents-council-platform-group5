@@ -24,6 +24,7 @@ function RegisterForm() {
             const response = await fetch('../app/services/RegisteringService.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ ...form, children })
             });
 

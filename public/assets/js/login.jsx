@@ -41,6 +41,7 @@ function handleLogin() {
   fetch ('/parents-council-platform-group5/app/services/LoginService.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
       body: JSON.stringify({ email, password })
   })
 
