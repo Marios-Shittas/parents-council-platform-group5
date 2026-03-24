@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
         }
 
         $decoded = json_decode($raw, true);
-        if (!is_array($decoded)) {
+        if (!is_array($decoded) && !is_object(json_decode($raw))) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Μη έγκυρα δεδομένα φόρμας.']);
@@ -554,9 +554,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="modal-save-draft-btn" class="btn btn-outline-secondary">
-                    <i class="fas fa-save mr-1"></i> Αποθήκευση Πρόχειρου
-                </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times mr-1"></i> Ακύρωση
                 </button>

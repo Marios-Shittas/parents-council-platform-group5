@@ -1,79 +1,10 @@
 "use strict";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   APPLICATION METADATA  (dummy / front-end only)
-   Cycling array assigned by rendered card order (data-app-index).
-   Provides status, category, open/close dates, and form type for the UI.
-   Actual submission is saved to the database via AJAX.
-───────────────────────────────────────────────────────────────────────────── */
-const APP_META = [
-    {
-        status:    'open',
-        category:  'Βιβλιοθήκη',
-        openDate:  '01/03/2026',
-        closeDate: '30/04/2026',
-        formType:  'library'
-    },
-    {
-        status:    'closed',
-        category:  'Εκδρομές',
-        openDate:  '10/01/2026',
-        closeDate: '28/02/2026',
-        formType:  'field_trip'
-    },
-    {
-        status:    'open',
-        category:  'Επιστήμη',
-        openDate:  '01/03/2026',
-        closeDate: '15/05/2026',
-        formType:  'science_fair'
-    },
-    {
-        status:    'open',
-        category:  'Εξωσχολικές',
-        openDate:  '10/03/2026',
-        closeDate: '20/04/2026',
-        formType:  'after_school'
-    }
-];
-
-/* ─────────────────────────────────────────────────────────────────────────────
    FORM FIELD TEMPLATES  (keyed by formType)
 ───────────────────────────────────────────────────────────────────────────── */
 const FORM_FIELDS = {
-    library: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',        type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                 type: 'select',   required: true,  icon: 'fa-chalkboard',   options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα', type: 'text',    required: true,  icon: 'fa-user' },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    field_trip: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',            type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                     type: 'select',   required: true,  icon: 'fa-chalkboard',        options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα',    type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'trip_name',    label: 'Προορισμός Εκδρομής',      type: 'text',     required: true,  icon: 'fa-map-marker-alt' },
-        { name: 'comments',     label: 'Ιατρικές Πληροφορίες / Σχόλια', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    science_fair: [
-        { name: 'student_name',  label: 'Όνομα Μαθητή',       type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',         label: 'Τάξη',                type: 'select',   required: true,  icon: 'fa-chalkboard',  options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',   label: 'Όνομα Γονέα',        type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'project_title', label: 'Τίτλος Εργασίας',     type: 'text',     required: true,  icon: 'fa-flask' },
-        { name: 'comments',      label: 'Σχόλια (προαιρετικό)',type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    after_school: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',       type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                type: 'select',   required: true,  icon: 'fa-chalkboard',  options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα',        type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'activity',     label: 'Δραστηριότητα',       type: 'select',   required: true,  icon: 'fa-running',     options: ['Ποδόσφαιρο','Μπάσκετ','Χορός','Θέατρο','Ζωγραφική'] },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)',type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    general: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',        type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                 type: 'select',   required: true,  icon: 'fa-chalkboard',   options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα', type: 'text',   required: true,  icon: 'fa-user' },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ]
+    general: []
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -674,9 +605,16 @@ document.addEventListener('DOMContentLoaded', function () {
         // Dynamic form fields
         var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
         var container = document.getElementById('modal-dynamic-fields');
+        // Προσθέτουμε το input αρχείου μέσα στη φόρμα
         container.innerHTML =
-            '<form id="application-form">' +
+            '<form id="application-form" enctype="multipart/form-data">' +
             fields.map(buildField).join('') +
+            '<div class="form-group mt-3 mb-0">' +
+            '<label class="form-label-custom mb-2">' +
+            '<i class="fas fa-paperclip text-primary mr-1"></i>Προαιρετικό αρχείο υποβολής</label>' +
+            '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
+            '<small class="text-muted d-block mt-1">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png.</small>' +
+            '</div>' +
             '</form>';
 
         // Restore saved draft for this application, if available.

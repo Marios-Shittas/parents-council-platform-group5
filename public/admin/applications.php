@@ -162,15 +162,6 @@ function getDocumentAbsolutePath(string $storedPath): string {
     return $storedPath;
 }
 
-function getSubmissionStatusMeta(string $status): array {
-    $map = [
-        'waiting' => ['label' => 'Υπό Εξέταση', 'badge' => 'bg-info'],
-        'approved' => ['label' => 'Εγκρίθηκε', 'badge' => 'bg-success'],
-        'rejected' => ['label' => 'Απορρίφθηκε', 'badge' => 'bg-danger'],
-    ];
-
-    return $map[$status] ?? ['label' => $status, 'badge' => 'bg-secondary'];
-}
 
 function getApplicationUiMetaPath(): string {
     return __DIR__ . '/../../storage/application_ui_meta.json';
@@ -701,29 +692,20 @@ if ($selectedApplicationId > 0) {
                         <table class="table table-hover align-middle admin-dashboard-table">
                             <thead>
                                 <tr>
-                                    <th>Μαθητής</th>
-                                    <th>Τάξη</th>
                                     <th>Γονέας</th>
                                     <th>Ημ. Υποβολής</th>
                                     <th>Συνημμένα</th>
-                                    <th>Κατάσταση</th>
-                                    <th>Ενέργειες</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($selectedSubmissions as $submission): ?>
                                     <?php
                                         $formData = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
-                                        $studentName = $formData['student_name'] ?? '—';
-                                        $studentClass = $formData['class'] ?? '—';
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
-                                        $statusMeta = getSubmissionStatusMeta((string)$submission['sub_status']);
                                         $submissionFileUrl = !empty($submission['file_path']) ? getDocumentPublicUrl((string)$submission['file_path']) : '';
                                     ?>
                                     <tr>
-                                        <td class="fw-semibold"><?php echo htmlspecialchars((string)$studentName); ?></td>
-                                        <td><?php echo htmlspecialchars((string)$studentClass); ?></td>
                                         <td>
                                             <div><?php echo htmlspecialchars((string)$parentName); ?></div>
                                             <div class="small text-muted"><?php echo htmlspecialchars((string)($submission['email'] ?? '')); ?></div>
@@ -738,7 +720,7 @@ if ($selectedApplicationId > 0) {
                                                 <span class="text-muted">—</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><span class="badge <?php echo htmlspecialchars($statusMeta['badge']); ?>"><?php echo htmlspecialchars($statusMeta['label']); ?></span></td>
+
                                         <td>
                                             <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form" data-student-name="<?php echo htmlspecialchars((string)$studentName, ENT_QUOTES, 'UTF-8'); ?>" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>">
                                                 <input type="hidden" name="action" value="update_submission_status">
@@ -747,14 +729,6 @@ if ($selectedApplicationId > 0) {
                                                 <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
                                                 <input type="hidden" name="return_scroll_y" value="0">
 
-                                                <select name="sub_status" class="form-select form-select-sm" required>
-                                                    <option value="" <?php echo ($submission['sub_status'] !== 'approved' && $submission['sub_status'] !== 'rejected') ? 'selected' : ''; ?> disabled>Επιλογή...</option>
-                                                    <option value="approved" <?php echo ($submission['sub_status'] === 'approved') ? 'selected' : ''; ?>>Αποδοχή</option>
-                                                    <option value="rejected" <?php echo ($submission['sub_status'] === 'rejected') ? 'selected' : ''; ?>>Απόρριψη</option>
-                                                    <option value="delete">Διαγραφή Υποβολής</option>
-                                                </select>
-
-                                                <button type="submit" class="btn btn-sm btn-primary-custom">Αποθήκευση</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -914,20 +888,6 @@ if ($selectedApplicationId > 0) {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label class="form-label"><strong>Νέα Εικόνα</strong></label>
-                                        <input type="file" name="application_image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Νέο Αρχείο Οδηγιών</strong></label>
-                                        <input type="file" name="instruction_file" class="form-control" accept=".pdf,.doc,.docx">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Πρόσθετα Δικαιολογητικά</strong></label>
-                                        <input type="file" name="required_documents[]" class="form-control" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -964,7 +924,7 @@ if ($selectedApplicationId > 0) {
                 <div class="row g-3 mb-3">
                     <div class="col-md-6"><div class="detail-card"><span>Αίτηση</span><strong id="detail_application_title">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Κατάσταση</span><strong id="detail_status_badge_wrapper">—</strong></div></div>
-                    <div class="col-md-6"><div class="detail-card"><span>Μαθητής</span><strong id="detail_student_name">—</strong></div></div>
+                    
                     <div class="col-md-6"><div class="detail-card"><span>Τάξη</span><strong id="detail_student_class">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Γονέας</span><strong id="detail_parent_name">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Ημ. Υποβολής</span><strong id="detail_submitted_at">—</strong></div></div>
