@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once __DIR__ . '/../../app/services/ProductsService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -184,14 +187,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
 
         if ($id > 0) {
-            $deleted = $productsService->deleteProduct($id);
+            $existsInOrders = $productsService->productExistsInOrders($id);
 
-            if ($deleted) {
-                $_SESSION['flash_message'] = 'Το προϊόν διαγράφηκε επιτυχώς.';
-                $_SESSION['flash_message_type'] = 'success';
+            if ($existsInOrders === true) {
+                $_SESSION['flash_message'] = 'Το προϊόν δεν μπορεί να διαγραφεί, γιατί υπάρχει σε καταχωρημένες παραγγελίες.';
+                $_SESSION['flash_message_type'] = 'warning';
             } else {
-                $_SESSION['flash_message'] = 'Σφάλμα κατά τη διαγραφή του προϊόντος.';
-                $_SESSION['flash_message_type'] = 'danger';
+                $deleted = $productsService->deleteProduct($id);
+
+                if ($deleted) {
+                    $_SESSION['flash_message'] = 'Το προϊόν διαγράφηκε επιτυχώς.';
+                    $_SESSION['flash_message_type'] = 'success';
+                } else {
+                    $_SESSION['flash_message'] = 'Σφάλμα κατά τη διαγραφή του προϊόντος.';
+                    $_SESSION['flash_message_type'] = 'danger';
+                }
             }
         } else {
             $_SESSION['flash_message'] = 'Μη έγκυρο προϊόν.';
