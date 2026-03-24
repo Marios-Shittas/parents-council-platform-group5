@@ -1,33 +1,28 @@
 <?php
+declare(strict_types=1);
+
 require_once __DIR__ . '/../app/config/db.php';
+require_once __DIR__ . '/../app/includes/TokenValidator.php';
 
-$token = trim((string)($_GET['token'] ?? ''));
-$isValidToken = false;
-$tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
+class SubscriptionPage
+{
+    private mysqli $conn;
+    private TokenValidator $tokenValidator;
+    private string $tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
 
-if ($token !== '') {
-    $stmt = $conn->prepare(
-        "SELECT user_id
-         FROM Users
-         WHERE token = ?
-           AND role = 'parent'
-           AND account_status = 'waiting_payment'
-           AND token_expiry IS NOT NULL
-           AND token_expiry >= NOW()
-         LIMIT 1"
-    );
-
-    if ($stmt) {
-        $stmt->bind_param('s', $token);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $isValidToken = $result && $result->num_rows === 1;
-        $stmt->close();
+    public function __construct(mysqli $conn)
+    {
+        $this->conn = $conn;
+        $this->tokenValidator = new TokenValidator($conn);
     }
-}
 
-$tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-?>
+    public function render(): void
+    {
+        $token = trim((string) ($_GET['token'] ?? ''));
+        $isValidToken = $this->isTokenValid($token);
+        $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        ?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -44,19 +39,18 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- CSS -->
-   <link rel="stylesheet" href="assets/css/subscription.css">
+    <link rel="stylesheet" href="assets/css/subscription.css">
 
-    <title>Συνδρωμή</title>
+    <title>Συνδρομή</title>
 </head>
 <body>
     <?php if (!$isValidToken): ?>
         <div class="container mt-5">
             <div class="alert alert-danger text-center" role="alert">
-                <?php echo htmlspecialchars($tokenMessage, ENT_QUOTES, 'UTF-8'); ?>
+                <?php echo htmlspecialchars($this->tokenMessage, ENT_QUOTES, 'UTF-8'); ?>
             </div>
         </div>
     <?php else: ?>
-        <!-- React will render here -->
         <div class="container">
             <div id="root"></div>
         </div>
@@ -74,6 +68,19 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             window.APPROVAL_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
         </script>
 
-        <!-- Your React JSX -->
         <script type="text/babel" src="assets/js/subscription.jsx"></script>
     <?php endif; ?>
+</body>
+</html>
+        <?php
+    }
+
+    private function isTokenValid(string $token): bool
+    {
+        return $this->tokenValidator->isTokenValid($token, 'parent', 'waiting_payment', true);
+    }
+}
+
+$page = new SubscriptionPage($conn);
+$page->render();
+$conn->close();

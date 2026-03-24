@@ -1,96 +1,119 @@
 <?php
-header("Content-Type: application/json");
-require_once "../config/db.php";
+declare(strict_types=1);
 
-$token = trim((string)($_GET['token'] ?? ''));
+header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/TokenValidator.php';
 
-if ($token === '') {
-    http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "message" => "Missing approval token."
-    ]);
-    exit;
+class SubscriptionService
+{
+    private mysqli $conn;
+    private TokenValidator $tokenValidator;
+
+    public function __construct(mysqli $conn)
+    {
+        $this->conn = $conn;
+        $this->tokenValidator = new TokenValidator($conn);
+    }
+
+    public function handleRequest(): void
+    {
+        $token = trim((string) ($_GET['token'] ?? ''));
+        if ($token === '') {
+            $this->respond(400, [
+                'success' => false,
+                'message' => 'Missing approval token.',
+            ]);
+            return;
+        }
+
+        $userId = $this->getUserIdFromToken($token);
+        if ($userId === null) {
+            $this->respond(401, [
+                'success' => false,
+                'message' => 'Invalid or expired approval token.',
+            ]);
+            return;
+        }
+
+        $childrenCount = $this->getChildrenCount($userId);
+        $pricing = $this->getPricing();
+
+        if ($pricing === null) {
+            $this->respond(500, [
+                'success' => false,
+                'message' => 'Pricing settings are missing.',
+            ]);
+            return;
+        }
+
+        $subscriptionPrice = (float) $pricing['subscription_price'];
+        $insurancePrice = (float) $pricing['insurance_price'];
+
+        $insuranceTotal = $insurancePrice * $childrenCount;
+        $total = $subscriptionPrice + $insuranceTotal;
+
+        $this->respond(200, [
+            'success' => true,
+            'data' => [
+                'subscription_price' => $subscriptionPrice,
+                'insurance_price' => $insurancePrice,
+                'children_count' => $childrenCount,
+                'insurance_total' => $insuranceTotal,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    private function getUserIdFromToken(string $token): ?int
+    {
+        return $this->tokenValidator->getUserIdByToken($token, 'parent', 'waiting_payment', true);
+    }
+
+    private function getChildrenCount(int $userId): int
+    {
+        $stmt = $this->conn->prepare('SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?');
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to count children.');
+        }
+
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return (int) ($row['children_count'] ?? 0);
+    }
+
+    private function getPricing(): ?array
+    {
+        $sql = 'SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1';
+        $res = $this->conn->query($sql);
+        if ($res === false) {
+            throw new RuntimeException('Failed to read pricing settings.');
+        }
+
+        $row = $res->fetch_assoc();
+        return $row ?: null;
+    }
+
+    private function respond(int $statusCode, array $payload): void
+    {
+        http_response_code($statusCode);
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
 }
 
-$userStmt = $conn->prepare(
-    "SELECT user_id
-     FROM Users
-     WHERE token = ?
-       AND role = 'parent'
-       AND account_status = 'waiting_payment'
-       AND token_expiry IS NOT NULL
-       AND token_expiry >= NOW()
-     LIMIT 1"
-);
-
-if (!$userStmt) {
+try {
+    $service = new SubscriptionService($conn);
+    $service->handleRequest();
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode([
-        "success" => false,
-        "message" => "Failed to validate token."
-    ]);
-    exit;
+        'success' => false,
+        'message' => $e->getMessage(),
+    ], JSON_UNESCAPED_UNICODE);
 }
 
-$userStmt->bind_param("s", $token);
-$userStmt->execute();
-$userResult = $userStmt->get_result();
-$userData = $userResult ? $userResult->fetch_assoc() : null;
-$userStmt->close();
-
-if (!$userData) {
-    http_response_code(401);
-    echo json_encode([
-        "success" => false,
-        "message" => "Invalid or expired approval token."
-    ]);
-    exit;
-}
-
-$user_id = (int)$userData['user_id'];
-
-$stmt = $conn->prepare("SELECT COUNT(*) as children_count FROM Children WHERE user_id = ?");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result()->fetch_assoc();
-
-$children_count = (int)$result['children_count'];
-
-$sql = "SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1";
-$res = $conn->query($sql);
-if (!$res) {
-    http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "message" => "Failed to read pricing settings."
-    ]);
-    exit;
-}
-
-$pricing = $res->fetch_assoc();
-if (!$pricing) {
-    http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "message" => "Pricing settings are missing."
-    ]);
-    exit;
-}
-
-$subscription_price = (float)$pricing['subscription_price'];
-$insurance_price = (float)$pricing['insurance_price'];
-
-$insurance_total = $insurance_price * $children_count;
-$total = $subscription_price + $insurance_total;
-
-echo json_encode([
-    "success" => true,
-    "data" => [
-        "subscription_price" => $subscription_price,
-        "insurance_price" => $insurance_price,
-        "children_count" => $children_count,
-        "insurance_total" => $insurance_total,
-        "total" => $total
-    ]
-]);
+$conn->close();
