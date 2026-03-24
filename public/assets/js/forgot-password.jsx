@@ -16,6 +16,7 @@ function handleForgotPassword() {
   fetch ('/parents-council-platform-group5/app/services/ForgotPasswordService.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
       body: JSON.stringify({email})
   })
   .then(respone => respone.json())

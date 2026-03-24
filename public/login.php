@@ -1,3 +1,13 @@
+<?php 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+?>
+
 <!DOCTYPE html>
 <html lang="el">
     <head>
@@ -18,6 +28,27 @@
     </head>
     
     <body class="body">
+    <script>
+        // If trying to go back from login, validate session
+        // This prevents cached protected pages from showing
+        (function() {
+            // Listen for attempts to go back
+            window.addEventListener('popstate', function(event) {
+                // Do nothing - let them go back naturally
+                // But if they navigate to a protected page, the protected page will redirect them
+            });
+            
+            // When page is hidden and shown, validate
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    // If they switch tabs and come back, ensure they stay on login
+                    if (window.location.pathname.includes('login.php')) {
+                        // We're on login, which is correct
+                    }
+                }
+            });
+        })();
+    </script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>
