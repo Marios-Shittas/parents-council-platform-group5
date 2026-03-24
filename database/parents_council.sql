@@ -26,6 +26,12 @@ DROP TABLE IF EXISTS UsefulInformationSections;
 DROP TABLE IF EXISTS SystemSchedule;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Children;
+<<<<<<< HEAD
+=======
+DROP TABLE IF EXISTS PricingSettings;
+DROP TABLE IF EXISTS UsefulInformationSections;
+DROP TABLE IF EXISTS EpikoinoniaPageSections;
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -174,11 +180,18 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
 CREATE TABLE IF NOT EXISTS Submissions (
     application_id    INT NOT NULL,
     user_id           INT NOT NULL,
+<<<<<<< HEAD
     file_path         VARCHAR(255) NULL DEFAULT NULL,
     text_content      TEXT DEFAULT NULL,
     submission_data   TEXT DEFAULT NULL,
     submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sub_status        ENUM('waiting', 'approved', 'rejected') DEFAULT 'waiting',
+=======
+    file_path         VARCHAR(255) DEFAULT NULL,
+    submission_data   LONGTEXT DEFAULT NULL,
+    submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    sub_status        ENUM('waiting','approved','rejected') DEFAULT 'waiting',
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
     PRIMARY KEY (application_id, user_id),
     CONSTRAINT fk_sub_ap
         FOREIGN KEY (application_id) REFERENCES Applications(application_id)
@@ -238,8 +251,14 @@ CREATE TABLE IF NOT EXISTS Payments (
     user_id            INT NOT NULL,
     amount             DECIMAL(10,2) NOT NULL,
     payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+<<<<<<< HEAD
     payment_status     ENUM('completed', 'failed', 'refunded') NOT NULL DEFAULT 'completed',
     payment_type       ENUM('membership', 'insurance', 'product') NOT NULL,
+=======
+    payment_status     ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+    payment_type       ENUM('membership','insurance','product') NOT NULL,
+    transaction_id     VARCHAR(255) UNIQUE NULL,
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
     PRIMARY KEY (payment_id),
     CONSTRAINT fk_pay_user
         FOREIGN KEY (user_id) REFERENCES Users(user_id)
@@ -269,4 +288,38 @@ CREATE TABLE IF NOT EXISTS SystemSchedule (
     end_date          DATETIME NOT NULL,
     ss_status         ENUM('active', 'inactive') DEFAULT 'inactive',
     PRIMARY KEY (ss_id)
+<<<<<<< HEAD
+=======
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS PricingSettings (
+    id INT NOT NULL AUTO_INCREMENT,
+    subscription_price DECIMAL(10,2) NOT NULL,
+    insurance_price DECIMAL(10,2) NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS UsefulInformationSections (
+    section_id        INT NOT NULL AUTO_INCREMENT,
+    section_key       VARCHAR(100) NOT NULL,
+    section_title     VARCHAR(255) NOT NULL,
+    section_subtitle  TEXT DEFAULT NULL,
+    content_json      LONGTEXT DEFAULT NULL,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_id),
+    UNIQUE KEY uq_useful_information_section_key (section_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
+    section_id        INT NOT NULL AUTO_INCREMENT,
+    section_key       VARCHAR(100) NOT NULL,
+    section_title     VARCHAR(255) NOT NULL,
+    section_subtitle  TEXT DEFAULT NULL,
+    content_json      LONGTEXT DEFAULT NULL,
+    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (section_id),
+    UNIQUE KEY uq_epikoinonia_section_key (section_key)
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

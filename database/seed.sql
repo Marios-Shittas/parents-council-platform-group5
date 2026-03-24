@@ -4,10 +4,17 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+<<<<<<< HEAD
 INSERT INTO Users (user_id, name, surname, email, password, phone_number, number_of_children, role, account_status, token, token_expiry) VALUES
 (1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '1234567890', 0, 'admin', 'active', NULL, NULL),
 (2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '1112223333', 2, 'parent', 'active', NULL, NULL),
 (3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '4445556666', 1, 'parent', 'approved', NULL, NULL);
+=======
+INSERT INTO Users (user_id, name, surname, email, password, phone_number, role, account_status, token, token_expiry) VALUES
+(1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '1234567890', 'admin', 'active', NULL, NULL),
+(2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '1112223333', 'parent', 'active', NULL, NULL),
+(3, 'Jane', 'Smith', 'avramidis.dev@gmail.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '4445556666', 'parent', 'waiting_payment', NULL, NULL);
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 
 INSERT INTO Children (child_id, user_id, name, surname, date_of_birth, school_class) VALUES
 (1, 2, 'Chris', 'Doe', '2015-05-10', '5A'),
@@ -54,7 +61,11 @@ INSERT INTO Events (event_id, event_title, event_description, event_date, publis
 
 INSERT INTO Products (product_id, product_name, product_description, price) VALUES
 (1, 'School Hoodie', 'Blue hoodie with school logo', 25.00),
+<<<<<<< HEAD
 (2, 'Black School Trousers', 'Black school uniform trousers', 15.00);
+=======
+(2, 'Notebook', 'A4 lined notebook', 3.50);
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 
 INSERT INTO SystemSchedule (ss_id, feature, start_date, end_date, ss_status) VALUES
 (1, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active'),
@@ -64,6 +75,7 @@ INSERT INTO Orders (order_id, user_id, total_price, created_at, order_status) VA
 (1, 2, 28.50, '2026-03-07 11:59:24', 'paid'),
 (2, 3, 25.00, '2026-03-07 11:59:24', 'pending');
 
+<<<<<<< HEAD
 INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES
 (1, 1, 25.00, 1, NULL),
 (1, 2, 3.50, 1, NULL),
@@ -77,6 +89,13 @@ INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, 
 (1, 1, 1, 1, 25.00, NULL),
 (2, 1, 2, 1, 3.50, NULL);
 
+=======
+INSERT INTO Payments (payment_id, user_id, amount, payment_date, payment_status, payment_type, transaction_id) VALUES
+(100, 2, 20.00, '2026-03-10 10:00:00', 'completed', 'membership', 'JCC_MEMB_001'),
+(101, 2, 15.00, '2026-03-10 10:05:00', 'completed', 'insurance', 'JCC_INS_001'),
+(102, 3, 25.00, '2026-03-11 12:00:00', 'failed', 'product', 'JCC_PROD_001');
+
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 INSERT INTO AnnouncementsImages (an_image_id, announcement_id, image_path) VALUES
 (31, 37, '/parents-council-platform-group5/public/assets/Announcements_img/69b16b4e53d13_1773235022.png'),
 (33, 38, '/parents-council-platform-group5/public/assets/Announcements_img/69b16b940919b_1773235092.jpeg'),
@@ -117,6 +136,19 @@ INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES
 (1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', 'approved'),
 (2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', 'waiting');
 
+<<<<<<< HEAD
+=======
+INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES
+(1, 1, 25.00, 1, NULL),
+(1, 2, 3.50, 1, NULL),
+(2, 1, 25.00, 1, NULL);
+
+INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, price_at_purchase, size) VALUES
+(1, 100, 1, 1, 25.00, NULL),
+(2, 100, 2, 1, 3.50, NULL),
+(3, 102, 1, 2, 50.00, NULL);
+
+>>>>>>> 64b2c196a771bfd7bdfa15a1b213bde4b6cc453b
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
 (2, 2, '/parents-council-platform-group5/public/assets/Products_img/black-school-trousers.jpg');
