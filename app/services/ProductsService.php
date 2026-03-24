@@ -157,60 +157,129 @@ class ProductsService
         return $stmt->execute();
     }
 
+    public function productExistsInOrders($productId)
+    {
+        $productId = (int)$productId;
+
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(*) AS total
+            FROM OrderItems
+            WHERE product_id = ?
+        ");
+
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $row = $result->fetch_assoc()) {
+            return ((int)$row['total']) > 0;
+        }
+
+        return false;
+    }
+
     public function deleteProduct($productId)
     {
         $productId = (int)$productId;
 
-        // 1. Πάρε όλες τις εικόνες του προϊόντος
-        $stmt = $this->conn->prepare("
-            SELECT image_path FROM ProductsImages WHERE product_id = ?
-        ");
-
-        if ($stmt) {
-            $stmt->bind_param("i", $productId);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            // 2. Διέγραψε τα αρχεία εικόνων από τον φάκελο
-            while ($row = $result->fetch_assoc()) {
-                $imagePath = $row['image_path'];
-
-                // Καθαρίζουμε το σχετικό path
-                $imagePath = ltrim($imagePath, './');
-
-                if (strpos($imagePath, '../') === 0) {
-                    $imagePath = substr($imagePath, 3);
-                }
-
-                $filePath = __DIR__ . '/../../public/' . $imagePath;
-
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-            }
-        }
-
-        // 3. Διέγραψε εγγραφές από ProductsImages
-        $stmtImages = $this->conn->prepare("
-            DELETE FROM ProductsImages WHERE product_id = ?
-        ");
-
-        if ($stmtImages) {
-            $stmtImages->bind_param("i", $productId);
-            $stmtImages->execute();
-        }
-
-        // 4. Διέγραψε το προϊόν από Products
-        $stmtProduct = $this->conn->prepare("
-            DELETE FROM Products WHERE product_id = ?
-        ");
-
-        if (!$stmtProduct) {
+        if ($productId <= 0) {
             return false;
         }
 
-        $stmtProduct->bind_param("i", $productId);
+        mysqli_begin_transaction($this->conn);
 
-        return $stmtProduct->execute();
+        try {
+            $imagePaths = [];
+
+            $stmtSelect = $this->conn->prepare("
+                SELECT image_path
+                FROM ProductsImages
+                WHERE product_id = ?
+            ");
+
+            if (!$stmtSelect) {
+                throw new Exception('Prepare select failed: ' . $this->conn->error);
+            }
+
+            $stmtSelect->bind_param("i", $productId);
+            $stmtSelect->execute();
+
+            $result = $stmtSelect->get_result();
+            while ($row = $result->fetch_assoc()) {
+                $imagePaths[] = $row['image_path'];
+            }
+            $stmtSelect->close();
+
+            $stmtDeleteImages = $this->conn->prepare("
+                DELETE FROM ProductsImages
+                WHERE product_id = ?
+            ");
+
+            if (!$stmtDeleteImages) {
+                throw new Exception('Prepare delete images failed: ' . $this->conn->error);
+            }
+
+            $stmtDeleteImages->bind_param("i", $productId);
+
+            if (!$stmtDeleteImages->execute()) {
+                throw new Exception('Delete images failed: ' . $stmtDeleteImages->error);
+            }
+
+            $stmtDeleteImages->close();
+
+            $stmtDeleteProduct = $this->conn->prepare("
+                DELETE FROM Products
+                WHERE product_id = ?
+            ");
+
+            if (!$stmtDeleteProduct) {
+                throw new Exception('Prepare delete product failed: ' . $this->conn->error);
+            }
+
+            $stmtDeleteProduct->bind_param("i", $productId);
+
+            if (!$stmtDeleteProduct->execute()) {
+                throw new Exception('Delete product failed: ' . $stmtDeleteProduct->error);
+            }
+
+            if ($stmtDeleteProduct->affected_rows <= 0) {
+                throw new Exception('No product deleted.');
+            }
+
+            $stmtDeleteProduct->close();
+
+            mysqli_commit($this->conn);
+
+            foreach ($imagePaths as $imagePath) {
+                $imagePath = trim((string)$imagePath);
+
+                if ($imagePath === '') {
+                    continue;
+                }
+
+                $cleanPath = str_replace('\\', '/', $imagePath);
+                $cleanPath = preg_replace('#^\.\./#', '', $cleanPath);
+                $cleanPath = preg_replace('#^/+#', '', $cleanPath);
+
+                $publicRoot = realpath(__DIR__ . '/../../public');
+                if ($publicRoot !== false) {
+                    $absolutePath = $publicRoot . '/' . $cleanPath;
+                    if (file_exists($absolutePath)) {
+                        @unlink($absolutePath);
+                    }
+                }
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            mysqli_rollback($this->conn);
+            error_log('deleteProduct error: ' . $e->getMessage());
+            return false;
+        }
     }
 }
