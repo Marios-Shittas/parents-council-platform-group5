@@ -52,10 +52,7 @@ header("Expires: 0");
     <!-- Footer -->
     <?php include '../app/includes/footer.php'; ?>
 </body>
-</html>
-        <?php
-    }
-}
+
 
 $page = new RegisterPage();
 $page->render();
