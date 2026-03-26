@@ -50,9 +50,18 @@ function SubscriptionPage() {
                 alert(response.message || "Αποτυχία πληρωμής.");
                 return;
             }
-            alert("Η πληρωμή δημιουργήθηκε!");
+
+            if (!response.redirect_url) {
+                alert("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.");
+                return;
+            }
+
+            window.location.href = response.redirect_url;
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+            console.error(err);
+            alert("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.");
+        })
         .finally(() => setLoading(false));
     };
 

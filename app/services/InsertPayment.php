@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/TokenValidator.php';
 
@@ -52,6 +53,7 @@ class InsertPaymentService
 
             $childrenCount = $this->getChildrenCount($userId);
             $pricing = $this->getPricing();
+            $customerEmail = $this->getUserEmail($userId);
 
             if ($pricing === null) {
                 throw new RuntimeException('Pricing settings are missing.');
@@ -59,19 +61,33 @@ class InsertPaymentService
 
             $subscriptionPrice = (float) $pricing['subscription_price'];
             $insurancePrice = (float) $pricing['insurance_price'];
+            $insuranceTotal = $includeInsurance ? ($insurancePrice * $childrenCount) : 0.0;
+            $totalAmount = $subscriptionPrice + $insuranceTotal;
 
             $membershipPaymentId = $this->insertPayment($userId, $subscriptionPrice, 'membership');
 
             $insurancePaymentId = null;
             if ($includeInsurance) {
-                $insuranceTotal = $insurancePrice * $childrenCount;
                 $insurancePaymentId = $this->insertPayment($userId, $insuranceTotal, 'insurance');
             }
+
+            $returnUrl = $this->buildJccReturnUrl($token, $membershipPaymentId, $insurancePaymentId, false);
+            $failUrl = $this->buildJccReturnUrl($token, $membershipPaymentId, $insurancePaymentId, true);
+            $orderNumber = $this->generateOrderNumber($userId);
+
+            $jccResponse = $this->registerJccOrder(
+                $orderNumber,
+                $totalAmount,
+                $returnUrl,
+                $failUrl,
+                $customerEmail
+            );
 
             $logDescription = "User created membership payment (ID: {$membershipPaymentId})";
             if ($includeInsurance && $insurancePaymentId !== null) {
                 $logDescription .= " and insurance payment (ID: {$insurancePaymentId})";
             }
+            $logDescription .= "; JCC orderId: " . $jccResponse['orderId'];
 
             $this->insertLog($userId, $logDescription);
             $this->conn->commit();
@@ -80,6 +96,8 @@ class InsertPaymentService
                 'success' => true,
                 'membership_payment_id' => $membershipPaymentId,
                 'insurance_payment_id' => $insurancePaymentId,
+                'order_id' => $jccResponse['orderId'],
+                'redirect_url' => $jccResponse['formUrl'],
             ]);
         } catch (Throwable $e) {
             $this->conn->rollback();
@@ -133,6 +151,22 @@ class InsertPaymentService
         return $row ?: null;
     }
 
+    private function getUserEmail(int $userId): string
+    {
+        $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to load user email.');
+        }
+
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return (string) ($row['email'] ?? '');
+    }
+
     private function insertPayment(int $userId, float $amount, string $paymentType): int
     {
         $stmt = $this->conn->prepare(
@@ -150,6 +184,107 @@ class InsertPaymentService
         $stmt->close();
 
         return $paymentId;
+    }
+
+    private function buildJccReturnUrl(string $token, int $membershipPaymentId, ?int $insurancePaymentId, bool $failed): string
+    {
+        $base = $failed ? JCC_FAIL_URL : JCC_RETURN_URL;
+        $separator = strpos($base, '?') === false ? '?' : '&';
+
+        $params = [
+            'token' => $token,
+            'mp' => (string) $membershipPaymentId,
+            'ip' => $insurancePaymentId !== null ? (string) $insurancePaymentId : '',
+        ];
+
+        return $base . $separator . http_build_query($params);
+    }
+
+    private function generateOrderNumber(int $userId): string
+    {
+        $randomPart = bin2hex(random_bytes(5));
+        return sprintf('SUB-%d-%d-%s', $userId, time(), $randomPart);
+    }
+
+    private function registerJccOrder(
+        string $orderNumber,
+        float $amount,
+        string $returnUrl,
+        string $failUrl,
+        string $email
+    ): array {
+        if (!function_exists('curl_init')) {
+            throw new RuntimeException('cURL extension is required for JCC integration.');
+        }
+
+        $amountMinorUnits = (int) round($amount * 100);
+        if ($amountMinorUnits <= 0) {
+            throw new RuntimeException('Invalid payment amount.');
+        }
+
+        $requestFields = [
+            'userName' => JCC_API_LOGIN,
+            'password' => JCC_API_PASSWORD,
+            'orderNumber' => $orderNumber,
+            'amount' => (string) $amountMinorUnits,
+            'currency' => '978',
+            'returnUrl' => $returnUrl,
+            'failUrl' => $failUrl,
+            'language' => 'el',
+            'description' => 'Subscription payment',
+        ];
+
+        if ($email !== '') {
+            $requestFields['email'] = $email;
+        }
+
+        $ch = curl_init(JCC_REGISTER_URL);
+        if ($ch === false) {
+            throw new RuntimeException('Unable to initialize JCC request.');
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => http_build_query($requestFields),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/x-www-form-urlencoded',
+            ],
+        ]);
+
+        $rawResponse = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($rawResponse === false || $curlError !== '') {
+            throw new RuntimeException('Failed to connect to JCC gateway: ' . $curlError);
+        }
+
+        $rawResponse = ltrim($rawResponse, "\xEF\xBB\xBF");
+        $response = json_decode($rawResponse, true);
+        if (!is_array($response)) {
+            $snippet = substr(trim($rawResponse), 0, 220);
+            throw new RuntimeException('Invalid response from JCC gateway (HTTP ' . $httpCode . '): ' . $snippet);
+        }
+
+        if (($response['errorCode'] ?? '0') !== '0' && ($response['errorCode'] ?? 0) !== 0) {
+            $errorMessage = (string) ($response['errorMessage'] ?? 'Unknown JCC error.');
+            throw new RuntimeException('JCC register error: ' . $errorMessage);
+        }
+
+        $orderId = (string) ($response['orderId'] ?? '');
+        $formUrl = (string) ($response['formUrl'] ?? '');
+
+        if ($httpCode >= 400 || $orderId === '' || $formUrl === '') {
+            throw new RuntimeException('JCC did not return a valid checkout URL.');
+        }
+
+        return [
+            'orderId' => $orderId,
+            'formUrl' => $formUrl,
+        ];
     }
 
     private function insertLog(int $userId, string $description): void
