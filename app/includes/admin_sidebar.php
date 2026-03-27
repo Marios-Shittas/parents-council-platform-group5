@@ -70,6 +70,12 @@ if ($unreadContactMessages > 0) {
         </li>
 
         <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
+                <i class="fas fa-receipt"></i> Παραγγελίες
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'epikoinonia.php' ? 'active' : ''; ?>" href="epikoinonia.php">
                 <i class="fas fa-envelope"></i>
                 <span class="admin-nav-label">Επικοινωνία</span>

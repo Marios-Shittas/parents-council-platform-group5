@@ -120,7 +120,6 @@ INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES
 INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, price_at_purchase, size) VALUES
 (1, 102, 1, 1, 25.00, NULL),
 (2, 102, 3, 1, 3.50, NULL);
-
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
 (2, 2, '/parents-council-platform-group5/public/assets/Products_img/black-school-trousers.jpg'),

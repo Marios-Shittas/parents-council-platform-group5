@@ -21,7 +21,6 @@ class UsersService
         if (!$stmt) {
             return null;
         }
-
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
