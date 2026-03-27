@@ -516,8 +516,7 @@ if ($selectedApplicationId > 0) {
     <link rel="stylesheet" href="../assets/css/admin_css/admin_applications.css">
 
     <title>Διαχείριση Αιτήσεων - Admin</title>
-    <script>
-        (function() {
+</head>
 <body>
 
 
@@ -938,7 +937,8 @@ if ($selectedApplicationId > 0) {
                 <div class="row g-3 mb-3">
                     <div class="col-md-6"><div class="detail-card"><span>Αίτηση</span><strong id="detail_application_title">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Κατάσταση</span><strong id="detail_status_badge_wrapper">—</strong></div></div>
-                    
+
+                    <div class="col-md-6"><div class="detail-card"><span>Μαθητής</span><strong id="detail_student_name">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Τάξη</span><strong id="detail_student_class">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Γονέας</span><strong id="detail_parent_name">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Ημ. Υποβολής</span><strong id="detail_submitted_at">—</strong></div></div>

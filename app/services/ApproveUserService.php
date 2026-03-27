@@ -6,9 +6,70 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/ApprovalMailer.php';
 
-use Kozzy\ParentsCouncilPlatformGroup5\services\EmailApproval;
+function sendApprovalEmailMessage(string $email, string $link): void
+{
+    $smtpFailureMessage = '';
+
+    try {
+        $mailer = new ApprovalMailer([
+            'host' => SMTP_HOST,
+            'port' => SMTP_PORT,
+            'encryption' => SMTP_ENCRYPTION,
+            'username' => SMTP_USER,
+            'password' => SMTP_PASS,
+            'from_email' => SMTP_FROM_EMAIL,
+            'from_name' => SMTP_FROM_NAME,
+        ]);
+
+        $mailer->sendApprovalEmail($email, $link);
+        return;
+    } catch (Throwable $smtpException) {
+        $smtpFailureMessage = $smtpException->getMessage();
+        $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+        if (file_exists($autoloadPath)) {
+            require_once $autoloadPath;
+        }
+
+        $emailApprovalPath = __DIR__ . '/EmailApproval.php';
+        if (file_exists($emailApprovalPath)) {
+            require_once $emailApprovalPath;
+        }
+
+        if (
+            class_exists('Kozzy\\ParentsCouncilPlatformGroup5\\services\\EmailApproval') &&
+            class_exists('PHPMailer\\PHPMailer\\PHPMailer')
+        ) {
+            $emailService = new \Kozzy\ParentsCouncilPlatformGroup5\services\EmailApproval([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+
+            $emailService->sendApprovalEmail($email, $link);
+            return;
+        }
+    }
+
+    $subject = 'Η αίτησή σας εγκρίθηκε';
+    $message =
+        "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
+        "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
+        "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
+        $link . "\n\n" .
+        "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
+    $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+
+    if (!mail($email, $subject, $message, $headers)) {
+        $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
+        throw new RuntimeException('Failed to send approval email.' . $suffix);
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -76,17 +137,7 @@ try {
 
     $stmt->close();
 
-    $emailService = new EmailApproval([
-        'host' => SMTP_HOST,
-        'port' => SMTP_PORT,
-        'encryption' => SMTP_ENCRYPTION,
-        'username' => SMTP_USER,
-        'password' => SMTP_PASS,
-        'from_email' => SMTP_FROM_EMAIL,
-        'from_name' => SMTP_FROM_NAME,
-    ]);
-
-    $emailService->sendApprovalEmail($email, $link);
+    sendApprovalEmailMessage($email, $link);
 
     $logStmt = $conn->prepare(
         "INSERT INTO Logs (user_id, action, description)
