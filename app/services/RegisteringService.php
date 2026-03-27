@@ -1,77 +1,216 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+declare(strict_types=1);
 
-header("Content-Type: application/json");
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
 require_once __DIR__ . '/../config/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(["success" => false, "message" => "Method not allowed"]);
-    exit;
-}
+class RegisteringService
+{
+    private mysqli $conn;
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-$name     = trim($data['first_name']);
-$surname  = trim($data['last_name']);
-$email    = trim($data['email']);
-$phone    = trim($data['phone']);
-$children = $data['children'];
-
-// Check if email already exists
-$check = $conn->prepare("SELECT user_id FROM Users WHERE email = ?");
-$check->bind_param("s", $email);
-$check->execute();
-$check->store_result();
-
-if ($check->num_rows > 0) {
-    http_response_code(409);
-    echo json_encode(["success" => false, "message" => "Το email χρησιμοποιείται ήδη."]);
-    $check->close();
-    exit;
-}
-$check->close();
-
-$placeholderPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
-
-$conn->begin_transaction();
-
-try {
-    $stmtUser = $conn->prepare("
-        INSERT INTO Users (name, surname, email, password, phone_number, role, account_status)
-        VALUES (?, ?, ?, ?, ?, 'parent', 'pending')
-    ");
-    $stmtUser->bind_param("sssss", $name, $surname, $email, $placeholderPassword, $phone);
-    $stmtUser->execute();
-    $userId = $conn->insert_id;
-    $stmtUser->close();
-
-    $stmtChild = $conn->prepare("
-        INSERT INTO Children (user_id, name, surname, date_of_birth, school_class)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-
-    foreach ($children as $child) {
-        $childName    = trim($child['child_name']);
-        $childSurname = trim($child['child_last_name']);
-        $childDob     = $child['child_dob'];
-        $childClass   = $child['child_class'];
-
-        $stmtChild->bind_param("issss", $userId, $childName, $childSurname, $childDob, $childClass);
-        $stmtChild->execute();
+    public function __construct(mysqli $conn)
+    {
+        $this->conn = $conn;
     }
-    $stmtChild->close();
 
-    $conn->commit();
-    echo json_encode(["success" => true, "message" => "Η αίτησή σας υποβλήθηκε και βρίσκεται σε αναμονή έγκρισης."]);
+    public function handleRequest(): void
+    {
+        header('Content-Type: application/json');
 
-} catch (Exception $e) {
-    $conn->rollback();
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => "Σφάλμα: " . $e->getMessage()]);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->respond(405, [
+                'success' => false,
+                'message' => 'Method not allowed',
+            ]);
+            return;
+        }
+
+        $payload = $this->getRequestPayload();
+        if ($payload === null) {
+            $this->respond(400, [
+                'success' => false,
+                'message' => 'Μη έγκυρα δεδομένα αιτήματος.',
+            ]);
+            return;
+        }
+
+        $validationError = $this->validatePayload($payload);
+        if ($validationError !== null) {
+            $this->respond(422, [
+                'success' => false,
+                'message' => $validationError,
+            ]);
+            return;
+        }
+
+        $email = trim((string) $payload['email']);
+        if ($this->emailExists($email)) {
+            $this->respond(409, [
+                'success' => false,
+                'message' => 'Το email χρησιμοποιείται ήδη.',
+            ]);
+            return;
+        }
+
+        $name = trim((string) $payload['first_name']);
+        $surname = trim((string) $payload['last_name']);
+        $phone = trim((string) $payload['phone']);
+        $children = $payload['children'];
+
+        try {
+            $this->conn->begin_transaction();
+
+            $userId = $this->insertUser($name, $surname, $email, $phone);
+            $this->insertChildren($userId, $children);
+            $this->insertRegistrationLog($userId, $email);
+
+            $this->conn->commit();
+
+            $this->respond(200, [
+                'success' => true,
+                'message' => 'Η αίτησή σας υποβλήθηκε και βρίσκεται σε αναμονή έγκρισης.',
+            ]);
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+
+            $this->respond(500, [
+                'success' => false,
+                'message' => 'Σφάλμα: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    private function getRequestPayload(): ?array
+    {
+        $rawBody = file_get_contents('php://input');
+        if ($rawBody === false || $rawBody === '') {
+            return null;
+        }
+
+        $decoded = json_decode($rawBody, true);
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    private function validatePayload(array $payload): ?string
+    {
+        $requiredFields = ['first_name', 'last_name', 'email', 'phone', 'children'];
+        foreach ($requiredFields as $field) {
+            if (!array_key_exists($field, $payload)) {
+                return 'Λείπουν απαραίτητα πεδία από τη φόρμα.';
+            }
+        }
+
+        if (!filter_var((string) $payload['email'], FILTER_VALIDATE_EMAIL)) {
+            return 'Το email δεν είναι έγκυρο.';
+        }
+
+        if (!is_array($payload['children']) || count($payload['children']) === 0) {
+            return 'Πρέπει να καταχωρηθεί τουλάχιστον ένα παιδί.';
+        }
+
+        foreach ($payload['children'] as $child) {
+            if (!is_array($child)) {
+                return 'Τα στοιχεία παιδιού δεν είναι έγκυρα.';
+            }
+
+            $childFields = ['child_name', 'child_last_name', 'child_dob', 'child_class'];
+            foreach ($childFields as $field) {
+                if (empty(trim((string) ($child[$field] ?? '')))) {
+                    return 'Συμπληρώστε όλα τα στοιχεία για κάθε παιδί.';
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function emailExists(string $email): bool
+    {
+        $check = $this->conn->prepare('SELECT user_id FROM Users WHERE email = ?');
+        if ($check === false) {
+            throw new RuntimeException('Αποτυχία ελέγχου email.');
+        }
+
+        $check->bind_param('s', $email);
+        $check->execute();
+        $check->store_result();
+        $exists = $check->num_rows > 0;
+        $check->close();
+
+        return $exists;
+    }
+
+    private function insertUser(string $name, string $surname, string $email, string $phone): int
+    {
+        $placeholderPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
+
+        $stmtUser = $this->conn->prepare(
+            "INSERT INTO Users (name, surname, email, password, phone_number, role, account_status)
+             VALUES (?, ?, ?, ?, ?, 'parent', 'pending')"
+        );
+
+        if ($stmtUser === false) {
+            throw new RuntimeException('Αποτυχία καταχώρησης χρήστη.');
+        }
+
+        $stmtUser->bind_param('sssss', $name, $surname, $email, $placeholderPassword, $phone);
+        $stmtUser->execute();
+        $userId = (int) $this->conn->insert_id;
+        $stmtUser->close();
+
+        return $userId;
+    }
+
+    private function insertChildren(int $userId, array $children): void
+    {
+        $stmtChild = $this->conn->prepare(
+            'INSERT INTO Children (user_id, name, surname, date_of_birth, school_class) VALUES (?, ?, ?, ?, ?)'
+        );
+
+        if ($stmtChild === false) {
+            throw new RuntimeException('Αποτυχία καταχώρησης παιδιών.');
+        }
+
+        foreach ($children as $child) {
+            $childName = trim((string) $child['child_name']);
+            $childSurname = trim((string) $child['child_last_name']);
+            $childDob = (string) $child['child_dob'];
+            $childClass = trim((string) $child['child_class']);
+
+            $stmtChild->bind_param('issss', $userId, $childName, $childSurname, $childDob, $childClass);
+            $stmtChild->execute();
+        }
+
+        $stmtChild->close();
+    }
+
+    private function insertRegistrationLog(int $userId, string $email): void
+    {
+        $action = 'user_registration';
+        $description = "New parent registered with email: {$email}";
+
+        $stmtLog = $this->conn->prepare(
+            'INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)'
+        );
+
+        if ($stmtLog === false) {
+            throw new RuntimeException('Αποτυχία καταγραφής log εγγραφής.');
+        }
+
+        $stmtLog->bind_param('iss', $userId, $action, $description);
+        $stmtLog->execute();
+        $stmtLog->close();
+    }
+
+    private function respond(int $statusCode, array $body): void
+    {
+        http_response_code($statusCode);
+        echo json_encode($body, JSON_UNESCAPED_UNICODE);
+    }
 }
 
+$service = new RegisteringService($conn);
+$service->handleRequest();
 $conn->close();
-?>

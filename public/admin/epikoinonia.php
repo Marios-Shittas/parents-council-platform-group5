@@ -6,6 +6,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /parents-council-platform-group5/public/login.php');
+    exit;
+}
+
 function epikoinoniaAdminTrim($value)
 {
     return trim((string)$value);
@@ -799,12 +809,12 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                                 <?php if ($message['is_read'] == 0): ?>
                                                     <span class="badge-unread">
                                                         <i class="fas fa-circle"></i>
-                                                        Νέο
+                                                        ΝΕΟ
                                                     </span>
                                                 <?php else: ?>
                                                     <span class="badge-read">
                                                         <i class="fas fa-check-circle"></i>
-                                                        Αναγνωσμένο
+                                                        ΑΝΑΓΝΩΣΜΕΝΟ
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
@@ -899,11 +909,9 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                 <p class="text-muted">Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</p>
             </div>
             <div class="delete-modal-footer">
-                <button id="cancelBtn" class="btn btn-secondary">
-                    Όχι
-                </button>
+                <button id="cancelBtn" class="btn btn-secondary">Όχι</button>
                 <button id="confirmBtn" class="btn btn-danger">
-                    Ναι, Διαγραφή
+                    Ναι,Διαγραφή
                 </button>
             </div>
         </div>

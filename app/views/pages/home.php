@@ -64,6 +64,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
                             <h5 class="block-title"><i class="fas fa-calendar-alt mr-2"></i>Ημερολόγιο</h5>
                         </div>
                         <div id="calendar-root"></div>
+                        <div id="event-detail-root"></div>
                     </div>
                 </div>
                 <div class="col-12 col-lg-4">
@@ -84,7 +85,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/home.jsx'); ?>"></script>
+    <script type="text/babel" src="<?php echo site_asset_url('js/home-page-calendar.jsx'); ?>"></script>
     <script type="text/babel" src="<?php echo site_asset_url('js/home-page-announcements.jsx'); ?>"></script>
     <script type="text/babel" src="<?php echo site_asset_url('js/home-page-upcoming-events.jsx'); ?>"></script>
     </body>

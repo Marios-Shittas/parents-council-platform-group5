@@ -303,6 +303,69 @@
     padding: 0.5rem 0 0.62rem;
 }
 
+.event-title-preview {
+    font-size: 9px;
+    background-color: #4A90D9;
+    color: white;
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-detail-box {
+    position: relative;
+    margin-top: 10px;
+    padding: 15px;
+    background: #fdfefe;
+    border: 1px solid #e3ebf4;
+    border-radius: 8px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+}
+
+.event-detail-title {
+    font-weight: bold;
+    color: #1E2D5A;
+}
+
+.event-detail-description {
+    font-size: 0.85rem;
+    color: #444;
+}
+
+.event-detail-date {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.event-title-preview {
+    font-size: 9px;
+    background-color: #4A90D9;
+    color: white;
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-title-preview.holiday-preview {
+    background-color: #e74c3c;
+}
+
 @media (max-width: 1199.98px) {
     .home-hero-inner {
         grid-template-columns: 1fr;

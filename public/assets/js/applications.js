@@ -1,84 +1,10 @@
 "use strict";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   APPLICATION METADATA  (dummy / front-end only)
-   Cycling array assigned by rendered card order (data-app-index).
-   Provides status, category, open/close dates, and form type for the UI.
-   Actual submission is saved to the database via AJAX.
-───────────────────────────────────────────────────────────────────────────── */
-const APP_META = [
-    {
-        status:    'open',
-        category:  'Βιβλιοθήκη',
-        openDate:  '01/03/2026',
-        closeDate: '30/04/2026',
-        formType:  'library'
-    },
-    {
-        status:    'closed',
-        category:  'Εκδρομές',
-        openDate:  '10/01/2026',
-        closeDate: '28/02/2026',
-        formType:  'field_trip'
-    },
-    {
-        status:    'open',
-        category:  'Επιστήμη',
-        openDate:  '01/03/2026',
-        closeDate: '15/05/2026',
-        formType:  'science_fair'
-    },
-    {
-        status:    'open',
-        category:  'Εξωσχολικές',
-        openDate:  '10/03/2026',
-        closeDate: '20/04/2026',
-        formType:  'after_school'
-    }
-];
-
-/* ─────────────────────────────────────────────────────────────────────────────
    FORM FIELD TEMPLATES  (keyed by formType)
 ───────────────────────────────────────────────────────────────────────────── */
 const FORM_FIELDS = {
-    library: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',        type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                 type: 'select',   required: true,  icon: 'fa-chalkboard',   options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα', type: 'text',    required: true,  icon: 'fa-user' },
-        { name: 'date',         label: 'Ημερομηνία',           type: 'date',     required: true,  icon: 'fa-calendar-alt' },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    field_trip: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',            type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                     type: 'select',   required: true,  icon: 'fa-chalkboard',        options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα',    type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'trip_name',    label: 'Προορισμός Εκδρομής',      type: 'text',     required: true,  icon: 'fa-map-marker-alt' },
-        { name: 'trip_date',    label: 'Ημερομηνία Εκδρομής',      type: 'date',     required: true,  icon: 'fa-calendar-alt' },
-        { name: 'comments',     label: 'Ιατρικές Πληροφορίες / Σχόλια', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    science_fair: [
-        { name: 'student_name',  label: 'Όνομα Μαθητή',       type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',         label: 'Τάξη',                type: 'select',   required: true,  icon: 'fa-chalkboard',  options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',   label: 'Όνομα Γονέα',        type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'project_title', label: 'Τίτλος Εργασίας',     type: 'text',     required: true,  icon: 'fa-flask' },
-        { name: 'date',          label: 'Ημερομηνία',          type: 'date',     required: true,  icon: 'fa-calendar-alt' },
-        { name: 'comments',      label: 'Σχόλια (προαιρετικό)',type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    after_school: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',       type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                type: 'select',   required: true,  icon: 'fa-chalkboard',  options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα',        type: 'text',     required: true,  icon: 'fa-user' },
-        { name: 'activity',     label: 'Δραστηριότητα',       type: 'select',   required: true,  icon: 'fa-running',     options: ['Ποδόσφαιρο','Μπάσκετ','Χορός','Θέατρο','Ζωγραφική'] },
-        { name: 'date',         label: 'Ημερομηνία',          type: 'date',     required: true,  icon: 'fa-calendar-alt' },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)',type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ],
-    general: [
-        { name: 'student_name', label: 'Όνομα Μαθητή',        type: 'text',     required: true,  icon: 'fa-user-graduate' },
-        { name: 'class',        label: 'Τάξη',                 type: 'select',   required: true,  icon: 'fa-chalkboard',   options: ['Α1','Α2','Β1','Β2','Γ1','Γ2'] },
-        { name: 'parent_name',  label: 'Όνομα Γονέα/Κηδεμόνα', type: 'text',   required: true,  icon: 'fa-user' },
-        { name: 'date',         label: 'Ημερομηνία',           type: 'date',     required: true,  icon: 'fa-calendar-alt' },
-        { name: 'comments',     label: 'Σχόλια (προαιρετικό)', type: 'textarea', required: false, icon: 'fa-comment-alt' }
-    ]
+    general: []
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -265,14 +191,49 @@ function restoreDraftToForm(form, draftData) {
     });
 }
 
+function parseUiDate(value) {
+    var v = String(value || '').trim();
+    if (!v) return null;
+
+    var isoMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoMatch) {
+        return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+    }
+
+    var grMatch = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (grMatch) {
+        return new Date(Number(grMatch[3]), Number(grMatch[2]) - 1, Number(grMatch[1]));
+    }
+
+    return null;
+}
+
+function getApplicationWindowStatus(openDate, closeDate) {
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var open = parseUiDate(openDate);
+    var close = parseUiDate(closeDate);
+
+    if (open && today < open) {
+        return 'upcoming';
+    }
+
+    if (close && today > close) {
+        return 'closed';
+    }
+
+    return 'open';
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    BADGE / TAG HTML BUILDERS
 ───────────────────────────────────────────────────────────────────────────── */
 function cardStatusBadge(status) {
     var map = {
-        open:    { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: 'Ανοιχτή'      },
-        closed:  { cls: 'app-status-closed',  icon: 'fa-lock',       label: 'Κλειστή'      },
-        applied: { cls: 'app-status-applied', icon: 'fa-check',      label: 'Υποβλήθηκε'   }
+        open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: 'Ανοιχτή'       },
+        upcoming: { cls: 'app-status-closed',  icon: 'fa-hourglass-half', label: 'Δεν Άνοιξε Ακόμα' },
+        closed:   { cls: 'app-status-closed',  icon: 'fa-lock',       label: 'Κλειστή'       },
+        applied:  { cls: 'app-status-applied', icon: 'fa-check',      label: 'Υποβλήθηκε'    }
     };
     var s = map[status] || map.open;
     return '<span class="app-status-badge ' + s.cls + '">' +
@@ -303,11 +264,13 @@ function augmentCards() {
         var openDate   = card.dataset.appOpenDate || meta.openDate;
         var closeDate  = card.dataset.appCloseDate || meta.closeDate;
         var applied    = dbApplied || isJsApplied(appId);
+        var windowStatus = getApplicationWindowStatus(openDate, closeDate);
+        var effectiveStatus = applied ? 'applied' : windowStatus;
 
         // Status badge
         var badgeSlot = card.querySelector('.js-status-placeholder');
         if (badgeSlot) {
-            badgeSlot.innerHTML = cardStatusBadge(applied ? 'applied' : meta.status);
+            badgeSlot.innerHTML = cardStatusBadge(effectiveStatus);
         }
 
         // Category tag
@@ -332,20 +295,36 @@ function augmentCards() {
         var btn = card.querySelector('.submit-btn');
         if (!btn) return;
 
+        btn.classList.remove('btn-primary', 'btn-success', 'btn-secondary', 'btn-warning');
+
         if (applied) {
             btn.innerHTML = '<i class="fas fa-check mr-1"></i> Υποβλήθηκε';
-            btn.classList.remove('btn-primary');
             btn.classList.add('btn-success');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-        } else if (meta.status === 'closed') {
+            btn.dataset.unavailableReason = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
+        } else if (windowStatus === 'upcoming') {
+            btn.innerHTML = '<i class="fas fa-hourglass-start mr-1"></i> Ακόμα δεν άνοιξε';
+            btn.classList.add('btn-warning');
+            btn.disabled = true;
+            btn.removeAttribute('data-toggle');
+            btn.removeAttribute('data-target');
+            btn.dataset.unavailableReason = 'Η αίτηση δεν έχει ανοίξει ακόμα.';
+        } else if (windowStatus === 'closed') {
             btn.innerHTML = '<i class="fas fa-lock mr-1"></i> Κλειστή';
-            btn.classList.remove('btn-primary');
             btn.classList.add('btn-secondary');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
+            btn.dataset.unavailableReason = 'Η περίοδος υποβολής έχει λήξει.';
+        } else {
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή Αίτησης';
+            btn.classList.add('btn-primary');
+            btn.disabled = false;
+            btn.setAttribute('data-toggle', 'modal');
+            btn.setAttribute('data-target', '#submitModal');
+            delete btn.dataset.unavailableReason;
         }
     });
 }
@@ -414,13 +393,17 @@ function buildField(field) {
 /* ─────────────────────────────────────────────────────────────────────────────
    SHOW VIEW MODAL  – handles both PHP-rendered DB rows and JS-submitted rows
 ───────────────────────────────────────────────────────────────────────────── */
-function showViewModalFromData(appTitle, submissionDataObj, statusKey) {
+function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
     var fields = FORM_FIELDS[submissionDataObj._formType] || FORM_FIELDS.general;
     var rows = fields.map(function (f) {
         var val = submissionDataObj[f.name] || '—';
         return '<tr><th class="text-muted font-weight-normal" style="width:45%">' +
                escHtml(f.label) + '</th><td><strong>' + escHtml(val) + '</strong></td></tr>';
     }).join('');
+
+    var submittedLabel = submittedAt || submissionDataObj.applied_at || '—';
+    rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">Ημερομηνία Υποβολής</th><td><strong>' +
+            escHtml(submittedLabel) + '</strong></td></tr>';
 
     var body = document.getElementById('view-modal-body');
     if (body) {
@@ -586,7 +569,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var submitBtn = document.querySelector('#app-card-' + _viewAppId + ' .submit-btn');
             if (!submitBtn || submitBtn.disabled) {
-                alert('Η αίτηση δεν είναι διαθέσιμη για υποβολή.');
+                var reason = submitBtn ? (submitBtn.dataset.unavailableReason || '') : '';
+                alert(reason || 'Η αίτηση δεν είναι διαθέσιμη για υποβολή.');
                 return;
             }
 
@@ -617,28 +601,21 @@ document.addEventListener('DOMContentLoaded', function () {
         // Header text
         document.getElementById('modal-title').textContent       = appTitle;
         document.getElementById('modal-description').textContent = appDesc;
-        document.getElementById('modal-open-date').textContent   = meta.openDate;
-        document.getElementById('modal-close-date').textContent  = meta.closeDate;
-
-        var typeBadge = document.getElementById('modal-type-badge');
-        if (typeBadge) {
-            typeBadge.innerHTML =
-                '<i class="fas fa-tag mr-1"></i>' + escHtml(meta.category);
-        }
 
         // Dynamic form fields
         var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
         var container = document.getElementById('modal-dynamic-fields');
+        // Προσθέτουμε το input αρχείου μέσα στη φόρμα
         container.innerHTML =
-            '<form id="application-form">' +
+            '<form id="application-form" enctype="multipart/form-data">' +
             fields.map(buildField).join('') +
+            '<div class="form-group mt-3 mb-0">' +
+            '<label class="form-label-custom mb-2">' +
+            '<i class="fas fa-paperclip text-primary mr-1"></i>Προαιρετικό αρχείο υποβολής</label>' +
+            '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
+            '<small class="text-muted d-block mt-1">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png.</small>' +
+            '</div>' +
             '</form>';
-
-        // Default today's date for all date inputs
-        var today = new Date().toISOString().slice(0, 10);
-        container.querySelectorAll('input[type="date"]').forEach(function (el) {
-            el.value = today;
-        });
 
         // Restore saved draft for this application, if available.
         var form = document.getElementById('application-form');
@@ -669,6 +646,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var data = {};
         new FormData(form).forEach(function (value, key) { data[key] = value; });
+        data.applied_at = todayLabel();
         data._formType = _modal.meta.formType;
         data._category = _modal.meta.category;
 
@@ -769,10 +747,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (dbBtn) {
                 var raw    = dbBtn.dataset.subData  || '{}';
                 var title  = dbBtn.dataset.subTitle || '';
+                var submittedAt = dbBtn.dataset.submittedAt || '';
                 var status = dbBtn.dataset.subStatus || 'waiting';
                 try {
                     var parsed = JSON.parse(raw);
-                    showViewModalFromData(title, parsed, status);
+                    showViewModalFromData(title, parsed, status, submittedAt);
                 } catch (err) {
                     alert('Δεν είναι δυνατή η εμφάνιση λεπτομερειών.');
                 }

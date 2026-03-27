@@ -4,7 +4,20 @@
  * Create, update, delete applications and manage documents
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /parents-council-platform-group5/public/login.php');
+    exit;
+}
+
 require_once __DIR__ . '/../../app/services/ApplicationsService.php';
 
 // Initialize the service
@@ -162,15 +175,6 @@ function getDocumentAbsolutePath(string $storedPath): string {
     return $storedPath;
 }
 
-function getSubmissionStatusMeta(string $status): array {
-    $map = [
-        'waiting' => ['label' => 'Υπό Εξέταση', 'badge' => 'bg-info'],
-        'approved' => ['label' => 'Εγκρίθηκε', 'badge' => 'bg-success'],
-        'rejected' => ['label' => 'Απορρίφθηκε', 'badge' => 'bg-danger'],
-    ];
-
-    return $map[$status] ?? ['label' => $status, 'badge' => 'bg-secondary'];
-}
 
 function getApplicationUiMetaPath(): string {
     return __DIR__ . '/../../storage/application_ui_meta.json';
@@ -438,9 +442,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
-    $_SESSION['flash_message_type'] = $messageType ?: 'info';
-
     $redirectUrl = 'applications.php';
     if ($returnViewSubmissions > 0) {
         $redirectUrl .= '?view_submissions=' . $returnViewSubmissions;
@@ -450,6 +451,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($returnScrollY > 0) {
         $redirectUrl .= '?scroll_y=' . $returnScrollY;
     }
+
+    $_SESSION['flash_message'] = $message ?: 'Η ενέργεια ολοκληρώθηκε.';
+    $_SESSION['flash_message_type'] = $messageType ?: 'info';
 
     header('Location: ' . $redirectUrl);
     exit;
@@ -557,33 +561,6 @@ if ($selectedApplicationId > 0) {
                         <span class="stat-label">Σύνολο Υποβολών</span>
                         <div class="stat-value"><?php echo count($submissions); ?></div>
                         <div class="stat-icon"><i class="fas fa-inbox"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-info">
-                    <div class="card-body">
-                        <span class="stat-label">Υπό Εξέταση</span>
-                        <div class="stat-value"><?php echo $pendingReviews; ?></div>
-                        <div class="stat-icon"><i class="fas fa-search"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-success">
-                    <div class="card-body">
-                        <span class="stat-label">Εγκεκριμένες</span>
-                        <div class="stat-value"><?php echo $approvedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-6 col-xl-2">
-                <div class="card card-custom stat-card h-100 stat-card-danger">
-                    <div class="card-body">
-                        <span class="stat-label">Απορριφθείσες</span>
-                        <div class="stat-value"><?php echo $rejectedSubmissions; ?></div>
-                        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
                     </div>
                 </div>
             </div>
@@ -728,29 +705,20 @@ if ($selectedApplicationId > 0) {
                         <table class="table table-hover align-middle admin-dashboard-table">
                             <thead>
                                 <tr>
-                                    <th>Μαθητής</th>
-                                    <th>Τάξη</th>
                                     <th>Γονέας</th>
                                     <th>Ημ. Υποβολής</th>
                                     <th>Συνημμένα</th>
-                                    <th>Κατάσταση</th>
-                                    <th>Ενέργειες</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($selectedSubmissions as $submission): ?>
                                     <?php
                                         $formData = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
-                                        $studentName = $formData['student_name'] ?? '—';
-                                        $studentClass = $formData['class'] ?? '—';
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
-                                        $statusMeta = getSubmissionStatusMeta((string)$submission['sub_status']);
                                         $submissionFileUrl = !empty($submission['file_path']) ? getDocumentPublicUrl((string)$submission['file_path']) : '';
                                     ?>
                                     <tr>
-                                        <td class="fw-semibold"><?php echo htmlspecialchars((string)$studentName); ?></td>
-                                        <td><?php echo htmlspecialchars((string)$studentClass); ?></td>
                                         <td>
                                             <div><?php echo htmlspecialchars((string)$parentName); ?></div>
                                             <div class="small text-muted"><?php echo htmlspecialchars((string)($submission['email'] ?? '')); ?></div>
@@ -765,7 +733,7 @@ if ($selectedApplicationId > 0) {
                                                 <span class="text-muted">—</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><span class="badge <?php echo htmlspecialchars($statusMeta['badge']); ?>"><?php echo htmlspecialchars($statusMeta['label']); ?></span></td>
+
                                         <td>
                                             <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form" data-student-name="<?php echo htmlspecialchars((string)$studentName, ENT_QUOTES, 'UTF-8'); ?>" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>">
                                                 <input type="hidden" name="action" value="update_submission_status">
@@ -774,14 +742,6 @@ if ($selectedApplicationId > 0) {
                                                 <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
                                                 <input type="hidden" name="return_scroll_y" value="0">
 
-                                                <select name="sub_status" class="form-select form-select-sm" required>
-                                                    <option value="" <?php echo ($submission['sub_status'] !== 'approved' && $submission['sub_status'] !== 'rejected') ? 'selected' : ''; ?> disabled>Επιλογή...</option>
-                                                    <option value="approved" <?php echo ($submission['sub_status'] === 'approved') ? 'selected' : ''; ?>>Αποδοχή</option>
-                                                    <option value="rejected" <?php echo ($submission['sub_status'] === 'rejected') ? 'selected' : ''; ?>>Απόρριψη</option>
-                                                    <option value="delete">Διαγραφή Υποβολής</option>
-                                                </select>
-
-                                                <button type="submit" class="btn btn-sm btn-primary-custom">Αποθήκευση</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -798,7 +758,7 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="createApplicationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="create_application_form">
                 <input type="hidden" name="action" value="create">
 
                 <div class="modal-header" style="background:#2f6fb3;">
@@ -826,11 +786,6 @@ if ($selectedApplicationId > 0) {
                                     <label class="form-label"><strong>Περιγραφή</strong></label>
                                     <textarea name="application_description" class="form-control form-control-custom" rows="5"></textarea>
                                 </div>
-
-                                <div>
-                                    <label class="form-label"><strong>Οδηγίες για γονείς</strong></label>
-                                    <textarea name="application_instructions_ui" class="form-control" rows="4" placeholder="Εμφανίζονται ως UI πεδίο στο admin."></textarea>
-                                </div>
                             </div>
                         </div>
 
@@ -840,11 +795,11 @@ if ($selectedApplicationId > 0) {
                                     <div class="row g-3">
                                         <div class="col-12">
                                             <label class="form-label"><strong>Ημερομηνία Ανοίγματος</strong></label>
-                                            <input type="date" name="application_open_date_ui" class="form-control">
+                                            <input type="date" name="application_open_date_ui" id="create_application_open_date" class="form-control">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
-                                            <input type="date" name="application_close_date_ui" class="form-control">
+                                            <input type="date" name="application_close_date_ui" id="create_application_close_date" class="form-control">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label"><strong>Κατάσταση</strong></label>
@@ -879,12 +834,6 @@ if ($selectedApplicationId > 0) {
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Ακύρωση</button>
-                    <button type="submit" class="btn btn-success js-create-publish-btn" id="create_publish_btn">
-                        <i class="fas fa-bullhorn me-1"></i>Δημοσίευση Αίτησης
-                    </button>
-                    <button type="submit" class="btn btn-primary-custom">
-                        <i class="fas fa-save me-1"></i>Δημιουργία
-                    </button>
                 </div>
             </form>
         </div>
@@ -894,7 +843,7 @@ if ($selectedApplicationId > 0) {
 <div class="modal fade" id="editApplicationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="edit_application_form">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="application_id" id="edit_application_id">
 
@@ -952,20 +901,6 @@ if ($selectedApplicationId > 0) {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label class="form-label"><strong>Νέα Εικόνα</strong></label>
-                                        <input type="file" name="application_image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Νέο Αρχείο Οδηγιών</strong></label>
-                                        <input type="file" name="instruction_file" class="form-control" accept=".pdf,.doc,.docx">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Πρόσθετα Δικαιολογητικά</strong></label>
-                                        <input type="file" name="required_documents[]" class="form-control" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1002,6 +937,7 @@ if ($selectedApplicationId > 0) {
                 <div class="row g-3 mb-3">
                     <div class="col-md-6"><div class="detail-card"><span>Αίτηση</span><strong id="detail_application_title">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Κατάσταση</span><strong id="detail_status_badge_wrapper">—</strong></div></div>
+
                     <div class="col-md-6"><div class="detail-card"><span>Μαθητής</span><strong id="detail_student_name">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Τάξη</span><strong id="detail_student_class">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Γονέας</span><strong id="detail_parent_name">—</strong></div></div>
@@ -1140,6 +1076,40 @@ if ($selectedApplicationId > 0) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    function bindDateRangeValidation(openInput, closeInput, form) {
+        if (!openInput || !closeInput) return;
+
+        function syncCloseMinDate() {
+            var openVal = openInput.value || '';
+            closeInput.min = openVal;
+
+            if (openVal && closeInput.value && closeInput.value < openVal) {
+                closeInput.value = '';
+            }
+        }
+
+        openInput.addEventListener('change', syncCloseMinDate);
+        syncCloseMinDate();
+
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                var openVal = openInput.value || '';
+                var closeVal = closeInput.value || '';
+
+                if (openVal && closeVal && closeVal < openVal) {
+                    event.preventDefault();
+                    alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                    closeInput.focus();
+                }
+            });
+        }
+    }
+
+    var createOpenDate = document.getElementById('create_application_open_date');
+    var createCloseDate = document.getElementById('create_application_close_date');
+    var createForm = document.getElementById('create_application_form');
+    bindDateRangeValidation(createOpenDate, createCloseDate, createForm);
+
     var urlParams = new URLSearchParams(window.location.search);
     var scrollYParam = parseInt(urlParams.get('scroll_y') || '0', 10);
     if (!Number.isNaN(scrollYParam) && scrollYParam > 0) {
@@ -1156,6 +1126,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var editModal = document.getElementById('editApplicationModal');
+    var editOpenDate = document.getElementById('edit_application_open_date');
+    var editCloseDate = document.getElementById('edit_application_close_date');
+    var editForm = document.getElementById('edit_application_form');
+    bindDateRangeValidation(editOpenDate, editCloseDate, editForm);
+
     if (editModal) {
         editModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -1167,6 +1142,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit_application_open_date').value = button.getAttribute('data-application-open-date') || '';
             document.getElementById('edit_application_close_date').value = button.getAttribute('data-application-close-date') || '';
             document.getElementById('edit_application_status').value = button.getAttribute('data-application-status') || 'active';
+
+            if (editOpenDate) {
+                editOpenDate.dispatchEvent(new Event('change'));
+            }
         });
     }
 

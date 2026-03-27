@@ -8,6 +8,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /parents-council-platform-group5/public/login.php');
+    exit;
+}
+
 $productsService = new ProductsService();
 $message = '';
 $messageType = '';
@@ -138,13 +148,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         if (move_uploaded_file($fileTmp, $targetPath)) {
                             $dbImagePath = '../assets/Products_img/' . $newFileName;
-                            $imageSaved = $productsService->addProductImage($id, $dbImagePath);
+                            $imageSaved = $productsService->replaceProductImage($id, $dbImagePath);
 
                             if ($imageSaved) {
-                                $_SESSION['flash_message'] = 'Το προϊόν ενημερώθηκε επιτυχώς μαζί με τη νέα εικόνα.';
+                                $_SESSION['flash_message'] = 'Το προϊόν ενημερώθηκε επιτυχώς και η εικόνα αντικαταστάθηκε.';
                                 $_SESSION['flash_message_type'] = 'success';
                             } else {
-                                $_SESSION['flash_message'] = 'Η εικόνα μεταφέρθηκε, αλλά δεν αποθηκεύτηκε στη βάση.';
+                                if (file_exists($targetPath)) {
+                                    @unlink($targetPath);
+                                }
+
+                                $_SESSION['flash_message'] = 'Η νέα εικόνα ανέβηκε, αλλά δεν αποθηκεύτηκε σωστά στη βάση.';
                                 $_SESSION['flash_message_type'] = 'warning';
                             }
                         } else {
@@ -456,7 +470,7 @@ $products = $productsService->getAllProducts();
                         <label><strong>Νέα Εικόνα Προϊόντος (προαιρετικά)</strong></label>
                         <input type="file" name="product_image" class="form-control-file" accept=".jpg,.jpeg,.png,.gif,.webp">
                         <small class="text-muted d-block mt-1">
-                            Αν επιλέξεις νέα εικόνα, θα προστεθεί στο προϊόν.
+                            Αν επιλέξεις νέα εικόνα, θα αντικαταστήσει την τρέχουσα.
                         </small>
                     </div>
 

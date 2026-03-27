@@ -285,6 +285,22 @@ class EventsService {
         echo json_encode($events);
     }
 
+    public function getAllEventsForCalendar() {
+        $eventsQuery = "SELECT event_title as title, event_description as description, event_date as date FROM Events ORDER BY event_date ASC";
+        $result = $this->conn->query($eventsQuery);
+
+        if (!$result) {
+            echo json_encode(["error" => "Query failed: " . $this->conn->error]);
+            exit;
+        }
+
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+        return $events;
+    }
+
 }
 
 if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {

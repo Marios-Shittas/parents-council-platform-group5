@@ -14,6 +14,7 @@ function RegisterForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!form.consent) {
             alert("Πρέπει να συμφωνήσετε με την πολιτική απορρήτου.");
             return;
@@ -23,11 +24,18 @@ function RegisterForm() {
             const response = await fetch('../app/services/RegisteringService.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ ...form, children })
             });
 
             const result = await response.json();
+
             alert(result.message);
+
+            if (result.success) {
+                window.location.href = "../public/home.php";
+            }
+
         } catch (error) {
             alert("Σφάλμα επικοινωνίας με τον server.");
         }
@@ -49,12 +57,17 @@ function RegisterForm() {
     };
 
     const addChild = () => {
-        setChildren(prev => [...prev, { child_name: '', child_last_name: '', child_dob: '', child_class: '' }]);
+        setChildren(prev => [
+            ...prev,
+            { child_name: '', child_last_name: '', child_dob: '', child_class: '' }
+        ]);
     };
 
     const removeChild = (index) => {
         setChildren(prev => prev.filter((_, i) => i !== index));
     };
+    
+
 return (
     <div>
         <section className="public-page-header" aria-labelledby="public-page-title">
@@ -79,7 +92,7 @@ return (
                 <p className="register-intro">
                     Με την εγγραφή σας στον Σύνδεσμο Γονέων μπορείτε να αποκτήσετε πρόσβαση στο σύστημα και
                     να επωφεληθείτε από τις διαθέσιμες υπηρεσίες και λειτουργίες της πλατφόρμας, όπως ενημέρωση
-                    για εκδηλώσεις και δραστηριότητες, συμμετοχή σε events, αγορές προϊόντων που προσφέρει ο
+                    για εκδηλώσεις και δραστηριότητες, συμμετοχή σε εκδηλώσεις, αγορές προϊόντων που προσφέρει ο
                     σύνδεσμος, καθώς και υποβολή αιτήσεων για διάφορες δράσεις και υπηρεσίες κατά τη διάρκεια
                     της σχολικής χρονιάς. Πριν προχωρήσετε, παρακαλούμε συμπληρώστε προσεκτικά τα στοιχεία σας.{' '}
                     <strong>Μετά την υποβολή, η αίτησή σας θα τεθεί σε αναμονή μέχρι να εγκριθεί από τον Σύνδεσμο.

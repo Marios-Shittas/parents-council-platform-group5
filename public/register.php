@@ -1,4 +1,11 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+header("Expires: 0");
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -25,7 +32,7 @@
 <body>
 
     <!-- Header -->
-    <?php include '../app/includes/header.php'; ?>
+    <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
     <!-- React will render here -->
     <div class="container">
@@ -39,8 +46,10 @@
     <!-- Babel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-    <!-- Your React JSX -->
+    <!-- Register JSX -->
     <script type="text/babel" src="assets/js/register.jsx"></script>
 
     <!-- Footer -->
-    <?php include '../app/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../app/includes/footer.php'; ?>
+</body>
+</html>
