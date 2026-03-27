@@ -37,6 +37,7 @@ class ProductsService
 
         if ($result) {
             while ($row = mysqli_fetch_assoc($result)) {
+                $row['product_image'] = $this->resolveProductImagePath((string)($row['product_image'] ?? ''));
                 $products[] = $row;
             }
         }
@@ -76,7 +77,12 @@ class ProductsService
         $result = $stmt->get_result();
 
         if ($result && $result->num_rows > 0) {
-            return $result->fetch_assoc();
+            $product = $result->fetch_assoc();
+            if (is_array($product)) {
+                $product['product_image'] = $this->resolveProductImagePath((string)($product['product_image'] ?? ''));
+            }
+
+            return $product;
         }
 
         return false;
@@ -364,5 +370,33 @@ class ProductsService
                 @unlink($absolutePath);
             }
         }
+    }
+
+    private function resolveProductImagePath(string $imagePath): string
+    {
+        $imagePath = trim($imagePath);
+        if ($imagePath === '') {
+            return $this->getDefaultProductImagePath();
+        }
+
+        $normalized = str_replace('\\', '/', $imagePath);
+        $projectRoot = dirname(__DIR__, 2);
+        $absolutePath = '';
+
+        $publicPosition = strpos($normalized, '/public/');
+        if ($publicPosition !== false) {
+            $absolutePath = $projectRoot . substr($normalized, $publicPosition);
+        } elseif (strpos($normalized, '/assets/') === 0) {
+            $absolutePath = $projectRoot . '/public' . $normalized;
+        } else {
+            $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+        }
+
+        return file_exists($absolutePath) ? $imagePath : $this->getDefaultProductImagePath();
+    }
+
+    private function getDefaultProductImagePath(): string
+    {
+        return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
     }
 }

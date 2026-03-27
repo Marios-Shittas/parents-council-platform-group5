@@ -6,6 +6,34 @@ header("Access-Control-Allow-Origin: *");
 
 include "../config/db.php";
 
+function getDefaultProductImagePath(): string
+{
+    return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
+}
+
+function resolveProductImagePath(string $imagePath): string
+{
+    $imagePath = trim($imagePath);
+    if ($imagePath === '') {
+        return getDefaultProductImagePath();
+    }
+
+    $normalized = str_replace('\\', '/', $imagePath);
+    $projectRoot = dirname(__DIR__, 2);
+    $absolutePath = '';
+
+    $publicPosition = strpos($normalized, '/public/');
+    if ($publicPosition !== false) {
+        $absolutePath = $projectRoot . substr($normalized, $publicPosition);
+    } elseif (strpos($normalized, '/assets/') === 0) {
+        $absolutePath = $projectRoot . '/public' . $normalized;
+    } else {
+        $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+    }
+
+    return file_exists($absolutePath) ? $imagePath : getDefaultProductImagePath();
+}
+
 $sql = "SELECT product_id, product_name, product_description, price FROM Products";
 $result = $conn->query($sql);
 
@@ -21,8 +49,12 @@ if ($result->num_rows > 0) {
         $images = [];
         if ($img_result) {
             while ($img_row = $img_result->fetch_assoc()) {
-                $images[] = $img_row['image_path'];
+                $images[] = resolveProductImagePath((string)($img_row['image_path'] ?? ''));
             }
+        }
+
+        if (empty($images)) {
+            $images[] = getDefaultProductImagePath();
         }
 
         $row['images'] = $images;
