@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+<title id="title">Default product image</title>
+<desc id="desc">Placeholder image for products without an available photo.</desc>
+<defs>
+<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#edf4ff" />
+<stop offset="100%" stop-color="#d6e6fb" />
+</linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#bg)" />
+<circle cx="620" cy="120" r="90" fill="#ffffff" fill-opacity="0.45" />
+<circle cx="170" cy="470" r="120" fill="#ffffff" fill-opacity="0.3" />
+<rect x="185" y="120" width="430" height="300" rx="28" fill="#ffffff" />
+<path d="M300 210h200c17 0 30 13 30 30v60c0 17-13 30-30 30H300c-17 0-30-13-30-30v-60c0-17 13-30 30-30z" fill="#2f6fb3" fill-opacity="0.12" />
+<path d="M338 205c0-34 28-62 62-62s62 28 62 62h-40c0-12-10-22-22-22s-22 10-22 22z" fill="#2f6fb3" />
+<rect x="255" y="450" width="290" height="20" rx="10" fill="#7a93ad" fill-opacity="0.35" />
+<text x="400" y="515" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#24486b">No Product Image</text>
+</svg>

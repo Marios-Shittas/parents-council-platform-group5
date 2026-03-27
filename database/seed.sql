@@ -122,7 +122,7 @@ INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, 
 (2, 102, 3, 1, 3.50, NULL);
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
-(2, 2, '/parents-council-platform-group5/public/assets/Products_img/black-school-trousers.jpg'),
-(3, 3, '/parents-council-platform-group5/public/assets/Products_img/product_69c1153c899be8.66544098.jpg');
+(2, 2, '/parents-council-platform-group5/public/assets/Products_img/product_69c4ffe67280e6.61595091.jpg'),
+(3, 3, '/parents-council-platform-group5/public/assets/Products_img/default-product.svg');
 
 COMMIT;
