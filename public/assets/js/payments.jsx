@@ -3,104 +3,153 @@ function Payments() {
     const [cart, setCart] = React.useState([]);
     const [selectedSizes, setSelectedSizes] = React.useState({});
     const [sizeErrors, setSizeErrors] = React.useState({});
+    const [cartLoading, setCartLoading] = React.useState(true);
 
-    // Fetch products from PHP API
+    const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
+    const cartUrl = "/parents-council-platform-group5/public/cart.php";
+
     React.useEffect(() => {
-        fetch("/parents-council-platform-group5/app/services/ProductFetch.php")
+        fetch(productsUrl)
             .then(res => res.json())
             .then(data => setProducts(data))
-            .catch(err => console.error("Fetch error:", err));
+            .catch(err => console.error("Fetch products error:", err));
     }, []);
 
-    // Update selected size for a product
-    function updateSelectedSize(productId, size) {
-        setSelectedSizes({
-            ...selectedSizes,
-            [productId]: size
-        });
+    React.useEffect(() => {
+        loadCart();
+    }, []);
 
-        // Καθαρίζει το error μόλις επιλεγεί μέγεθος
-        if (size) {
-            setSizeErrors({
-                ...sizeErrors,
-                [productId]: ''
+    function loadCart() {
+        setCartLoading(true);
+
+        fetch(`${cartUrl}?action=get`)
+            .then(async (res) => {
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || "Σφάλμα φόρτωσης καλαθιού.");
+                }
+
+                const items = (data.cart && data.cart.items) ? data.cart.items : [];
+                setCart(items);
+            })
+            .catch(err => {
+                console.error("Fetch cart error:", err);
+                setCart([]);
+            })
+            .finally(() => {
+                setCartLoading(false);
             });
+    }
+
+    function postCartAction(formData) {
+        return fetch(cartUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: new URLSearchParams(formData).toString()
+        })
+        .then(async (res) => {
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Σφάλμα καλαθιού.");
+            }
+
+            const items = (data.cart && data.cart.items) ? data.cart.items : [];
+            setCart(items);
+            return data;
+        });
+    }
+
+    function updateSelectedSize(productId, size) {
+        setSelectedSizes(prev => ({
+            ...prev,
+            [productId]: size
+        }));
+
+        if (size) {
+            setSizeErrors(prev => ({
+                ...prev,
+                [productId]: ''
+            }));
         }
     }
 
-    // Add product to cart
     function addToCart(product) {
         const selectedSize = selectedSizes[product.product_id];
 
-        // Υποχρεωτική επιλογή μεγέθους
         if (!selectedSize || selectedSize.trim() === '') {
-            setSizeErrors({
-                ...sizeErrors,
+            setSizeErrors(prev => ({
+                ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
-            });
+            }));
             return;
         }
 
-        const existingIndex = cart.findIndex(item =>
-            item.product_id === product.product_id && item.size === selectedSize
-        );
-
-        if (existingIndex >= 0) {
-            const newCart = [...cart];
-            newCart[existingIndex].quantity += 1;
-            setCart(newCart);
-        } else {
-            setCart([
-                ...cart,
-                {
-                    ...product,
-                    quantity: 1,
-                    size: selectedSize
-                }
-            ]);
-        }
-
-        // Καθαρίζει το error αφού μπει σωστά στο καλάθι
-        setSizeErrors({
-            ...sizeErrors,
-            [product.product_id]: ''
+        postCartAction({
+            action: 'add',
+            product_id: product.product_id,
+            quantity: 1,
+            size: selectedSize
+        })
+        .then(() => {
+            setSizeErrors(prev => ({
+                ...prev,
+                [product.product_id]: ''
+            }));
+        })
+        .catch(err => {
+            console.error("Add to cart error:", err);
+            alert(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.');
         });
     }
 
-    // Remove product from cart
-    function removeFromCart(index) {
-        const newCart = [...cart];
-        newCart.splice(index, 1);
-        setCart(newCart);
+    function removeFromCart(productId, size) {
+        postCartAction({
+            action: 'remove',
+            product_id: productId,
+            size: size || ''
+        })
+        .catch(err => {
+            console.error("Remove from cart error:", err);
+            alert(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.');
+        });
     }
 
-    // Update quantity
-    function updateQuantity(index, newQuantity) {
+    function updateQuantity(productId, size, newQuantity) {
         if (newQuantity < 1) return;
-        const newCart = [...cart];
-        newCart[index].quantity = newQuantity;
-        setCart(newCart);
+
+        postCartAction({
+            action: 'update',
+            product_id: productId,
+            size: size || '',
+            quantity: newQuantity
+        })
+        .catch(err => {
+            console.error("Update cart error:", err);
+            alert(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.');
+        });
     }
 
-    // Calculate total
     function calculateTotal() {
-        return cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+        return cart
+            .reduce((total, item) => total + (Number(item.price_at_purchase) * Number(item.quantity)), 0)
+            .toFixed(2);
     }
 
-    // Calculate total quantity in cart
     function calculateItemCount() {
-        return cart.reduce((total, item) => total + item.quantity, 0);
+        return cart.reduce((total, item) => total + Number(item.quantity), 0);
     }
 
-    // Handle checkout
     function handleCheckout() {
         if (cart.length === 0) {
             alert('Το καλάθι είναι κενό!');
             return;
         }
 
-        alert('Ευχαριστούμε για την αγορά σας!\nΣύνολο: €' + calculateTotal());
-        setCart([]);
+        alert('Η ολοκλήρωση αγοράς θα συνδεθεί στο επόμενο βήμα.\nΣύνολο: €' + calculateTotal());
     }
 
     return (
@@ -200,7 +249,14 @@ function Payments() {
                             </div>
                         </div>
 
-                        {cart.length === 0 ? (
+                        {cartLoading ? (
+                            <div className="cart-empty-state">
+                                <div className="cart-empty-icon">
+                                    <i className="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <h3>Φόρτωση καλαθιού...</h3>
+                            </div>
+                        ) : cart.length === 0 ? (
                             <div className="cart-empty-state">
                                 <div className="cart-empty-icon">
                                     <i className="fas fa-shopping-basket"></i>
@@ -211,7 +267,7 @@ function Payments() {
                         ) : (
                             <>
                                 {cart.map((item, index) => (
-                                    <div className="cartitem mb-3" key={index}>
+                                    <div className="cartitem mb-3" key={`${item.product_id}-${item.size || 'no-size'}-${index}`}>
                                         <div className="row align-items-center">
                                             <div className="col-lg-4 col-md-4 cart-pro-title">
                                                 <div>{item.product_name}</div>
@@ -230,7 +286,7 @@ function Payments() {
                                                 <div className="quantity-controls">
                                                     <button
                                                         className="btn btn-sm btn-outline-light"
-                                                        onClick={() => updateQuantity(index, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.product_id, item.size, Number(item.quantity) - 1)}
                                                     >
                                                         <i className="fas fa-minus"></i>
                                                     </button>
@@ -239,12 +295,12 @@ function Payments() {
                                                         type="number"
                                                         className="quantity-input"
                                                         value={item.quantity}
-                                                        onChange={(e) => updateQuantity(index, parseInt(e.target.value, 10) || 1)}
+                                                        onChange={(e) => updateQuantity(item.product_id, item.size, parseInt(e.target.value, 10) || 1)}
                                                     />
 
                                                     <button
                                                         className="btn btn-sm btn-outline-light"
-                                                        onClick={() => updateQuantity(index, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.product_id, item.size, Number(item.quantity) + 1)}
                                                     >
                                                         <i className="fas fa-plus"></i>
                                                     </button>
@@ -253,12 +309,12 @@ function Payments() {
 
                                             <div className="col-lg-2 col-md-2 cart-item-actions">
                                                 <div className="cart-pro-price">
-                                                    <strong>€{(item.price * item.quantity).toFixed(2)}</strong>
+                                                    <strong>€{(Number(item.price_at_purchase) * Number(item.quantity)).toFixed(2)}</strong>
                                                 </div>
 
                                                 <button
                                                     className="delete btn btn-sm btn-danger"
-                                                    onClick={() => removeFromCart(index)}
+                                                    onClick={() => removeFromCart(item.product_id, item.size)}
                                                 >
                                                     <i className="fas fa-trash-alt mr-1"></i>
                                                     Αφαίρεση
@@ -292,6 +348,5 @@ function Payments() {
     );
 }
 
-// Mount React component
 const root = ReactDOM.createRoot(document.getElementById('payments'));
 root.render(<Payments />);
