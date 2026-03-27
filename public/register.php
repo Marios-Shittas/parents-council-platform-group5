@@ -32,7 +32,7 @@ header("Expires: 0");
 <body>
 
     <!-- Header -->
-    <?php include '../app/includes/header.php'; ?>
+    <?php include __DIR__ . '/../app/includes/header.php'; ?>
 
     <!-- React will render here -->
     <div class="container">
@@ -50,9 +50,6 @@ header("Expires: 0");
     <script type="text/babel" src="assets/js/register.jsx"></script>
 
     <!-- Footer -->
-    <?php include '../app/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../app/includes/footer.php'; ?>
 </body>
-
-
-$page = new RegisterPage();
-$page->render();
+</html>
