@@ -10,7 +10,7 @@
         }
 
         public function getUserByEmail($email) {
-            $sql = "SELECT * FROM users WHERE email = ?";
+            $sql = "SELECT * FROM Users WHERE email = ?";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("s", $email);
             $stmt->execute();
