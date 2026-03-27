@@ -5,7 +5,7 @@ function Payments() {
     const [sizeErrors, setSizeErrors] = React.useState({});
     const [cartLoading, setCartLoading] = React.useState(true);
 
-    const productsUrl = "/parents-council-platform-group5/app/services/PaymentsService.php";
+    const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
 
     React.useEffect(() => {
