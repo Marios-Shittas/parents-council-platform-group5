@@ -244,8 +244,9 @@ CREATE TABLE IF NOT EXISTS Payments (
     payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     payment_status     ENUM('pending', 'completed', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
     payment_type       ENUM('membership', 'insurance', 'product') NOT NULL,
-    transaction_id     VARCHAR(255) UNIQUE NULL,
+    transaction_id     VARCHAR(255) NULL,
     PRIMARY KEY (payment_id),
+    KEY idx_payments_transaction_id (transaction_id),
     CONSTRAINT fk_pay_user
         FOREIGN KEY (user_id) REFERENCES Users(user_id)
         ON DELETE RESTRICT ON UPDATE CASCADE

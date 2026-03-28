@@ -51,7 +51,8 @@ class SubscriptionJccService
 
             $this->updatePaymentStatus($membershipPaymentId, $userId, $paymentStatus, $transactionId);
             if ($insurancePaymentId > 0) {
-                $this->updatePaymentStatus($insurancePaymentId, $userId, $paymentStatus, $transactionId);
+                // A single JCC checkout can cover both rows, so only the primary payment stores the gateway transaction id.
+                $this->updatePaymentStatus($insurancePaymentId, $userId, $paymentStatus, null);
             }
 
             if ($paymentStatus === 'completed') {
