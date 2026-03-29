@@ -30,6 +30,10 @@ class TokenValidator
             return null;
         }
 
+        if ($requireNotExpired && $role === 'parent' && $accountStatus === 'waiting_payment') {
+            $this->resetAllExpiredWaitingPaymentUsersToPending();
+        }
+
         $sql = 'SELECT user_id FROM Users WHERE token = ?';
         $types = 's';
         $params = [$token];
@@ -64,5 +68,27 @@ class TokenValidator
         $stmt->close();
 
         return $row ? (int) $row['user_id'] : null;
+    }
+
+    public function resetAllExpiredWaitingPaymentUsersToPending(): int
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE Users
+             SET account_status = 'pending', token = NULL, token_expiry = NULL
+             WHERE role = 'parent'
+               AND account_status = 'waiting_payment'
+               AND token_expiry IS NOT NULL
+               AND token_expiry < NOW()"
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to prepare expired token reset.');
+        }
+
+        $stmt->execute();
+        $affectedRows = $stmt->affected_rows;
+        $stmt->close();
+
+        return max(0, $affectedRows);
     }
 }
