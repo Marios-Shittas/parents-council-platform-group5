@@ -19,14 +19,39 @@ body {
     top: 0;
     left: 0;
     bottom: 0;
+    font-family: 'Lato', sans-serif;
+    line-height: 1.4;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+}
+
+.admin-sidebar .nav,
+.admin-sidebar .nav-item {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
 }
 
 .admin-sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: 'Montserrat', sans-serif;
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 30px;
     line-height: 1.4;
+    letter-spacing: 0 !important;
+    word-spacing: 0 !important;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.admin-sidebar .brand i {
+    flex: 0 0 auto;
 }
 
 .admin-sidebar .nav-link {
@@ -38,11 +63,19 @@ body {
     align-items: center;
     gap: 12px;
     font-size: 18px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: 0 !important;
+    word-spacing: 0 !important;
+    text-transform: none;
     transition: 0.2s ease;
 }
 
 .admin-sidebar .admin-nav-label {
     flex: 1;
+    letter-spacing: 0 !important;
+    word-spacing: 0 !important;
 }
 
 .admin-sidebar .admin-notification-badge {
@@ -78,9 +111,14 @@ body {
 }
 
 .back-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 20px;
+    font-family: 'Lato', sans-serif;
     font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.35;
     color: #183f6b;
     text-decoration: none;
 }
