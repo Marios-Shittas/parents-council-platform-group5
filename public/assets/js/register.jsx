@@ -1,18 +1,4 @@
 function RegisterForm() {
-    const guardianFieldMessages = {
-        first_name: 'Το όνομα συμπληρώθηκε σωστά.',
-        last_name: 'Το επώνυμο συμπληρώθηκε σωστά.',
-        phone: 'Έτοιμο για αποθήκευση ως +357 και 8ψήφιο αριθμό.',
-        email: 'Το email έχει σωστή μορφή.'
-    };
-
-    const childFieldMessages = {
-        child_name: 'Το όνομα του παιδιού συμπληρώθηκε σωστά.',
-        child_last_name: 'Το επώνυμο του παιδιού συμπληρώθηκε σωστά.',
-        child_dob: 'Η ημερομηνία γέννησης είναι έγκυρη.',
-        child_class: 'Η τάξη συμπληρώθηκε σωστά.'
-    };
-
     const [form, setForm] = React.useState({
         first_name: '',
         last_name: '',
@@ -25,8 +11,7 @@ function RegisterForm() {
     const [children, setChildren] = React.useState([
         { child_name: '', child_last_name: '', child_dob: '', child_class: '' }
     ]);
-    const [touchedFields, setTouchedFields] = React.useState({});
-    const [submitted, setSubmitted] = React.useState(false);
+    const [showPhoneError, setShowPhoneError] = React.useState(false);
 
     const isNonEmpty = (value) => value.trim() !== '';
     const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -46,51 +31,6 @@ function RegisterForm() {
 
     const isChildFieldValid = (fieldName, value) => isNonEmpty(value);
 
-    const shouldShowState = (fieldKey) => submitted || Boolean(touchedFields[fieldKey]);
-
-    const getInputClassName = (fieldKey, isValid) => {
-        const classNames = ['form-control'];
-
-        if (shouldShowState(fieldKey)) {
-            classNames.push(isValid ? 'is-valid' : 'is-invalid');
-        }
-
-        return classNames.join(' ');
-    };
-
-    const getFeedbackClassName = (fieldKey, isValid) => {
-        if (!shouldShowState(fieldKey)) {
-            return 'register-feedback d-none';
-        }
-
-        return `register-feedback ${isValid ? 'is-valid' : 'is-invalid'}`;
-    };
-
-    const getPhoneShellClassName = () => {
-        const classNames = ['register-phone-shell'];
-
-        if (shouldShowState('phone')) {
-            classNames.push(isPhoneValid(form.phone) ? 'register-is-valid' : 'register-is-invalid');
-        }
-
-        return classNames.join(' ');
-    };
-
-    const markFieldTouched = (fieldKey) => {
-        setTouchedFields(prev => ({
-            ...prev,
-            [fieldKey]: true
-        }));
-    };
-
-    const getAllFieldKeys = () => {
-        const childKeys = children.reduce((keys, child, index) => (
-            keys.concat(Object.keys(child).map((fieldName) => `child-${index}-${fieldName}`))
-        ), []);
-
-        return ['first_name', 'last_name', 'phone', 'email', ...childKeys];
-    };
-
     const isFormValid = () => {
         const guardianValid = ['first_name', 'last_name', 'phone', 'email'].every((fieldName) => (
             isGuardianFieldValid(fieldName, form[fieldName])
@@ -103,18 +43,20 @@ function RegisterForm() {
         return guardianValid && childrenValid && form.viber_consent && form.consent;
     };
 
+    const handlePhoneKeyDown = (e) => {
+        if (e.key === 'Enter' && !isPhoneValid(form.phone)) {
+            e.preventDefault();
+            setShowPhoneError(true);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
-        setTouchedFields(prev => {
-            const nextState = { ...prev };
 
-            getAllFieldKeys().forEach((fieldKey) => {
-                nextState[fieldKey] = true;
-            });
-
-            return nextState;
-        });
+        if (!isPhoneValid(form.phone)) {
+            setShowPhoneError(true);
+            return;
+        }
 
         if (!isFormValid()) {
             alert("Παρακαλώ συμπληρώστε σωστά όλα τα πεδία πριν την υποβολή.");
@@ -161,6 +103,10 @@ function RegisterForm() {
                     ? value.replace(/\D/g, '').slice(0, 8)
                     : value
         }));
+
+        if (name === 'phone' && isPhoneValid(value.replace(/\D/g, '').slice(0, 8))) {
+            setShowPhoneError(false);
+        }
     };
 
     const handleChildChange = (index, e) => {
@@ -235,13 +181,9 @@ function RegisterForm() {
                                                 type="text"
                                                 value={form.first_name}
                                                 onChange={handleChange}
-                                                onBlur={() => markFieldTouched('first_name')}
-                                                className={getInputClassName('first_name', isGuardianFieldValid('first_name', form.first_name))}
+                                                className="form-control"
                                                 required
                                             />
-                                            <div className={getFeedbackClassName('first_name', isGuardianFieldValid('first_name', form.first_name))}>
-                                                {isGuardianFieldValid('first_name', form.first_name) ? guardianFieldMessages.first_name : 'Συμπληρώστε το όνομα.'}
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -254,13 +196,9 @@ function RegisterForm() {
                                                 type="text"
                                                 value={form.last_name}
                                                 onChange={handleChange}
-                                                onBlur={() => markFieldTouched('last_name')}
-                                                className={getInputClassName('last_name', isGuardianFieldValid('last_name', form.last_name))}
+                                                className="form-control"
                                                 required
                                             />
-                                            <div className={getFeedbackClassName('last_name', isGuardianFieldValid('last_name', form.last_name))}>
-                                                {isGuardianFieldValid('last_name', form.last_name) ? guardianFieldMessages.last_name : 'Συμπληρώστε το επώνυμο.'}
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -268,14 +206,14 @@ function RegisterForm() {
                                     <div className="form-group-inline">
                                         <label>Τηλέφωνο:</label>
                                         <div className="register-input-stack">
-                                            <div className={getPhoneShellClassName()}>
+                                            <div className="register-phone-shell">
                                                 <span className="register-phone-prefix">+357</span>
                                                 <input
                                                     name="phone"
                                                     type="text"
                                                     value={form.phone}
                                                     onChange={handleChange}
-                                                    onBlur={() => markFieldTouched('phone')}
+                                                    onKeyDown={handlePhoneKeyDown}
                                                     className="form-control"
                                                     inputMode="numeric"
                                                     autoComplete="tel-national"
@@ -284,9 +222,11 @@ function RegisterForm() {
                                                     required
                                                 />
                                             </div>
-                                            <div className={getFeedbackClassName('phone', isPhoneValid(form.phone))}>
-                                                {isPhoneValid(form.phone) ? guardianFieldMessages.phone : 'Βάλτε 8 ψηφία. Ο κωδικός +357 μπαίνει αυτόματα.'}
-                                            </div>
+                                            {showPhoneError && (
+                                                <div className="register-field-note register-field-note--error">
+                                                    Το κινητό πρέπει να έχει ακριβώς 8 ψηφία μετά το +357.
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -299,14 +239,10 @@ function RegisterForm() {
                                                 type="email"
                                                 value={form.email}
                                                 onChange={handleChange}
-                                                onBlur={() => markFieldTouched('email')}
-                                                className={getInputClassName('email', isGuardianFieldValid('email', form.email))}
+                                                className="form-control"
                                                 autoComplete="email"
                                                 required
                                             />
-                                            <div className={getFeedbackClassName('email', isGuardianFieldValid('email', form.email))}>
-                                                {isGuardianFieldValid('email', form.email) ? guardianFieldMessages.email : 'Συμπληρώστε έγκυρο email.'}
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -340,13 +276,9 @@ function RegisterForm() {
                                                     type="text"
                                                     value={child.child_name}
                                                     onChange={(e) => handleChildChange(index, e)}
-                                                    onBlur={() => markFieldTouched(`child-${index}-child_name`)}
-                                                    className={getInputClassName(`child-${index}-child_name`, isChildFieldValid('child_name', child.child_name))}
+                                                    className="form-control"
                                                     required
                                                 />
-                                                <div className={getFeedbackClassName(`child-${index}-child_name`, isChildFieldValid('child_name', child.child_name))}>
-                                                    {isChildFieldValid('child_name', child.child_name) ? childFieldMessages.child_name : 'Συμπληρώστε το όνομα του παιδιού.'}
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -359,13 +291,9 @@ function RegisterForm() {
                                                     type="text"
                                                     value={child.child_last_name}
                                                     onChange={(e) => handleChildChange(index, e)}
-                                                    onBlur={() => markFieldTouched(`child-${index}-child_last_name`)}
-                                                    className={getInputClassName(`child-${index}-child_last_name`, isChildFieldValid('child_last_name', child.child_last_name))}
+                                                    className="form-control"
                                                     required
                                                 />
-                                                <div className={getFeedbackClassName(`child-${index}-child_last_name`, isChildFieldValid('child_last_name', child.child_last_name))}>
-                                                    {isChildFieldValid('child_last_name', child.child_last_name) ? childFieldMessages.child_last_name : 'Συμπληρώστε το επώνυμο του παιδιού.'}
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -378,13 +306,9 @@ function RegisterForm() {
                                                     type="date"
                                                     value={child.child_dob}
                                                     onChange={(e) => handleChildChange(index, e)}
-                                                    onBlur={() => markFieldTouched(`child-${index}-child_dob`)}
-                                                    className={getInputClassName(`child-${index}-child_dob`, isChildFieldValid('child_dob', child.child_dob))}
+                                                    className="form-control"
                                                     required
                                                 />
-                                                <div className={getFeedbackClassName(`child-${index}-child_dob`, isChildFieldValid('child_dob', child.child_dob))}>
-                                                    {isChildFieldValid('child_dob', child.child_dob) ? childFieldMessages.child_dob : 'Συμπληρώστε την ημερομηνία γέννησης.'}
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -397,14 +321,10 @@ function RegisterForm() {
                                                     type="text"
                                                     value={child.child_class}
                                                     onChange={(e) => handleChildChange(index, e)}
-                                                    onBlur={() => markFieldTouched(`child-${index}-child_class`)}
-                                                    className={getInputClassName(`child-${index}-child_class`, isChildFieldValid('child_class', child.child_class))}
+                                                    className="form-control"
                                                     placeholder="πχ. Α΄3"
                                                     required
                                                 />
-                                                <div className={getFeedbackClassName(`child-${index}-child_class`, isChildFieldValid('child_class', child.child_class))}>
-                                                    {isChildFieldValid('child_class', child.child_class) ? childFieldMessages.child_class : 'Συμπληρώστε την τάξη του παιδιού.'}
-                                                </div>
                                             </div>
                                         </div>
                                     </div>

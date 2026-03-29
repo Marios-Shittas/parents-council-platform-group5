@@ -125,44 +125,6 @@
     color: #9ca3af !important;
 }
 
-.register-section-card input.form-control.is-valid,
-.register-phone-shell.register-is-valid {
-    border-color: #198754 !important;
-    background: #f0fdf4 !important;
-}
-
-.register-section-card input.form-control.is-valid:focus,
-.register-phone-shell.register-is-valid:focus-within {
-    border-color: #198754 !important;
-    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.14) !important;
-}
-
-.register-section-card input.form-control.is-invalid,
-.register-phone-shell.register-is-invalid {
-    border-color: #dc3545 !important;
-    background: #fff5f5 !important;
-}
-
-.register-section-card input.form-control.is-invalid:focus,
-.register-phone-shell.register-is-invalid:focus-within {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12) !important;
-}
-
-.register-feedback {
-    font-size: 0.76rem;
-    line-height: 1.4;
-    padding-left: 2px;
-}
-
-.register-feedback.is-valid {
-    color: #198754;
-}
-
-.register-feedback.is-invalid {
-    color: #dc3545;
-}
-
 .register-phone-shell {
     display: flex;
     align-items: center;
@@ -196,6 +158,16 @@
 
 .register-phone-shell input.form-control:focus {
     box-shadow: none !important;
+}
+
+.register-field-note {
+    margin-top: 6px;
+    font-size: 0.76rem;
+    line-height: 1.4;
+}
+
+.register-field-note--error {
+    color: #dc3545;
 }
 
 /* ── Consent rows ── */
