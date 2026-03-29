@@ -390,7 +390,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     </div>
                     <div class="users-search-wrap">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο ή κατάσταση">
+                        <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο, κατάσταση ή Viber">
                     </div>
                 </div>
 
@@ -408,6 +408,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                     <th>Χρήστης</th>
                                     <th>Ρόλος</th>
                                     <th>Status</th>
+                                    <th>Viber</th>
                                     <th>Παιδιά</th>
                                     <th>Ιστορικό</th>
                                     <th>Δημιουργία</th>
@@ -423,12 +424,13 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         $hasHistory = ((int)($user['order_count'] ?? 0) > 0) || ((int)($user['payment_count'] ?? 0) > 0);
                                         $orderHistory = $ordersByUserId[$userId] ?? [];
                                         $paymentHistory = $paymentsByUserId[$userId] ?? [];
+                                        $hasViberConsent = ((int)($user['viber_consent'] ?? 0) === 1);
                                         $displayChildren = ($user['role'] ?? '') === 'parent' ? (int)($user['child_count'] ?? 0) : 0;
                                         $inlineChildren = $childrenByParentId[$userId] ?? [];
                                         $historyRowId = 'history-preview-' . $userId;
                                         $inlineRowId = 'children-preview-' . $userId;
                                     ?>
-                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? ''))), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? '') . ' ' . (($user['role'] ?? '') === 'parent' ? ($hasViberConsent ? 'viber ναι' : 'viber οχι') : ''))), ENT_QUOTES, 'UTF-8'); ?>">
                                         <td>
                                             <div class="user-main-cell">
                                                 <div class="user-avatar"><?php echo htmlspecialchars(strtoupper(substr((string)($user['name'] ?? 'U'), 0, 1))); ?></div>
@@ -458,6 +460,15 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                             <span class="<?php echo htmlspecialchars(statusBadgeClass((string)($user['account_status'] ?? 'pending'))); ?>">
                                                 <?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <?php if (($user['role'] ?? '') === 'parent'): ?>
+                                                <span class="badge <?php echo $hasViberConsent ? 'bg-success-subtle text-success-emphasis' : 'bg-secondary-subtle text-secondary-emphasis'; ?>">
+                                                    <?php echo $hasViberConsent ? 'Ναι' : 'Όχι'; ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-muted">—</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if (($user['role'] ?? '') === 'parent'): ?>
@@ -550,7 +561,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                     </tr>
                                     <?php if ($hasHistory): ?>
                                         <tr id="<?php echo $historyRowId; ?>" class="history-preview-row user-preview-row d-none" data-preview-for="<?php echo $userId; ?>">
-                                            <td colspan="7">
+                                            <td colspan="8">
                                                 <div class="history-preview-card">
                                                     <div class="history-preview-header">
                                                         <div>
@@ -635,7 +646,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                     <?php endif; ?>
                                     <?php if (($user['role'] ?? '') === 'parent'): ?>
                                         <tr id="<?php echo $inlineRowId; ?>" class="children-preview-row user-preview-row <?php echo $managedParentId === $userId ? '' : 'd-none'; ?>" data-preview-for="<?php echo $userId; ?>">
-                                            <td colspan="7">
+                                            <td colspan="8">
                                                 <div class="children-preview-card">
                                                     <div class="children-preview-header">
                                                         <div>

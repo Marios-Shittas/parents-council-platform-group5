@@ -70,19 +70,12 @@ body {
 
 /* Back Link */
 .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--primary);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
     margin-bottom: 24px;
-    transition: var(--transition);
+    transition: color 0.2s ease;
 }
 
 .back-link:hover {
-    color: var(--primary-dark);
+    color: #183f6b;
 }
 
 .back-link.mb-2 {

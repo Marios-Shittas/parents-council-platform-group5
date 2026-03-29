@@ -16,12 +16,10 @@ if ($unreadContactMessages > 0) {
 }
 ?>
 
-<link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
-
 <nav class="admin-sidebar">
     
     <div class="brand">
-        <i class="fas fa-school mr-2"></i>
+        <i class="fas fa-school"></i>
         Admin Panel
     </div>
 

@@ -236,8 +236,10 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Διαχείριση Επικοινωνίας - Πίνακας Ελέγχου</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_epikoinonia.css">
 </head>
 <body>
@@ -247,9 +249,9 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
         <div class="admin-content">
             <!-- Back Link - Only show in list view -->
             <?php if (!$viewDetail): ?>
-                <a href="announcements.php" class="back-link">
+                <a href="home.php" class="back-link">
                     <i class="fas fa-arrow-left"></i>
-                    Πίσω στον Πίνακα Ελέγχου
+                    Πίσω στο Dashboard
                 </a>
             <?php endif; ?>
 
