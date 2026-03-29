@@ -100,7 +100,7 @@ function RegisterForm() {
             Object.entries(child).every(([fieldName, value]) => isChildFieldValid(fieldName, value))
         ));
 
-        return guardianValid && childrenValid && form.consent;
+        return guardianValid && childrenValid && form.viber_consent && form.consent;
     };
 
     const handleSubmit = async (e) => {
@@ -121,8 +121,8 @@ function RegisterForm() {
             return;
         }
 
-        if (!form.consent) {
-            alert("Πρέπει να συμφωνήσετε με την πολιτική απορρήτου.");
+        if (!form.viber_consent || !form.consent) {
+            alert("Πρέπει να κάνετε check και στα δύο κουτιά για να ολοκληρωθεί η εγγραφή.");
             return;
         }
 
@@ -418,7 +418,7 @@ function RegisterForm() {
 
                         {/* ── Viber ── */}
                         <div className={`consent-row ${form.viber_consent ? 'is-checked' : ''}`}>
-                            <input type="checkbox" name="viber_consent" id="viber_consent" checked={form.viber_consent} onChange={handleChange} />
+                            <input type="checkbox" name="viber_consent" id="viber_consent" checked={form.viber_consent} onChange={handleChange} required />
                             <label htmlFor="viber_consent">
                                 Αποδέχομαι να προστεθώ στην ομάδα Viber του Συνδέσμου Γονέων.
                             </label>

@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS Users (
     email                VARCHAR(150) NOT NULL UNIQUE,
     password             VARCHAR(255) NOT NULL,
     phone_number         VARCHAR(20) DEFAULT NULL,
-    viber_consent        TINYINT(1) NOT NULL DEFAULT 0,
     number_of_children   INT DEFAULT 0,
     role                 ENUM('parent', 'admin') NOT NULL DEFAULT 'parent',
     account_status       ENUM('pending', 'approved', 'rejected', 'waiting_payment', 'active') NOT NULL DEFAULT 'pending',

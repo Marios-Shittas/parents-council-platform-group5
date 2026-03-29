@@ -11,7 +11,6 @@ class UsersService
     {
         global $conn;
         $this->conn = $conn;
-        $this->ensureViberConsentColumn();
     }
 
     public function getUserByEmail($email)
@@ -122,7 +121,6 @@ class UsersService
                 u.surname,
                 u.email,
                 u.phone_number,
-                u.viber_consent,
                 u.number_of_children,
                 u.role,
                 u.account_status,
@@ -859,24 +857,6 @@ class UsersService
     private function normalizeRole(string $role): string
     {
         return in_array($role, ['admin', 'parent'], true) ? $role : 'parent';
-    }
-
-    private function ensureViberConsentColumn(): void
-    {
-        $result = $this->conn->query("SHOW COLUMNS FROM Users LIKE 'viber_consent'");
-        if ($result instanceof mysqli_result && $result->num_rows > 0) {
-            $result->close();
-            return;
-        }
-
-        if ($result instanceof mysqli_result) {
-            $result->close();
-        }
-
-        $this->conn->query(
-            "ALTER TABLE Users
-             ADD COLUMN viber_consent TINYINT(1) NOT NULL DEFAULT 0 AFTER phone_number"
-        );
     }
 
     private function normalizeStatus(string $status): string

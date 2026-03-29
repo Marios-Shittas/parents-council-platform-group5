@@ -13,7 +13,6 @@ class RegisteringService
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
-        $this->ensureViberConsentColumn();
     }
 
     public function handleRequest(): void
@@ -58,13 +57,12 @@ class RegisteringService
         $name = trim((string) $payload['first_name']);
         $surname = trim((string) $payload['last_name']);
         $phone = $this->normalizePhone((string) $payload['phone']) ?? '';
-        $viberConsent = filter_var($payload['viber_consent'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $children = $payload['children'];
 
         try {
             $this->conn->begin_transaction();
 
-            $userId = $this->insertUser($name, $surname, $email, $phone, $viberConsent);
+            $userId = $this->insertUser($name, $surname, $email, $phone);
             $this->insertChildren($userId, $children);
             $this->insertRegistrationLog($userId, $email);
 
@@ -116,6 +114,10 @@ class RegisteringService
             return 'Πρέπει να αποδεχτείτε την πολιτική απορρήτου.';
         }
 
+        if (filter_var($payload['viber_consent'] ?? false, FILTER_VALIDATE_BOOLEAN) !== true) {
+            return 'Πρέπει να αποδεχτείτε και τη συμμετοχή στην ομάδα Viber για να ολοκληρωθεί η εγγραφή.';
+        }
+
         if (!is_array($payload['children']) || count($payload['children']) === 0) {
             return 'Πρέπει να καταχωρηθεί τουλάχιστον ένα παιδί.';
         }
@@ -162,21 +164,20 @@ class RegisteringService
         return $exists;
     }
 
-    private function insertUser(string $name, string $surname, string $email, string $phone, bool $viberConsent): int
+    private function insertUser(string $name, string $surname, string $email, string $phone): int
     {
         $placeholderPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
-        $viberConsentValue = $viberConsent ? 1 : 0;
 
         $stmtUser = $this->conn->prepare(
-            "INSERT INTO Users (name, surname, email, password, phone_number, viber_consent, role, account_status)
-             VALUES (?, ?, ?, ?, ?, ?, 'parent', 'pending')"
+            "INSERT INTO Users (name, surname, email, password, phone_number, role, account_status)
+             VALUES (?, ?, ?, ?, ?, 'parent', 'pending')"
         );
 
         if ($stmtUser === false) {
             throw new RuntimeException('Αποτυχία καταχώρησης χρήστη.');
         }
 
-        $stmtUser->bind_param('sssssi', $name, $surname, $email, $placeholderPassword, $phone, $viberConsentValue);
+        $stmtUser->bind_param('sssss', $name, $surname, $email, $placeholderPassword, $phone);
         $stmtUser->execute();
         $userId = (int) $this->conn->insert_id;
         $stmtUser->close();
@@ -229,24 +230,6 @@ class RegisteringService
     {
         http_response_code($statusCode);
         echo json_encode($body, JSON_UNESCAPED_UNICODE);
-    }
-
-    private function ensureViberConsentColumn(): void
-    {
-        $result = $this->conn->query("SHOW COLUMNS FROM Users LIKE 'viber_consent'");
-        if ($result instanceof mysqli_result && $result->num_rows > 0) {
-            $result->close();
-            return;
-        }
-
-        if ($result instanceof mysqli_result) {
-            $result->close();
-        }
-
-        $this->conn->query(
-            "ALTER TABLE Users
-             ADD COLUMN viber_consent TINYINT(1) NOT NULL DEFAULT 0 AFTER phone_number"
-        );
     }
 }
 
