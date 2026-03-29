@@ -72,6 +72,11 @@ function uploadApplicationFiles(ApplicationsService $applicationsService, int $a
         'instruction_file' => ['label' => 'αρχείο οδηγιών', 'extensions' => ['pdf', 'doc', 'docx']],
         'required_documents' => ['label' => 'δικαιολογητικό', 'extensions' => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']],
     ];
+    $maxFilesByField = [
+        'application_image' => 1,
+        'instruction_file' => 4,
+        'required_documents' => 4,
+    ];
 
     $uploadedCount = 0;
     $errors = [];
@@ -82,7 +87,33 @@ function uploadApplicationFiles(ApplicationsService $applicationsService, int $a
             continue;
         }
 
-        foreach (normalizeUploadedFiles($_FILES[$fieldName]) as $file) {
+        $files = normalizeUploadedFiles($_FILES[$fieldName]);
+        $maxFiles = (int)($maxFilesByField[$fieldName] ?? 1);
+        if ($fieldName === 'instruction_file') {
+            $existingInstructionFiles = 0;
+            foreach ($applicationsService->getDocuments($applicationId) as $existingDoc) {
+                $existingPath = (string)($existingDoc['file_path'] ?? '');
+                if ($existingPath !== '' && strpos($existingPath, '_instruction_file_') !== false) {
+                    $existingInstructionFiles++;
+                }
+            }
+
+            $remainingSlots = max(0, $maxFiles - $existingInstructionFiles);
+            if ($remainingSlots <= 0) {
+                $errors[] = 'Υπάρχουν ήδη 4 αρχεία οδηγιών για αυτή την αίτηση.';
+                continue;
+            }
+
+            if (count($files) > $remainingSlots) {
+                $errors[] = 'Μπορείτε να ανεβάσετε μέχρι ' . $remainingSlots . ' ακόμη αρχεία οδηγιών.';
+                $files = array_slice($files, 0, $remainingSlots);
+            }
+        } elseif ($maxFiles > 0 && count($files) > $maxFiles) {
+            $errors[] = 'Επιτρέπονται έως ' . $maxFiles . ' αρχεία για ' . $definition['label'] . '.';
+            $files = array_slice($files, 0, $maxFiles);
+        }
+
+        foreach ($files as $file) {
             if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
                 $errors[] = 'Αποτυχία ανεβάσματος για ' . $definition['label'] . '.';
                 continue;
@@ -283,12 +314,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $application_id = (int)($_POST['application_id'] ?? 0);
         $title = trim($_POST['application_title'] ?? '');
         $description = trim($_POST['application_description'] ?? '');
-        $openDateUi = normalizeUiDate((string)($_POST['application_open_date_ui'] ?? ''));
-        $closeDateUi = normalizeUiDate((string)($_POST['application_close_date_ui'] ?? ''));
-        $statusUi = normalizeApplicationStatus((string)($_POST['application_status_ui'] ?? 'active'));
 
         if ($application_id > 0 && $title !== '') {
             $existingMeta = $applicationUiMeta[(string)$application_id] ?? [];
+            $openDateUi = array_key_exists('application_open_date_ui', $_POST)
+                ? normalizeUiDate((string)($_POST['application_open_date_ui'] ?? ''))
+                : (string)($existingMeta['open_date'] ?? '');
+            $closeDateUi = array_key_exists('application_close_date_ui', $_POST)
+                ? normalizeUiDate((string)($_POST['application_close_date_ui'] ?? ''))
+                : (string)($existingMeta['close_date'] ?? ($existingMeta['deadline'] ?? ''));
+            $statusUi = array_key_exists('application_status_ui', $_POST)
+                ? normalizeApplicationStatus((string)($_POST['application_status_ui'] ?? 'active'))
+                : normalizeApplicationStatus((string)($existingMeta['status'] ?? 'active'));
+
             if ($openDateUi !== '' && $closeDateUi !== '' && $openDateUi > $closeDateUi) {
                 $message = 'Η ημερομηνία ανοίγματος δεν μπορεί να είναι μετά την ημερομηνία κλεισίματος.';
                 $messageType = 'danger';
@@ -393,6 +431,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'add_instruction_files') {
+        $application_id = (int)($_POST['application_id'] ?? 0);
+        if ($application_id <= 0) {
+            $message = 'Μη έγκυρη αίτηση.';
+            $messageType = 'danger';
+        } else {
+            $uploadResult = uploadApplicationFiles($applicationsService, $application_id, $documentsUploadDir);
+            if ($uploadResult['uploaded_count'] > 0) {
+                $message = 'Τα αρχεία προστέθηκαν επιτυχώς!';
+                if (!empty($uploadResult['errors'])) {
+                    $message .= ' ' . implode(' ', $uploadResult['errors']);
+                }
+                $messageType = 'success';
+            } elseif (!empty($uploadResult['errors'])) {
+                $message = implode(' ', $uploadResult['errors']);
+                $messageType = 'danger';
+            } else {
+                $message = 'Δεν επιλέχθηκαν αρχεία.';
+                $messageType = 'warning';
+            }
+        }
+    }
+
+    if ($action === 'replace_document') {
+        $doc_id = (int)($_POST['ap_document_id'] ?? 0);
+        $application_id = (int)($_POST['application_id'] ?? 0);
+
+        if ($doc_id <= 0 || $application_id <= 0) {
+            $message = 'Μη έγκυρα στοιχεία αρχείου.';
+            $messageType = 'danger';
+        } elseif (!isset($_FILES['replacement_file']) || ($_FILES['replacement_file']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $message = 'Παρακαλώ επιλέξτε νέο αρχείο για αντικατάσταση.';
+            $messageType = 'danger';
+        } else {
+            $document = $applicationsService->getDocumentById($doc_id);
+            if (!$document || (int)($document['application_id'] ?? 0) !== $application_id) {
+                $message = 'Το αρχείο δεν βρέθηκε.';
+                $messageType = 'danger';
+            } else {
+                $replacementFile = $_FILES['replacement_file'];
+                $currentPath = (string)($document['file_path'] ?? '');
+                if (strpos($currentPath, '_instruction_file_') === false) {
+                    $message = 'Μπορούν να αντικατασταθούν μόνο αρχεία οδηγιών.';
+                    $messageType = 'danger';
+                } else {
+                    $extension = strtolower(pathinfo((string)($replacementFile['name'] ?? ''), PATHINFO_EXTENSION));
+                    $allowedExtensions = ['pdf', 'doc', 'docx'];
+                    if (!in_array($extension, $allowedExtensions, true)) {
+                        $message = 'Επιτρεπόμενοι τύποι: pdf, doc, docx.';
+                        $messageType = 'danger';
+                    } else {
+                        $fieldToken = strpos($currentPath, '_instruction_file_') !== false ? 'instruction_file' : 'document_file';
+                        $newFileName = 'application_' . $application_id . '_' . $fieldToken . '_' . uniqid('', true) . '.' . $extension;
+                        $targetPath = $documentsUploadDir . $newFileName;
+                        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+
+                        if (!move_uploaded_file((string)$replacementFile['tmp_name'], $targetPath)) {
+                            $message = 'Αποτυχία ανεβάσματος νέου αρχείου.';
+                            $messageType = 'danger';
+                        } elseif ($applicationsService->updateDocumentPath($doc_id, $dbPath)) {
+                            $oldAbsPath = getDocumentAbsolutePath($currentPath);
+                            if ($oldAbsPath !== '' && file_exists($oldAbsPath)) {
+                                unlink($oldAbsPath);
+                            }
+                            $message = 'Το αρχείο αντικαταστάθηκε επιτυχώς!';
+                            $messageType = 'success';
+                        } else {
+                            if (file_exists($targetPath)) {
+                                unlink($targetPath);
+                            }
+                            $message = 'Σφάλμα κατά την αντικατάσταση του αρχείου.';
+                            $messageType = 'danger';
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if ($action === 'delete_document') {
         $doc_id = (int)($_POST['ap_document_id'] ?? 0);
 
@@ -468,6 +585,18 @@ $applications = $applicationsService->getAllApplications();
 $documents = $applicationsService->getAllDocuments();
 $submissions = $applicationsService->getAllSubmissions();
 $applicationUiMeta = loadApplicationUiMeta();
+$documentsByApplication = [];
+
+foreach ($documents as $document) {
+    $applicationIdForDocument = (int)($document['application_id'] ?? 0);
+    if ($applicationIdForDocument <= 0) {
+        continue;
+    }
+    if (!isset($documentsByApplication[$applicationIdForDocument])) {
+        $documentsByApplication[$applicationIdForDocument] = [];
+    }
+    $documentsByApplication[$applicationIdForDocument][] = $document;
+}
 
 $submissionCountByApplication = [];
 $pendingReviews = 0;
@@ -513,7 +642,7 @@ if ($selectedApplicationId > 0) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/admin_css/admin_applications.css">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_applications.css?v=<?php echo (int)(@filemtime(__DIR__ . '/../assets/css/admin_css/admin_applications.css') ?: time()); ?>">
 
     <title>Διαχείριση Αιτήσεων - Admin</title>
 </head>
@@ -587,10 +716,8 @@ if ($selectedApplicationId > 0) {
                             <thead>
                                 <tr>
                                     <th>Τίτλος Αίτησης</th>
-                                    <th>Περίοδος</th>
-                                    <th>Κατάσταση</th>
                                     <th>Υποβολές</th>
-                                    <th>Ημ. Δημιουργίας</th>
+                                    <th>Ημερομηνία</th>
                                     <th class="text-end">Ενέργειες</th>
                                 </tr>
                             </thead>
@@ -601,29 +728,37 @@ if ($selectedApplicationId > 0) {
                                         $submissionTotal = $submissionCountByApplication[$applicationId] ?? 0;
                                         $appMeta = $applicationUiMeta[(string)$applicationId] ?? [];
                                         $applicationOpenDate = (string)($appMeta['open_date'] ?? '');
-                                        $applicationCloseDate = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ''));
-                                        $applicationStatus = normalizeApplicationStatus((string)($appMeta['status'] ?? 'active'));
-                                        $applicationStatusLabel = $applicationStatus === 'inactive' ? 'Ανενεργή' : 'Ενεργή';
-                                        $applicationStatusBadge = $applicationStatus === 'inactive' ? 'bg-secondary' : 'bg-success';
+                                        $applicationDateDisplay = '—';
+                                        if ($applicationOpenDate !== '') {
+                                            $applicationDateObj = DateTime::createFromFormat('Y-m-d', $applicationOpenDate);
+                                            if ($applicationDateObj && $applicationDateObj->format('Y-m-d') === $applicationOpenDate) {
+                                                $applicationDateDisplay = $applicationDateObj->format('d/m/Y');
+                                            } else {
+                                                $applicationDateDisplay = $applicationOpenDate;
+                                            }
+                                        }
+                                        $applicationFilesForEdit = [];
+                                        foreach (($documentsByApplication[$applicationId] ?? []) as $applicationDocument) {
+                                            $docPath = (string)($applicationDocument['file_path'] ?? '');
+                                            if ($docPath === '' || strpos($docPath, '_instruction_file_') === false) {
+                                                continue;
+                                            }
+
+                                            $applicationFilesForEdit[] = [
+                                                'id' => (int)($applicationDocument['ap_document_id'] ?? 0),
+                                                'name' => basename($docPath),
+                                                'url' => getDocumentPublicUrl($docPath),
+                                            ];
+                                        }
+                                        $applicationFilesForEditJson = json_encode($applicationFilesForEdit, JSON_UNESCAPED_UNICODE);
                                     ?>
                                     <tr>
                                         <td>
                                             <div class="fw-bold text-dark"><?php echo htmlspecialchars($application['application_title']); ?></div>
                                             <div class="small text-muted text-truncate-two-lines"><?php echo htmlspecialchars($application['application_description'] ?? 'Χωρίς περιγραφή.'); ?></div>
                                         </td>
-                                        <td>
-                                            <?php if ($applicationOpenDate !== '' || $applicationCloseDate !== ''): ?>
-                                                <div class="small">
-                                                    <div><strong>Ανοίγει:</strong> <?php echo $applicationOpenDate !== '' ? htmlspecialchars($applicationOpenDate) : '—'; ?></div>
-                                                    <div><strong>Κλείνει:</strong> <?php echo $applicationCloseDate !== '' ? htmlspecialchars($applicationCloseDate) : '—'; ?></div>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-muted">—</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><span class="badge <?php echo $applicationStatusBadge; ?>"><?php echo $applicationStatusLabel; ?></span></td>
                                         <td><span class="badge bg-light text-dark border"><?php echo $submissionTotal; ?></span></td>
-                                        <td><span class="text-muted">—</span></td>
+                                        <td><span class="text-muted"><?php echo htmlspecialchars($applicationDateDisplay); ?></span></td>
                                         <td class="text-end">
                                             <div class="d-inline-flex align-items-center gap-2">
                                                 <button
@@ -635,8 +770,7 @@ if ($selectedApplicationId > 0) {
                                                     data-application-title="<?php echo htmlspecialchars($application['application_title'], ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-open-date="<?php echo htmlspecialchars($applicationOpenDate, ENT_QUOTES, 'UTF-8'); ?>"
-                                                    data-application-close-date="<?php echo htmlspecialchars($applicationCloseDate, ENT_QUOTES, 'UTF-8'); ?>"
-                                                    data-application-status="<?php echo htmlspecialchars($applicationStatus, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    data-application-documents="<?php echo htmlspecialchars($applicationFilesForEditJson ?: '[]', ENT_QUOTES, 'UTF-8'); ?>"
                                                 >
                                                     <i class="fas fa-edit me-1"></i>Επεξεργασία
                                                 </button>
@@ -708,6 +842,7 @@ if ($selectedApplicationId > 0) {
                                     <th>Γονέας</th>
                                     <th>Ημ. Υποβολής</th>
                                     <th>Συνημμένα</th>
+                                    <th>Ενέργειες</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -715,6 +850,7 @@ if ($selectedApplicationId > 0) {
                                     <?php
                                         $formData = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
+                                        $studentName = (string)($formData['student_name'] ?? '—');
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
                                         $submissionFileUrl = !empty($submission['file_path']) ? getDocumentPublicUrl((string)$submission['file_path']) : '';
                                     ?>
@@ -739,11 +875,15 @@ if ($selectedApplicationId > 0) {
                                                 <input type="hidden" name="action" value="update_submission_status">
                                                 <input type="hidden" name="application_id" value="<?php echo (int)$submission['application_id']; ?>">
                                                 <input type="hidden" name="user_id" value="<?php echo (int)$submission['user_id']; ?>">
+                                                <input type="hidden" name="sub_status" value="delete">
                                                 <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
                                                 <input type="hidden" name="return_scroll_y" value="0">
-
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash-alt me-1"></i>Διαγραφή
+                                                </button>
                                             </form>
                                         </td>
+
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -794,37 +934,21 @@ if ($selectedApplicationId > 0) {
                                 <div class="card-body vstack gap-3">
                                     <div class="row g-3">
                                         <div class="col-12">
-                                            <label class="form-label"><strong>Ημερομηνία Ανοίγματος</strong></label>
+                                            <label class="form-label"><strong>Ημερομηνία</strong></label>
                                             <input type="date" name="application_open_date_ui" id="create_application_open_date" class="form-control">
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
-                                            <input type="date" name="application_close_date_ui" id="create_application_close_date" class="form-control">
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label"><strong>Κατάσταση</strong></label>
-                                            <select name="application_status_ui" id="create_application_status" class="form-select">
-                                                <option value="active" selected>Ενεργή</option>
-                                                <option value="inactive">Ανενεργή</option>
-                                            </select>
-                                        </div>
+                                            </div>
                                     </div>
 
                                     <div>
-                                        <label class="form-label"><strong>Προαιρετική Εικόνα</strong></label>
-                                        <input type="file" name="application_image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Αρχείο Οδηγιών (PDF/DOC)</strong></label>
-                                        <input type="file" name="instruction_file" class="form-control" accept=".pdf,.doc,.docx">
+                                        <label class="form-label"><strong>Αρχεία Οδηγιών (μέχρι 4)</strong></label>
+                                        <input type="file" id="create_instruction_files" name="instruction_file[]" class="form-control" accept=".pdf,.doc,.docx" multiple>
+                                        <div class="form-text">Μπορείτε να επιλέξετε έως 4 αρχεία.</div>
                                     </div>
 
                                     <div>
                                         <button type="submit" class="btn btn-success w-100 js-create-publish-btn">
                                             <i class="fas fa-bullhorn me-1"></i>Δημοσίευση Αίτησης
                                         </button>
-                                        <div class="form-text">Με τη δημοσίευση η κατάσταση ορίζεται αυτόματα σε «Ενεργή».</div>
                                     </div>
                                 </div>
                             </div>
@@ -841,79 +965,87 @@ if ($selectedApplicationId > 0) {
 </div>
 
 <div class="modal fade" id="editApplicationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST" enctype="multipart/form-data" id="edit_application_form">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="application_id" id="edit_application_id">
+            <div class="modal-header" style="background:#2f6fb3;">
+                <h5 class="modal-title" style="color:#ffffff !important;">
+                    <i class="fas fa-edit me-2" style="color:#ffffff !important;"></i>Επεξεργασία Αίτησης
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Κλείσιμο"
+                        style="filter: brightness(0) invert(1); opacity:1;">
+                </button>
+            </div>
 
-                <div class="modal-header" style="background:#2f6fb3;">
-                    <h5 class="modal-title" style="color:#ffffff !important;">
-                        <i class="fas fa-edit me-2" style="color:#ffffff !important;"></i>Επεξεργασία Αίτησης
-                    </h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Κλείσιμο"
-                            style="filter: brightness(0) invert(1); opacity:1;">
-                    </button>
-                </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="editApplicationTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="edit-info-tab" data-bs-toggle="tab" data-bs-target="#edit-info-pane" type="button" role="tab" aria-controls="edit-info-pane" aria-selected="true">Στοιχεία</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="edit-files-tab" data-bs-toggle="tab" data-bs-target="#edit-files-pane" type="button" role="tab" aria-controls="edit-files-pane" aria-selected="false">Αρχεία</button>
+                    </li>
+                </ul>
 
-                <div class="modal-body">
-                    <div class="row g-4">
-                        <div class="col-12 col-lg-7">
-                            <div class="vstack gap-3">
-                                <div>
-                                    <label class="form-label"><strong>Τίτλος *</strong></label>
-                                    <input type="text" name="application_title" id="edit_application_title" class="form-control form-control-custom" required>
+                <div class="tab-content pt-3">
+                    <div class="tab-pane fade show active" id="edit-info-pane" role="tabpanel" aria-labelledby="edit-info-tab">
+                        <form method="POST" enctype="multipart/form-data" id="edit_application_form">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="application_id" id="edit_application_id">
+
+                            <div class="row g-2">
+                                <div class="col-12 col-lg-8">
+                                    <div class="vstack gap-2">
+                                        <div>
+                                            <label class="form-label"><strong>Τίτλος *</strong></label>
+                                            <input type="text" name="application_title" id="edit_application_title" class="form-control form-control-sm form-control-custom" required>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label"><strong>Περιγραφή</strong></label>
+                                            <textarea name="application_description" id="edit_application_description" class="form-control form-control-sm form-control-custom" rows="3"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label class="form-label"><strong>Περιγραφή</strong></label>
-                                    <textarea name="application_description" id="edit_application_description" class="form-control form-control-custom" rows="5"></textarea>
-                                </div>
-
-                                <div>
-                                    <label class="form-label"><strong>Οδηγίες για γονείς</strong></label>
-                                    <textarea name="application_instructions_ui" class="form-control" rows="4" placeholder="UI-only πεδίο για μελλοντική σύνδεση."></textarea>
+                                <div class="col-12 col-lg-4">
+                                    <label class="form-label"><strong>Ημερομηνία Ανοίγματος</strong></label>
+                                    <input type="date" name="application_open_date_ui" id="edit_application_open_date" class="form-control form-control-sm">
                                 </div>
                             </div>
-                        </div>
+                        </form>
+                    </div>
 
-                        <div class="col-12 col-lg-5">
-                            <div class="card bg-light border-0 h-100">
-                                <div class="card-body vstack gap-3">
-                                    <div>
-                                        <label class="form-label"><strong>Ημερομηνία Ανοίγματος</strong></label>
-                                        <input type="date" name="application_open_date_ui" id="edit_application_open_date" class="form-control">
-                                    </div>
+                    <div class="tab-pane fade" id="edit-files-pane" role="tabpanel" aria-labelledby="edit-files-tab">
+                        <form method="POST" enctype="multipart/form-data" id="edit_add_files_form" class="card bg-light border-0 mb-2">
+                            <input type="hidden" name="action" value="add_instruction_files">
+                            <input type="hidden" name="application_id" id="edit_files_application_id">
 
-                                    <div>
-                                        <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
-                                        <input type="date" name="application_close_date_ui" id="edit_application_close_date" class="form-control">
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label"><strong>Κατάσταση</strong></label>
-                                        <select name="application_status_ui" id="edit_application_status" class="form-select">
-                                            <option value="active" selected>Ενεργή</option>
-                                            <option value="inactive">Ανενεργή</option>
-                                        </select>
-                                    </div>
-
-                                </div>
+                            <div class="card-body py-2">
+                                <label class="form-label"><strong>Προσθήκη Νέων Αρχείων Οδηγιών</strong></label>
+                                <input type="file" id="edit_instruction_files" name="instruction_file[]" class="form-control form-control-sm mb-2" accept=".pdf,.doc,.docx" multiple>
+                                <div class="form-text mb-2">Μπορείτε να επιλέξετε έως 4 αρχεία συνολικά ανά αίτηση.</div>
+                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-upload me-1"></i>Προσθήκη Αρχείων
+                                </button>
                             </div>
+                        </form>
+
+                        <div id="edit_application_files_list" class="vstack gap-2">
+                            <div class="text-muted">Δεν υπάρχουν αρχεία.</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Ακύρωση</button>
-                    <button type="submit" class="btn btn-primary-custom">
-                        <i class="fas fa-save me-1"></i>Αποθήκευση Αλλαγών
-                    </button>
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="submit" form="edit_application_form" class="btn btn-primary-custom">
+                    <i class="fas fa-save me-1"></i>Αποθήκευση Αλλαγών
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1108,7 +1240,35 @@ document.addEventListener('DOMContentLoaded', function () {
     var createOpenDate = document.getElementById('create_application_open_date');
     var createCloseDate = document.getElementById('create_application_close_date');
     var createForm = document.getElementById('create_application_form');
+    var createInstructionFiles = document.getElementById('create_instruction_files');
     bindDateRangeValidation(createOpenDate, createCloseDate, createForm);
+    if (createInstructionFiles) {
+        createInstructionFiles.addEventListener('change', function () {
+            if (!createInstructionFiles.files || createInstructionFiles.files.length <= 4) {
+                return;
+            }
+
+            alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
+            createInstructionFiles.value = '';
+        });
+    }
+    var createModalEl = document.getElementById('createApplicationModal');
+    if (createModalEl) {
+        createModalEl.addEventListener('hidden.bs.modal', function () {
+            if (createForm) {
+                createForm.reset();
+            }
+
+            if (createOpenDate) {
+                createOpenDate.dispatchEvent(new Event('change'));
+            }
+
+            var createStatusSelect = document.getElementById('create_application_status');
+            if (createStatusSelect) {
+                createStatusSelect.value = 'active';
+            }
+        });
+    }
 
     var urlParams = new URLSearchParams(window.location.search);
     var scrollYParam = parseInt(urlParams.get('scroll_y') || '0', 10);
@@ -1126,25 +1286,103 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var editModal = document.getElementById('editApplicationModal');
-    var editOpenDate = document.getElementById('edit_application_open_date');
-    var editCloseDate = document.getElementById('edit_application_close_date');
     var editForm = document.getElementById('edit_application_form');
-    bindDateRangeValidation(editOpenDate, editCloseDate, editForm);
+    var editOpenDate = document.getElementById('edit_application_open_date');
+    var editFilesApplicationId = document.getElementById('edit_files_application_id');
+    var editInstructionFiles = document.getElementById('edit_instruction_files');
+    var editFilesList = document.getElementById('edit_application_files_list');
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function renderEditApplicationFiles(applicationId, documents) {
+        if (!editFilesList) {
+            return;
+        }
+
+        if (!Array.isArray(documents) || documents.length === 0) {
+            editFilesList.innerHTML = '<div class="text-muted">Δεν υπάρχουν αρχεία για αυτή την αίτηση.</div>';
+            return;
+        }
+
+        var html = documents.map(function (doc) {
+            var fileName = doc && doc.name ? doc.name : 'Αρχείο';
+            var fileUrl = doc && doc.url ? doc.url : '#';
+            var documentId = doc && doc.id ? String(doc.id) : '0';
+
+            return '' +
+                '<div class="card border-0 bg-light">' +
+                    '<div class="card-body py-2 px-3">' +
+                        '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">' +
+                            '<a href="' + escapeHtml(fileUrl) + '" target="_blank" class="fw-semibold text-decoration-none">' +
+                                '<i class="fas fa-file-alt me-1"></i>' + escapeHtml(fileName) +
+                            '</a>' +
+                            '<form method="POST" class="js-delete-doc-form m-0">' +
+                                '<input type="hidden" name="action" value="delete_document">' +
+                                '<input type="hidden" name="ap_document_id" value="' + escapeHtml(documentId) + '">' +
+                                '<button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt me-1"></i>Αφαίρεση</button>' +
+                            '</form>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }).join('');
+
+        editFilesList.innerHTML = html;
+        editFilesList.querySelectorAll('.js-delete-doc-form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!confirm('Θέλετε σίγουρα να αφαιρέσετε αυτό το αρχείο;')) {
+                    event.preventDefault();
+                }
+            });
+        });
+    }
+
+    if (editInstructionFiles) {
+        editInstructionFiles.addEventListener('change', function () {
+            if (!editInstructionFiles.files || editInstructionFiles.files.length <= 4) {
+                return;
+            }
+            alert('Μπορείτε να επιλέξετε έως 4 αρχεία.');
+            editInstructionFiles.value = '';
+        });
+    }
 
     if (editModal) {
         editModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             if (!button) return;
 
-            document.getElementById('edit_application_id').value = button.getAttribute('data-application-id') || '';
+            var applicationId = button.getAttribute('data-application-id') || '';
+            document.getElementById('edit_application_id').value = applicationId;
             document.getElementById('edit_application_title').value = button.getAttribute('data-application-title') || '';
             document.getElementById('edit_application_description').value = button.getAttribute('data-application-description') || '';
             document.getElementById('edit_application_open_date').value = button.getAttribute('data-application-open-date') || '';
-            document.getElementById('edit_application_close_date').value = button.getAttribute('data-application-close-date') || '';
-            document.getElementById('edit_application_status').value = button.getAttribute('data-application-status') || 'active';
+            if (editFilesApplicationId) {
+                editFilesApplicationId.value = applicationId;
+            }
 
-            if (editOpenDate) {
-                editOpenDate.dispatchEvent(new Event('change'));
+            if (editInstructionFiles) {
+                editInstructionFiles.value = '';
+            }
+
+            var documentsRaw = button.getAttribute('data-application-documents') || '[]';
+            var documents = [];
+            try {
+                documents = JSON.parse(documentsRaw);
+            } catch (error) {
+                documents = [];
+            }
+            renderEditApplicationFiles(applicationId, documents);
+
+            var infoTabButton = document.getElementById('edit-info-tab');
+            if (infoTabButton && window.bootstrap && bootstrap.Tab) {
+                bootstrap.Tab.getOrCreateInstance(infoTabButton).show();
             }
         });
     }
@@ -1186,8 +1424,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 scrollInput.value = String(window.scrollY || window.pageYOffset || 0);
             }
 
-            var statusSelect = form.querySelector('select[name="sub_status"]');
-            if (!statusSelect || statusSelect.value !== 'delete' || !deleteSubmissionModal) {
+            var statusField = form.querySelector('select[name="sub_status"], input[name="sub_status"]');
+            var selectedStatus = statusField ? String(statusField.value || '') : '';
+            if (selectedStatus !== 'delete' || !deleteSubmissionModal) {
                 return;
             }
 

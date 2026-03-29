@@ -7,6 +7,18 @@ const FORM_FIELDS = {
     general: []
 };
 
+const APP_META = [
+    {
+        formType: 'general',
+        category: '',
+        openDate: '',
+        closeDate: ''
+    }
+];
+
+var MAX_SUBMISSION_FILES = 4;
+var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+
 /* ─────────────────────────────────────────────────────────────────────────────
    IN-PAGE APPLIED TRACKING  (resets on page reload — DB is the source of truth)
 ───────────────────────────────────────────────────────────────────────────── */
@@ -129,21 +141,9 @@ function upsertDraftSubmissionRow(appId, draftData) {
     }
 
     var appTitle = getAppTitleById(appId);
-    var info = getDraftStudentInfo(draftData);
-
     row.innerHTML =
-        '<td><strong>' + escHtml(appTitle) + '</strong></td>' +
-        '<td>' + escHtml(info.studentName) + '</td>' +
-        '<td>' + escHtml(info.studentClass) + '</td>' +
-        '<td>' + escHtml(todayLabel()) + '</td>' +
-        '<td>' +
-            '<span class="sub-status-badge sub-submitted">Draft</span>' +
-        '</td>' +
-        '<td>' +
-            '<button type="button" class="btn btn-sm btn-outline-primary continue-draft-btn" data-app-id="' + String(appId) + '">' +
-                '<i class="fas fa-edit mr-1"></i>Συνέχεια αίτησης' +
-            '</button>' +
-        '</td>';
+        '<td><strong>' + escHtml(appTitle) + '</strong><div class="small text-muted mt-1">Πρόχειρο</div></td>' +
+        '<td>' + escHtml(todayLabel()) + '</td>';
 
     toggleSubmissionsVisibility();
 }
@@ -340,16 +340,16 @@ function addSubmissionRow(sub) {
 
     if (!tbody) return;
 
+    var uploadedFiles = Array.isArray(sub.uploadedFiles) ? sub.uploadedFiles : [];
+    var filesHtml = uploadedFiles.map(function (fileName) {
+        return '<div class="small text-primary mt-1"><i class="fas fa-paperclip mr-1"></i>' + escHtml(fileName) + '</div>';
+    }).join('');
+
     var tr = document.createElement('tr');
     tr.dataset.jsRow = sub.appId;
     tr.innerHTML =
-        '<td><strong>' + escHtml(sub.appTitle)      + '</strong></td>' +
-        '<td>'          + escHtml(sub.studentName)  + '</td>'          +
-        '<td>'          + escHtml(sub.studentClass) + '</td>'          +
-        '<td>'          + escHtml(sub.submittedDate)+ '</td>'          +
-        '<td>'          + submissionStatusBadge('waiting') + '</td>'   +
-        '<td><button class="btn btn-sm btn-outline-secondary" disabled>' +
-            '<i class="fas fa-clock mr-1"></i>Αποθηκεύτηκε</button></td>';
+        '<td><strong>' + escHtml(sub.appTitle) + '</strong>' + filesHtml + '</td>' +
+        '<td>' + escHtml(sub.submittedDate) + '</td>';
     tbody.appendChild(tr);
 
     if (noMsg)  noMsg.style.display  = 'none';
@@ -505,7 +505,17 @@ document.addEventListener('DOMContentLoaded', function () {
     var viewModalTitle = document.getElementById('application-view-title');
     var viewModalDesc = document.getElementById('application-view-description');
     var viewModalAttachments = document.getElementById('application-view-attachments-list');
-    var viewModalContinueBtn = document.getElementById('application-view-continue-btn');
+    var viewModalSubmitBtn = document.getElementById('application-view-submit-btn');
+    var viewModalFileInput = document.getElementById('application-view-file-input');
+    var viewModalSelectedFiles = document.getElementById('application-view-selected-files');
+    var unavailableMessageEl = document.getElementById('application-unavailable-message');
+
+    function showUnavailableBox(messageText) {
+        if (unavailableMessageEl) {
+            unavailableMessageEl.textContent = messageText || 'Η αίτηση δεν έχει ανοίξει ακόμα.';
+        }
+        $('#application-unavailable-modal').modal('show');
+    }
 
     function normalizeDocPath(rawPath) {
         var prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
@@ -523,59 +533,210 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(rawPath);
     }
 
+    function renderSelectedSubmissionFiles() {
+        if (!viewModalSelectedFiles || !viewModalFileInput) return;
+
+        var files = Array.from(viewModalFileInput.files || []);
+        if (files.length === 0) {
+            viewModalSelectedFiles.innerHTML = '';
+            return;
+        }
+
+        viewModalSelectedFiles.innerHTML = files.map(function (file) {
+            return '<li>' + escHtml(file.name) + '</li>';
+        }).join('');
+    }
+
+    function openApplicationViewModal(card) {
+        if (!card) return;
+
+        var submitBtn = card.querySelector('.submit-btn');
+        if (!submitBtn || submitBtn.disabled) {
+            var reason = submitBtn ? (submitBtn.dataset.unavailableReason || '') : '';
+            showUnavailableBox(reason || 'Η αίτηση δεν έχει ανοίξει ακόμα.');
+            return;
+        }
+
+        var appId = parseInt(card.dataset.appId, 10);
+        var appIndex = parseInt(card.dataset.appIndex, 10);
+        var title = card.dataset.applicationTitle || 'Λεπτομέρειες Αίτησης';
+        var description = card.dataset.applicationDescription || 'Δεν υπάρχει διαθέσιμη περιγραφή.';
+        var docsRaw = card.dataset.applicationDocuments || '[]';
+        var docs = [];
+
+        try {
+            docs = JSON.parse(docsRaw);
+            if (!Array.isArray(docs)) docs = [];
+        } catch (err) {
+            docs = [];
+        }
+
+        var meta = getMeta(appIndex);
+        var appOpenDate = card.dataset.appOpenDate || meta.openDate;
+        var appCloseDate = card.dataset.appCloseDate || meta.closeDate;
+        _viewAppId = appId;
+        _modal = {
+            appId: appId,
+            appTitle: title,
+            appIndex: appIndex,
+            meta: {
+                formType: meta.formType || 'general',
+                category: meta.category || '',
+                openDate: appOpenDate,
+                closeDate: appCloseDate
+            }
+        };
+
+        if (viewModalTitle) viewModalTitle.textContent = title;
+        if (viewModalDesc) viewModalDesc.textContent = description;
+
+        if (viewModalAttachments) {
+            if (docs.length === 0) {
+                viewModalAttachments.innerHTML = '<li class="text-muted">Δεν υπάρχουν συνημμένα έγγραφα.</li>';
+            } else {
+                viewModalAttachments.innerHTML = docs.map(function (doc) {
+                    var rawPath = doc && doc.file_path ? doc.file_path : '';
+                    var url = normalizeDocPath(rawPath);
+                    var name = rawPath ? rawPath.split('/').pop() : 'Έγγραφο';
+                    return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
+                }).join('');
+            }
+        }
+
+        if (viewModalFileInput) {
+            viewModalFileInput.value = '';
+        }
+        renderSelectedSubmissionFiles();
+
+        if (viewModalSubmitBtn) {
+            viewModalSubmitBtn.disabled = false;
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+        }
+
+        $('#applicationViewModal').modal('show');
+    }
+
     document.querySelectorAll('.post-open-trigger').forEach(function (card) {
         card.addEventListener('click', function (e) {
             var submitButton = e.target.closest('.submit-btn');
             if (submitButton) return;
-
-            var appId = parseInt(card.dataset.appId, 10);
-            var title = card.dataset.applicationTitle || 'Λεπτομέρειες Αίτησης';
-            var description = card.dataset.applicationDescription || 'Δεν υπάρχει διαθέσιμη περιγραφή.';
-            var docsRaw = card.dataset.applicationDocuments || '[]';
-            var docs = [];
-
-            try {
-                docs = JSON.parse(docsRaw);
-                if (!Array.isArray(docs)) docs = [];
-            } catch (err) {
-                docs = [];
-            }
-
-            _viewAppId = appId;
-
-            if (viewModalTitle) viewModalTitle.textContent = title;
-            if (viewModalDesc) viewModalDesc.textContent = description;
-
-            if (viewModalAttachments) {
-                if (docs.length === 0) {
-                    viewModalAttachments.innerHTML = '<li class="text-muted">Δεν υπάρχουν συνημμένα έγγραφα.</li>';
-                } else {
-                    viewModalAttachments.innerHTML = docs.map(function (doc) {
-                        var rawPath = doc && doc.file_path ? doc.file_path : '';
-                        var url = normalizeDocPath(rawPath);
-                        var name = rawPath ? rawPath.split('/').pop() : 'Έγγραφο';
-                        return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
-                    }).join('');
-                }
-            }
-
-            $('#applicationViewModal').modal('show');
+            if (e.target.closest('.application-instruction-link')) return;
+            openApplicationViewModal(card);
         });
     });
 
-    if (viewModalContinueBtn) {
-        viewModalContinueBtn.addEventListener('click', function () {
-            if (!_viewAppId) return;
+    document.querySelectorAll('.js-open-submit-link').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-            var submitBtn = document.querySelector('#app-card-' + _viewAppId + ' .submit-btn');
-            if (!submitBtn || submitBtn.disabled) {
-                var reason = submitBtn ? (submitBtn.dataset.unavailableReason || '') : '';
-                alert(reason || 'Η αίτηση δεν είναι διαθέσιμη για υποβολή.');
+            var card = link.closest('.post-open-trigger');
+            if (!card) return;
+            openApplicationViewModal(card);
+        });
+    });
+
+    if (viewModalFileInput) {
+        viewModalFileInput.addEventListener('change', function () {
+            var selectedFiles = Array.from(viewModalFileInput.files || []);
+            if (selectedFiles.length > MAX_SUBMISSION_FILES) {
+                alert('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
+                viewModalFileInput.value = '';
+            }
+
+            renderSelectedSubmissionFiles();
+        });
+    }
+
+    $('#applicationViewModal').on('hidden.bs.modal', function () {
+        if (viewModalFileInput) {
+            viewModalFileInput.value = '';
+        }
+        renderSelectedSubmissionFiles();
+        _viewAppId = 0;
+        _modal = {};
+    });
+
+    if (viewModalSubmitBtn) {
+        viewModalSubmitBtn.addEventListener('click', function () {
+            if (!_modal.appId) return;
+
+            var files = viewModalFileInput ? Array.from(viewModalFileInput.files || []) : [];
+            if (files.length > MAX_SUBMISSION_FILES) {
+                alert('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
                 return;
             }
 
-            $('#applicationViewModal').modal('hide');
-            submitBtn.click();
+            for (var i = 0; i < files.length; i++) {
+                var fileName = String(files[i].name || '');
+                var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+                if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
+                    alert('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
+                    return;
+                }
+            }
+
+            var data = {
+                applied_at: todayLabel(),
+                _formType: (_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general',
+                _category: (_modal.meta && _modal.meta.category) ? _modal.meta.category : ''
+            };
+
+            viewModalSubmitBtn.disabled = true;
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Αποστολή...';
+
+            var body = new FormData();
+            body.append('ajax_submit_v2', '1');
+            body.append('application_id', String(_modal.appId));
+            body.append('submission_data', JSON.stringify(data));
+            files.forEach(function (file) {
+                body.append('submission_files[]', file);
+            });
+
+            fetch(window.location.pathname, {
+                method: 'POST',
+                body: body
+            })
+            .then(function (res) {
+                return res.text().then(function (text) {
+                    try {
+                        return JSON.parse(text);
+                    } catch (parseError) {
+                        throw new Error(text ? text.slice(0, 260) : 'Empty response');
+                    }
+                });
+            })
+            .then(function (json) {
+                viewModalSubmitBtn.disabled = false;
+                viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+
+                if (!json.success) {
+                    alert(json.message || 'Σφάλμα.');
+                    return;
+                }
+
+                _justApplied.add(_modal.appId);
+                clearDraft(_modal.appId);
+                removeDraftSubmissionRow(_modal.appId);
+                $('#applicationViewModal').modal('hide');
+                setTimeout(cleanupModalArtifacts, 120);
+                showToast();
+                augmentCards();
+
+                addSubmissionRow({
+                    appId: _modal.appId,
+                    appTitle: _modal.appTitle,
+                    submittedDate: new Date().toLocaleDateString('el-GR'),
+                    uploadedFiles: Array.isArray(json.uploaded_files) ? json.uploaded_files : files.map(function (file) {
+                        return String(file.name || '');
+                    })
+                });
+            })
+            .catch(function () {
+                viewModalSubmitBtn.disabled = false;
+                viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+                alert('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
+            });
         });
     }
 
@@ -586,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var appTitle = btn.data('application-title') || '';
         var appDesc  = btn.data('application-description') || '';
         var appIndex = parseInt(btn.data('app-index'), 10);
-        var meta     = getMeta(appIndex);
+        var meta     = getMeta(appIndex) || { formType: 'general', category: '', openDate: '', closeDate: '' };
         var appOpenDate = btn.data('app-open-date') || '';
         var appCloseDate = btn.data('app-close-date') || '';
         if (appOpenDate) {
@@ -647,15 +808,15 @@ document.addEventListener('DOMContentLoaded', function () {
         var data = {};
         new FormData(form).forEach(function (value, key) { data[key] = value; });
         data.applied_at = todayLabel();
-        data._formType = _modal.meta.formType;
-        data._category = _modal.meta.category;
+        data._formType = (_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general';
+        data._category = (_modal.meta && _modal.meta.category) ? _modal.meta.category : '';
 
         var btn = document.getElementById('modal-submit-btn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Αποστολή...';
 
         var body = new FormData();
-        body.append('ajax_submit', '1');
+        body.append('ajax_submit_v2', '1');
         body.append('application_id', String(_modal.appId));
         body.append('submission_data', JSON.stringify(data));
 
@@ -664,11 +825,19 @@ document.addEventListener('DOMContentLoaded', function () {
             body.append('submission_file', fileInput.files[0]);
         }
 
-        fetch('applications.php', {
+        fetch(window.location.pathname, {
             method:  'POST',
             body:    body
         })
-        .then(function (res) { return res.json(); })
+        .then(function (res) {
+            return res.text().then(function (text) {
+                try {
+                    return JSON.parse(text);
+                } catch (parseError) {
+                    throw new Error(text ? text.slice(0, 260) : 'Empty response');
+                }
+            });
+        })
         .then(function (json) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';

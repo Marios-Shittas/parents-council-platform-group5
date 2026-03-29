@@ -248,6 +248,59 @@
     flex-shrink: 0;
 }
 
+/* Πιο compact edit modal για να χωράει χωρίς εσωτερικό scroll στις περισσότερες οθόνες */
+#editApplicationModal .modal-dialog {
+    max-width: 900px;
+}
+
+#editApplicationModal .modal-content {
+    max-height: calc(100vh - 1.25rem);
+}
+
+#editApplicationModal .modal-header,
+#editApplicationModal .modal-footer {
+    padding: 0.55rem 0.9rem;
+}
+
+#editApplicationModal .modal-body {
+    overflow-y: visible;
+    max-height: none;
+    padding: 0.8rem 0.9rem;
+}
+
+#editApplicationModal .nav-tabs .nav-link {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.86rem;
+}
+
+#editApplicationModal .form-label {
+    margin-bottom: 0.2rem;
+    font-size: 0.88rem;
+}
+
+#editApplicationModal .form-control,
+#editApplicationModal .form-select,
+#editApplicationModal .form-text,
+#editApplicationModal .btn-sm {
+    font-size: 0.85rem;
+}
+
+#editApplicationModal .card-body {
+    padding: 0.55rem 0.7rem;
+}
+
+#edit_application_description {
+    min-height: 96px;
+}
+
+/* Fallback scroll μόνο σε πολύ μικρό ύψος viewport */
+@media (max-height: 760px) {
+    #editApplicationModal .modal-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 165px);
+    }
+}
+
 /* Tablet breakpoint: header αριστερή στοίχιση και full-width truncate */
 @media (max-width: 991.98px) {
     .admin-page-header {
