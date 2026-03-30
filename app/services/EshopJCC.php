@@ -7,6 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 class EshopJccService
 {
@@ -45,12 +46,12 @@ class EshopJccService
 
     private function handleCheckoutRegistration(bool $respondWithJson): void
     {
-        $userId = (int) ($_SESSION['user_id'] ?? 0);
-        if ($userId <= 0) {
-            $this->respondCheckoutError($respondWithJson, 'Πρέπει να κάνετε σύνδεση πρώτα.', 401);
-            return;
-        }
+        auth_require_role('parent', [
+            'mode' => $respondWithJson ? 'json' : 'redirect',
+            'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
+        ]);
 
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
         $transactionStarted = false;
 
         try {

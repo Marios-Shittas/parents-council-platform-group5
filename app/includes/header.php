@@ -374,6 +374,8 @@ $nav_items[] = [
     // Aggressive back button prevention + continuous session validation
     (function() {
         const loginUrl = '/parents-council-platform-group5/public/login.php';
+        const adminHomeUrl = '/parents-council-platform-group5/public/admin/home.php';
+        const requiredRole = <?php echo json_encode(site_is_parent() ? 'parent' : null); ?>;
         
         // Clear any stored history data
         try {
@@ -387,6 +389,11 @@ $nav_items[] = [
                 .then(data => {
                     if (!data.isLoggedIn) {
                         window.location.href = loginUrl;
+                        return;
+                    }
+
+                    if (requiredRole && data.role !== requiredRole) {
+                        window.location.href = data.role === 'admin' ? adminHomeUrl : loginUrl;
                     }
                 })
                 .catch(() => {
