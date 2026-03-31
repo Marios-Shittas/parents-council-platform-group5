@@ -31,6 +31,12 @@ function normalizeUserStatus(string $status): string
     return in_array($status, $allowed, true) ? $status : 'pending';
 }
 
+function normalizeUserSort(string $sort): string
+{
+    $allowed = ['pending_first', 'newest', 'oldest', 'name_az', 'status_az'];
+    return in_array($sort, $allowed, true) ? $sort : 'pending_first';
+}
+
 function redirectWithFlash(string $message, string $type = 'info', int $manageChildrenUserId = 0): void
 {
     $_SESSION['flash_message'] = $message;
@@ -272,7 +278,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 }
 
-$users = $usersService->getAllUsersForAdmin();
+$selectedSort = normalizeUserSort((string)($_GET['sort'] ?? 'pending_first'));
+$users = $usersService->getAllUsersForAdmin($selectedSort);
 $managedParentId = (int)($_GET['manage_children'] ?? 0);
 $allUserIds = [];
 $parentUserIds = [];
@@ -388,9 +395,24 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                         <h4 class="mb-1"><i class="fas fa-table me-2"></i>Λίστα Χρηστών</h4>
                         <p class="text-muted mb-0">Ο λογαριασμός `admin 1` είναι προστατευμένος. Επίσης δεν επιτρέπεται διαγραφή του τρέχοντος συνδεδεμένου admin.</p>
                     </div>
-                    <div class="users-search-wrap">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο ή κατάσταση">
+                    <div class="users-toolbar-actions">
+                        <div class="users-search-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο ή κατάσταση">
+                        </div>
+                        <form method="GET" class="users-sort-form">
+                            <?php if ($managedParentId > 0): ?>
+                                <input type="hidden" name="manage_children" value="<?php echo $managedParentId; ?>">
+                            <?php endif; ?>
+                            <label for="usersSortSelect" class="users-sort-label">Sort by</label>
+                            <select name="sort" id="usersSortSelect" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="pending_first" <?php echo $selectedSort === 'pending_first' ? 'selected' : ''; ?>>Pending first</option>
+                                <option value="newest" <?php echo $selectedSort === 'newest' ? 'selected' : ''; ?>>Newest first</option>
+                                <option value="oldest" <?php echo $selectedSort === 'oldest' ? 'selected' : ''; ?>>Oldest first</option>
+                                <option value="name_az" <?php echo $selectedSort === 'name_az' ? 'selected' : ''; ?>>Name A-Z</option>
+                                <option value="status_az" <?php echo $selectedSort === 'status_az' ? 'selected' : ''; ?>>Status</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
 

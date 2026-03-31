@@ -14,7 +14,6 @@ require_once __DIR__ . '/site_context.php';
 
 $site_title = 'Γυμνάσιο Αγίου Αθανασίου';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
-$search_query = trim($_GET['q'] ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 
 $useful_info_item = [
@@ -22,6 +21,13 @@ $useful_info_item = [
     'href' => site_section_url('useful-information.php'),
     'icon' => 'fas fa-info-circle',
     'match' => ['useful-information.php'],
+];
+
+$profile_item = [
+    'label' => 'Το Προφίλ Μου',
+    'href' => site_section_url('profile.php'),
+    'icon' => 'fas fa-user-circle',
+    'match' => ['profile.php'],
 ];
 
 $nav_items = [
@@ -149,7 +155,7 @@ $nav_items[] = [
 
         /* Λίγο κενό ανάμεσα στα menu items. */
         .navbar-nav .nav-item {
-            margin: 0 .06rem;
+            margin: 0 .18rem;
         }
 
         /* Βασικό στυλ links menu. */
@@ -157,7 +163,7 @@ $nav_items[] = [
             font-family: 'Lato', sans-serif;
             font-weight: 600;
             color: var(--text-main) !important;
-            padding: .48rem .7rem;
+            padding: .5rem .95rem;
             border-radius: .65rem;
             transition: all .2s ease;
             position: relative;
@@ -200,45 +206,30 @@ $nav_items[] = [
             background: rgba(26, 58, 92, 0.55);
         }
 
-        /* Πεδίο αναζήτησης. */
-        .search-input {
-            font-family: 'Lato', sans-serif;
-            /* Περιορίζει το search για να μη τρώει όλο το πλάτος. */
-            min-width: 180px;
-            max-width: 320px;
-            border-radius: 999px 0 0 999px;
-            border-color: #d6dce4;
-        }
-
-        /* Όταν ο χρήστης γράφει στο search, το πεδίο φωτίζεται. */
-        .search-input:focus {
-            border-color: var(--brand-color);
-            box-shadow: 0 0 0 .2rem rgba(26, 58, 92, 0.12);
-        }
-
-        /* Κουμπί search. */
-        .search-btn {
-            font-family: 'Lato', sans-serif;
-            /* Ίδιο pill style με το input για ενιαίο κουμπί. */
-            border-radius: 0 999px 999px 0;
-            border-color: #d6dce4;
-        }
-
         /* Κουμπί login. */
         .login-btn {
             font-family: 'Lato', sans-serif;
             border-radius: 999px;
-            font-weight: 600;
+            font-weight: 600 !important;
             padding: .3rem .9rem;
             border-width: 2px;
-            font-size: .9rem;
+            font-size: .9rem !important;
+            line-height: 1.25 !important;
+            letter-spacing: 0 !important;
+            text-rendering: geometricPrecision;
+        }
+
+        .login-btn i,
+        .login-btn span {
+            font-size: inherit !important;
+            line-height: inherit !important;
         }
 
         .login-btn:visited,
         .login-btn:focus,
         .login-btn:active {
             color: var(--text-main) !important;
-            font-weight: 600;
+            font-weight: 600 !important;
         }
 
         .login-btn:hover {
@@ -248,6 +239,7 @@ $nav_items[] = [
         .logout-btn {
             border-color: #dc3545;
             color: #dc3545 !important;
+            font-weight: 600 !important;
         }
 
         .logout-btn:hover,
@@ -271,7 +263,7 @@ $nav_items[] = [
             color: #ffffff !important;
         }
 
-        .info-icon-link {
+        .utility-icon-link {
             font-family: 'Lato', sans-serif;
             width: 38px;
             height: 38px;
@@ -280,6 +272,30 @@ $nav_items[] = [
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            transition: all .2s ease;
+        }
+
+        .profile-icon-link {
+            border: 1px solid #c4d8ec;
+            color: #3e6d97;
+            background: #edf4fb;
+        }
+
+        .profile-icon-link:hover {
+            color: #234e76;
+            background: #e2eef9;
+            border-color: #a9c7e3;
+            transform: translateY(-1px);
+        }
+
+        .profile-icon-link.active {
+            color: #173f66;
+            background: #dbe9f7;
+            border-color: #98bbda;
+            box-shadow: inset 0 0 0 1px rgba(49, 101, 146, 0.08);
+        }
+
+        .info-icon-link {
             border: 1px solid #b9e3c8;
             color: #5cab78;
             background: #effaf3;
@@ -309,20 +325,41 @@ $nav_items[] = [
         .navbar-collapse {
             /* Χωρίζει menu και δεξιά εργαλεία σε 2 καθαρές ζώνες. */
             justify-content: space-between;
+            align-items: center;
+            gap: 1.35rem;
         }
 
         .navbar-nav {
-            /* Τα κουμπιά απλώνονται ομοιόμορφα στον χώρο. */
+            /* Το menu κάθεται πιο κεντραρισμένα αφού δεν υπάρχει search. */
             flex: 1 1 auto;
+            justify-content: center;
+            margin: 0 1.6rem;
+            gap: .35rem;
+        }
+
+        .navbar-public .navbar-nav {
             justify-content: space-evenly;
-            margin: 0 1rem;
+            margin: 0 2.4rem;
+            gap: .8rem;
+        }
+
+        .navbar-public .navbar-nav .nav-item {
+            margin: 0 .35rem;
+        }
+
+        .navbar-public .navbar-nav .nav-link {
+            padding: .5rem 1.1rem;
         }
 
         .navbar-tools {
-            /* Search + Login μένουν δεξιά. */
-            margin-left: auto;
-            min-width: 360px;
+            /* Τα utility actions μένουν compact δεξιά. */
+            flex: 0 0 auto;
             justify-content: flex-end;
+            gap: .8rem;
+            margin-left: 0;
+            min-width: auto;
+            padding: .2rem 0 .2rem .9rem;
+            border-left: 1px solid rgba(26, 58, 92, 0.08);
         }
 
         .navbar .container {
@@ -332,11 +369,9 @@ $nav_items[] = [
 
         /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
         .navbar-nav .nav-link:focus-visible,
-        .search-btn:focus-visible,
         .login-btn:focus-visible,
-        .info-icon-link:focus-visible,
-        .navbar-toggler:focus-visible,
-        .search-input:focus-visible {
+        .utility-icon-link:focus-visible,
+        .navbar-toggler:focus-visible {
             outline: 2px solid rgba(26, 58, 92, 0.45);
             outline-offset: 2px;
         }
@@ -347,6 +382,7 @@ $nav_items[] = [
                 margin-top: .75rem;
                 /* Σε κινητό πάμε στο κλασικό στοίχισμα αριστερά. */
                 justify-content: flex-start;
+                gap: .1rem;
             }
 
             .navbar-nav .nav-item {
@@ -356,15 +392,12 @@ $nav_items[] = [
             .navbar-tools {
                 margin-top: .75rem;
                 padding-top: .5rem;
+                padding-left: 0;
                 border-top: 1px solid #e7ebf0;
+                border-left: 0;
                 gap: .5rem;
                 min-width: 100%;
-            }
-
-            .search-input {
-                /* Σε κινητό το search γίνεται full width. */
-                min-width: 100%;
-                max-width: none;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -468,7 +501,7 @@ $nav_items[] = [
 
 <header class="site-header">
 <!-- Κύριο navigation όλου του site. -->
-<nav class="navbar navbar-expand-lg navbar-light">
+<nav class="navbar navbar-expand-lg navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
     <div class="container">
 
         <!-- Λογότυπο + τίτλος σχολείου. -->
@@ -500,23 +533,8 @@ $nav_items[] = [
                 <?php endforeach; ?>
             </ul>
 
-            <!-- Δεξιά εργαλεία: αναζήτηση + login. -->
+            <!-- Δεξιά εργαλεία: login + shortcut. -->
             <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center navbar-tools">
-
-                <!-- Form αναζήτησης (με GET για να φαίνεται το q στο URL). -->
-                <form class="my-2 my-lg-0 mr-lg-2" action="<?php echo site_public_url('search.php'); ?>" method="get">
-                    <div class="input-group input-group-sm">
-                        <!-- Φιλτράρουμε τιμή με htmlspecialchars για ασφάλεια. -->
-                        <input type="search" name="q" class="form-control search-input"
-                               placeholder="Αναζήτηση..." aria-label="Search"
-                               value="<?php echo htmlspecialchars($search_query, ENT_QUOTES, 'UTF-8'); ?>">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary search-btn" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
 
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('logout.php'); ?>"
@@ -530,9 +548,20 @@ $nav_items[] = [
                     </a>
                 <?php endif; ?>
 
+                <?php if (site_is_parent()): ?>
+                    <?php $is_profile_active = in_array($current_page, $profile_item['match'], true); ?>
+                    <a href="<?php echo $profile_item['href']; ?>"
+                       class="mt-2 mt-lg-0 utility-icon-link profile-icon-link<?php echo $is_profile_active ? ' active' : ''; ?>"
+                       aria-label="<?php echo htmlspecialchars($profile_item['label']); ?>"
+                       title="<?php echo htmlspecialchars($profile_item['label']); ?>"
+                       <?php echo $is_profile_active ? 'aria-current="page"' : ''; ?>>
+                        <i class="<?php echo $profile_item['icon']; ?>"></i>
+                    </a>
+                <?php endif; ?>
+
                 <?php $is_useful_info_active = in_array($current_page, $useful_info_item['match'], true); ?>
                 <a href="<?php echo $useful_info_item['href']; ?>"
-                   class="ml-lg-2 mt-2 mt-lg-0 info-icon-link<?php echo $is_useful_info_active ? ' active' : ''; ?>"
+                   class="mt-2 mt-lg-0 utility-icon-link info-icon-link<?php echo $is_useful_info_active ? ' active' : ''; ?>"
                    aria-label="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
                    title="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
                    <?php echo $is_useful_info_active ? 'aria-current="page"' : ''; ?>>
