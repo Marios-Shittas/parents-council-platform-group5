@@ -240,6 +240,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'email' => trim((string)($_POST['email'] ?? '')),
             'phone_number' => trim((string)($_POST['phone_number'] ?? '')),
             'password' => (string)($_POST['password'] ?? ''),
+            'rejection_message' => trim((string)($_POST['rejection_message'] ?? '')),
             'role' => $requestedRole,
             'account_status' => $requestedStatus,
         ], $currentAdminId);
@@ -247,6 +248,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $flashMessage = $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.';
         if (!empty($result['approval_email_sent']) && !empty($result['approval_email'])) {
             $flashMessage = 'Στάλθηκε email έγκρισης στο ' . $result['approval_email'] . ' και ο χρήστης μεταφέρθηκε σε αναμονή πληρωμής.';
+        }
+        if (!empty($result['rejection_email_sent']) && !empty($result['rejection_email'])) {
+            $flashMessage = 'Στάλθηκε email απόρριψης στο ' . $result['rejection_email'] . '.';
         }
 
         redirectWithFlash(
@@ -854,6 +858,11 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                             <label class="form-label"><strong>Νέος Κωδικός</strong></label>
                             <input type="password" name="password" id="edit_password" class="form-control" minlength="6" placeholder="Άφησέ το κενό αν δεν θέλεις αλλαγή">
                         </div>
+                        <div class="col-12 d-none" id="rejectionMessageGroup">
+                            <label class="form-label"><strong>Μήνυμα Απόρριψης *</strong></label>
+                            <textarea name="rejection_message" id="edit_rejection_message" class="form-control" rows="4" placeholder="Γράψε το μήνυμα που θα σταλεί στον γονέα"></textarea>
+                            <small class="text-muted">Το μήνυμα αποστέλλεται με email όταν η κατάσταση γίνει «Απορριφθείς».</small>
+                        </div>
                     </div>
                 </div>
 
@@ -1062,6 +1071,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var editModal = document.getElementById('editUserModal');
     if (editModal) {
+        var statusSelect = document.getElementById('edit_status');
+        var rejectionGroup = document.getElementById('rejectionMessageGroup');
+        var rejectionInput = document.getElementById('edit_rejection_message');
+
+        function toggleRejectionMessageField() {
+            if (!statusSelect || !rejectionGroup || !rejectionInput) {
+                return;
+            }
+
+            var show = statusSelect.value === 'rejected' && !statusSelect.disabled;
+            rejectionGroup.classList.toggle('d-none', !show);
+            rejectionInput.required = show;
+
+            if (!show) {
+                rejectionInput.value = '';
+            }
+        }
+
         editModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             if (!button) {
@@ -1077,15 +1104,24 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit_email').value = button.getAttribute('data-user-email') || '';
             document.getElementById('edit_phone').value = button.getAttribute('data-user-phone') || '';
             document.getElementById('edit_role').value = button.getAttribute('data-user-role') || 'parent';
-            document.getElementById('edit_status').value = button.getAttribute('data-user-status') || 'pending';
+            statusSelect.value = button.getAttribute('data-user-status') || 'pending';
             document.getElementById('edit_password').value = '';
+            if (rejectionInput) {
+                rejectionInput.value = '';
+            }
 
             document.getElementById('edit_role').disabled = isProtected || isSelf;
-            document.getElementById('edit_status').disabled = isProtected || isSelf;
+            statusSelect.disabled = isProtected || isSelf;
 
             document.getElementById('editProtectedNotice').classList.toggle('d-none', !isProtected);
             document.getElementById('editSelfNotice').classList.toggle('d-none', !isSelf);
+
+            toggleRejectionMessageField();
         });
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', toggleRejectionMessageField);
+        }
     }
 
     var deleteModal = document.getElementById('deleteUserModal');
