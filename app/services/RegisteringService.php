@@ -56,7 +56,7 @@ class RegisteringService
 
         $name = trim((string) $payload['first_name']);
         $surname = trim((string) $payload['last_name']);
-        $phone = trim((string) $payload['phone']);
+        $phone = $this->normalizePhone((string) $payload['phone']) ?? '';
         $children = $payload['children'];
 
         try {
@@ -106,6 +106,18 @@ class RegisteringService
             return 'Το email δεν είναι έγκυρο.';
         }
 
+        if ($this->normalizePhone((string) $payload['phone']) === null) {
+            return 'Το κινητό πρέπει να δηλωθεί στη μορφή +357 και 8ψήφιος αριθμός.';
+        }
+
+        if (filter_var($payload['consent'] ?? false, FILTER_VALIDATE_BOOLEAN) !== true) {
+            return 'Πρέπει να αποδεχτείτε την πολιτική απορρήτου.';
+        }
+
+        if (filter_var($payload['viber_consent'] ?? false, FILTER_VALIDATE_BOOLEAN) !== true) {
+            return 'Πρέπει να αποδεχτείτε και τη συμμετοχή στην ομάδα Viber για να ολοκληρωθεί η εγγραφή.';
+        }
+
         if (!is_array($payload['children']) || count($payload['children']) === 0) {
             return 'Πρέπει να καταχωρηθεί τουλάχιστον ένα παιδί.';
         }
@@ -124,6 +136,16 @@ class RegisteringService
         }
 
         return null;
+    }
+
+    private function normalizePhone(string $phone): ?string
+    {
+        $normalizedPhone = preg_replace('/[\s\-]+/', '', trim($phone));
+        if (!is_string($normalizedPhone)) {
+            $normalizedPhone = trim($phone);
+        }
+
+        return preg_match('/^\+357\d{8}$/', $normalizedPhone) === 1 ? $normalizedPhone : null;
     }
 
     private function emailExists(string $email): bool

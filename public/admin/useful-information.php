@@ -243,8 +243,8 @@ $uniform = $sections['uniform'];
     <?php include __DIR__ . '/../../app/includes/admin_sidebar.php'; ?>
 
     <main class="admin-content">
-        <a href="announcements.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στις σελίδες διαχείρισης
+        <a href="home.php" class="back-link">
+            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
         </a>
 
         <div class="admin-header">

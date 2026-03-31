@@ -85,6 +85,68 @@ class ApprovalMailer
         }
     }
 
+    public function sendActivationCredentialsEmail(string $toEmail, string $temporaryPassword): void
+    {
+        if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Recipient email is invalid.');
+        }
+
+        if ($temporaryPassword === '') {
+            throw new InvalidArgumentException('Temporary password is missing.');
+        }
+
+        $subject = self::activationCredentialsSubject();
+        $body = self::activationCredentialsBody($temporaryPassword);
+
+        $socket = $this->openConnection();
+
+        try {
+            $this->expect($socket, [220]);
+            $this->command($socket, 'EHLO localhost', [250]);
+
+            if ($this->encryption === 'tls' || $this->encryption === 'starttls' || $this->port === 587) {
+                $this->command($socket, 'STARTTLS', [220]);
+
+                $cryptoEnabled = @stream_socket_enable_crypto(
+                    $socket,
+                    true,
+                    STREAM_CRYPTO_METHOD_TLS_CLIENT
+                );
+
+                if ($cryptoEnabled !== true) {
+                    throw new RuntimeException('SMTP STARTTLS handshake failed.');
+                }
+
+                $this->command($socket, 'EHLO localhost', [250]);
+            }
+
+            $this->command($socket, 'AUTH LOGIN', [334]);
+            $this->command($socket, base64_encode($this->username), [334]);
+            $this->command($socket, base64_encode($this->password), [235]);
+            $this->command($socket, 'MAIL FROM:<' . $this->fromEmail . '>', [250]);
+            $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
+            $this->command($socket, 'DATA', [354]);
+            $this->write($socket, $this->buildMessage($toEmail, $subject, $body) . "\r\n.\r\n");
+            $this->expect($socket, [250]);
+            $this->command($socket, 'QUIT', [221]);
+        } finally {
+            fclose($socket);
+        }
+    }
+
+    public static function activationCredentialsSubject(): string
+    {
+        return 'Ο λογαριασμός σας ενεργοποιήθηκε';
+    }
+
+    public static function activationCredentialsBody(string $temporaryPassword): string
+    {
+        return
+            "Η πληρωμή της συνδρομής σας ολοκληρώθηκε επιτυχώς και πλέον είστε ενεργό μέλος.\r\n\r\n" .
+            "Αυτός είναι ο κωδικός πρόσβασής σας για είσοδο: {$temporaryPassword}\r\n\r\n" .
+            "Μπορείτε να τον αλλάξετε οποιαδήποτε στιγμή από τη σελίδα Ξέχασα κωδικό (Forgot Password).";
+    }
+
     private function openConnection()
     {
         $transport = ($this->encryption === 'ssl' || $this->encryption === 'smtps' || $this->port === 465)

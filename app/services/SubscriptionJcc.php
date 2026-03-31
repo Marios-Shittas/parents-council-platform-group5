@@ -5,6 +5,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/TokenValidator.php';
+require_once __DIR__ . '/ApprovalMailer.php';
 
 class SubscriptionJccService
 {
@@ -46,6 +47,7 @@ class SubscriptionJccService
             $orderStatus = (int) ($statusResponse['orderStatus'] ?? -1);
             $paymentStatus = $this->mapOrderStatusToPaymentStatus($orderStatus);
             $transactionId = $this->resolveTransactionId($statusResponse, $orderId);
+            $activationCredentials = null;
 
             $this->conn->begin_transaction();
 
@@ -59,7 +61,7 @@ class SubscriptionJccService
                     $this->insertInsuranceChildrenPayments($userId, $insurancePaymentId);
                 }
 
-                $this->activateUser($userId);
+                $activationCredentials = $this->activateUserWithTemporaryPassword($userId);
                 $this->insertLog(
                     $userId,
                     'PAYMENT_COMPLETED',
@@ -81,12 +83,41 @@ class SubscriptionJccService
 
             $this->conn->commit();
 
-            $this->respond(200, [
+            $credentialsEmailSent = false;
+            $credentialsEmailMessage = null;
+            if ($paymentStatus === 'completed' && is_array($activationCredentials)) {
+                try {
+                    $this->sendActivationCredentialsEmail(
+                        (string) ($activationCredentials['email'] ?? ''),
+                        (string) ($activationCredentials['temporary_password'] ?? '')
+                    );
+                    $credentialsEmailSent = true;
+                    $this->insertLog($userId, 'ACTIVATION_CREDENTIALS_SENT', 'Activation credentials email sent.');
+                } catch (Throwable $emailError) {
+                    $credentialsEmailMessage = 'Payment completed, but failed to send credentials email.';
+                    $this->insertLog(
+                        $userId,
+                        'ACTIVATION_CREDENTIALS_EMAIL_FAILED',
+                        'Payment completed but credentials email failed: ' . $emailError->getMessage()
+                    );
+                }
+            }
+
+            $response = [
                 'success' => true,
                 'payment_status' => $paymentStatus,
                 'order_status' => $orderStatus,
                 'transaction_id' => $transactionId,
-            ]);
+            ];
+
+            if ($paymentStatus === 'completed' && is_array($activationCredentials)) {
+                $response['credentials_email_sent'] = $credentialsEmailSent;
+                if ($credentialsEmailMessage !== null) {
+                    $response['credentials_email_message'] = $credentialsEmailMessage;
+                }
+            }
+
+            $this->respond(200, $response);
         } catch (Throwable $e) {
             $this->conn->rollback();
             $this->respond(500, [
@@ -307,11 +338,14 @@ class SubscriptionJccService
         $childrenStmt->close();
     }
 
-    private function activateUser(int $userId): void
+    private function activateUserWithTemporaryPassword(int $userId): ?array
     {
+        $temporaryPassword = $this->generateTemporaryPassword();
+        $hashedPassword = password_hash($temporaryPassword, PASSWORD_DEFAULT);
+
         $stmt = $this->conn->prepare(
             "UPDATE Users
-             SET account_status = 'active', token = NULL, token_expiry = NULL
+             SET account_status = 'active', password = ?, token = NULL, token_expiry = NULL
              WHERE user_id = ? AND account_status = 'waiting_payment'
              LIMIT 1"
         );
@@ -320,9 +354,88 @@ class SubscriptionJccService
             throw new RuntimeException('Failed to prepare user activation.');
         }
 
+        $stmt->bind_param('si', $hashedPassword, $userId);
+        $stmt->execute();
+
+        if ($stmt->affected_rows < 1) {
+            $stmt->close();
+            return null;
+        }
+
+        $stmt->close();
+
+        $email = $this->getUserEmail($userId);
+        if ($email === '') {
+            throw new RuntimeException('Failed to load user email for credentials notification.');
+        }
+
+        return [
+            'email' => $email,
+            'temporary_password' => $temporaryPassword,
+        ];
+    }
+
+    private function getUserEmail(int $userId): string
+    {
+        $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to prepare user email lookup.');
+        }
+
         $stmt->bind_param('i', $userId);
         $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
         $stmt->close();
+
+        return trim((string) ($row['email'] ?? ''));
+    }
+
+    private function generateTemporaryPassword(int $length = 12): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+        $maxIndex = strlen($alphabet) - 1;
+        $password = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $alphabet[random_int(0, $maxIndex)];
+        }
+
+        return $password;
+    }
+
+    private function sendActivationCredentialsEmail(string $toEmail, string $temporaryPassword): void
+    {
+        if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Recipient email is invalid for credentials email.');
+        }
+
+        if ($temporaryPassword === '') {
+            throw new InvalidArgumentException('Temporary password is missing.');
+        }
+
+        try {
+            $mailer = new ApprovalMailer([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+
+            $mailer->sendActivationCredentialsEmail($toEmail, $temporaryPassword);
+            return;
+        } catch (Throwable $smtpError) {
+            $subject = ApprovalMailer::activationCredentialsSubject();
+            $message = str_replace("\r\n", "\n", ApprovalMailer::activationCredentialsBody($temporaryPassword));
+            $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+
+            if (!mail($toEmail, $subject, $message, $headers)) {
+                throw new RuntimeException('Failed to send activation credentials email: ' . $smtpError->getMessage());
+            }
+        }
     }
 
     private function insertLog(int $userId, string $action, string $description): void

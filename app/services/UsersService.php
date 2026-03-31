@@ -50,10 +50,17 @@ class UsersService
 
     public function login($inputEmail, $inputPassword)
     {
-        $user = $this->getUserByEmail($inputEmail);
+        $email = trim((string)$inputEmail);
+        $this->resetAllExpiredWaitingPaymentUsersToPending();
+
+        $user = $this->getUserByEmail($email);
 
         if (!$user) {
             return ['success' => false, 'message' => 'Invalid email or password.'];
+        }
+
+        if ((string)($user['account_status'] ?? '') !== 'active') {
+            return ['success' => false, 'message' => 'Your account is not active yet.'];
         }
 
         if (!password_verify($inputPassword, $user['password'])) {
@@ -68,11 +75,38 @@ class UsersService
         ];
     }
 
+    private function resetAllExpiredWaitingPaymentUsersToPending(): int
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE Users
+             SET account_status = 'pending', token = NULL, token_expiry = NULL
+             WHERE role = 'parent'
+               AND account_status = 'waiting_payment'
+               AND token_expiry IS NOT NULL
+               AND token_expiry < NOW()"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->execute();
+        $affectedRows = $stmt->affected_rows;
+        $stmt->close();
+
+        return max(0, $affectedRows);
+    }
+
     public function forgot($email)
     {
+        $email = trim((string)$email);
         $user = $this->getUserByEmail($email);
         if (!$user || $email !== $user['email']) {
             return ['success' => false, 'message' => 'Invalid email.'];
+        }
+
+        if ((string)($user['account_status'] ?? '') !== 'active') {
+            return ['success' => false, 'message' => 'Ο λογαριασμός δεν είναι ενεργός.'];
         }
 
         return ['success' => true, 'message' => 'Link Sent.'];
@@ -838,7 +872,9 @@ class UsersService
         }
 
         $currentStatus = (string)($existingUser['account_status'] ?? 'pending');
-        return in_array($currentStatus, ['pending', 'rejected'], true);
+        // Allow re-running the approval email/token flow for parent accounts
+        // unless they are already fully active.
+        return in_array($currentStatus, ['pending', 'rejected', 'approved', 'waiting_payment'], true);
     }
 
     private function sendApprovalEmail(string $email, string $link): void

@@ -3,7 +3,8 @@ function SubscriptionResultPage() {
         type: "loading",
         title: "Επεξεργασία πληρωμής",
         text: "Γίνεται έλεγχος της συναλλαγής σας με την JCC...",
-        tx: ""
+        tx: "",
+        showEmailNotice: false
     });
 
     React.useEffect(() => {
@@ -27,11 +28,16 @@ function SubscriptionResultPage() {
                 }
 
                 if (response.payment_status === "completed") {
+                    const successText = response.credentials_email_sent === false
+                        ? (response.credentials_email_message || "Η συνδρομή ολοκληρώθηκε και πλέον είστε ενεργό μέλος, αλλά υπήρξε πρόβλημα στην αποστολή του κωδικού μέσω email. Παρακαλώ επικοινωνήστε με τη γραμματεία.")
+                        : "Η συνδρομή σας ολοκληρώθηκε επιτυχώς. Πλέον είστε ενεργό μέλος.";
+
                     setState({
                         type: "success",
                         title: "Η πληρωμή ολοκληρώθηκε",
-                        text: "Η συνδρομή σας ενεργοποιήθηκε επιτυχώς και μπορείτε να συνδεθείτε στο σύστημα.",
-                        tx: response.transaction_id || ""
+                        text: successText,
+                        tx: response.transaction_id || "",
+                        showEmailNotice: response.credentials_email_sent !== false
                     });
                     return;
                 }
@@ -41,7 +47,8 @@ function SubscriptionResultPage() {
                         type: "pending",
                         title: "Η πληρωμή εκκρεμεί",
                         text: "Η πληρωμή είναι σε εκκρεμότητα. Ελέγξτε ξανά σε λίγα λεπτά.",
-                        tx: ""
+                        tx: "",
+                        showEmailNotice: false
                     });
                     return;
                 }
@@ -50,7 +57,8 @@ function SubscriptionResultPage() {
                     type: "failed",
                     title: "Η πληρωμή απέτυχε",
                     text: "Η πληρωμή δεν ολοκληρώθηκε. Παρακαλώ δοκιμάστε ξανά.",
-                    tx: ""
+                    tx: "",
+                    showEmailNotice: false
                 });
             })
             .catch(function () {
@@ -58,7 +66,8 @@ function SubscriptionResultPage() {
                     type: "failed",
                     title: "Σφάλμα επικοινωνίας",
                     text: "Παρουσιάστηκε σφάλμα κατά τον έλεγχο της συναλλαγής.",
-                    tx: ""
+                    tx: "",
+                    showEmailNotice: false
                 });
             });
     }, []);
@@ -79,6 +88,12 @@ function SubscriptionResultPage() {
                             <div className={"result-badge " + state.type}>{renderIcon(state.type)}</div>
                             <h2 className="result-title mt-3 mb-2">{state.title}</h2>
                             <p className="result-subtitle mb-0">{state.text}</p>
+
+                            {state.showEmailNotice ? (
+                                <div className="alert alert-info mt-3 mb-0" role="alert">
+                                    <strong>Θα λάβετε τον κωδικό εισόδου μέσω email.</strong> Ελέγξτε και τον φάκελο Spam.
+                                </div>
+                            ) : null}
 
                             {state.tx ? (
                                 <div>
