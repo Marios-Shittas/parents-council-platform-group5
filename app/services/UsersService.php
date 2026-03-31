@@ -112,8 +112,62 @@ class UsersService
         return ['success' => true, 'message' => 'Link Sent.'];
     }
 
-    public function getAllUsersForAdmin(): array
+    public function getAllUsersForAdmin(string $sort = 'pending_first'): array
     {
+        switch ($sort) {
+            case 'newest':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+            case 'oldest':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at ASC,
+                    u.user_id ASC
+                ";
+                break;
+            case 'name_az':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.surname ASC,
+                    u.name ASC,
+                    u.user_id ASC
+                ";
+                break;
+            case 'status_az':
+                $orderBy = "
+                    CASE u.account_status
+                        WHEN 'pending' THEN 0
+                        WHEN 'approved' THEN 1
+                        WHEN 'waiting_payment' THEN 2
+                        WHEN 'active' THEN 3
+                        WHEN 'rejected' THEN 4
+                        ELSE 5
+                    END,
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+            case 'pending_first':
+            default:
+                $orderBy = "
+                    CASE WHEN u.account_status = 'pending' THEN 0 ELSE 1 END,
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+        }
+
         $sql = "
             SELECT
                 u.user_id,
@@ -144,11 +198,7 @@ class UsersService
                 FROM Payments
                 GROUP BY user_id
             ) payments ON payments.user_id = u.user_id
-            ORDER BY
-                CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
-                CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
-                u.created_at DESC,
-                u.user_id DESC
+            ORDER BY {$orderBy}
         ";
 
         $result = $this->conn->query($sql);
@@ -538,6 +588,12 @@ class UsersService
         return $groupedOrders;
     }
 
+    public function getOrdersByUserId(int $userId): array
+    {
+        $groupedOrders = $this->getOrdersGroupedByUserIds([$userId]);
+        return $groupedOrders[$userId] ?? [];
+    }
+
     public function getPaymentsGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -587,6 +643,78 @@ class UsersService
         $stmt->close();
 
         return $groupedPayments;
+    }
+
+    public function getPaymentsByUserId(int $userId): array
+    {
+        $groupedPayments = $this->getPaymentsGroupedByUserIds([$userId]);
+        return $groupedPayments[$userId] ?? [];
+    }
+
+    public function getOrderItemsGroupedByOrderIds(array $orderIds): array
+    {
+        $orderIds = array_values(array_filter(array_map('intval', $orderIds), static function ($id) {
+            return $id > 0;
+        }));
+
+        if (empty($orderIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+        $types = str_repeat('i', count($orderIds));
+
+        $sql = "
+            SELECT
+                oi.order_id,
+                oi.product_id,
+                p.product_name,
+                oi.quantity,
+                oi.size,
+                oi.price_at_purchase,
+                (oi.quantity * oi.price_at_purchase) AS line_total
+            FROM OrderItems oi
+            INNER JOIN Products p ON p.product_id = oi.product_id
+            WHERE oi.order_id IN ({$placeholders})
+            ORDER BY oi.order_id DESC, p.product_name ASC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $bindValues = [];
+        foreach ($orderIds as $index => $value) {
+            $bindValues[$index] = &$orderIds[$index];
+        }
+
+        array_unshift($bindValues, $types);
+        call_user_func_array([$stmt, 'bind_param'], $bindValues);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $itemsByOrderId = [];
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $orderId = (int)($row['order_id'] ?? 0);
+            if (!isset($itemsByOrderId[$orderId])) {
+                $itemsByOrderId[$orderId] = [];
+            }
+
+            $itemsByOrderId[$orderId][] = [
+                'product_id' => (int)($row['product_id'] ?? 0),
+                'product_name' => (string)($row['product_name'] ?? ''),
+                'quantity' => (int)($row['quantity'] ?? 0),
+                'size' => $row['size'] === null ? null : (string)$row['size'],
+                'price_at_purchase' => (float)($row['price_at_purchase'] ?? 0),
+                'line_total' => (float)($row['line_total'] ?? 0),
+            ];
+        }
+
+        $stmt->close();
+
+        return $itemsByOrderId;
     }
 
     public function createChildForParent(int $parentUserId, array $data, ?int $actorUserId = null): array

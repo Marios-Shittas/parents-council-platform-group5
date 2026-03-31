@@ -64,6 +64,11 @@
     margin-bottom: 2px;
 }
 
+.register-card-eyebrow-child {
+    letter-spacing: 0.04em;
+    text-transform: none;
+}
+
 .register-card-title {
     font-size: 0.95rem;
     font-weight: 700;
@@ -85,13 +90,16 @@
 /* ── Form group inline ── */
 .register-section-card .form-group-inline {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 14px;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
 }
 .register-section-card .form-group-inline label {
-    min-width: fit-content;
-    padding-top: 12px;
+    width: 118px;
+    min-width: 118px;
+    padding-top: 0;
+    line-height: 1.2;
+    text-align: left;
 }
 
 .register-input-stack {
@@ -114,6 +122,7 @@
 .register-section-card input.form-control {
     flex: 1;
     min-width: 0;
+    min-height: 46px;
 }
 .register-section-card input.form-control:focus {
     background: #fff !important;
@@ -129,6 +138,11 @@
     display: flex;
     align-items: center;
     overflow: hidden;
+    min-height: 46px;
+}
+
+.register-section-card .row {
+    row-gap: 4px;
 }
 
 .register-phone-shell:focus-within {
@@ -260,11 +274,13 @@
 @media (max-width: 576px) {
     .register-section-card .form-group-inline {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
+        align-items: stretch;
+        gap: 8px;
     }
     .register-section-card .form-group-inline label {
         padding-top: 0;
+        width: auto;
+        min-width: 0;
     }
     .register-input-stack {
         width: 100%;
