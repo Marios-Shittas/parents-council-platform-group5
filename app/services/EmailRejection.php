@@ -1,6 +1,8 @@
 <?php
 
-class ApprovalMailer
+declare(strict_types=1);
+
+class EmailRejection
 {
     private string $host;
     private int $port;
@@ -35,71 +37,50 @@ class ApprovalMailer
         }
     }
 
-    public function sendApprovalEmail(string $toEmail, string $link): void
+    public function sendRejectionEmail(string $toEmail, string $adminMessage): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException('Recipient email is invalid.');
         }
 
-        $subject = self::approvalEmailSubject();
-        $body = self::approvalEmailHtmlBody($link);
-
-        $socket = $this->openConnection();
-
-        try {
-            $this->expect($socket, [220]);
-            $this->command($socket, 'EHLO localhost', [250]);
-
-            if ($this->encryption === 'tls' || $this->encryption === 'starttls' || $this->port === 587) {
-                $this->command($socket, 'STARTTLS', [220]);
-
-                $cryptoEnabled = @stream_socket_enable_crypto(
-                    $socket,
-                    true,
-                    STREAM_CRYPTO_METHOD_TLS_CLIENT
-                );
-
-                if ($cryptoEnabled !== true) {
-                    throw new RuntimeException('SMTP STARTTLS handshake failed.');
-                }
-
-                $this->command($socket, 'EHLO localhost', [250]);
-            }
-
-            $this->command($socket, 'AUTH LOGIN', [334]);
-            $this->command($socket, base64_encode($this->username), [334]);
-            $this->command($socket, base64_encode($this->password), [235]);
-            $this->command($socket, 'MAIL FROM:<' . $this->fromEmail . '>', [250]);
-            $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
-            $this->command($socket, 'DATA', [354]);
-            $this->write($socket, $this->buildHtmlMessage($toEmail, $subject, $body) . "\r\n.\r\n");
-            $this->expect($socket, [250]);
-            $this->command($socket, 'QUIT', [221]);
-        } finally {
-            fclose($socket);
+        $adminMessage = trim($adminMessage);
+        if ($adminMessage === '') {
+            throw new InvalidArgumentException('Rejection message is required.');
         }
+
+        $subject = 'Ενημέρωση για την αίτησή σας';
+        $body =
+            "Η αίτησή σας απορρίφθηκε από τον διαχειριστή.\r\n\r\n" .
+            "Μήνυμα διαχειριστή:\r\n" .
+            $adminMessage . "\r\n\r\n" .
+            "Αν χρειάζεστε διευκρινίσεις, επικοινωνήστε με τον Σύνδεσμο Γονέων.";
+
+        $lastError = null;
+        foreach ($this->resolveTransportModes() as $mode) {
+            try {
+                $this->sendViaSmtpMode($mode, $toEmail, $subject, $body);
+                return;
+            } catch (Throwable $e) {
+                $lastError = $e;
+            }
+        }
+
+        if ($lastError instanceof Throwable) {
+            throw new RuntimeException('Failed to send rejection email: ' . $lastError->getMessage(), 0, $lastError);
+        }
+
+        throw new RuntimeException('Failed to send rejection email.');
     }
 
-    public function sendActivationCredentialsEmail(string $toEmail, string $temporaryPassword): void
+    private function sendViaSmtpMode(string $mode, string $toEmail, string $subject, string $body): void
     {
-        if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException('Recipient email is invalid.');
-        }
-
-        if ($temporaryPassword === '') {
-            throw new InvalidArgumentException('Temporary password is missing.');
-        }
-
-        $subject = self::activationCredentialsSubject();
-        $body = self::activationCredentialsBody($temporaryPassword);
-
-        $socket = $this->openConnection();
+        $socket = $this->openConnection($mode);
 
         try {
             $this->expect($socket, [220]);
             $this->command($socket, 'EHLO localhost', [250]);
 
-            if ($this->encryption === 'tls' || $this->encryption === 'starttls' || $this->port === 587) {
+            if ($this->shouldUseStartTls($mode)) {
                 $this->command($socket, 'STARTTLS', [220]);
 
                 $cryptoEnabled = @stream_socket_enable_crypto(
@@ -129,49 +110,35 @@ class ApprovalMailer
         }
     }
 
-    public static function activationCredentialsSubject(): string
+    private function resolveTransportModes(): array
     {
-        return 'Ο λογαριασμός σας ενεργοποιήθηκε';
+        if ($this->encryption === 'ssl' || $this->encryption === 'smtps') {
+            return ['smtps', 'starttls', 'none'];
+        }
+
+        if ($this->encryption === 'tls' || $this->encryption === 'starttls') {
+            return ['starttls', 'smtps', 'none'];
+        }
+
+        if ($this->port === 465) {
+            return ['smtps', 'starttls', 'none'];
+        }
+
+        if ($this->port === 587) {
+            return ['starttls', 'smtps', 'none'];
+        }
+
+        return ['starttls', 'smtps', 'none'];
     }
 
-    public static function approvalEmailSubject(): string
+    private function shouldUseStartTls(string $mode): bool
     {
-        return 'Η αίτησή σας εγκρίθηκε';
+        return $mode === 'starttls';
     }
 
-    public static function approvalEmailHtmlBody(string $link): string
+    private function openConnection(string $mode)
     {
-        $safeLink = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-
-        return
-            '<p>Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.</p>' .
-            '<p>Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.</p>' .
-            '<p><a href="' . $safeLink . '"><strong>Σύνδεσμος Συνδρομής</strong></a></p>' .
-            '<p>Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.</p>';
-    }
-
-    public static function approvalEmailTextBody(): string
-    {
-        return
-            "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-            "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-            "Χρησιμοποίησε τον σύνδεσμο συνδρομής από το HTML email.\n\n" .
-            "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
-    }
-
-    public static function activationCredentialsBody(string $temporaryPassword): string
-    {
-        return
-            "Η πληρωμή της συνδρομής σας ολοκληρώθηκε επιτυχώς και πλέον είστε ενεργό μέλος.\r\n\r\n" .
-            "Αυτός είναι ο κωδικός πρόσβασής σας για είσοδο: {$temporaryPassword}\r\n\r\n" .
-            "Μπορείτε να τον αλλάξετε οποιαδήποτε στιγμή από τη σελίδα Ξέχασα κωδικό (Forgot Password).";
-    }
-
-    private function openConnection()
-    {
-        $transport = ($this->encryption === 'ssl' || $this->encryption === 'smtps' || $this->port === 465)
-            ? 'ssl://'
-            : 'tcp://';
+        $transport = $mode === 'smtps' ? 'ssl://' : 'tcp://';
 
         $context = stream_context_create([
             'ssl' => [
@@ -211,24 +178,6 @@ class ApprovalMailer
             'Subject: ' . $encodedSubject,
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
-            'Content-Transfer-Encoding: 8bit',
-        ];
-
-        return implode("\r\n", $headers) . "\r\n\r\n" . $body;
-    }
-
-    private function buildHtmlMessage(string $toEmail, string $subject, string $body): string
-    {
-        $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-        $encodedFromName = '=?UTF-8?B?' . base64_encode($this->fromName) . '?=';
-
-        $headers = [
-            'Date: ' . date('r'),
-            'From: ' . $encodedFromName . ' <' . $this->fromEmail . '>',
-            'To: <' . $toEmail . '>',
-            'Subject: ' . $encodedSubject,
-            'MIME-Version: 1.0',
-            'Content-Type: text/html; charset=UTF-8',
             'Content-Transfer-Encoding: 8bit',
         ];
 
