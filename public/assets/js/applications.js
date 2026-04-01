@@ -1,8 +1,8 @@
-"use strict";
+﻿"use strict";
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    FORM FIELD TEMPLATES  (keyed by formType)
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const FORM_FIELDS = {
     general: []
 };
@@ -19,18 +19,18 @@ const APP_META = [
 var MAX_SUBMISSION_FILES = 4;
 var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   IN-PAGE APPLIED TRACKING  (resets on page reload — DB is the source of truth)
-───────────────────────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   IN-PAGE APPLIED TRACKING  (resets on page reload â€” DB is the source of truth)
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const _justApplied = new Set(); // appIds submitted during this page session
 
 function isJsApplied(appId) {
     return _justApplied.has(appId);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HELPERS
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function getMeta(index) {
     return APP_META[((index % APP_META.length) + APP_META.length) % APP_META.length];
 }
@@ -117,15 +117,15 @@ function getAppCardById(appId) {
 
 function getAppTitleById(appId) {
     var card = getAppCardById(appId);
-    if (!card) return 'Αίτηση #' + String(appId);
+    if (!card) return 'Î‘Î¯Ï„Î·ÏƒÎ· #' + String(appId);
     var titleEl = card.querySelector('.application-title');
-    return titleEl ? titleEl.textContent.trim() : 'Αίτηση #' + String(appId);
+    return titleEl ? titleEl.textContent.trim() : 'Î‘Î¯Ï„Î·ÏƒÎ· #' + String(appId);
 }
 
 function getDraftStudentInfo(draftData) {
     return {
-        studentName: draftData && draftData.student_name ? draftData.student_name : '—',
-        studentClass: draftData && draftData.class ? draftData.class : '—'
+        studentName: draftData && draftData.student_name ? draftData.student_name : 'â€”',
+        studentClass: draftData && draftData.class ? draftData.class : 'â€”'
     };
 }
 
@@ -142,7 +142,7 @@ function upsertDraftSubmissionRow(appId, draftData) {
 
     var appTitle = getAppTitleById(appId);
     row.innerHTML =
-        '<td><strong>' + escHtml(appTitle) + '</strong><div class="small text-muted mt-1">Πρόχειρο</div></td>' +
+        '<td><strong>' + escHtml(appTitle) + '</strong><div class="small text-muted mt-1">Î ÏÏŒÏ‡ÎµÎ¹ÏÎ¿</div></td>' +
         '<td>' + escHtml(todayLabel()) + '</td>';
 
     toggleSubmissionsVisibility();
@@ -225,15 +225,15 @@ function getApplicationWindowStatus(openDate, closeDate) {
     return 'open';
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    BADGE / TAG HTML BUILDERS
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function cardStatusBadge(status) {
     var map = {
-        open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: 'Ανοιχτή'       },
-        upcoming: { cls: 'app-status-closed',  icon: 'fa-hourglass-half', label: 'Δεν Άνοιξε Ακόμα' },
-        closed:   { cls: 'app-status-closed',  icon: 'fa-lock',       label: 'Κλειστή'       },
-        applied:  { cls: 'app-status-applied', icon: 'fa-check',      label: 'Υποβλήθηκε'    }
+        open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: 'Î‘Î½Î¿Î¹Ï‡Ï„Î®'       },
+        upcoming: { cls: 'app-status-closed',  icon: 'fa-hourglass-half', label: 'Î”ÎµÎ½ Î†Î½Î¿Î¹Î¾Îµ Î‘ÎºÏŒÎ¼Î±' },
+        closed:   { cls: 'app-status-closed',  icon: 'fa-lock',       label: 'ÎšÎ»ÎµÎ¹ÏƒÏ„Î®'       },
+        applied:  { cls: 'app-status-applied', icon: 'fa-check',      label: 'Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ'    }
     };
     var s = map[status] || map.open;
     return '<span class="app-status-badge ' + s.cls + '">' +
@@ -242,19 +242,19 @@ function cardStatusBadge(status) {
 
 function submissionStatusBadge(status) {
     var map = {
-        submitted: { cls: 'sub-submitted', label: 'Υποβλήθηκε'  },
-        waiting:   { cls: 'sub-waiting',   label: 'Υπό Εξέταση' },
-        approved:  { cls: 'sub-approved',  label: 'Εγκρίθηκε'   },
-        rejected:  { cls: 'sub-rejected',  label: 'Απορρίφθηκε' }
+        submitted: { cls: 'sub-submitted', label: 'Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ'  },
+        waiting:   { cls: 'sub-waiting',   label: 'Î¥Ï€ÏŒ Î•Î¾Î­Ï„Î±ÏƒÎ·' },
+        approved:  { cls: 'sub-approved',  label: 'Î•Î³ÎºÏÎ¯Î¸Î·ÎºÎµ'   },
+        rejected:  { cls: 'sub-rejected',  label: 'Î‘Ï€Î¿ÏÏÎ¯Ï†Î¸Î·ÎºÎµ' }
     };
     var s = map[status] || map.submitted;
     return '<span class="sub-status-badge ' + s.cls + '">' + escHtml(s.label) + '</span>';
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   AUGMENT CARDS  – inject status badge, category tag, and date row into every
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   AUGMENT CARDS  â€“ inject status badge, category tag, and date row into every
    PHP-rendered application card using its data-app-index attribute.
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function augmentCards() {
     document.querySelectorAll('.app-card-wrapper').forEach(function (card) {
         var idx        = parseInt(card.dataset.appIndex, 10);
@@ -285,9 +285,9 @@ function augmentCards() {
             datesSlot.innerHTML =
                 '<div class="app-dates-row">' +
                 '<span class="app-date-item"><i class="fas fa-calendar-plus text-success"></i>' +
-                '<small>Άνοιγμα: <strong>' + escHtml(openDate) + '</strong></small></span>' +
+                '<small>Î†Î½Î¿Î¹Î³Î¼Î±: <strong>' + escHtml(openDate) + '</strong></small></span>' +
                 '<span class="app-date-item"><i class="fas fa-calendar-times text-danger"></i>' +
-                '<small>Λήξη: <strong>' + escHtml(closeDate) + '</strong></small></span>' +
+                '<small>Î›Î®Î¾Î·: <strong>' + escHtml(closeDate) + '</strong></small></span>' +
                 '</div>';
         }
 
@@ -298,28 +298,28 @@ function augmentCards() {
         btn.classList.remove('btn-primary', 'btn-success', 'btn-secondary', 'btn-warning');
 
         if (applied) {
-            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Υποβλήθηκε';
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ';
             btn.classList.add('btn-success');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
+            btn.dataset.unavailableReason = 'ÎˆÏ‡ÎµÏ„Îµ Î®Î´Î· Ï…Ï€Î¿Î²Î¬Î»ÎµÎ¹ Î±Ï…Ï„Î® Ï„Î·Î½ Î±Î¯Ï„Î·ÏƒÎ·.';
         } else if (windowStatus === 'upcoming') {
-            btn.innerHTML = '<i class="fas fa-hourglass-start mr-1"></i> Ακόμα δεν άνοιξε';
+            btn.innerHTML = '<i class="fas fa-hourglass-start mr-1"></i> Î‘ÎºÏŒÎ¼Î± Î´ÎµÎ½ Î¬Î½Î¿Î¹Î¾Îµ';
             btn.classList.add('btn-warning');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'Η αίτηση δεν έχει ανοίξει ακόμα.';
+            btn.dataset.unavailableReason = 'Î— Î±Î¯Ï„Î·ÏƒÎ· Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î±Î½Î¿Î¯Î¾ÎµÎ¹ Î±ÎºÏŒÎ¼Î±.';
         } else if (windowStatus === 'closed') {
-            btn.innerHTML = '<i class="fas fa-lock mr-1"></i> Κλειστή';
+            btn.innerHTML = '<i class="fas fa-lock mr-1"></i> ÎšÎ»ÎµÎ¹ÏƒÏ„Î®';
             btn.classList.add('btn-secondary');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'Η περίοδος υποβολής έχει λήξει.';
+            btn.dataset.unavailableReason = 'Î— Ï€ÎµÏÎ¯Î¿Î´Î¿Ï‚ Ï…Ï€Î¿Î²Î¿Î»Î®Ï‚ Î­Ï‡ÎµÎ¹ Î»Î®Î¾ÎµÎ¹.';
         } else {
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή Αίτησης';
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Î¥Ï€Î¿Î²Î¿Î»Î® Î‘Î¯Ï„Î·ÏƒÎ·Ï‚';
             btn.classList.add('btn-primary');
             btn.disabled = false;
             btn.setAttribute('data-toggle', 'modal');
@@ -329,10 +329,10 @@ function augmentCards() {
     });
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    RENDER NEWLY-SUBMITTED ROWS  (rows added this page session, before reload)
    DB-rendered rows are already in the tbody from PHP.
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function addSubmissionRow(sub) {
     var tbody = document.getElementById('submissions-tbody');
     var table = document.getElementById('submissions-table');
@@ -356,9 +356,9 @@ function addSubmissionRow(sub) {
     if (table)  table.style.display  = '';
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    BUILD ONE FORM FIELD
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function buildField(field) {
     var req = field.required
         ? '<span class="text-danger ml-1" aria-hidden="true">*</span>'
@@ -371,7 +371,7 @@ function buildField(field) {
         }).join('');
         control = '<select class="form-control" name="' + field.name + '"' +
                   (field.required ? ' required' : '') + '>' +
-                  '<option value="" disabled selected>Επιλέξτε...</option>' +
+                  '<option value="" disabled selected>Î•Ï€Î¹Î»Î­Î¾Ï„Îµ...</option>' +
                   opts + '</select>';
     } else if (field.type === 'textarea') {
         control = '<textarea class="form-control" name="' + field.name +
@@ -390,19 +390,19 @@ function buildField(field) {
            control + '</div>';
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   SHOW VIEW MODAL  – handles both PHP-rendered DB rows and JS-submitted rows
-───────────────────────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   SHOW VIEW MODAL  â€“ handles both PHP-rendered DB rows and JS-submitted rows
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
     var fields = FORM_FIELDS[submissionDataObj._formType] || FORM_FIELDS.general;
     var rows = fields.map(function (f) {
-        var val = submissionDataObj[f.name] || '—';
+        var val = submissionDataObj[f.name] || 'â€”';
         return '<tr><th class="text-muted font-weight-normal" style="width:45%">' +
                escHtml(f.label) + '</th><td><strong>' + escHtml(val) + '</strong></td></tr>';
     }).join('');
 
-    var submittedLabel = submittedAt || submissionDataObj.applied_at || '—';
-    rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">Ημερομηνία Υποβολής</th><td><strong>' +
+    var submittedLabel = submittedAt || submissionDataObj.applied_at || 'â€”';
+    rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î¥Ï€Î¿Î²Î¿Î»Î®Ï‚</th><td><strong>' +
             escHtml(submittedLabel) + '</strong></td></tr>';
 
     var body = document.getElementById('view-modal-body');
@@ -417,9 +417,9 @@ function showViewModalFromData(appTitle, submissionDataObj, statusKey, submitted
     $('#viewModal').modal('show');
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SHOW SUCCESS TOAST
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function showToast() {
     var toast = document.getElementById('submission-toast');
     if (!toast) return;
@@ -427,15 +427,15 @@ function showToast() {
     setTimeout(function () { toast.style.display = 'none'; }, 4000);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   MODAL STATE  – shared between "show" & "submit" handlers
-───────────────────────────────────────────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   MODAL STATE  â€“ shared between "show" & "submit" handlers
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 var _modal = {};
 var _viewAppId = 0;
 
-/* ─────────────────────────────────────────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    DOM READY
-───────────────────────────────────────────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 document.addEventListener('DOMContentLoaded', function () {
     var bodyScrollLockCount = 0;
 
@@ -509,10 +509,52 @@ document.addEventListener('DOMContentLoaded', function () {
     var viewModalFileInput = document.getElementById('application-view-file-input');
     var viewModalSelectedFiles = document.getElementById('application-view-selected-files');
     var unavailableMessageEl = document.getElementById('application-unavailable-message');
+    var applicationNoticeBox = document.getElementById('application-notice-box');
+    var applicationNoticeBackdrop = document.getElementById('application-notice-backdrop');
+    var applicationNoticeMessage = document.getElementById('application-notice-message');
+    var applicationNoticeClose = document.getElementById('application-notice-close');
+
+    function hideCenterNotice() {
+        if (applicationNoticeBox) {
+            applicationNoticeBox.classList.remove('is-visible');
+        }
+        if (applicationNoticeBackdrop) {
+            applicationNoticeBackdrop.classList.remove('is-visible');
+        }
+    }
+
+    function showCenterNotice(messageText) {
+        if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
+            window.alert(messageText || 'Σφάλμα.');
+            return;
+        }
+
+        applicationNoticeMessage.textContent = messageText || 'Î£Ï†Î¬Î»Î¼Î±.';
+        applicationNoticeBackdrop.classList.add('is-visible');
+        applicationNoticeBox.classList.add('is-visible');
+
+        if (applicationNoticeClose) {
+            applicationNoticeClose.focus();
+        }
+    }
+
+    if (applicationNoticeClose) {
+        applicationNoticeClose.addEventListener('click', hideCenterNotice);
+    }
+
+    if (applicationNoticeBackdrop) {
+        applicationNoticeBackdrop.addEventListener('click', hideCenterNotice);
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && applicationNoticeBox && applicationNoticeBox.classList.contains('is-visible')) {
+            hideCenterNotice();
+        }
+    });
 
     function showUnavailableBox(messageText) {
         if (unavailableMessageEl) {
-            unavailableMessageEl.textContent = messageText || 'Η αίτηση δεν έχει ανοίξει ακόμα.';
+            unavailableMessageEl.textContent = messageText || 'Î— Î±Î¯Ï„Î·ÏƒÎ· Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î±Î½Î¿Î¯Î¾ÎµÎ¹ Î±ÎºÏŒÎ¼Î±.';
         }
         $('#application-unavailable-modal').modal('show');
     }
@@ -543,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         viewModalSelectedFiles.innerHTML = files.map(function (file) {
-            return '<li>' + escHtml(file.name) + '</li>';
+            return '<li><i class="fas fa-file-alt"></i><span>' + escHtml(file.name) + '</span></li>';
         }).join('');
     }
 
@@ -559,8 +601,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var appId = parseInt(card.dataset.appId, 10);
         var appIndex = parseInt(card.dataset.appIndex, 10);
-        var title = card.dataset.applicationTitle || 'Λεπτομέρειες Αίτησης';
-        var description = card.dataset.applicationDescription || 'Δεν υπάρχει διαθέσιμη περιγραφή.';
+        var title = card.dataset.applicationTitle || 'Î›ÎµÏ€Ï„Î¿Î¼Î­ÏÎµÎ¹ÎµÏ‚ Î‘Î¯Ï„Î·ÏƒÎ·Ï‚';
+        var description = card.dataset.applicationDescription || 'Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡ÎµÎ¹ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î· Ï€ÎµÏÎ¹Î³ÏÎ±Ï†Î®.';
         var docsRaw = card.dataset.applicationDocuments || '[]';
         var docs = [];
 
@@ -592,12 +634,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (viewModalAttachments) {
             if (docs.length === 0) {
-                viewModalAttachments.innerHTML = '<li class="text-muted">Δεν υπάρχουν συνημμένα έγγραφα.</li>';
+                viewModalAttachments.innerHTML = '<li class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î± Î­Î³Î³ÏÎ±Ï†Î±.</li>';
             } else {
                 viewModalAttachments.innerHTML = docs.map(function (doc) {
                     var rawPath = doc && doc.file_path ? doc.file_path : '';
                     var url = normalizeDocPath(rawPath);
-                    var name = rawPath ? rawPath.split('/').pop() : 'Έγγραφο';
+                    var name = rawPath ? rawPath.split('/').pop() : 'ÎˆÎ³Î³ÏÎ±Ï†Î¿';
                     return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
                 }).join('');
             }
@@ -640,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function () {
         viewModalFileInput.addEventListener('change', function () {
             var selectedFiles = Array.from(viewModalFileInput.files || []);
             if (selectedFiles.length > MAX_SUBMISSION_FILES) {
-                alert('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
+                showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
                 viewModalFileInput.value = '';
             }
 
@@ -662,8 +704,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!_modal.appId) return;
 
             var files = viewModalFileInput ? Array.from(viewModalFileInput.files || []) : [];
+            if (files.length === 0) {
+                showCenterNotice('Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.');
+                return;
+            }
             if (files.length > MAX_SUBMISSION_FILES) {
-                alert('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
+                showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
                 return;
             }
 
@@ -671,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var fileName = String(files[i].name || '');
                 var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
                 if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
-                    alert('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
+                    showCenterNotice('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
                     return;
                 }
             }
@@ -711,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
 
                 if (!json.success) {
-                    alert(json.message || 'Σφάλμα.');
+                    showCenterNotice(json.message || 'Σφάλμα.');
                     return;
                 }
 
@@ -735,12 +781,12 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(function () {
                 viewModalSubmitBtn.disabled = false;
                 viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
-                alert('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
+                showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
             });
         });
     }
 
-    /* ── Open modal: populate header + dynamic fields ─────────────────── */
+    /* â”€â”€ Open modal: populate header + dynamic fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     $('#submitModal').on('show.bs.modal', function (event) {
         var btn      = $(event.relatedTarget);
         var appId    = parseInt(btn.data('application-id'), 10);
@@ -766,15 +812,15 @@ document.addEventListener('DOMContentLoaded', function () {
         // Dynamic form fields
         var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
         var container = document.getElementById('modal-dynamic-fields');
-        // Προσθέτουμε το input αρχείου μέσα στη φόρμα
+        // Î ÏÎ¿ÏƒÎ¸Î­Ï„Î¿Ï…Î¼Îµ Ï„Î¿ input Î±ÏÏ‡ÎµÎ¯Î¿Ï… Î¼Î­ÏƒÎ± ÏƒÏ„Î· Ï†ÏŒÏÎ¼Î±
         container.innerHTML =
             '<form id="application-form" enctype="multipart/form-data">' +
             fields.map(buildField).join('') +
             '<div class="form-group mt-3 mb-0">' +
             '<label class="form-label-custom mb-2">' +
-            '<i class="fas fa-paperclip text-primary mr-1"></i>Προαιρετικό αρχείο υποβολής</label>' +
+            '<i class="fas fa-paperclip text-primary mr-1"></i>Î ÏÎ¿Î±Î¹ÏÎµÏ„Î¹ÎºÏŒ Î±ÏÏ‡ÎµÎ¯Î¿ Ï…Ï€Î¿Î²Î¿Î»Î®Ï‚</label>' +
             '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
-            '<small class="text-muted d-block mt-1">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png.</small>' +
+            '<small class="text-muted d-block mt-1">Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹: pdf, doc, docx, jpg, jpeg, png.</small>' +
             '</div>' +
             '</form>';
 
@@ -786,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    /* ── Clear form on modal close ─────────────────────────────────────── */
+    /* â”€â”€ Clear form on modal close â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     $('#submitModal').on('hidden.bs.modal', function () {
         var container = document.getElementById('modal-dynamic-fields');
         if (container) container.innerHTML = '';
@@ -795,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function () {
         _modal = {};
     });
 
-    /* ── Submit button: POST to PHP via fetch() ───────────────────────── */
+    /* â”€â”€ Submit button: POST to PHP via fetch() â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     document.getElementById('modal-submit-btn').addEventListener('click', function () {
         var form = document.getElementById('application-form');
         if (!form) return;
@@ -843,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';
 
             if (!json.success) {
-                alert(json.message || 'Σφάλμα.');
+                showCenterNotice(json.message || 'Σφάλμα.');
                 return;
             }
 
@@ -861,15 +907,15 @@ document.addEventListener('DOMContentLoaded', function () {
             addSubmissionRow({
                 appId:        _modal.appId,
                 appTitle:     _modal.appTitle,
-                studentName:  data.student_name  || '—',
-                studentClass: data.class         || '—',
+                studentName:  data.student_name  || 'â€”',
+                studentClass: data.class         || 'â€”',
                 submittedDate: new Date().toLocaleDateString('el-GR')
             });
         })
         .catch(function (err) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';
-            alert('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
+            showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
         });
     });
 
@@ -878,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveDraftBtn.addEventListener('click', function () {
             var form = document.getElementById('application-form');
             if (!form || !_modal.appId) {
-                alert('Δεν υπάρχει ενεργή αίτηση για αποθήκευση πρόχειρου.');
+                showCenterNotice('Δεν υπάρχει ενεργή αίτηση για αποθήκευση πρόχειρου.');
                 return;
             }
 
@@ -892,18 +938,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (saveDraft(_modal.appId, data)) {
                 upsertDraftSubmissionRow(_modal.appId, data);
-                alert('Το πρόχειρο αποθηκεύτηκε. Μπορείτε να συνεχίσετε αργότερα.');
+                showCenterNotice('Το πρόχειρο αποθηκεύτηκε. Μπορείτε να συνεχίσετε αργότερα.');
             } else {
-                alert('Δεν ήταν δυνατή η αποθήκευση πρόχειρου σε αυτή τη συσκευή.');
+                showCenterNotice('Δεν ήταν δυνατή η αποθήκευση πρόχειρου σε αυτή τη συσκευή.');
             }
         });
     }
 
-    /* ── View submission details (event delegation on tbody) ──────────── */
+    /* â”€â”€ View submission details (event delegation on tbody) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     var tbody = document.getElementById('submissions-tbody');
     if (tbody) {
         tbody.addEventListener('click', function (e) {
-            // JS-submitted rows (view-js-submission class — kept for compat)
+            // JS-submitted rows (view-js-submission class â€” kept for compat)
             var jsBtn = e.target.closest('.view-js-submission');
             if (jsBtn) {
                 var subId = parseInt(jsBtn.dataset.subId, 10);
@@ -922,7 +968,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     var parsed = JSON.parse(raw);
                     showViewModalFromData(title, parsed, status, submittedAt);
                 } catch (err) {
-                    alert('Δεν είναι δυνατή η εμφάνιση λεπτομερειών.');
+                    showCenterNotice('Δεν είναι δυνατή η εμφάνιση λεπτομερειών.');
                 }
             }
 
@@ -933,7 +979,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var submitBtn = document.querySelector('#app-card-' + appId + ' .submit-btn');
                 if (!submitBtn || submitBtn.disabled) {
-                    alert('Δεν είναι δυνατή η συνέχεια αυτής της αίτησης.');
+                    showCenterNotice('Δεν είναι δυνατή η συνέχεια αυτής της αίτησης.');
                     return;
                 }
 
@@ -942,3 +988,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+

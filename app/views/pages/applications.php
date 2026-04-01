@@ -94,6 +94,15 @@ function normalizeUploadedSubmissionFiles(array $files): array {
     return $normalized;
 }
 
+function getUploadedSubmissionDisplayName(string $fileName): string {
+    $fileName = trim($fileName);
+    if ($fileName === '') {
+        return '';
+    }
+
+    return basename(str_replace('\\', '/', $fileName));
+}
+
 // Προσωρινό parent id μέχρι να συνδεθεί το πραγματικό auth flow.
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
 
@@ -146,6 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             $incomingFiles = array_merge($incomingFiles, normalizeUploadedSubmissionFiles((array)$_FILES['submission_file']));
         }
 
+        if (count($incomingFiles) === 0) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Παρακαλώ ανεβάστε τουλάχιστον ένα αρχείο για την υποβολή της αίτησης.']);
+            exit;
+        }
+
         if (count($incomingFiles) > $maxSubmissionFiles) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
@@ -155,6 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
 
         $uploadedDbPaths = [];
         $uploadedAbsPaths = [];
+        $uploadedOriginalNames = [];
 
         foreach ($incomingFiles as $file) {
             $fileError = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
@@ -192,6 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
             $uploadedAbsPath = $uploadDir . $newFileName;
             $uploadedDbPath = 'storage/uploads/submissions/' . $newFileName;
+            $originalDisplayName = getUploadedSubmissionDisplayName((string)($file['name'] ?? ''));
 
             if (!move_uploaded_file((string)($file['tmp_name'] ?? ''), $uploadedAbsPath)) {
                 foreach ($uploadedAbsPaths as $path) {
@@ -208,10 +226,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
 
             $uploadedAbsPaths[] = $uploadedAbsPath;
             $uploadedDbPaths[] = $uploadedDbPath;
+            $uploadedOriginalNames[$uploadedDbPath] = $originalDisplayName !== '' ? $originalDisplayName : basename($uploadedDbPath);
         }
 
         if (!empty($uploadedDbPaths)) {
             $decoded['_uploaded_files'] = $uploadedDbPaths;
+            $decoded['_uploaded_file_names'] = $uploadedOriginalNames;
         }
 
         $submissionPayloadJson = json_encode($decoded, JSON_UNESCAPED_UNICODE);
@@ -236,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             echo json_encode([
                 'success' => true,
                 'message' => 'Η αίτηση υποβλήθηκε επιτυχώς.',
-                'uploaded_files' => array_map('basename', $uploadedDbPaths),
+                'uploaded_files' => array_values($uploadedOriginalNames),
             ]);
         } else {
             foreach ($uploadedAbsPaths as $path) {
@@ -552,63 +572,135 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             background: #ffffff;
             border: 1px solid #dce9f8;
             border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 14px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
         }
 
         .application-view-files-panel h6 {
             color: #1f4f8f;
             font-weight: 700;
+            margin-bottom: 12px;
         }
 
         #application-view-attachments-list {
+            list-style: none;
             margin-bottom: 0;
-            padding-left: 18px;
+            padding-left: 0;
         }
 
         #application-view-attachments-list li {
-            margin-bottom: 6px;
-            line-height: 1.25;
+            margin-bottom: 10px;
+            line-height: 1.35;
+            background: #f7fbff;
+            border: 1px solid #d8e7f8;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        #application-view-attachments-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        #application-view-attachments-list a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #18395f;
+            font-weight: 600;
         }
 
         #application-view-upload {
             background: #ffffff;
             border: 1px solid #dce9f8;
             border-radius: 12px;
-            padding: 12px 14px;
+            padding: 16px 18px;
+            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
         }
 
         #application-view-upload .upload-title {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 9px;
             font-weight: 700;
             color: #1f4f8f;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        #application-view-upload .upload-title i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .application-view-upload-note {
+            display: block;
+            margin-top: 10px;
+            color: #60758e !important;
+            font-size: 0.92rem;
+        }
+
+        .application-view-upload-note strong {
+            color: #304c6f;
         }
 
         #application-view-file-input {
             border: 1px solid #b9d1ef;
-            background: #f6faff;
+            background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
+            border-radius: 10px;
+            min-height: 46px;
+            padding: 6px 8px;
+            color: #223d60;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
         }
 
         #application-view-file-input::file-selector-button,
         #application-view-file-input::-webkit-file-upload-button {
             border: 0;
-            background: #2b76cc;
+            background: linear-gradient(135deg, #2c73c8 0%, #1d5faa 100%);
             color: #ffffff;
-            padding: 0.36rem 0.62rem;
-            margin-right: 0.6rem;
-            border-radius: 6px;
+            padding: 0.42rem 0.75rem;
+            margin-right: 0.65rem;
+            border-radius: 7px;
             cursor: pointer;
+            font-size: 0.92rem;
+            line-height: 1.1;
+            font-weight: 700;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
 
         #application-view-selected-files {
-            margin-top: 8px;
+            list-style: none;
+            margin-top: 14px;
             margin-bottom: 0;
-            padding-left: 18px;
+            padding-left: 0;
             color: #2b4462;
             font-size: 0.9rem;
+        }
+
+        #application-view-selected-files:empty {
+            display: none;
+        }
+
+        #application-view-selected-files li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 9px 12px;
+            background: #f7fbff;
+            border: 1px solid #d8e7f8;
+            border-radius: 10px;
+            color: #24476d;
+            font-weight: 600;
+        }
+
+        #application-view-selected-files li:last-child {
+            margin-bottom: 0;
+        }
+
+        #application-view-selected-files li i {
+            color: #2b76cc;
         }
 
         #submitModal .modal-dialog {
@@ -626,6 +718,75 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
 
         #submitModal .modal-title {
             color: #ffffff;
+        }
+
+        #application-notice-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1085;
+            width: min(360px, calc(100vw - 32px));
+            display: none;
+            padding: 0;
+            background: transparent !important;
+            border: 0;
+            box-shadow: none !important;
+            outline: none;
+        }
+
+        #application-notice-box.is-visible {
+            display: block;
+        }
+
+        .application-notice-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 31, 52, 0.28);
+            z-index: 1084;
+            display: none;
+        }
+
+        .application-notice-backdrop.is-visible {
+            display: block;
+        }
+
+        .application-notice-card {
+            background: linear-gradient(180deg, #f7fbff 0%, #e6f1ff 100%);
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 18px 44px rgba(18, 41, 70, 0.22);
+            overflow: hidden;
+            background-clip: padding-box;
+        }
+
+        .application-notice-header {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.98rem;
+        }
+
+        .application-notice-body {
+            padding: 16px;
+            color: #284566;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            background: transparent;
+        }
+
+        .application-notice-footer {
+            padding: 0 16px 16px;
+            display: flex;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .application-notice-btn {
+            min-width: 96px;
+            border-radius: 9px;
+            font-weight: 700;
         }
 
         #submitModal .modal-header .close {
@@ -842,6 +1003,16 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     }
 
                                     $submissionFiles = [];
+                                    $uploadedFileNames = [];
+                                    if (!empty($formData['_uploaded_file_names']) && is_array($formData['_uploaded_file_names'])) {
+                                        foreach ($formData['_uploaded_file_names'] as $storedPath => $displayName) {
+                                            $storedPath = (string)$storedPath;
+                                            $displayName = getUploadedSubmissionDisplayName((string)$displayName);
+                                            if ($storedPath !== '' && $displayName !== '') {
+                                                $uploadedFileNames[$storedPath] = $displayName;
+                                            }
+                                        }
+                                    }
                                     $legacyFilePath = (string)($submission['file_path'] ?? '');
                                     if ($legacyFilePath !== '') {
                                         $submissionFiles[] = $legacyFilePath;
@@ -868,7 +1039,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                                 <div class="mt-2">
                                                     <?php foreach ($submissionFiles as $submissionFilePath): ?>
                                                         <a href="<?php echo htmlspecialchars(site_resolve_content_url($submissionFilePath)); ?>" target="_blank" class="d-block small font-weight-semibold text-primary mb-1">
-                                                            <i class="fas fa-download mr-1"></i><?php echo htmlspecialchars(basename($submissionFilePath)); ?>
+                                                            <i class="fas fa-download mr-1"></i><?php echo htmlspecialchars($uploadedFileNames[$submissionFilePath] ?? basename($submissionFilePath)); ?>
                                                         </a>
                                                     <?php endforeach; ?>
                                                 </div>
@@ -913,7 +1084,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         multiple
                     >
-                    <small class="text-muted d-block mt-2">Επιτρεπόμενοι τύποι: pdf, doc, docx, jpg, jpeg, png.</small>
+                    <small class="application-view-upload-note">Απαιτείται τουλάχιστον 1 αρχείο. Επιτρεπόμενοι τύποι: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.</small>
                     <ul id="application-view-selected-files"></ul>
                 </div>
             </div>
@@ -998,6 +1169,17 @@ include __DIR__ . '/../../includes/public_page_header.php';
 <div id="submission-toast" class="position-fixed" style="bottom:1.5rem;right:1.5rem;z-index:9999;display:none;">
     <div class="alert alert-success shadow py-3 px-4 mb-0">
         <i class="fas fa-check-circle mr-2"></i> Η αίτησή σας υποβλήθηκε επιτυχώς!
+    </div>
+</div>
+
+<div id="application-notice-backdrop" class="application-notice-backdrop"></div>
+<div id="application-notice-box" role="alertdialog" aria-modal="true" aria-labelledby="application-notice-title">
+    <div class="application-notice-card">
+        <div class="application-notice-header" id="application-notice-title">Ειδοποίηση</div>
+        <div class="application-notice-body" id="application-notice-message">—</div>
+        <div class="application-notice-footer">
+            <button type="button" class="btn btn-primary application-notice-btn" id="application-notice-close">OK</button>
+        </div>
     </div>
 </div>
 
