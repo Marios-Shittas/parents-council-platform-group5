@@ -117,9 +117,9 @@ function getAppCardById(appId) {
 
 function getAppTitleById(appId) {
     var card = getAppCardById(appId);
-    if (!card) return 'Î‘Î¯Ï„Î·ÏƒÎ· #' + String(appId);
+    if (!card) return '\u0391\u03af\u03c4\u03b7\u03c3\u03b7 #' + String(appId);
     var titleEl = card.querySelector('.application-title');
-    return titleEl ? titleEl.textContent.trim() : 'Î‘Î¯Ï„Î·ÏƒÎ· #' + String(appId);
+    return titleEl ? titleEl.textContent.trim() : '\u0391\u03af\u03c4\u03b7\u03c3\u03b7 #' + String(appId);
 }
 
 function getDraftStudentInfo(draftData) {
@@ -142,7 +142,7 @@ function upsertDraftSubmissionRow(appId, draftData) {
 
     var appTitle = getAppTitleById(appId);
     row.innerHTML =
-        '<td><strong>' + escHtml(appTitle) + '</strong><div class="small text-muted mt-1">Î ÏÏŒÏ‡ÎµÎ¹ÏÎ¿</div></td>' +
+        '<td><strong>' + escHtml(appTitle) + '</strong><div class="small text-muted mt-1">\u03a0\u03c1\u03cc\u03c7\u03b5\u03b9\u03c1\u03bf</div></td>' +
         '<td>' + escHtml(todayLabel()) + '</td>';
 
     toggleSubmissionsVisibility();
@@ -230,10 +230,10 @@ function getApplicationWindowStatus(openDate, closeDate) {
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function cardStatusBadge(status) {
     var map = {
-        open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: 'Î‘Î½Î¿Î¹Ï‡Ï„Î®'       },
-        upcoming: { cls: 'app-status-closed',  icon: 'fa-hourglass-half', label: 'Î”ÎµÎ½ Î†Î½Î¿Î¹Î¾Îµ Î‘ÎºÏŒÎ¼Î±' },
-        closed:   { cls: 'app-status-closed',  icon: 'fa-lock',       label: 'ÎšÎ»ÎµÎ¹ÏƒÏ„Î®'       },
-        applied:  { cls: 'app-status-applied', icon: 'fa-check',      label: 'Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ'    }
+        open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: '\u0391\u03bd\u03bf\u03b9\u03c7\u03c4\u03ae' },
+        upcoming: { cls: 'app-status-closed',  icon: 'fa-hourglass-half', label: '\u0394\u03b5\u03bd \u0386\u03bd\u03bf\u03b9\u03be\u03b5 \u0391\u03ba\u03cc\u03bc\u03b1' },
+        closed:   { cls: 'app-status-closed',  icon: 'fa-lock',       label: '\u039a\u03bb\u03b5\u03b9\u03c3\u03c4\u03ae' },
+        applied:  { cls: 'app-status-applied', icon: 'fa-check',      label: '\u03a5\u03c0\u03bf\u03b2\u03bb\u03ae\u03b8\u03b7\u03ba\u03b5' }
     };
     var s = map[status] || map.open;
     return '<span class="app-status-badge ' + s.cls + '">' +
@@ -242,10 +242,10 @@ function cardStatusBadge(status) {
 
 function submissionStatusBadge(status) {
     var map = {
-        submitted: { cls: 'sub-submitted', label: 'Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ'  },
-        waiting:   { cls: 'sub-waiting',   label: 'Î¥Ï€ÏŒ Î•Î¾Î­Ï„Î±ÏƒÎ·' },
-        approved:  { cls: 'sub-approved',  label: 'Î•Î³ÎºÏÎ¯Î¸Î·ÎºÎµ'   },
-        rejected:  { cls: 'sub-rejected',  label: 'Î‘Ï€Î¿ÏÏÎ¯Ï†Î¸Î·ÎºÎµ' }
+        submitted: { cls: 'sub-submitted', label: '\u03a5\u03c0\u03bf\u03b2\u03bb\u03ae\u03b8\u03b7\u03ba\u03b5' },
+        waiting:   { cls: 'sub-waiting',   label: '\u03a5\u03c0\u03cc \u0395\u03be\u03ad\u03c4\u03b1\u03c3\u03b7' },
+        approved:  { cls: 'sub-approved',  label: '\u0395\u03b3\u03ba\u03c1\u03af\u03b8\u03b7\u03ba\u03b5' },
+        rejected:  { cls: 'sub-rejected',  label: '\u0391\u03c0\u03bf\u03c1\u03c1\u03af\u03c6\u03b8\u03b7\u03ba\u03b5' }
     };
     var s = map[status] || map.submitted;
     return '<span class="sub-status-badge ' + s.cls + '">' + escHtml(s.label) + '</span>';
@@ -285,9 +285,9 @@ function augmentCards() {
             datesSlot.innerHTML =
                 '<div class="app-dates-row">' +
                 '<span class="app-date-item"><i class="fas fa-calendar-plus text-success"></i>' +
-                '<small>Î†Î½Î¿Î¹Î³Î¼Î±: <strong>' + escHtml(openDate) + '</strong></small></span>' +
+                '<small>\u0386\u03bd\u03bf\u03b9\u03b3\u03bc\u03b1: <strong>' + escHtml(openDate) + '</strong></small></span>' +
                 '<span class="app-date-item"><i class="fas fa-calendar-times text-danger"></i>' +
-                '<small>Î›Î®Î¾Î·: <strong>' + escHtml(closeDate) + '</strong></small></span>' +
+                '<small>\u039b\u03ae\u03be\u03b7: <strong>' + escHtml(closeDate) + '</strong></small></span>' +
                 '</div>';
         }
 
@@ -298,28 +298,28 @@ function augmentCards() {
         btn.classList.remove('btn-primary', 'btn-success', 'btn-secondary', 'btn-warning');
 
         if (applied) {
-            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Î¥Ï€Î¿Î²Î»Î®Î¸Î·ÎºÎµ';
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> \u03a5\u03c0\u03bf\u03b2\u03bb\u03ae\u03b8\u03b7\u03ba\u03b5';
             btn.classList.add('btn-success');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'ÎˆÏ‡ÎµÏ„Îµ Î®Î´Î· Ï…Ï€Î¿Î²Î¬Î»ÎµÎ¹ Î±Ï…Ï„Î® Ï„Î·Î½ Î±Î¯Ï„Î·ÏƒÎ·.';
+            btn.dataset.unavailableReason = '\u0388\u03c7\u03b5\u03c4\u03b5 \u03ae\u03b4\u03b7 \u03c5\u03c0\u03bf\u03b2\u03ac\u03bb\u03b5\u03b9 \u03b1\u03c5\u03c4\u03ae \u03c4\u03b7\u03bd \u03b1\u03af\u03c4\u03b7\u03c3\u03b7.';
         } else if (windowStatus === 'upcoming') {
-            btn.innerHTML = '<i class="fas fa-hourglass-start mr-1"></i> Î‘ÎºÏŒÎ¼Î± Î´ÎµÎ½ Î¬Î½Î¿Î¹Î¾Îµ';
+            btn.innerHTML = '<i class="fas fa-hourglass-start mr-1"></i> \u0391\u03ba\u03cc\u03bc\u03b1 \u03b4\u03b5\u03bd \u03ac\u03bd\u03bf\u03b9\u03be\u03b5';
             btn.classList.add('btn-warning');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'Î— Î±Î¯Ï„Î·ÏƒÎ· Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î±Î½Î¿Î¯Î¾ÎµÎ¹ Î±ÎºÏŒÎ¼Î±.';
+            btn.dataset.unavailableReason = '\u0397 \u03b1\u03af\u03c4\u03b7\u03c3\u03b7 \u03b4\u03b5\u03bd \u03ad\u03c7\u03b5\u03b9 \u03b1\u03bd\u03bf\u03af\u03be\u03b5\u03b9 \u03b1\u03ba\u03cc\u03bc\u03b1.';
         } else if (windowStatus === 'closed') {
-            btn.innerHTML = '<i class="fas fa-lock mr-1"></i> ÎšÎ»ÎµÎ¹ÏƒÏ„Î®';
+            btn.innerHTML = '<i class="fas fa-lock mr-1"></i> \u039a\u03bb\u03b5\u03b9\u03c3\u03c4\u03ae';
             btn.classList.add('btn-secondary');
             btn.disabled = true;
             btn.removeAttribute('data-toggle');
             btn.removeAttribute('data-target');
-            btn.dataset.unavailableReason = 'Î— Ï€ÎµÏÎ¯Î¿Î´Î¿Ï‚ Ï…Ï€Î¿Î²Î¿Î»Î®Ï‚ Î­Ï‡ÎµÎ¹ Î»Î®Î¾ÎµÎ¹.';
+            btn.dataset.unavailableReason = '\u0397 \u03c0\u03b5\u03c1\u03af\u03bf\u03b4\u03bf\u03c2 \u03c5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2 \u03ad\u03c7\u03b5\u03b9 \u03bb\u03ae\u03be\u03b5\u03b9.';
         } else {
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Î¥Ï€Î¿Î²Î¿Î»Î® Î‘Î¯Ï„Î·ÏƒÎ·Ï‚';
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> \u03a5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae \u0391\u03af\u03c4\u03b7\u03c3\u03b7\u03c2';
             btn.classList.add('btn-primary');
             btn.disabled = false;
             btn.setAttribute('data-toggle', 'modal');
@@ -341,8 +341,13 @@ function addSubmissionRow(sub) {
     if (!tbody) return;
 
     var uploadedFiles = Array.isArray(sub.uploadedFiles) ? sub.uploadedFiles : [];
-    var filesHtml = uploadedFiles.map(function (fileName) {
-        return '<div class="small text-primary mt-1"><i class="fas fa-paperclip mr-1"></i>' + escHtml(fileName) + '</div>';
+    var filesHtml = uploadedFiles.map(function (fileItem) {
+        if (fileItem && typeof fileItem === 'object' && fileItem.url) {
+            var itemName = fileItem.name ? String(fileItem.name) : 'Αρχείο';
+            return '<a href="' + escHtml(String(fileItem.url)) + '" target="_blank" rel="noopener noreferrer" class="submission-file-link d-block small mt-1"><i class="fas fa-paperclip mr-1"></i>' + escHtml(itemName) + '</a>';
+        }
+
+        return '<div class="submission-file-link d-block small mt-1"><i class="fas fa-paperclip mr-1"></i>' + escHtml(String(fileItem || '')) + '</div>';
     }).join('');
 
     var tr = document.createElement('tr');
@@ -371,7 +376,7 @@ function buildField(field) {
         }).join('');
         control = '<select class="form-control" name="' + field.name + '"' +
                   (field.required ? ' required' : '') + '>' +
-                  '<option value="" disabled selected>Î•Ï€Î¹Î»Î­Î¾Ï„Îµ...</option>' +
+                  '<option value="" disabled selected>\u0395\u03c0\u03b9\u03bb\u03ad\u03be\u03c4\u03b5...</option>' +
                   opts + '</select>';
     } else if (field.type === 'textarea') {
         control = '<textarea class="form-control" name="' + field.name +
@@ -402,7 +407,7 @@ function showViewModalFromData(appTitle, submissionDataObj, statusKey, submitted
     }).join('');
 
     var submittedLabel = submittedAt || submissionDataObj.applied_at || 'â€”';
-    rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î¥Ï€Î¿Î²Î¿Î»Î®Ï‚</th><td><strong>' +
+    rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">\u0397\u03bc\u03b5\u03c1\u03bf\u03bc\u03b7\u03bd\u03af\u03b1 \u03a5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</th><td><strong>' +
             escHtml(submittedLabel) + '</strong></td></tr>';
 
     var body = document.getElementById('view-modal-body');
@@ -529,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        applicationNoticeMessage.textContent = messageText || 'Î£Ï†Î¬Î»Î¼Î±.';
+        applicationNoticeMessage.textContent = messageText || 'Σφάλμα.';
         applicationNoticeBackdrop.classList.add('is-visible');
         applicationNoticeBox.classList.add('is-visible');
 
@@ -554,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function showUnavailableBox(messageText) {
         if (unavailableMessageEl) {
-            unavailableMessageEl.textContent = messageText || 'Î— Î±Î¯Ï„Î·ÏƒÎ· Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î±Î½Î¿Î¯Î¾ÎµÎ¹ Î±ÎºÏŒÎ¼Î±.';
+            unavailableMessageEl.textContent = messageText || '\u0397 \u03b1\u03af\u03c4\u03b7\u03c3\u03b7 \u03b4\u03b5\u03bd \u03ad\u03c7\u03b5\u03b9 \u03b1\u03bd\u03bf\u03af\u03be\u03b5\u03b9 \u03b1\u03ba\u03cc\u03bc\u03b1.';
         }
         $('#application-unavailable-modal').modal('show');
     }
@@ -601,8 +606,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var appId = parseInt(card.dataset.appId, 10);
         var appIndex = parseInt(card.dataset.appIndex, 10);
-        var title = card.dataset.applicationTitle || 'Î›ÎµÏ€Ï„Î¿Î¼Î­ÏÎµÎ¹ÎµÏ‚ Î‘Î¯Ï„Î·ÏƒÎ·Ï‚';
-        var description = card.dataset.applicationDescription || 'Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡ÎµÎ¹ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î· Ï€ÎµÏÎ¹Î³ÏÎ±Ï†Î®.';
+        var title = card.dataset.applicationTitle || '\u039b\u03b5\u03c0\u03c4\u03bf\u03bc\u03ad\u03c1\u03b5\u03b9\u03b5\u03c2 \u0391\u03af\u03c4\u03b7\u03c3\u03b7\u03c2';
+        var description = card.dataset.applicationDescription || '\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03b5\u03b9 \u03b4\u03b9\u03b1\u03b8\u03ad\u03c3\u03b9\u03bc\u03b7 \u03c0\u03b5\u03c1\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae.';
         var docsRaw = card.dataset.applicationDocuments || '[]';
         var docs = [];
 
@@ -634,12 +639,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (viewModalAttachments) {
             if (docs.length === 0) {
-                viewModalAttachments.innerHTML = '<li class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î± Î­Î³Î³ÏÎ±Ï†Î±.</li>';
+                viewModalAttachments.innerHTML = '<li class="text-muted">\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03bf\u03c5\u03bd \u03c3\u03c5\u03bd\u03b7\u03bc\u03bc\u03ad\u03bd\u03b1 \u03ad\u03b3\u03b3\u03c1\u03b1\u03c6\u03b1.</li>';
             } else {
                 viewModalAttachments.innerHTML = docs.map(function (doc) {
                     var rawPath = doc && doc.file_path ? doc.file_path : '';
                     var url = normalizeDocPath(rawPath);
-                    var name = rawPath ? rawPath.split('/').pop() : 'ÎˆÎ³Î³ÏÎ±Ï†Î¿';
+                    var name = rawPath ? rawPath.split('/').pop() : '\u0388\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf';
                     return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
                 }).join('');
             }
@@ -773,8 +778,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     appId: _modal.appId,
                     appTitle: _modal.appTitle,
                     submittedDate: new Date().toLocaleDateString('el-GR'),
-                    uploadedFiles: Array.isArray(json.uploaded_files) ? json.uploaded_files : files.map(function (file) {
-                        return String(file.name || '');
+                    uploadedFiles: Array.isArray(json.uploaded_file_links) ? json.uploaded_file_links : files.map(function (file) {
+                        return {
+                            name: String(file.name || ''),
+                            url: ''
+                        };
                     })
                 });
             })
@@ -812,15 +820,15 @@ document.addEventListener('DOMContentLoaded', function () {
         // Dynamic form fields
         var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
         var container = document.getElementById('modal-dynamic-fields');
-        // Î ÏÎ¿ÏƒÎ¸Î­Ï„Î¿Ï…Î¼Îµ Ï„Î¿ input Î±ÏÏ‡ÎµÎ¯Î¿Ï… Î¼Î­ÏƒÎ± ÏƒÏ„Î· Ï†ÏŒÏÎ¼Î±
+        // Add the file input inside the form.
         container.innerHTML =
             '<form id="application-form" enctype="multipart/form-data">' +
             fields.map(buildField).join('') +
             '<div class="form-group mt-3 mb-0">' +
             '<label class="form-label-custom mb-2">' +
-            '<i class="fas fa-paperclip text-primary mr-1"></i>Î ÏÎ¿Î±Î¹ÏÎµÏ„Î¹ÎºÏŒ Î±ÏÏ‡ÎµÎ¯Î¿ Ï…Ï€Î¿Î²Î¿Î»Î®Ï‚</label>' +
+            '<i class="fas fa-paperclip text-primary mr-1"></i>\u03a0\u03c1\u03bf\u03b1\u03b9\u03c1\u03b5\u03c4\u03b9\u03ba\u03cc \u03b1\u03c1\u03c7\u03b5\u03af\u03bf \u03c5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</label>' +
             '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
-            '<small class="text-muted d-block mt-1">Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹: pdf, doc, docx, jpg, jpeg, png.</small>' +
+            '<small class="text-muted d-block mt-1">\u0395\u03c0\u03b9\u03c4\u03c1\u03b5\u03c0\u03cc\u03bc\u03b5\u03bd\u03bf\u03b9 \u03c4\u03cd\u03c0\u03bf\u03b9: pdf, doc, docx, jpg, jpeg, png.</small>' +
             '</div>' +
             '</form>';
 

@@ -253,10 +253,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
         if ($applicationsService->createSubmissionWithDataAndFile($application_id, $user_id, $submissionPayloadJson, $primaryUploadedDbPath)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
+            $uploadedFileLinks = [];
+            foreach ($uploadedDbPaths as $uploadedDbPath) {
+                $uploadedFileLinks[] = [
+                    'name' => $uploadedOriginalNames[$uploadedDbPath] ?? basename($uploadedDbPath),
+                    'url' => site_resolve_content_url($uploadedDbPath),
+                ];
+            }
             echo json_encode([
                 'success' => true,
                 'message' => 'Η αίτηση υποβλήθηκε επιτυχώς.',
                 'uploaded_files' => array_values($uploadedOriginalNames),
+                'uploaded_file_links' => $uploadedFileLinks,
             ]);
         } else {
             foreach ($uploadedAbsPaths as $path) {
@@ -1038,7 +1046,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                             <?php if (!empty($submissionFiles)): ?>
                                                 <div class="mt-2">
                                                     <?php foreach ($submissionFiles as $submissionFilePath): ?>
-                                                        <a href="<?php echo htmlspecialchars(site_resolve_content_url($submissionFilePath)); ?>" target="_blank" class="d-block small font-weight-semibold text-primary mb-1">
+                                                        <a href="<?php echo htmlspecialchars(site_resolve_content_url($submissionFilePath)); ?>" target="_blank" rel="noopener noreferrer" class="submission-file-link d-block small mb-1">
                                                             <i class="fas fa-download mr-1"></i><?php echo htmlspecialchars($uploadedFileNames[$submissionFilePath] ?? basename($submissionFilePath)); ?>
                                                         </a>
                                                     <?php endforeach; ?>

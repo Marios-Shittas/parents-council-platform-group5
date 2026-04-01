@@ -761,10 +761,10 @@ if ($selectedApplicationId > 0) {
                                         <td><span class="badge bg-light text-dark border"><?php echo $submissionTotal; ?></span></td>
                                         <td><span class="text-muted"><?php echo htmlspecialchars($applicationDateDisplay); ?></span></td>
                                         <td class="text-end">
-                                            <div class="d-inline-flex align-items-center gap-2">
+                                            <div class="d-inline-flex align-items-center gap-2 application-table-actions">
                                                 <button
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-primary py-0 px-2 js-edit-application"
+                                                    class="btn btn-sm btn-outline-primary py-0 px-2 js-edit-application application-table-action-btn"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editApplicationModal"
                                                     data-application-id="<?php echo $applicationId; ?>"
@@ -777,7 +777,7 @@ if ($selectedApplicationId > 0) {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    class="btn btn-sm btn-danger py-0 px-2 js-open-delete-modal"
+                                                    class="btn btn-sm btn-outline-danger py-0 px-2 js-open-delete-modal application-table-action-btn"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteApplicationModal"
                                                     data-application-id="<?php echo $applicationId; ?>"
@@ -853,7 +853,34 @@ if ($selectedApplicationId > 0) {
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $studentName = (string)($formData['student_name'] ?? '—');
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
-                                        $submissionFileUrl = !empty($submission['file_path']) ? getDocumentPublicUrl((string)$submission['file_path']) : '';
+                                        $submissionFiles = [];
+                                        $uploadedFileNames = [];
+
+                                        if (!empty($formData['_uploaded_file_names']) && is_array($formData['_uploaded_file_names'])) {
+                                            foreach ($formData['_uploaded_file_names'] as $storedPath => $displayName) {
+                                                $storedPath = trim((string)$storedPath);
+                                                $displayName = trim((string)$displayName);
+                                                if ($storedPath !== '' && $displayName !== '') {
+                                                    $uploadedFileNames[$storedPath] = $displayName;
+                                                }
+                                            }
+                                        }
+
+                                        $legacyFilePath = trim((string)($submission['file_path'] ?? ''));
+                                        if ($legacyFilePath !== '') {
+                                            $submissionFiles[] = $legacyFilePath;
+                                        }
+
+                                        if (!empty($formData['_uploaded_files']) && is_array($formData['_uploaded_files'])) {
+                                            foreach ($formData['_uploaded_files'] as $uploadedPath) {
+                                                $uploadedPath = trim((string)$uploadedPath);
+                                                if ($uploadedPath !== '') {
+                                                    $submissionFiles[] = $uploadedPath;
+                                                }
+                                            }
+                                        }
+
+                                        $submissionFiles = array_values(array_unique($submissionFiles));
                                     ?>
                                     <tr>
                                         <td>
@@ -862,17 +889,21 @@ if ($selectedApplicationId > 0) {
                                         </td>
                                         <td><?php echo htmlspecialchars((string)$submittedAt); ?></td>
                                         <td>
-                                            <?php if ($submissionFileUrl !== ''): ?>
-                                                <a href="<?php echo htmlspecialchars($submissionFileUrl); ?>" target="_blank" class="text-decoration-none fw-semibold">
-                                                    <?php echo htmlspecialchars(basename((string)$submission['file_path'])); ?>
-                                                </a>
+                                            <?php if (!empty($submissionFiles)): ?>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <?php foreach ($submissionFiles as $submissionFilePath): ?>
+                                                        <a href="<?php echo htmlspecialchars(getDocumentPublicUrl($submissionFilePath)); ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-semibold">
+                                                            <?php echo htmlspecialchars($uploadedFileNames[$submissionFilePath] ?? basename($submissionFilePath)); ?>
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             <?php else: ?>
                                                 <span class="text-muted">—</span>
                                             <?php endif; ?>
                                         </td>
 
                                         <td>
-                                            <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form" data-student-name="<?php echo htmlspecialchars((string)$studentName, ENT_QUOTES, 'UTF-8'); ?>" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>">
+                                            <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>" data-application-title="<?php echo htmlspecialchars((string)($submission['application_title'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                                 <input type="hidden" name="action" value="update_submission_status">
                                                 <input type="hidden" name="application_id" value="<?php echo (int)$submission['application_id']; ?>">
                                                 <input type="hidden" name="user_id" value="<?php echo (int)$submission['user_id']; ?>">
@@ -1170,8 +1201,8 @@ if ($selectedApplicationId > 0) {
 </div>
 
 <div class="modal fade" id="deleteSubmissionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-dialog-centered delete-submission-modal-dialog">
+        <div class="modal-content border-0 shadow-lg delete-submission-modal-content">
             <form method="POST" id="delete_submission_confirm_form">
                 <input type="hidden" name="action" value="update_submission_status">
                 <input type="hidden" name="application_id" id="delete_submission_application_id">
@@ -1180,26 +1211,26 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="return_view_submissions" id="delete_submission_return_view_submissions" value="0">
                 <input type="hidden" name="return_scroll_y" id="delete_submission_return_scroll_y" value="0">
 
-                <div class="modal-header" style="background:#2f6fb3;">
-                    <h5 class="modal-title" style="color:#ffffff !important;">
-                        <i class="fas fa-exclamation-triangle me-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής Υποβολής
+                <div class="modal-header delete-submission-modal-header">
+                    <h5 class="modal-title delete-submission-modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής Υποβολής
                     </h5>
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
-                            aria-label="Κλείσιμο"
-                            style="filter: brightness(0) invert(1); opacity:1;">
+                            aria-label="Κλείσιμο">
                     </button>
                 </div>
 
-                <div class="modal-body text-center">
-                    <p class="mb-2 fw-semibold">Θέλετε σίγουρα να διαγράψετε αυτή την υποβολή;</p>
-                    <p class="text-muted mb-0" id="delete_submission_details">—</p>
+                <div class="modal-body delete-submission-modal-body text-center">
+                    <p class="delete-submission-modal-question mb-2">Θέλετε σίγουρα να διαγράψετε αυτή την υποβολή;</p>
+                    <p class="delete-submission-modal-note mb-0">Η ενέργεια αυτή θα επιτρέψει στον γονέα να υποβάλει ξανά αίτηση.</p>
+                    <div class="delete-submission-modal-details" id="delete_submission_details">—</div>
                 </div>
 
-                <div class="modal-footer justify-content-center">
-                    <button type="submit" class="btn btn-danger px-4">Ναι</button>
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Όχι</button>
+                <div class="modal-footer delete-submission-modal-footer justify-content-center">
+                    <button type="submit" class="btn btn-danger delete-submission-confirm-btn">Ναι, διαγραφή</button>
+                    <button type="button" class="btn btn-outline-secondary delete-submission-cancel-btn" data-bs-dismiss="modal">Όχι</button>
                 </div>
             </form>
         </div>
@@ -1436,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var applicationIdInput = form.querySelector('input[name="application_id"]');
             var userIdInput = form.querySelector('input[name="user_id"]');
             var returnViewInput = form.querySelector('input[name="return_view_submissions"]');
-            var studentName = form.getAttribute('data-student-name') || '—';
+            var applicationTitle = form.getAttribute('data-application-title') || '—';
             var parentName = form.getAttribute('data-parent-name') || '—';
 
             if (deleteSubmissionApplicationId) {
@@ -1452,7 +1483,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteSubmissionReturnScroll.value = String(window.scrollY || window.pageYOffset || 0);
             }
             if (deleteSubmissionDetails) {
-                deleteSubmissionDetails.textContent = 'Μαθητής: ' + studentName + ' | Γονέας: ' + parentName;
+                deleteSubmissionDetails.textContent = 'Αίτηση: ' + applicationTitle + ' | Γονέας: ' + parentName;
             }
 
             deleteSubmissionModal.show();
