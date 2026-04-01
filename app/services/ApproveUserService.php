@@ -56,14 +56,12 @@ function sendApprovalEmailMessage(string $email, string $link): void
         }
     }
 
-    $subject = 'Η αίτησή σας εγκρίθηκε';
-    $message =
-        "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-        "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-        "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
-        $link . "\n\n" .
-        "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
-    $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+    $subject = ApprovalMailer::approvalEmailSubject();
+    $message = ApprovalMailer::approvalEmailHtmlBody($link);
+    $headers =
+        'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+        "MIME-Version: 1.0\r\n" .
+        "Content-Type: text/html; charset=UTF-8";
 
     if (!mail($email, $subject, $message, $headers)) {
         $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';

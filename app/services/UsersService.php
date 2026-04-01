@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
+require_once __DIR__ . '/EmailRejection.php';
 
 class UsersService
 {
@@ -289,6 +290,7 @@ class UsersService
         $email = trim((string)($data['email'] ?? ''));
         $phone = trim((string)($data['phone_number'] ?? ''));
         $password = (string)($data['password'] ?? '');
+        $rejectionMessage = trim((string)($data['rejection_message'] ?? ''));
         $role = $this->normalizeRole((string)($data['role'] ?? $existingUser['role']));
         $status = $this->normalizeStatus((string)($data['account_status'] ?? $existingUser['account_status']));
 
@@ -306,6 +308,11 @@ class UsersService
 
         if ($role === 'admin') {
             $status = 'active';
+        }
+
+        $shouldTriggerRejectionFlow = ($role === 'parent' && $status === 'rejected');
+        if ($shouldTriggerRejectionFlow && $rejectionMessage === '') {
+            return ['success' => false, 'message' => 'Συμπλήρωσε το μήνυμα απόρριψης για να σταλεί email στον γονέα.'];
         }
 
         $shouldTriggerApprovalFlow = $this->shouldTriggerApprovalFlow($existingUser, $role, $status);
@@ -384,6 +391,15 @@ class UsersService
                 );
             }
 
+            if ($shouldTriggerRejectionFlow) {
+                $this->sendRejectionEmail($email, $rejectionMessage);
+                $this->insertAdminLog(
+                    $actorUserId,
+                    'ADMIN_USER_REJECTION_EMAIL_SENT',
+                    "Rejection email sent to user #{$userId} ({$email})."
+                );
+            }
+
             $this->insertAdminLog(
                 $actorUserId,
                 'ADMIN_USER_UPDATED',
@@ -399,6 +415,15 @@ class UsersService
                     'approval_email_sent' => true,
                     'approval_email' => $email,
                     'subscription_link' => $approvalLink,
+                ];
+            }
+
+            if ($shouldTriggerRejectionFlow) {
+                return [
+                    'success' => true,
+                    'message' => "Ο χρήστης απορρίφθηκε και στάλθηκε email ενημέρωσης στο {$email}.",
+                    'rejection_email_sent' => true,
+                    'rejection_email' => $email,
                 ];
             }
 
@@ -1053,18 +1078,51 @@ class UsersService
             }
         }
 
-        $subject = 'Η αίτησή σας εγκρίθηκε';
-        $message =
-            "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-            "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-            "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
-            $link . "\n\n" .
-            "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
-        $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+        $subject = ApprovalMailer::approvalEmailSubject();
+        $message = ApprovalMailer::approvalEmailHtmlBody($link);
+        $headers =
+            'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: text/html; charset=UTF-8";
 
         if (!mail($email, $subject, $message, $headers)) {
             $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
             throw new RuntimeException('Αποτυχία αποστολής email έγκρισης.' . $suffix);
+        }
+    }
+
+    private function sendRejectionEmail(string $email, string $rejectionMessage): void
+    {
+        $smtpFailureMessage = '';
+
+        try {
+            $mailer = new EmailRejection([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+
+            $mailer->sendRejectionEmail($email, $rejectionMessage);
+            return;
+        } catch (Throwable $smtpException) {
+            $smtpFailureMessage = $smtpException->getMessage();
+        }
+
+        $subject = 'Ενημέρωση για την αίτησή σας';
+        $message =
+            "Η αίτησή σας απορρίφθηκε από τον διαχειριστή.\n\n" .
+            "Μήνυμα διαχειριστή:\n" .
+            $rejectionMessage . "\n\n" .
+            "Αν χρειάζεστε διευκρινίσεις, επικοινωνήστε με τον Σύνδεσμο Γονέων.";
+        $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+
+        if (!mail($email, $subject, $message, $headers)) {
+            $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
+            throw new RuntimeException('Αποτυχία αποστολής email απόρριψης.' . $suffix);
         }
     }
 }
