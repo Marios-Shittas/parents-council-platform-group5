@@ -4,9 +4,11 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/UsersService.php';
+require_once __DIR__ . '/../config/db.php';
 
 class ForgotPasswordService {
     private $usersService;
+    private $db;
 
     private $smtpHost = 'smtp.gmail.com';
     private $smtpUser = 'nigkaleta@gmail.com';
@@ -14,9 +16,12 @@ class ForgotPasswordService {
     private $smtpPort = 587;
     private $smtpSecure = 'tls';
     private $smtpFromEmail = 'nigkaleta@gmail.com';
+    private $tokenExpirationMinutes = 600; 
 
     public function __construct() {
         $this->usersService = new UsersService();
+        global $conn;
+        $this->db = $conn;
     }
 
     public function handleRequest() {
@@ -29,7 +34,14 @@ class ForgotPasswordService {
         $result = $this->usersService->forgot($email);
 
         if ($result['success']) {
-            $emailSent = $this->sendResetEmail($name, $email);
+            // Generate and store reset token in Users table
+            $token = $this->generateAndStoreToken($email);
+            
+            if (!$token) {
+                return ['success' => false, 'message' => 'Failed to generate reset token.'];
+            }
+
+            $emailSent = $this->sendResetEmail($name, $email, $token);
             if (!$emailSent) {
                 return ['success' => false, 'message' => 'Failed to send reset email.'];
             }
@@ -38,7 +50,37 @@ class ForgotPasswordService {
         return $result;
     }
 
-    private function sendResetEmail($name, $email) {
+    /**
+     * Generate a secure token and store it in the Users table
+     * @param string $email User's email
+     * @return string|false Token if successful, false otherwise
+     */
+    private function generateAndStoreToken($email) {
+        try {
+            // Generate a secure random token
+            $token = bin2hex(random_bytes(32));
+            
+            // Store token in Users table with expiration time
+            $expiresAt = date('Y-m-d H:i:s', time() + ($this->tokenExpirationMinutes * 60));
+            $stmt = $this->db->prepare("
+                UPDATE Users 
+                SET token = ?, token_expiry = ? 
+                WHERE email = ?
+            ");
+            $stmt->bind_param("sss", $token, $expiresAt, $email);
+            
+            if ($stmt->execute()) {
+                return $token;
+            }
+            
+            return false;
+        } catch (Exception $e) {
+            error_log("Error generating reset token: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function sendResetEmail($name, $email, $token) {
         $mail = new PHPMailer(true);
 
         try {
@@ -56,10 +98,11 @@ class ForgotPasswordService {
 
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = "http://localhost/parents-council-platform-group5/public/reset-password.php?email=" . urlencode($email);
+            $resetLink = "http://localhost/parents-council-platform-group5/public/reset-password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
             $mail->Body = "Hi $name,
                 <br><br>We received a request to reset your password. Click the link below to reset your password:
                 <br><br><a href='$resetLink'>Reset Password</a>
+                <br><br>This link will expire in {$this->tokenExpirationMinutes} minutes.
                 <br><br>If you didn't request a password reset, please ignore this email.
                 <br><br>Best regards,
                 <br>Parent Council Platform";
@@ -72,6 +115,7 @@ class ForgotPasswordService {
             return false;
         }
     }
+    
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

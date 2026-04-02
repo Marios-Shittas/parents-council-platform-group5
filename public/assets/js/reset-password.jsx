@@ -1,16 +1,12 @@
-// Reset password functionality
 (function() {
     const confirmButton = document.getElementById('confirm-button');
     const errorMessage = document.getElementById('error-message');
 
-    // Handle confirm button
     if (confirmButton) {
         confirmButton.addEventListener('click', function() {
-            // Get password values
             const newPassword = document.getElementById('new-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
-            // Validate passwords
             if (!newPassword || !confirmPassword) {
                 showError('Please enter and confirm your new password');
                 return;
@@ -20,38 +16,41 @@
                 return;
             }
 
-            // Send to server
             resetPassword(newPassword);
         });
     }
 
     function resetPassword(newPassword) {
-        // Get email from URL parameter if available
-        const params = new URLSearchParams(window.location.search);
-        const email = params.get('email');
-
-        // Send reset request
         fetch('/parents-council-platform-group5/app/services/ResetPasswordService.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                email: email,
+                email: window.RESET_EMAIL,
+                token: window.RESET_TOKEN,
                 newPassword: newPassword
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Redirect to login with success message
-                window.location.href = 'login.php?reset=success';
+                errorMessage.style.color = 'green';
+                errorMessage.textContent = data.message || 'Password reset successful';
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'login.php';
+                }, 1000);
             } else {
-                showError(data.message || 'Password reset failed');
+                errorMessage.style.color = 'red';
+                errorMessage.textContent = data.message || 'Password reset failed';
+                errorMessage.style.display = 'block';
             }
         })
         .catch(error => {
-            showError('An error occurred. Please try again.');
+            errorMessage.style.color = 'red';
+            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.style.display = 'block';
             console.error('Error:', error);
         });
     }
@@ -62,4 +61,27 @@
             errorMessage.style.display = 'block';
         }
     }
+
+        function setupPasswordToggle(inputId, toggleId) {
+        const toggleIcon = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        let isVisible = false;
+
+        if (toggleIcon && input) {
+            toggleIcon.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+            toggleIcon.style.cursor = 'pointer';
+
+            toggleIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                isVisible = !isVisible;
+                input.type = isVisible ? 'text' : 'password';
+                toggleIcon.innerHTML = isVisible 
+                    ? '<i class="fa-regular fa-eye"></i>' 
+                    : '<i class="fa-regular fa-eye-slash"></i>';
+            });
+        }
+    }
+
+    setupPasswordToggle('new-password', 'new-password-toggle');
+    setupPasswordToggle('confirm-password', 'confirm-password-toggle');
 })();

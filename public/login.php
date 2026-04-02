@@ -34,21 +34,13 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     
     <body class="body">
     <script>
-        // If trying to go back from login, validate session
-        // This prevents cached protected pages from showing
         (function() {
-            // Listen for attempts to go back
             window.addEventListener('popstate', function(event) {
-                // Do nothing - let them go back naturally
-                // But if they navigate to a protected page, the protected page will redirect them
             });
             
-            // When page is hidden and shown, validate
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) {
-                    // If they switch tabs and come back, ensure they stay on login
                     if (window.location.pathname.includes('login.php')) {
-                        // We're on login, which is correct
                     }
                 }
             });
