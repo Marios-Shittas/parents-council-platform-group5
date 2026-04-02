@@ -5,19 +5,12 @@ ini_set('display_errors', 1);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../app/services/CartService.php';
+require_once __DIR__ . '/../app/includes/auth.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['user_id']) || (int)$_SESSION['user_id'] <= 0) {
-    http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Πρέπει να κάνετε login πρώτα.'
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
+auth_require_role('parent', [
+    'mode' => 'json',
+    'message' => 'Μόνο λογαριασμοί γονέα μπορούν να χρησιμοποιήσουν το καλάθι.'
+]);
 
 $userId = (int)$_SESSION['user_id'];
 $cartService = new CartService();

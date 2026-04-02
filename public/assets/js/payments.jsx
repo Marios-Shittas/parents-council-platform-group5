@@ -4,9 +4,11 @@ function Payments() {
     const [selectedSizes, setSelectedSizes] = React.useState({});
     const [sizeErrors, setSizeErrors] = React.useState({});
     const [cartLoading, setCartLoading] = React.useState(true);
+    const [checkoutLoading, setCheckoutLoading] = React.useState(false);
 
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
+    const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
 
     React.useEffect(() => {
         fetch(productsUrl)
@@ -17,6 +19,19 @@ function Payments() {
 
     React.useEffect(() => {
         loadCart();
+    }, []);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const paymentStatus = params.get("payment_status");
+        const paymentMessage = params.get("payment_message");
+
+        if (!paymentStatus || !paymentMessage) {
+            return;
+        }
+
+        alert(paymentMessage);
+        window.history.replaceState({}, document.title, window.location.pathname);
     }, []);
 
     function loadCart() {
@@ -149,7 +164,8 @@ function Payments() {
             return;
         }
 
-        alert('Η ολοκλήρωση αγοράς θα συνδεθεί στο επόμενο βήμα.\nΣύνολο: €' + calculateTotal());
+        setCheckoutLoading(true);
+        window.location.href = `${checkoutUrl}?action=checkout`;
     }
 
     return (
@@ -334,9 +350,10 @@ function Payments() {
                                     <button
                                         className="btn btn-success btn-lg checkout-btn"
                                         onClick={handleCheckout}
+                                        disabled={checkoutLoading}
                                     >
                                         <i className="fas fa-credit-card mr-2"></i>
-                                        Ολοκλήρωση Αγοράς
+                                        {checkoutLoading ? 'Μετάβαση στην JCC...' : 'Ολοκλήρωση Αγοράς'}
                                     </button>
                                 </div>
                             </>

@@ -6,6 +6,9 @@ if (session_status() === PHP_SESSION_NONE) {
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+$registerScriptPath = __DIR__ . '/assets/js/register.jsx';
+$registerScriptVersion = is_file($registerScriptPath) ? (string) filemtime($registerScriptPath) : '1';
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -47,7 +50,7 @@ header("Expires: 0");
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
     <!-- Register JSX -->
-    <script type="text/babel" src="assets/js/register.jsx"></script>
+    <script type="text/babel" src="assets/js/register.jsx?v=<?php echo urlencode($registerScriptVersion); ?>"></script>
 
     <!-- Footer -->
     <?php include __DIR__ . '/../app/includes/footer.php'; ?>

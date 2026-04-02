@@ -73,13 +73,10 @@ class EmailApproval
                 $this->applyTransportMode($mode);
                 $this->mailer->clearAllRecipients();
                 $this->mailer->addAddress($toEmail);
-                $this->mailer->Subject = 'Η αίτησή σας εγκρίθηκε';
-                $this->mailer->Body =
-                    "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-                    "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-                    "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
-                    $link . "\n\n" .
-                    "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
+                $this->mailer->isHTML(true);
+                $this->mailer->Subject = \ApprovalMailer::approvalEmailSubject();
+                $this->mailer->Body = \ApprovalMailer::approvalEmailHtmlBody($link);
+                $this->mailer->AltBody = \ApprovalMailer::approvalEmailTextBody();
 
                 $this->mailer->send();
                 return;

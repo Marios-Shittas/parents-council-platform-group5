@@ -203,6 +203,20 @@ class ApplicationsService {
         
         return $stmt->execute();
     }
+
+    /**
+     * Update an existing document path.
+     * @param int $documentId Document ID
+     * @param string $filePath New file path
+     * @return bool True on success, false on failure
+     */
+    public function updateDocumentPath($documentId, $filePath) {
+        $sql = "UPDATE ApplicationsDocuments SET file_path = ? WHERE ap_document_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("si", $filePath, $documentId);
+
+        return $stmt->execute();
+    }
     
     // ============================================
     // SUBMISSION METHODS

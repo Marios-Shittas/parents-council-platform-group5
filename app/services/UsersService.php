@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
+require_once __DIR__ . '/EmailRejection.php';
 
 class UsersService
 {
@@ -144,8 +145,62 @@ class UsersService
 
     }
 
-    public function getAllUsersForAdmin(): array
+    public function getAllUsersForAdmin(string $sort = 'pending_first'): array
     {
+        switch ($sort) {
+            case 'newest':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+            case 'oldest':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at ASC,
+                    u.user_id ASC
+                ";
+                break;
+            case 'name_az':
+                $orderBy = "
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.surname ASC,
+                    u.name ASC,
+                    u.user_id ASC
+                ";
+                break;
+            case 'status_az':
+                $orderBy = "
+                    CASE u.account_status
+                        WHEN 'pending' THEN 0
+                        WHEN 'approved' THEN 1
+                        WHEN 'waiting_payment' THEN 2
+                        WHEN 'active' THEN 3
+                        WHEN 'rejected' THEN 4
+                        ELSE 5
+                    END,
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+            case 'pending_first':
+            default:
+                $orderBy = "
+                    CASE WHEN u.account_status = 'pending' THEN 0 ELSE 1 END,
+                    CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
+                    CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
+                    u.created_at DESC,
+                    u.user_id DESC
+                ";
+                break;
+        }
+
         $sql = "
             SELECT
                 u.user_id,
@@ -176,11 +231,7 @@ class UsersService
                 FROM Payments
                 GROUP BY user_id
             ) payments ON payments.user_id = u.user_id
-            ORDER BY
-                CASE WHEN u.user_id = 1 THEN 0 ELSE 1 END,
-                CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END,
-                u.created_at DESC,
-                u.user_id DESC
+            ORDER BY {$orderBy}
         ";
 
         $result = $this->conn->query($sql);
@@ -271,6 +322,7 @@ class UsersService
         $email = trim((string)($data['email'] ?? ''));
         $phone = trim((string)($data['phone_number'] ?? ''));
         $password = (string)($data['password'] ?? '');
+        $rejectionMessage = trim((string)($data['rejection_message'] ?? ''));
         $role = $this->normalizeRole((string)($data['role'] ?? $existingUser['role']));
         $status = $this->normalizeStatus((string)($data['account_status'] ?? $existingUser['account_status']));
 
@@ -288,6 +340,11 @@ class UsersService
 
         if ($role === 'admin') {
             $status = 'active';
+        }
+
+        $shouldTriggerRejectionFlow = ($role === 'parent' && $status === 'rejected');
+        if ($shouldTriggerRejectionFlow && $rejectionMessage === '') {
+            return ['success' => false, 'message' => 'Συμπλήρωσε το μήνυμα απόρριψης για να σταλεί email στον γονέα.'];
         }
 
         $shouldTriggerApprovalFlow = $this->shouldTriggerApprovalFlow($existingUser, $role, $status);
@@ -366,6 +423,15 @@ class UsersService
                 );
             }
 
+            if ($shouldTriggerRejectionFlow) {
+                $this->sendRejectionEmail($email, $rejectionMessage);
+                $this->insertAdminLog(
+                    $actorUserId,
+                    'ADMIN_USER_REJECTION_EMAIL_SENT',
+                    "Rejection email sent to user #{$userId} ({$email})."
+                );
+            }
+
             $this->insertAdminLog(
                 $actorUserId,
                 'ADMIN_USER_UPDATED',
@@ -381,6 +447,15 @@ class UsersService
                     'approval_email_sent' => true,
                     'approval_email' => $email,
                     'subscription_link' => $approvalLink,
+                ];
+            }
+
+            if ($shouldTriggerRejectionFlow) {
+                return [
+                    'success' => true,
+                    'message' => "Ο χρήστης απορρίφθηκε και στάλθηκε email ενημέρωσης στο {$email}.",
+                    'rejection_email_sent' => true,
+                    'rejection_email' => $email,
                 ];
             }
 
@@ -570,6 +645,12 @@ class UsersService
         return $groupedOrders;
     }
 
+    public function getOrdersByUserId(int $userId): array
+    {
+        $groupedOrders = $this->getOrdersGroupedByUserIds([$userId]);
+        return $groupedOrders[$userId] ?? [];
+    }
+
     public function getPaymentsGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -619,6 +700,78 @@ class UsersService
         $stmt->close();
 
         return $groupedPayments;
+    }
+
+    public function getPaymentsByUserId(int $userId): array
+    {
+        $groupedPayments = $this->getPaymentsGroupedByUserIds([$userId]);
+        return $groupedPayments[$userId] ?? [];
+    }
+
+    public function getOrderItemsGroupedByOrderIds(array $orderIds): array
+    {
+        $orderIds = array_values(array_filter(array_map('intval', $orderIds), static function ($id) {
+            return $id > 0;
+        }));
+
+        if (empty($orderIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+        $types = str_repeat('i', count($orderIds));
+
+        $sql = "
+            SELECT
+                oi.order_id,
+                oi.product_id,
+                p.product_name,
+                oi.quantity,
+                oi.size,
+                oi.price_at_purchase,
+                (oi.quantity * oi.price_at_purchase) AS line_total
+            FROM OrderItems oi
+            INNER JOIN Products p ON p.product_id = oi.product_id
+            WHERE oi.order_id IN ({$placeholders})
+            ORDER BY oi.order_id DESC, p.product_name ASC
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return [];
+        }
+
+        $bindValues = [];
+        foreach ($orderIds as $index => $value) {
+            $bindValues[$index] = &$orderIds[$index];
+        }
+
+        array_unshift($bindValues, $types);
+        call_user_func_array([$stmt, 'bind_param'], $bindValues);
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $itemsByOrderId = [];
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $orderId = (int)($row['order_id'] ?? 0);
+            if (!isset($itemsByOrderId[$orderId])) {
+                $itemsByOrderId[$orderId] = [];
+            }
+
+            $itemsByOrderId[$orderId][] = [
+                'product_id' => (int)($row['product_id'] ?? 0),
+                'product_name' => (string)($row['product_name'] ?? ''),
+                'quantity' => (int)($row['quantity'] ?? 0),
+                'size' => $row['size'] === null ? null : (string)$row['size'],
+                'price_at_purchase' => (float)($row['price_at_purchase'] ?? 0),
+                'line_total' => (float)($row['line_total'] ?? 0),
+            ];
+        }
+
+        $stmt->close();
+
+        return $itemsByOrderId;
     }
 
     public function createChildForParent(int $parentUserId, array $data, ?int $actorUserId = null): array
@@ -957,18 +1110,51 @@ class UsersService
             }
         }
 
-        $subject = 'Η αίτησή σας εγκρίθηκε';
-        $message =
-            "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
-            "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-            "Παρακαλούμε πατήστε τον παρακάτω σύνδεσμο:\n\n" .
-            $link . "\n\n" .
-            "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
-        $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+        $subject = ApprovalMailer::approvalEmailSubject();
+        $message = ApprovalMailer::approvalEmailHtmlBody($link);
+        $headers =
+            'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: text/html; charset=UTF-8";
 
         if (!mail($email, $subject, $message, $headers)) {
             $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
             throw new RuntimeException('Αποτυχία αποστολής email έγκρισης.' . $suffix);
+        }
+    }
+
+    private function sendRejectionEmail(string $email, string $rejectionMessage): void
+    {
+        $smtpFailureMessage = '';
+
+        try {
+            $mailer = new EmailRejection([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+
+            $mailer->sendRejectionEmail($email, $rejectionMessage);
+            return;
+        } catch (Throwable $smtpException) {
+            $smtpFailureMessage = $smtpException->getMessage();
+        }
+
+        $subject = 'Ενημέρωση για την αίτησή σας';
+        $message =
+            "Η αίτησή σας απορρίφθηκε από τον διαχειριστή.\n\n" .
+            "Μήνυμα διαχειριστή:\n" .
+            $rejectionMessage . "\n\n" .
+            "Αν χρειάζεστε διευκρινίσεις, επικοινωνήστε με τον Σύνδεσμο Γονέων.";
+        $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+
+        if (!mail($email, $subject, $message, $headers)) {
+            $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
+            throw new RuntimeException('Αποτυχία αποστολής email απόρριψης.' . $suffix);
         }
     }
 }

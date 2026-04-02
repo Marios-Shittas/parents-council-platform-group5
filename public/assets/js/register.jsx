@@ -127,6 +127,8 @@ function RegisterForm() {
         setChildren(prev => prev.filter((_, i) => i !== index));
     };
 
+    const getChildOrdinalLabel = (index) => `${index + 1}ο Παιδί`;
+
     return (
         <div>
             <section className="public-page-header" aria-labelledby="public-page-title">
@@ -257,7 +259,7 @@ function RegisterForm() {
                                         <i className="fas fa-child"></i>
                                     </div>
                                     <div className="flex-grow-1">
-                                        <span className="register-card-eyebrow">{1 + index}o Παιδί</span>
+                                        <span className="register-card-eyebrow register-card-eyebrow-child">{getChildOrdinalLabel(index)}</span>
                                         <p className="register-card-title">Στοιχεία Παιδιού</p>
                                     </div>
                                     {children.length > 1 && (
