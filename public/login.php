@@ -6,6 +6,11 @@ if (session_status() === PHP_SESSION_NONE) {
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+$successMessage = '';
+if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
+    $successMessage = 'Password reset successfully! Please log in with your new password.';
+}
 ?>
 
 <!DOCTYPE html>
@@ -55,6 +60,7 @@ header("Expires: 0");
             </a>
             <h1 id="login-title">Login</h1>
             <span id="error-message"></span>
+            <span id="success-message"><?php echo htmlspecialchars($successMessage); ?></span>
             <div class="login-container">
                 <p id="email-label">Please enter your email:</p>
                 <input type="email" id="email-input" placeholder="Email">

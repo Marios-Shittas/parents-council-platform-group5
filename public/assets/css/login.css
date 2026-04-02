@@ -25,6 +25,12 @@
     margin-left: 20px;
 }
 
+#success-message {
+    color: green;
+    font-size: 10px;
+    margin-left: 20px;
+}
+
 .login-container {
     margin: auto;
     padding: 10px;

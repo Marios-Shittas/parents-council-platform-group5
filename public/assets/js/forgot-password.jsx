@@ -24,9 +24,7 @@ function handleForgotPassword() {
       if (data.success) {
         errorMessage.style.color = 'green';
         errorMessage.textContent = data.message;
-        setTimeout(() => {
-            window.location.href = 'login.php';
-        }, 1000);
+        window.location.href = 'login.php';
       } else {
         errorMessage.textContent = data.message;
       }
