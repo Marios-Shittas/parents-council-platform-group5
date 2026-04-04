@@ -1240,6 +1240,104 @@ if ($selectedApplicationId > 0) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    function showNotice(message, options) {
+        var opts = options || {};
+        var overlay = document.createElement('div');
+        var previousOverflow = document.body.style.overflow || '';
+
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.zIndex = '1700';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.padding = '1rem';
+        overlay.style.background = 'rgba(11,25,41,.62)';
+
+        overlay.innerHTML = '' +
+            '<div role="dialog" aria-modal="true" style="width:min(500px,100%);background:#fff;border-radius:18px;padding:1.25rem 1.1rem;box-shadow:0 20px 50px rgba(11,25,41,.32);border-top:5px solid ' + (opts.variant === 'error' ? '#c84545' : opts.variant === 'warning' ? '#d79f0d' : '#2f6ea0') + '">' +
+                '<h3 style="font-family:Montserrat,sans-serif;font-weight:700;color:#1a3a5c;text-align:center;margin-bottom:.5rem">' + (opts.title || 'Ειδοποίηση') + '</h3>' +
+                '<div style="font-family:Lato,sans-serif;color:#344055;line-height:1.55;text-align:center;white-space:pre-wrap">' + (message || 'Συνέβη ένα απρόσμενο σφάλμα.') + '</div>' +
+                '<div style="display:flex;justify-content:center;margin-top:1rem">' +
+                    '<button type="button" data-action="ok" style="border:0;border-radius:999px;padding:.45rem 1rem;background:' + (opts.variant === 'error' ? '#bb3535' : opts.variant === 'warning' ? '#b8860b' : '#1f5f93') + ';color:#fff;font-weight:700">Εντάξει</button>' +
+                '</div>' +
+            '</div>';
+
+        function closeOverlay() {
+            document.body.style.overflow = previousOverflow;
+            overlay.remove();
+        }
+
+        overlay.addEventListener('click', function (event) {
+            if (event.target === overlay) {
+                closeOverlay();
+            }
+        });
+
+        var okBtn = overlay.querySelector('[data-action="ok"]');
+        if (okBtn) {
+            okBtn.addEventListener('click', closeOverlay);
+        }
+
+        document.body.style.overflow = 'hidden';
+        document.body.appendChild(overlay);
+    }
+
+    function showConfirm(message, onConfirm, options) {
+        var opts = options || {};
+        var overlay = document.createElement('div');
+        var previousOverflow = document.body.style.overflow || '';
+
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.zIndex = '1700';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.padding = '1rem';
+        overlay.style.background = 'rgba(11,25,41,.62)';
+
+        overlay.innerHTML = '' +
+            '<div role="dialog" aria-modal="true" style="width:min(500px,100%);background:#fff;border-radius:18px;padding:1.25rem 1.1rem;box-shadow:0 20px 50px rgba(11,25,41,.32);border-top:5px solid #d79f0d">' +
+                '<h3 style="font-family:Montserrat,sans-serif;font-weight:700;color:#1a3a5c;text-align:center;margin-bottom:.5rem">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
+                '<div style="font-family:Lato,sans-serif;color:#344055;line-height:1.55;text-align:center;white-space:pre-wrap">' + (message || 'Είστε σίγουροι;') + '</div>' +
+                '<div style="display:flex;justify-content:center;gap:.55rem;margin-top:1rem">' +
+                    '<button type="button" data-action="cancel" style="border:1px solid #c7d1db;border-radius:999px;padding:.45rem 1rem;background:#eef2f6;color:#344055;font-weight:700">Όχι</button>' +
+                    '<button type="button" data-action="confirm" style="border:0;border-radius:999px;padding:.45rem 1rem;background:#bb3535;color:#fff;font-weight:700">Ναι</button>' +
+                '</div>' +
+            '</div>';
+
+        function closeOverlay() {
+            document.body.style.overflow = previousOverflow;
+            overlay.remove();
+        }
+
+        overlay.addEventListener('click', function (event) {
+            if (event.target === overlay) {
+                closeOverlay();
+            }
+        });
+
+        var cancelBtn = overlay.querySelector('[data-action="cancel"]');
+        var confirmBtn = overlay.querySelector('[data-action="confirm"]');
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeOverlay);
+        }
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                closeOverlay();
+                if (typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            });
+        }
+
+        document.body.style.overflow = 'hidden';
+        document.body.appendChild(overlay);
+    }
+
     function bindDateRangeValidation(openInput, closeInput, form) {
         if (!openInput || !closeInput) return;
 
@@ -1262,7 +1360,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (openVal && closeVal && closeVal < openVal) {
                     event.preventDefault();
-                    alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                    showNotice('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.', {
+                        title: 'Μη έγκυρη ημερομηνία',
+                        variant: 'error'
+                    });
                     closeInput.focus();
                 }
             });
@@ -1280,7 +1381,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
+            showNotice('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.', {
+                title: 'Όριο αρχείων',
+                variant: 'warning'
+            });
             createInstructionFiles.value = '';
         });
     }
@@ -1368,9 +1472,12 @@ document.addEventListener('DOMContentLoaded', function () {
         editFilesList.innerHTML = html;
         editFilesList.querySelectorAll('.js-delete-doc-form').forEach(function (form) {
             form.addEventListener('submit', function (event) {
-                if (!confirm('Θέλετε σίγουρα να αφαιρέσετε αυτό το αρχείο;')) {
-                    event.preventDefault();
-                }
+                event.preventDefault();
+                showConfirm('Θέλετε σίγουρα να αφαιρέσετε αυτό το αρχείο;', function () {
+                    form.submit();
+                }, {
+                    title: 'Επιβεβαίωση διαγραφής'
+                });
             });
         });
     }
@@ -1380,7 +1487,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!editInstructionFiles.files || editInstructionFiles.files.length <= 4) {
                 return;
             }
-            alert('Μπορείτε να επιλέξετε έως 4 αρχεία.');
+            showNotice('Μπορείτε να επιλέξετε έως 4 αρχεία.', {
+                title: 'Όριο αρχείων',
+                variant: 'warning'
+            });
             editInstructionFiles.value = '';
         });
     }

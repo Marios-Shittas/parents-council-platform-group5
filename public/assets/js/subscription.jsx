@@ -4,8 +4,40 @@ function SubscriptionPage() {
     const [error, setError] = React.useState("");
     const [includeInsurance, setIncludeInsurance] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
     const token = window.APPROVAL_TOKEN || "";
     const baseServiceUrl = "/parents-council-platform-group5/app/services";
+
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
 
     React.useEffect(() => {
         fetch(baseServiceUrl + "/Subscription.php?token=" + encodeURIComponent(token))
@@ -47,12 +79,18 @@ function SubscriptionPage() {
         .then(res => res.json())
         .then(response => {
             if (!response.success) {
-                alert(response.message || "Αποτυχία πληρωμής.");
+                showNotice(response.message || "Αποτυχία πληρωμής.", {
+                    title: 'Αποτυχία πληρωμής',
+                    variant: 'error'
+                });
                 return;
             }
 
             if (!response.redirect_url) {
-                alert("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.");
+                showNotice("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.", {
+                    title: 'Σφάλμα πληρωμής',
+                    variant: 'error'
+                });
                 return;
             }
 
@@ -60,7 +98,10 @@ function SubscriptionPage() {
         })
         .catch(err => {
             console.error(err);
-            alert("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.");
+            showNotice("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.", {
+                title: 'Σφάλμα επικοινωνίας',
+                variant: 'error'
+            });
         })
         .finally(() => setLoading(false));
     };
@@ -77,6 +118,7 @@ function SubscriptionPage() {
     const total = data.subscription_price + insuranceTotal;
 
     return (
+        <>
         <div className="subscription-wrapper">
 
             <div className="subscription-header text-center">
@@ -147,6 +189,63 @@ function SubscriptionPage() {
 
             </div>
         </div>
+
+        {notice.open && (
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="subscription-notice-title"
+                onClick={closeNotice}
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 1600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(11, 25, 41, 0.62)',
+                    padding: '1rem'
+                }}
+            >
+                <div
+                    role="document"
+                    onClick={(event) => event.stopPropagation()}
+                    style={{
+                        width: 'min(500px, 100%)',
+                        background: '#fff',
+                        borderRadius: '18px',
+                        borderTop: `5px solid ${notice.variant === 'error' ? '#c84545' : notice.variant === 'warning' ? '#d79f0d' : '#2f6ea0'}`,
+                        boxShadow: '0 20px 50px rgba(11,25,41,.32)',
+                        padding: '1.25rem 1.1rem'
+                    }}
+                >
+                    <h3 id="subscription-notice-title" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, color: '#1a3a5c', textAlign: 'center', marginBottom: '.5rem' }}>
+                        {notice.title}
+                    </h3>
+                    <div style={{ fontFamily: 'Lato, sans-serif', color: '#344055', lineHeight: 1.55, textAlign: 'center', whiteSpace: 'pre-wrap' }}>
+                        {notice.message}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                        <button
+                            type="button"
+                            onClick={closeNotice}
+                            style={{
+                                border: 0,
+                                borderRadius: '999px',
+                                padding: '.48rem 1.2rem',
+                                background: notice.variant === 'error' ? '#bb3535' : notice.variant === 'warning' ? '#b8860b' : '#1f5f93',
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontFamily: 'Lato, sans-serif'
+                            }}
+                        >
+                            Εντάξει
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
 

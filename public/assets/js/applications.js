@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function showCenterNotice(messageText) {
         if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
-            window.alert(messageText || 'Σφάλμα.');
+            console.error(messageText || 'Σφάλμα.');
             return;
         }
 

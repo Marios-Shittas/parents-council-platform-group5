@@ -5,10 +5,42 @@ function Payments() {
     const [sizeErrors, setSizeErrors] = React.useState({});
     const [cartLoading, setCartLoading] = React.useState(true);
     const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
 
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
 
     React.useEffect(() => {
         fetch(productsUrl)
@@ -30,9 +62,12 @@ function Payments() {
             return;
         }
 
-        alert(paymentMessage);
+        showNotice(paymentMessage, {
+            title: paymentStatus === 'success' ? 'Η πληρωμή ολοκληρώθηκε' : 'Η πληρωμή δεν ολοκληρώθηκε',
+            variant: paymentStatus === 'success' ? 'info' : 'warning'
+        });
         window.history.replaceState({}, document.title, window.location.pathname);
-    }, []);
+    }, [showNotice]);
 
     function loadCart() {
         setCartLoading(true);
@@ -117,7 +152,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Add to cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.');
+            showNotice(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.', {
+                title: 'Αποτυχία προσθήκης',
+                variant: 'error'
+            });
         });
     }
 
@@ -129,7 +167,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Remove from cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.');
+            showNotice(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.', {
+                title: 'Αποτυχία αφαίρεσης',
+                variant: 'error'
+            });
         });
     }
 
@@ -144,7 +185,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Update cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.');
+            showNotice(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.', {
+                title: 'Αποτυχία ενημέρωσης',
+                variant: 'error'
+            });
         });
     }
 
@@ -160,7 +204,10 @@ function Payments() {
 
     function handleCheckout() {
         if (cart.length === 0) {
-            alert('Το καλάθι είναι κενό!');
+            showNotice('Το καλάθι είναι κενό!', {
+                title: 'Δεν υπάρχει παραγγελία',
+                variant: 'warning'
+            });
             return;
         }
 
@@ -361,6 +408,62 @@ function Payments() {
                     </div>
                 </div>
             </div>
+
+            {notice.open && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="payments-notice-title"
+                    onClick={closeNotice}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 1600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(11, 25, 41, 0.62)',
+                        padding: '1rem'
+                    }}
+                >
+                    <div
+                        role="document"
+                        onClick={(event) => event.stopPropagation()}
+                        style={{
+                            width: 'min(500px, 100%)',
+                            background: '#fff',
+                            borderRadius: '18px',
+                            borderTop: `5px solid ${notice.variant === 'error' ? '#c84545' : notice.variant === 'warning' ? '#d79f0d' : '#2f6ea0'}`,
+                            boxShadow: '0 20px 50px rgba(11,25,41,.32)',
+                            padding: '1.25rem 1.1rem'
+                        }}
+                    >
+                        <h3 id="payments-notice-title" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, color: '#1a3a5c', textAlign: 'center', marginBottom: '.5rem' }}>
+                            {notice.title}
+                        </h3>
+                        <div style={{ fontFamily: 'Lato, sans-serif', color: '#344055', lineHeight: 1.55, textAlign: 'center', whiteSpace: 'pre-wrap' }}>
+                            {notice.message}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                            <button
+                                type="button"
+                                onClick={closeNotice}
+                                style={{
+                                    border: 0,
+                                    borderRadius: '999px',
+                                    padding: '.48rem 1.2rem',
+                                    background: notice.variant === 'error' ? '#bb3535' : notice.variant === 'warning' ? '#b8860b' : '#1f5f93',
+                                    color: '#fff',
+                                    fontWeight: 700,
+                                    fontFamily: 'Lato, sans-serif'
+                                }}
+                            >
+                                Εντάξει
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
