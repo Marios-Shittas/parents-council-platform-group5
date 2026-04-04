@@ -57,6 +57,13 @@ class RegisteringService
         $name = trim((string) $payload['first_name']);
         $surname = trim((string) $payload['last_name']);
         $phone = $this->normalizePhone((string) $payload['phone']) ?? '';
+        if ($this->phoneExists($phone)) {
+            $this->respond(409, [
+                'success' => false,
+                'message' => 'Το τηλέφωνο χρησιμοποιείται ήδη.',
+            ]);
+            return;
+        }
         $children = $payload['children'];
 
         try {
@@ -70,7 +77,7 @@ class RegisteringService
 
             $this->respond(200, [
                 'success' => true,
-                'message' => 'Η αίτησή σας υποβλήθηκε και βρίσκεται σε αναμονή έγκρισης.',
+                'message' => 'Η εγγραφή σας καταχωρήθηκε επιτυχώς. Θα ενημερωθείτε μέσω email όταν εγκριθεί από τον διαχειριστή.',
             ]);
         } catch (Throwable $e) {
             $this->conn->rollback();
@@ -156,6 +163,22 @@ class RegisteringService
         }
 
         $check->bind_param('s', $email);
+        $check->execute();
+        $check->store_result();
+        $exists = $check->num_rows > 0;
+        $check->close();
+
+        return $exists;
+    }
+
+    private function phoneExists(string $phone): bool
+    {
+        $check = $this->conn->prepare('SELECT user_id FROM Users WHERE phone_number = ?');
+        if ($check === false) {
+            throw new RuntimeException('Αποτυχία ελέγχου τηλεφώνου.');
+        }
+
+        $check->bind_param('s', $phone);
         $check->execute();
         $check->store_result();
         $exists = $check->num_rows > 0;

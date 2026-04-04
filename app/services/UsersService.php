@@ -708,6 +708,51 @@ class UsersService
         return $groupedPayments[$userId] ?? [];
     }
 
+    public function getCompletedInsuredChildIdsByUserId(int $userId): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT DISTINCT ip.child_id
+             FROM InsurancePayments ip
+             INNER JOIN Payments p ON p.payment_id = ip.payment_id
+             INNER JOIN Children c ON c.child_id = ip.child_id
+             WHERE c.user_id = ?
+               AND p.user_id = ?
+               AND p.payment_type = 'insurance'
+               AND p.payment_status = 'completed'"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('ii', $userId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $childIds = [];
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $childId = (int)($row['child_id'] ?? 0);
+            if ($childId > 0) {
+                $childIds[] = $childId;
+            }
+        }
+
+        $stmt->close();
+
+        return array_values(array_unique($childIds));
+    }
+
+    public function getInsurancePriceSetting(): float
+    {
+        $result = $this->conn->query('SELECT insurance_price FROM PricingSettings LIMIT 1');
+        if (!$result) {
+            return 0.0;
+        }
+
+        $row = $result->fetch_assoc();
+        return (float)($row['insurance_price'] ?? 0.0);
+    }
+
     public function getOrderItemsGroupedByOrderIds(array $orderIds): array
     {
         $orderIds = array_values(array_filter(array_map('intval', $orderIds), static function ($id) {

@@ -26,6 +26,11 @@ $childrenCount = count($children);
 $paidOrdersCount = count(array_filter($orders, static function (array $order): bool {
     return (string)($order['order_status'] ?? '') === 'paid';
 }));
+$insurancePaymentStatus = trim((string)($_GET['insurance_payment_status'] ?? ''));
+$insurancePaymentMessage = trim((string)($_GET['insurance_payment_message'] ?? ''));
+$uninsuredChildrenNames = array_values(array_map(static function (array $child): string {
+    return trim((string)($child['name'] ?? '') . ' ' . (string)($child['surname'] ?? ''));
+}, $childrenPendingInsurance));
 $initials = mb_strtoupper(mb_substr((string)($parentUser['name'] ?? ''), 0, 1) . mb_substr((string)($parentUser['surname'] ?? ''), 0, 1));
 if (trim($initials) === '') {
     $initials = 'PG';
@@ -98,6 +103,36 @@ include __DIR__ . '/../../includes/public_page_header.php';
                 <p class="stat-note">Άθροισμα ολοκληρωμένων πληρωμών</p>
             </article>
         </section>
+
+        <?php if ($insurancePaymentMessage !== ''): ?>
+            <section class="profile-inline-message profile-inline-message-<?php echo htmlspecialchars($insurancePaymentStatus !== '' ? $insurancePaymentStatus : 'pending'); ?>">
+                <i class="fas fa-info-circle"></i>
+                <span><?php echo htmlspecialchars($insurancePaymentMessage); ?></span>
+            </section>
+        <?php endif; ?>
+
+        <?php if ($pendingInsuranceChildrenCount > 0): ?>
+            <section class="profile-insurance-cta">
+                <div class="insurance-cta-copy">
+                    <p class="panel-kicker">Ασφάλεια Παιδιών</p>
+                    <h2>Εκκρεμεί ασφάλεια για <?php echo $pendingInsuranceChildrenCount; ?> <?php echo $pendingInsuranceChildrenCount === 1 ? 'παιδί' : 'παιδιά'; ?></h2>
+                    <p>
+                        Δεν έχει καταχωρηθεί ολοκληρωμένη πληρωμή ασφάλειας για:
+                        <strong><?php echo htmlspecialchars(implode(', ', $uninsuredChildrenNames)); ?></strong>
+                    </p>
+                    <div class="insurance-cta-meta">
+                        <span><i class="fas fa-child mr-2"></i><?php echo $pendingInsuranceChildrenCount; ?> <?php echo $pendingInsuranceChildrenCount === 1 ? 'παιδί' : 'παιδιά'; ?></span>
+                        <span><i class="fas fa-euro-sign mr-2"></i>€<?php echo number_format($insurancePricePerChild, 2); ?> ανά παιδί</span>
+                        <span><i class="fas fa-receipt mr-2"></i>Σύνολο €<?php echo number_format($pendingInsuranceTotal, 2); ?></span>
+                    </div>
+                </div>
+                <div class="insurance-cta-actions">
+                    <a class="insurance-cta-btn" href="/parents-council-platform-group5/app/services/InsuranceJCC.php?action=checkout">
+                        Πληρωμή Ασφάλειας μέσω JCC
+                    </a>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <section class="profile-main-grid">
             <div class="profile-main-column">
