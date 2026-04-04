@@ -4,8 +4,40 @@ function SubscriptionPage() {
     const [error, setError] = React.useState("");
     const [includeInsurance, setIncludeInsurance] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
     const token = window.APPROVAL_TOKEN || "";
     const baseServiceUrl = "/parents-council-platform-group5/app/services";
+
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
 
     React.useEffect(() => {
         fetch(baseServiceUrl + "/Subscription.php?token=" + encodeURIComponent(token))
@@ -47,12 +79,18 @@ function SubscriptionPage() {
         .then(res => res.json())
         .then(response => {
             if (!response.success) {
-                alert(response.message || "Αποτυχία πληρωμής.");
+                showNotice(response.message || "Αποτυχία πληρωμής.", {
+                    title: 'Αποτυχία πληρωμής',
+                    variant: 'error'
+                });
                 return;
             }
 
             if (!response.redirect_url) {
-                alert("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.");
+                showNotice("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.", {
+                    title: 'Σφάλμα πληρωμής',
+                    variant: 'error'
+                });
                 return;
             }
 
@@ -60,7 +98,10 @@ function SubscriptionPage() {
         })
         .catch(err => {
             console.error(err);
-            alert("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.");
+            showNotice("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.", {
+                title: 'Σφάλμα επικοινωνίας',
+                variant: 'error'
+            });
         })
         .finally(() => setLoading(false));
     };
@@ -77,6 +118,7 @@ function SubscriptionPage() {
     const total = data.subscription_price + insuranceTotal;
 
     return (
+        <>
         <div className="subscription-wrapper">
 
             <div className="subscription-header text-center">
@@ -147,6 +189,39 @@ function SubscriptionPage() {
 
             </div>
         </div>
+
+        {notice.open && (
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="subscription-notice-title"
+                onClick={closeNotice}
+                className="subscription-notice-overlay"
+            >
+                <div
+                    role="document"
+                    onClick={(event) => event.stopPropagation()}
+                    className={`subscription-notice-card subscription-notice-card--${notice.variant}`}
+                >
+                    <h3 id="subscription-notice-title" className="subscription-notice-title">
+                        {notice.title}
+                    </h3>
+                    <div className="subscription-notice-message">
+                        {notice.message}
+                    </div>
+                    <div className="subscription-notice-actions">
+                        <button
+                            type="button"
+                            onClick={closeNotice}
+                            className={`subscription-notice-button subscription-notice-button--${notice.variant}`}
+                        >
+                            Εντάξει
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
 

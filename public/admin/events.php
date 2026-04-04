@@ -451,10 +451,10 @@ $events = $eventsService->getAllEvents();
                                             <a href="?edit=<?php echo (int)$event['event_id']; ?>" class="btn btn-sm btn-outline-primary mr-1" title="Επεξεργασία">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form method="POST" style="display: inline;">
+                                            <form method="POST" style="display: inline;" class="js-confirm-submit" data-confirm-message="Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την εκδήλωση;" data-confirm-title="Επιβεβαίωση διαγραφής">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo (int)$event['event_id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την εκδήλωση;')" title="Διαγραφή">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Διαγραφή">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -539,35 +539,142 @@ $events = $eventsService->getAllEvents();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-function deleteEventImage(imageId, eventId) {
-    if (!confirm('Διαγραφή εικόνας;')) {
+function ensureNoticeElements() {
+    if (document.getElementById('page-notice-overlay')) {
         return;
     }
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '';
+    const overlay = document.createElement('div');
+    overlay.id = 'page-notice-overlay';
+    overlay.className = 'page-notice-overlay';
+    overlay.innerHTML = '' +
+        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
+            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
+            '<div class="page-notice-message" id="page-notice-message">—</div>' +
+            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
+        '</div>';
 
-    const actionInput = document.createElement('input');
-    actionInput.type = 'hidden';
-    actionInput.name = 'action';
-    actionInput.value = 'delete_image';
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            overlay.classList.remove('is-open');
+            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
+        }
+    });
 
-    const imageIdInput = document.createElement('input');
-    imageIdInput.type = 'hidden';
-    imageIdInput.name = 'image_id';
-    imageIdInput.value = String(imageId);
+    document.body.appendChild(overlay);
 
-    const eventIdInput = document.createElement('input');
-    eventIdInput.type = 'hidden';
-    eventIdInput.name = 'event_id';
-    eventIdInput.value = String(eventId);
+    const closeBtn = document.getElementById('page-notice-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            overlay.classList.remove('is-open');
+            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
+        });
+    }
+}
 
-    form.appendChild(actionInput);
-    form.appendChild(imageIdInput);
-    form.appendChild(eventIdInput);
-    document.body.appendChild(form);
-    form.submit();
+function showNotice(message, options) {
+    ensureNoticeElements();
+
+    const overlay = document.getElementById('page-notice-overlay');
+    const card = document.getElementById('page-notice-card');
+    const title = document.getElementById('page-notice-title');
+    const body = document.getElementById('page-notice-message');
+    const opts = options || {};
+
+    if (!overlay || !card || !title || !body) {
+        console.error(message);
+        return;
+    }
+
+    card.classList.remove('is-error', 'is-warning');
+    if (opts.variant === 'error') card.classList.add('is-error');
+    if (opts.variant === 'warning') card.classList.add('is-warning');
+
+    title.textContent = opts.title || 'Ειδοποίηση';
+    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
+
+    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
+    document.body.style.overflow = 'hidden';
+    overlay.classList.add('is-open');
+}
+
+function showConfirm(message, onConfirm, options) {
+    const opts = options || {};
+    const overlay = document.createElement('div');
+    const previousOverflow = document.body.style.overflow || '';
+
+    overlay.className = 'page-confirm-overlay is-open';
+
+    overlay.innerHTML = '' +
+        '<div class="page-confirm-card" role="dialog" aria-modal="true">' +
+            '<h3 class="page-confirm-title">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
+            '<div class="page-confirm-message">' + (message || 'Είστε σίγουροι;') + '</div>' +
+            '<div class="page-confirm-actions">' +
+                '<button type="button" data-action="cancel" class="page-confirm-btn page-confirm-btn--cancel">Όχι</button>' +
+                '<button type="button" data-action="confirm" class="page-confirm-btn page-confirm-btn--confirm">Ναι</button>' +
+            '</div>' +
+        '</div>';
+
+    function closeOverlay() {
+        document.body.style.overflow = previousOverflow;
+        overlay.remove();
+    }
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            closeOverlay();
+        }
+    });
+
+    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
+    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeOverlay);
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            closeOverlay();
+            if (typeof onConfirm === 'function') {
+                onConfirm();
+            }
+        });
+    }
+
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(overlay);
+}
+
+function deleteEventImage(imageId, eventId) {
+    showConfirm('Διαγραφή εικόνας;', function () {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_image';
+
+        const imageIdInput = document.createElement('input');
+        imageIdInput.type = 'hidden';
+        imageIdInput.name = 'image_id';
+        imageIdInput.value = String(imageId);
+
+        const eventIdInput = document.createElement('input');
+        eventIdInput.type = 'hidden';
+        eventIdInput.name = 'event_id';
+        eventIdInput.value = String(eventId);
+
+        form.appendChild(actionInput);
+        form.appendChild(imageIdInput);
+        form.appendChild(eventIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }, {
+        title: 'Επιβεβαίωση διαγραφής'
+    });
 }
 
 function validateAndPreviewImages(input, previewId) {
@@ -604,7 +711,7 @@ function validateAndPreviewImages(input, previewId) {
                 div.className = 'image-preview-item';
                 div.innerHTML = `
                     <img src="${e.target.result}" alt="Preview">
-                    <div style="font-size: 10px; text-align: center; margin-top: 2px;">${file.name.substring(0, 15)}...</div>
+                    <div class="preview-file-caption">${file.name.substring(0, 15)}...</div>
                 `;
                 preview.appendChild(div);
             };
@@ -613,7 +720,10 @@ function validateAndPreviewImages(input, previewId) {
     });
 
     if (warnings.length > 0) {
-        alert('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.');
+        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.', {
+            title: 'Έλεγχος αρχείων',
+            variant: 'warning'
+        });
     }
 }
 
@@ -632,13 +742,26 @@ if (editImagesInput) {
             preview = document.createElement('div');
             preview.className = 'image-preview';
             preview.id = 'editPreview';
-            preview.style.marginTop = '10px';
             this.parentElement.appendChild(preview);
         }
 
         validateAndPreviewImages(this, 'editPreview');
     });
 }
+
+document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const message = form.getAttribute('data-confirm-message') || 'Είστε σίγουροι;';
+        const title = form.getAttribute('data-confirm-title') || 'Επιβεβαίωση';
+
+        showConfirm(message, function () {
+            form.submit();
+        }, {
+            title: title
+        });
+    });
+});
 </script>
 
 </body>

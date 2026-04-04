@@ -5,10 +5,42 @@ function Payments() {
     const [sizeErrors, setSizeErrors] = React.useState({});
     const [cartLoading, setCartLoading] = React.useState(true);
     const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
 
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
 
     React.useEffect(() => {
         fetch(productsUrl)
@@ -30,9 +62,12 @@ function Payments() {
             return;
         }
 
-        alert(paymentMessage);
+        showNotice(paymentMessage, {
+            title: paymentStatus === 'success' ? 'Η πληρωμή ολοκληρώθηκε' : 'Η πληρωμή δεν ολοκληρώθηκε',
+            variant: paymentStatus === 'success' ? 'info' : 'warning'
+        });
         window.history.replaceState({}, document.title, window.location.pathname);
-    }, []);
+    }, [showNotice]);
 
     function loadCart() {
         setCartLoading(true);
@@ -117,7 +152,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Add to cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.');
+            showNotice(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.', {
+                title: 'Αποτυχία προσθήκης',
+                variant: 'error'
+            });
         });
     }
 
@@ -129,7 +167,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Remove from cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.');
+            showNotice(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.', {
+                title: 'Αποτυχία αφαίρεσης',
+                variant: 'error'
+            });
         });
     }
 
@@ -144,7 +185,10 @@ function Payments() {
         })
         .catch(err => {
             console.error("Update cart error:", err);
-            alert(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.');
+            showNotice(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.', {
+                title: 'Αποτυχία ενημέρωσης',
+                variant: 'error'
+            });
         });
     }
 
@@ -160,7 +204,10 @@ function Payments() {
 
     function handleCheckout() {
         if (cart.length === 0) {
-            alert('Το καλάθι είναι κενό!');
+            showNotice('Το καλάθι είναι κενό!', {
+                title: 'Δεν υπάρχει παραγγελία',
+                variant: 'warning'
+            });
             return;
         }
 
@@ -233,7 +280,7 @@ function Payments() {
                                             </select>
 
                                             {sizeErrors[product.product_id] && (
-                                                <div style={{ color: 'red', marginTop: '8px', fontSize: '14px', fontWeight: '600' }}>
+                                                <div className="size-error-text">
                                                     {sizeErrors[product.product_id]}
                                                 </div>
                                             )}
@@ -361,6 +408,38 @@ function Payments() {
                     </div>
                 </div>
             </div>
+
+            {notice.open && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="payments-notice-title"
+                    onClick={closeNotice}
+                    className="payments-notice-overlay"
+                >
+                    <div
+                        role="document"
+                        onClick={(event) => event.stopPropagation()}
+                        className={`payments-notice-card payments-notice-card--${notice.variant}`}
+                    >
+                        <h3 id="payments-notice-title" className="payments-notice-title">
+                            {notice.title}
+                        </h3>
+                        <div className="payments-notice-message">
+                            {notice.message}
+                        </div>
+                        <div className="payments-notice-actions">
+                            <button
+                                type="button"
+                                onClick={closeNotice}
+                                className={`payments-notice-button payments-notice-button--${notice.variant}`}
+                            >
+                                Εντάξει
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

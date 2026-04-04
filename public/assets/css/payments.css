@@ -60,3 +60,78 @@
     border-radius: 16px;
     box-shadow: #05112e;
 }
+
+.size-error-text {
+    color: red;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.payments-notice-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(11, 25, 41, 0.62);
+    padding: 1rem;
+}
+
+.payments-notice-card {
+    width: min(500px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    border-top: 5px solid #2f6ea0;
+    box-shadow: 0 20px 50px rgba(11, 25, 41, 0.32);
+    padding: 1.25rem 1.1rem;
+}
+
+.payments-notice-card--warning {
+    border-top-color: #d79f0d;
+}
+
+.payments-notice-card--error {
+    border-top-color: #c84545;
+}
+
+.payments-notice-title {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.payments-notice-message {
+    font-family: Lato, sans-serif;
+    color: #344055;
+    line-height: 1.55;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.payments-notice-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.payments-notice-button {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.48rem 1.2rem;
+    color: #fff;
+    font-weight: 700;
+    font-family: Lato, sans-serif;
+    background: #1f5f93;
+}
+
+.payments-notice-button--warning {
+    background: #b8860b;
+}
+
+.payments-notice-button--error {
+    background: #bb3535;
+}
