@@ -1,12 +1,4 @@
 {
-    "6": {
-        "deadline": "2026-03-16",
-        "status": "active"
-    },
-    "7": {
-        "deadline": "2026-03-18",
-        "status": "active"
-    },
     "10": {
         "open_date": "2026-03-19",
         "close_date": "2026-03-25",
@@ -18,11 +10,5 @@
         "close_date": "2026-03-19",
         "status": "active",
         "image_path": "\/parents-council-platform-group5\/public\/assets\/Applications_docs\/application_11_application_image_69b958d7dad778.80067516.jpg"
-    },
-    "3": {
-        "open_date": "2026-03-22",
-        "close_date": "2026-03-24",
-        "status": "active",
-        "image_path": "\/parents-council-platform-group5\/public\/assets\/Applications_docs\/application_3_application_image_69c04b858d8d13.02681062.jpg"
     }
 }

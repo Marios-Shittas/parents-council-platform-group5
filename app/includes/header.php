@@ -3,9 +3,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
+if (!headers_sent()) {
+    header("Cache-Control: no-store, no-cache, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
 
 // Check if user is logged in (protected page)
 $isProtectedPage = isset($_SESSION['user_id']);
