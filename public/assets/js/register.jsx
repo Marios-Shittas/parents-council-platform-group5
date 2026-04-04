@@ -12,36 +12,27 @@ function RegisterForm() {
         { child_name: '', child_last_name: '', child_dob: '', child_class: '' }
     ]);
     const [showPhoneError, setShowPhoneError] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        variant: 'success',
+        title: '',
+        message: ''
+    });
 
-    const isNonEmpty = (value) => value.trim() !== '';
-    const isEmailValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, [notice.open]);
+
     const isPhoneValid = (value) => /^\d{8}$/.test(value);
-
-    const isGuardianFieldValid = (fieldName, value) => {
-        if (fieldName === 'email') {
-            return isEmailValid(value);
-        }
-
-        if (fieldName === 'phone') {
-            return isPhoneValid(value);
-        }
-
-        return isNonEmpty(value);
-    };
-
-    const isChildFieldValid = (fieldName, value) => isNonEmpty(value);
-
-    const isFormValid = () => {
-        const guardianValid = ['first_name', 'last_name', 'phone', 'email'].every((fieldName) => (
-            isGuardianFieldValid(fieldName, form[fieldName])
-        ));
-
-        const childrenValid = children.every((child) => (
-            Object.entries(child).every(([fieldName, value]) => isChildFieldValid(fieldName, value))
-        ));
-
-        return guardianValid && childrenValid && form.viber_consent && form.consent;
-    };
 
     const handlePhoneKeyDown = (e) => {
         if (e.key === 'Enter' && !isPhoneValid(form.phone)) {
@@ -55,16 +46,6 @@ function RegisterForm() {
 
         if (!isPhoneValid(form.phone)) {
             setShowPhoneError(true);
-            return;
-        }
-
-        if (!isFormValid()) {
-            alert("Παρακαλώ συμπληρώστε σωστά όλα τα πεδία πριν την υποβολή.");
-            return;
-        }
-
-        if (!form.viber_consent || !form.consent) {
-            alert("Πρέπει να κάνετε check και στα δύο κουτιά για να ολοκληρωθεί η εγγραφή.");
             return;
         }
 
@@ -82,14 +63,39 @@ function RegisterForm() {
 
             const result = await response.json();
 
-            alert(result.message);
-
             if (result.success) {
-                window.location.href = "../public/home.php";
+                setNotice({
+                    open: true,
+                    variant: 'success',
+                    title: 'Η εγγραφή καταχωρήθηκε επιτυχώς',
+                    message: result.message || 'Η αίτησή σας καταχωρήθηκε επιτυχώς. Θα ενημερωθείτε μέσω email όταν εγκριθεί από τον διαχειριστή.'
+                });
+                return;
             }
 
+            setNotice({
+                open: true,
+                variant: 'error',
+                title: 'Η εγγραφή δεν ολοκληρώθηκε',
+                message: result.message || 'Παρουσιάστηκε σφάλμα κατά την υποβολή της αίτησης.'
+            });
+
         } catch (error) {
-            alert("Σφάλμα επικοινωνίας με τον server.");
+            setNotice({
+                open: true,
+                variant: 'error',
+                title: 'Σφάλμα επικοινωνίας',
+                message: 'Σφάλμα επικοινωνίας με τον server.'
+            });
+        }
+    };
+
+    const closeNotice = () => {
+        const shouldRedirect = notice.variant === 'success';
+        setNotice({ open: false, variant: 'success', title: '', message: '' });
+
+        if (shouldRedirect) {
+            window.location.href = '../public/home.php';
         }
     };
 
@@ -220,6 +226,8 @@ function RegisterForm() {
                                                     inputMode="numeric"
                                                     autoComplete="tel-national"
                                                     maxLength="8"
+                                                    pattern="\d{8}"
+                                                    title="Το κινητό πρέπει να έχει ακριβώς 8 ψηφία."
                                                     placeholder="99123456"
                                                     required
                                                 />
@@ -366,6 +374,27 @@ function RegisterForm() {
                         </div>
 
                     </form>
+
+                    {notice.open && (
+                        <div className="register-success-modal" role="dialog" aria-modal="true" aria-labelledby="register-notice-title">
+                            <div className="register-success-modal__backdrop" onClick={closeNotice}></div>
+                            <div className={`register-success-modal__card register-success-modal__card--${notice.variant}`} role="document">
+                                <div className="register-success-modal__icon" aria-hidden="true">
+                                    <i className={notice.variant === 'success' ? 'fas fa-circle-check' : 'fas fa-triangle-exclamation'}></i>
+                                </div>
+                                <h2 id="register-notice-title" className="register-success-modal__title">
+                                    {notice.title}
+                                </h2>
+                                <p className="register-success-modal__message">
+                                    {notice.message}
+                                </p>
+                                <button type="button" className="register-success-modal__button" onClick={closeNotice}>
+                                    Εντάξει
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>

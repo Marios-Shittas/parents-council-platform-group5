@@ -270,6 +270,110 @@
     transform: translateY(-1px);
 }
 
+/* ── Success modal ── */
+.register-success-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.register-success-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(4px);
+}
+
+.register-success-modal__card {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 520px);
+    border-radius: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid rgba(59, 130, 246, 0.16);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+    padding: 28px 26px 24px;
+    text-align: center;
+    animation: register-success-modal-enter 180ms ease-out;
+}
+
+.register-success-modal__card--error {
+    border-color: rgba(239, 68, 68, 0.18);
+}
+
+.register-success-modal__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #dbeafe, #eff6ff);
+    color: #2563eb;
+    font-size: 1.75rem;
+}
+
+.register-success-modal__card--error .register-success-modal__icon {
+    background: linear-gradient(135deg, #fee2e2, #fef2f2);
+    color: #dc2626;
+}
+
+.register-success-modal__title {
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.register-success-modal__message {
+    margin: 0;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.register-success-modal__button {
+    margin-top: 22px;
+    border: none;
+    border-radius: 999px;
+    padding: 11px 26px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.register-success-modal__button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.register-success-modal__card--error .register-success-modal__button {
+    background: #dc2626;
+}
+
+.register-success-modal__card--error .register-success-modal__button:hover {
+    background: #b91c1c;
+}
+
+@keyframes register-success-modal-enter {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ── Responsive ── */
 @media (max-width: 576px) {
     .register-section-card .form-group-inline {
@@ -287,5 +391,14 @@
     }
     .register-section-card .form-group-inline input.form-control {
         width: 100%;
+    }
+
+    .register-success-modal__card {
+        padding: 24px 18px 20px;
+        border-radius: 20px;
+    }
+
+    .register-success-modal__title {
+        font-size: 1.08rem;
     }
 }
