@@ -138,6 +138,106 @@
     gap: 22px;
 }
 
+.profile-inline-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.profile-inline-message-completed {
+    background: #e8f7ee;
+    color: #1e7543;
+    border-color: #c0e8cf;
+}
+
+.profile-inline-message-pending {
+    background: #fff6e3;
+    color: #8a630a;
+    border-color: #f4deaa;
+}
+
+.profile-inline-message-failed {
+    background: #feeceb;
+    color: #a23131;
+    border-color: #f3c8c5;
+}
+
+.profile-insurance-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-radius: 24px;
+    border: 1px solid rgba(38, 96, 67, 0.18);
+    background: linear-gradient(135deg, #f4fbf7 0%, #e9f4fd 100%);
+    box-shadow: 0 14px 32px rgba(26, 58, 92, 0.08);
+    padding: 22px 24px;
+    margin-bottom: 24px;
+}
+
+.insurance-cta-copy h2 {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    color: #183a57;
+}
+
+.insurance-cta-copy p {
+    margin: 10px 0 0;
+    color: #4f657a;
+}
+
+.insurance-cta-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.insurance-cta-meta span {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid rgba(28, 88, 130, 0.16);
+    color: #295b87;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+}
+
+.insurance-cta-actions {
+    flex: 0 0 auto;
+}
+
+.insurance-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 0;
+    background: linear-gradient(135deg, #1f5f8f, #2e7ca8);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0.8rem 1.3rem;
+    box-shadow: 0 10px 24px rgba(31, 95, 143, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.insurance-cta-btn:hover,
+.insurance-cta-btn:focus {
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(31, 95, 143, 0.32);
+}
+
 .profile-main-grid {
     grid-template-columns: 1fr;
     margin-bottom: 24px;
@@ -478,6 +578,11 @@
 @media (max-width: 991.98px) {
     .profile-hero-card,
     .profile-identity {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-insurance-cta {
         flex-direction: column;
         align-items: flex-start;
     }
