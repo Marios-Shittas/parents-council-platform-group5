@@ -65,14 +65,12 @@ class RegisteringService
             return;
         }
         $children = $payload['children'];
-        $childrenCount = count($children);
 
         try {
             $this->conn->begin_transaction();
 
-            $userId = $this->insertUser($name, $surname, $email, $phone, $childrenCount);
+            $userId = $this->insertUser($name, $surname, $email, $phone);
             $this->insertChildren($userId, $children);
-            $this->syncUserChildrenCount($userId);
             $this->insertRegistrationLog($userId, $email);
 
             $this->conn->commit();
@@ -189,20 +187,20 @@ class RegisteringService
         return $exists;
     }
 
-    private function insertUser(string $name, string $surname, string $email, string $phone, int $childrenCount): int
+    private function insertUser(string $name, string $surname, string $email, string $phone): int
     {
         $placeholderPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
 
         $stmtUser = $this->conn->prepare(
-            "INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status)
-             VALUES (?, ?, ?, ?, ?, ?, 'parent', 'pending')"
+            "INSERT INTO Users (name, surname, email, password, phone_number, role, account_status)
+             VALUES (?, ?, ?, ?, ?, 'parent', 'pending')"
         );
 
         if ($stmtUser === false) {
             throw new RuntimeException('Αποτυχία καταχώρησης χρήστη.');
         }
 
-        $stmtUser->bind_param('sssssi', $name, $surname, $email, $placeholderPassword, $phone, $childrenCount);
+        $stmtUser->bind_param('sssss', $name, $surname, $email, $placeholderPassword, $phone);
         $stmtUser->execute();
         $userId = (int) $this->conn->insert_id;
         $stmtUser->close();
@@ -249,23 +247,6 @@ class RegisteringService
         $stmtLog->bind_param('iss', $userId, $action, $description);
         $stmtLog->execute();
         $stmtLog->close();
-    }
-
-    private function syncUserChildrenCount(int $userId): void
-    {
-        $stmt = $this->conn->prepare(
-            'UPDATE Users
-             SET number_of_children = (SELECT COUNT(*) FROM Children WHERE user_id = ?)
-             WHERE user_id = ?'
-        );
-
-        if ($stmt === false) {
-            throw new RuntimeException('Αποτυχία συγχρονισμού αριθμού παιδιών.');
-        }
-
-        $stmt->bind_param('ii', $userId, $userId);
-        $stmt->execute();
-        $stmt->close();
     }
 
     private function respond(int $statusCode, array $body): void

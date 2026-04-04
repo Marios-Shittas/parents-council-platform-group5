@@ -68,7 +68,7 @@ function RegisterForm() {
                     open: true,
                     variant: 'success',
                     title: 'Η εγγραφή καταχωρήθηκε επιτυχώς',
-                    message: 'Θα ενημερωθείτε μέσω email όταν εγκριθεί από τον διαχειριστή.'
+                    message: result.message || 'Η αίτησή σας καταχωρήθηκε επιτυχώς. Θα ενημερωθείτε μέσω email όταν εγκριθεί από τον διαχειριστή.'
                 });
                 return;
             }

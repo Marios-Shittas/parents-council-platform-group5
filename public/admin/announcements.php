@@ -504,10 +504,12 @@ $announcements = $announcementsService->getAllAnnouncements();
                                                class="btn btn-sm btn-outline-primary mr-1" title="Επεξεργασία">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form method="POST" style="display: inline;" class="js-confirm-submit" data-confirm-message="Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ανακοίνωση;" data-confirm-title="Επιβεβαίωση διαγραφής">
+                                            <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $ann['announcement_id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Διαγραφή">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ανακοίνωση;')"
+                                                        title="Διαγραφή">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -597,165 +599,36 @@ $announcements = $announcementsService->getAllAnnouncements();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-function ensureNoticeElements() {
-    if (document.getElementById('page-notice-overlay')) {
-        return;
-    }
-
-    const style = document.createElement('style');
-    style.textContent = '' +
-        '.page-notice-overlay{position:fixed;inset:0;z-index:1600;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(11,25,41,.62)}' +
-        '.page-notice-overlay.is-open{display:flex}' +
-        '.page-notice-card{width:min(500px,100%);background:#fff;border-radius:18px;padding:1.25rem 1.1rem;box-shadow:0 20px 50px rgba(11,25,41,.32);border-top:5px solid #2f6ea0}' +
-        '.page-notice-card.is-error{border-top-color:#c84545}' +
-        '.page-notice-card.is-warning{border-top-color:#d79f0d}' +
-        '.page-notice-title{font-family:Montserrat,sans-serif;font-weight:700;color:#1a3a5c;text-align:center;margin-bottom:.5rem}' +
-        '.page-notice-message{font-family:Lato,sans-serif;color:#344055;line-height:1.55;text-align:center;white-space:pre-wrap}' +
-        '.page-notice-actions{display:flex;justify-content:center;margin-top:1rem}' +
-        '.page-notice-btn{border:0;border-radius:999px;padding:.48rem 1.2rem;background:#1f5f93;color:#fff;font-weight:700}' +
-        '.page-notice-card.is-error .page-notice-btn{background:#bb3535}' +
-        '.page-notice-card.is-warning .page-notice-btn{background:#b8860b}';
-    document.head.appendChild(style);
-
-    const overlay = document.createElement('div');
-    overlay.id = 'page-notice-overlay';
-    overlay.className = 'page-notice-overlay';
-    overlay.innerHTML = '' +
-        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
-        '</div>';
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        }
-    });
-
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('page-notice-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        });
-    }
-}
-
-function showNotice(message, options) {
-    ensureNoticeElements();
-
-    const overlay = document.getElementById('page-notice-overlay');
-    const card = document.getElementById('page-notice-card');
-    const title = document.getElementById('page-notice-title');
-    const body = document.getElementById('page-notice-message');
-    const opts = options || {};
-
-    if (!overlay || !card || !title || !body) {
-        console.error(message);
-        return;
-    }
-
-    card.classList.remove('is-error', 'is-warning');
-    if (opts.variant === 'error') card.classList.add('is-error');
-    if (opts.variant === 'warning') card.classList.add('is-warning');
-
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
-
-    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
-    document.body.style.overflow = 'hidden';
-    overlay.classList.add('is-open');
-}
-
-function showConfirm(message, onConfirm, options) {
-    const opts = options || {};
-    const overlay = document.createElement('div');
-    const previousOverflow = document.body.style.overflow || '';
-
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.zIndex = '1700';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.padding = '1rem';
-    overlay.style.background = 'rgba(11,25,41,.62)';
-
-    overlay.innerHTML = '' +
-        '<div role="dialog" aria-modal="true" style="width:min(500px,100%);background:#fff;border-radius:18px;padding:1.25rem 1.1rem;box-shadow:0 20px 50px rgba(11,25,41,.32);border-top:5px solid #d79f0d">' +
-            '<h3 style="font-family:Montserrat,sans-serif;font-weight:700;color:#1a3a5c;text-align:center;margin-bottom:.5rem">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
-            '<div style="font-family:Lato,sans-serif;color:#344055;line-height:1.55;text-align:center;white-space:pre-wrap">' + (message || 'Είστε σίγουροι;') + '</div>' +
-            '<div style="display:flex;justify-content:center;gap:.55rem;margin-top:1rem">' +
-                '<button type="button" data-action="cancel" style="border:1px solid #c7d1db;border-radius:999px;padding:.45rem 1rem;background:#eef2f6;color:#344055;font-weight:700">Όχι</button>' +
-                '<button type="button" data-action="confirm" style="border:0;border-radius:999px;padding:.45rem 1rem;background:#bb3535;color:#fff;font-weight:700">Ναι</button>' +
-            '</div>' +
-        '</div>';
-
-    function closeOverlay() {
-        document.body.style.overflow = previousOverflow;
-        overlay.remove();
-    }
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            closeOverlay();
-        }
-    });
-
-    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
-    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeOverlay);
-    }
-
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function () {
-            closeOverlay();
-            if (typeof onConfirm === 'function') {
-                onConfirm();
-            }
-        });
-    }
-
-    document.body.style.overflow = 'hidden';
-    document.body.appendChild(overlay);
-}
-
 // Κάνει διαγραφή εικόνας με ξεχωριστό POST, χωρίς να χαλάει η φόρμα επεξεργασίας
 function deleteAnnouncementImage(imageId, announcementId) {
-    showConfirm('Διαγραφή εικόνας;', function () {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '';
+    if (!confirm('Διαγραφή εικόνας;')) {
+        return;
+    }
 
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'delete_image';
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '';
 
-        const imageIdInput = document.createElement('input');
-        imageIdInput.type = 'hidden';
-        imageIdInput.name = 'image_id';
-        imageIdInput.value = String(imageId);
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'delete_image';
 
-        const announcementIdInput = document.createElement('input');
-        announcementIdInput.type = 'hidden';
-        announcementIdInput.name = 'announcement_id';
-        announcementIdInput.value = String(announcementId);
+    const imageIdInput = document.createElement('input');
+    imageIdInput.type = 'hidden';
+    imageIdInput.name = 'image_id';
+    imageIdInput.value = String(imageId);
 
-        form.appendChild(actionInput);
-        form.appendChild(imageIdInput);
-        form.appendChild(announcementIdInput);
-        document.body.appendChild(form);
-        form.submit();
-    }, {
-        title: 'Επιβεβαίωση διαγραφής'
-    });
+    const announcementIdInput = document.createElement('input');
+    announcementIdInput.type = 'hidden';
+    announcementIdInput.name = 'announcement_id';
+    announcementIdInput.value = String(announcementId);
+
+    form.appendChild(actionInput);
+    form.appendChild(imageIdInput);
+    form.appendChild(announcementIdInput);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // Έλεγχος αρχείων και μικρή προεπισκόπηση εικόνων πριν το submit
@@ -807,10 +680,7 @@ function validateAndPreviewImages(input, previewId) {
     
     // Δείχνουμε προειδοποιήσεις, αλλά αφήνουμε τον server να κάνει τον τελικό έλεγχο
     if (warnings.length > 0) {
-        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.', {
-            title: 'Έλεγχος αρχείων',
-            variant: 'warning'
-        });
+        alert('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.');
     }
 }
 
@@ -838,20 +708,6 @@ if (editImagesInput) {
         validateAndPreviewImages(this, 'editPreview');
     });
 }
-
-document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const message = form.getAttribute('data-confirm-message') || 'Είστε σίγουροι;';
-        const title = form.getAttribute('data-confirm-title') || 'Επιβεβαίωση';
-
-        showConfirm(message, function () {
-            form.submit();
-        }, {
-            title: title
-        });
-    });
-});
 </script>
 
 </body>
