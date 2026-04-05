@@ -132,3 +132,104 @@
     width: 150px;
     text-align: center;
 }
+
+.page-notice-overlay,
+.page-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(11, 25, 41, 0.62);
+}
+
+.page-notice-overlay.is-open,
+.page-confirm-overlay.is-open {
+    display: flex;
+}
+
+.page-notice-card,
+.page-confirm-card {
+    width: min(500px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.25rem 1.1rem;
+    box-shadow: 0 20px 50px rgba(11, 25, 41, 0.32);
+    border-top: 5px solid #2f6ea0;
+}
+
+.page-notice-card.is-error {
+    border-top-color: #c84545;
+}
+
+.page-notice-card.is-warning,
+.page-confirm-card {
+    border-top-color: #d79f0d;
+}
+
+.page-notice-title,
+.page-confirm-title {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.page-notice-message,
+.page-confirm-message {
+    font-family: Lato, sans-serif;
+    color: #344055;
+    line-height: 1.55;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.page-notice-actions,
+.page-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 1rem;
+}
+
+.page-notice-btn,
+.page-confirm-btn {
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-weight: 700;
+}
+
+.page-notice-btn {
+    border: 0;
+    background: #1f5f93;
+    color: #fff;
+}
+
+.page-notice-card.is-error .page-notice-btn {
+    background: #bb3535;
+}
+
+.page-notice-card.is-warning .page-notice-btn {
+    background: #b8860b;
+}
+
+.page-confirm-btn--cancel {
+    border: 1px solid #c7d1db;
+    background: #eef2f6;
+    color: #344055;
+}
+
+.page-confirm-btn--confirm {
+    border: 0;
+    background: #bb3535;
+    color: #fff;
+}
+
+.preview-file-caption {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 2px;
+}
