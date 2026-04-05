@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../../includes/site_context.php';
 require_once __DIR__ . '/../../services/ParentsPageService.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 function parentsPageRenderMultiline($value)
 {
     return nl2br(htmlspecialchars(trim((string)$value), ENT_QUOTES, 'UTF-8'));
@@ -52,6 +56,7 @@ $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content'][
 $loginSteps = parentsPageSanitizeList($electronicAdminSection['content']['login_steps'] ?? []);
 $edgeSteps = parentsPageSanitizeList($electronicAdminSection['content']['edge_steps'] ?? []);
 $chromeSteps = parentsPageSanitizeList($electronicAdminSection['content']['chrome_steps'] ?? []);
+$showParentsGallery = site_is_parent() && (($_SESSION['role'] ?? '') === 'parent');
 
 $pageHeaderTitle = $pageHeaderSection['title'];
 $pageHeaderSubtitle = $pageHeaderSection['subtitle'];
@@ -198,25 +203,27 @@ $pageHeaderEyebrow = site_is_parent()
                     </button>
                 </div>
 
-                <div class="parents-widget">
-                    <h3><i class="fas fa-camera"></i> <?php echo htmlspecialchars($gallerySection['title']); ?></h3>
-                    <?php if (!empty($galleryImages)): ?>
-                        <div class="parents-gallery">
-                            <?php foreach ($galleryImages as $image): ?>
-                                <?php
-                                $fullImage = $image['full_image_path'] ?? '';
-                                $thumbImage = $image['thumb_image_path'] ?: $fullImage;
-                                $altText = trim((string)($image['alt_text'] ?? '')) !== '' ? $image['alt_text'] : 'Φωτογραφικό υλικό σχολείου';
-                                ?>
-                                <a href="<?php echo htmlspecialchars($fullImage); ?>" target="_blank" rel="noopener noreferrer">
-                                    <img src="<?php echo htmlspecialchars($thumbImage); ?>" alt="<?php echo htmlspecialchars($altText); ?>" loading="lazy">
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <p class="mb-0"><?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη φωτογραφίες.'); ?></p>
-                    <?php endif; ?>
-                </div>
+                <?php if ($showParentsGallery): ?>
+                    <div class="parents-widget">
+                        <h3><i class="fas fa-camera"></i> <?php echo htmlspecialchars($gallerySection['title']); ?></h3>
+                        <?php if (!empty($galleryImages)): ?>
+                            <div class="parents-gallery">
+                                <?php foreach ($galleryImages as $image): ?>
+                                    <?php
+                                    $fullImage = $image['full_image_path'] ?? '';
+                                    $thumbImage = $image['thumb_image_path'] ?: $fullImage;
+                                    $altText = trim((string)($image['alt_text'] ?? '')) !== '' ? $image['alt_text'] : 'Φωτογραφικό υλικό σχολείου';
+                                    ?>
+                                    <a href="<?php echo htmlspecialchars($fullImage); ?>" target="_blank" rel="noopener noreferrer">
+                                        <img src="<?php echo htmlspecialchars($thumbImage); ?>" alt="<?php echo htmlspecialchars($altText); ?>" loading="lazy">
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <p class="mb-0"><?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη φωτογραφίες.'); ?></p>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </aside>
         </div>
     </div>
