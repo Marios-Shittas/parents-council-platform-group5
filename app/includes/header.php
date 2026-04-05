@@ -14,7 +14,7 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Γυμνάσιο Αγίου Αθανασίου';
+$site_title = 'Σύνδεσμος Γονέων';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 
@@ -50,6 +50,12 @@ $nav_items = [
         'href' => site_section_url('events.php'),
         'icon' => 'fas fa-calendar-alt',
         'match' => ['events.php', 'event.php'],
+    ],
+    [
+        'label' => 'Γονείς',
+        'href' => site_section_url('parents.php'),
+        'icon' => 'fas fa-users',
+        'match' => ['parents.php'],
     ],
 ];
 
@@ -124,11 +130,11 @@ $nav_items[] = [
             font-family: 'Lato', sans-serif;
         }
 
-        /* Διακριτική μπλε γραμμή πάνω για πιο premium εμφάνιση. */
-        .navbar::before {
+        /* Διακριτική μπλε γραμμή κάτω από το header. */
+        .navbar::after {
             content: "";
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
             right: 0;
             height: 2px;
