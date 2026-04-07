@@ -4,7 +4,7 @@
 
 .page-content {
     background: #ffffff;
-    width: 340px;
+    width: 420px;
     height: 520px;
     border-radius: 12px;
     padding: 2rem 2rem 1.5rem;
@@ -12,16 +12,15 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
 }
 
-#login-title {
+#two-factor-title {
     text-align: left;
     margin: 20px;
-    width: 120px;
+    width: 240px;
     color: #1E2D5A;
 }
 
 #error-message {
     color: red;
-    display: block;
     font-size: 10px;
     margin-left: 20px;
 }
@@ -32,13 +31,13 @@
     margin-left: 20px;
 }
 
-.login-container {
+.two-factor-container {
     margin: auto;
     padding: 10px;
     width: 250px;
 }
 
-#email-label {
+#two-factor-label {
     color: #444;
     font-size: 18px;
     font-size: 0.82rem;
@@ -46,7 +45,7 @@
     display: block;
 }
 
-#email-input {
+#code-input {
     border: 1.5px solid #B0BDD8; 
     color: #1E2D5A; 
     background: #F8FAFF;
@@ -59,50 +58,13 @@
     outline: none;
     font-family: 'Lato', sans-serif;
 }
-
-#password-label {
-    color: #444;
-    font-size: 18px;
-    margin-top: 5px;
-    font-size: 0.82rem;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.password-wrapper {
-    position: relative;
-}
-
-.password-wrapper i {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #666;
-}
-
-#password-input {
-    border: 1.5px solid #B0BDD8; 
-    color: #1E2D5A; 
-    background: #F8FAFF;
-    border-radius: 6px;
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    margin-bottom: 5px;
-    outline: none;
-    font-family: 'Lato', sans-serif;
-}
-
-#email-input:focus, #password-input:focus {
+#code-input:focus {
     border-color: #1E2D5A;
     outline: none;
     box-shadow: 0 0 0 3px rgba(30, 45, 90, 0.15);
 }
 
-#login-button {
+#confirm-button {
     background: #1E2D5A; 
     color: #fff; 
     margin-top: 25px;
@@ -133,63 +95,7 @@
     margin-bottom: 2px;
 }
 
-#login-button:hover, #back-button:hover {
+#confirm-button:hover {
     background: #2A3F7E;
     color: #fff; 
-}
-
-.forgot-password {
-    text-align: right;
-    font-size: 0.72rem;
-    margin-bottom: 5px;
-}
-
-#forgot-password-link {
-    color: #1E2D5A;
-    text-decoration: none; 
-    font-weight: 600;
-}
-
-#forgot-password-link:hover {
-    color: #2A3F7E;
-    text-decoration: underline !important;
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 5px 0;
-}
-
-.line {
-    background: #ccc;
-    flex: 1;
-    height: 1px;
-}
-
-.or-text {
-    color: #888;
-    font-size: 12px;
-    letter-spacing: 1px;    
-}
-
-
-.register-container {
-    text-align: center;
-    font-size: 14px;
-}
-
-#register-prompt {
-    color: #555;
-}
-
-#register-link {
-    color: #1E2D5A;
-    text-decoration: none;
-}
-
-#register-link:hover {
-    color: #2A3F7E;
-    text-decoration: underline !important;
 }
