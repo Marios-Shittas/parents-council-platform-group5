@@ -113,6 +113,38 @@ class UsersService
         return ['success' => true, 'message' => 'Link Sent.'];
     }
 
+    public function resetPassword($email, $newPassword) 
+    {
+        if ($newPassword === '') {
+            return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να είναι κενός.'];
+        }
+        
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        $stmt = $this->conn->prepare ("UPDATE Users SET password = ? WHERE email = ?");
+
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας επαναφοράς κωδικού.'];
+        }
+
+        $stmt->bind_param("ss", $hashedPassword, $email);
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Αποτυχία επαναφοράς κωδικού.'];
+        }
+
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        if ($affected <= 0) {
+            return ['success' => false, 'message' => 'Δεν επαναφέρθηκε ο κωδικός.'];
+        }
+        
+        return ['success' => true, 'message' => 'Ο κωδικός επαναφέρθηκε επιτυχώς.'];
+
+    }
+
     public function getAllUsersForAdmin(string $sort = 'pending_first'): array
     {
         switch ($sort) {
@@ -323,7 +355,7 @@ class UsersService
         if ($shouldTriggerApprovalFlow) {
             $approvalToken = bin2hex(random_bytes(32));
             $expiryHours = defined('APPROVAL_LINK_EXPIRY_HOURS') ? max(1, APPROVAL_LINK_EXPIRY_HOURS) : 168;
-            $approvalExpiry = date('Y-m-d H:i:s', strtotime('+' . $expiryHours . ' hours'));
+            $approvalExpiry = date('Y-m-d H:i:s', time() + ($expiryHours * 3600));
             $approvalLink = rtrim(APP_BASE_URL, '/') . '/public/subscription.php?token=' . urlencode($approvalToken);
             $status = 'waiting_payment';
         }

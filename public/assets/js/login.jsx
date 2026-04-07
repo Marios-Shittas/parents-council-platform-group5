@@ -61,3 +61,11 @@ function handleLogin() {
   .catch(error => console.error('Error during login:', error));
 }
 document.getElementById("login-button").addEventListener("click", handleLogin);
+
+function handleKeyPress(event) {
+  if (event.key === 'Enter') {
+    handleLogin();
+  }
+}
+document.getElementById("email-input").addEventListener("keypress", handleKeyPress);
+document.getElementById("password-input").addEventListener("keypress", handleKeyPress);
