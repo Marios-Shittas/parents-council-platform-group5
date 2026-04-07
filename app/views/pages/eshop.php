@@ -3,6 +3,8 @@ require_once __DIR__ . '/../../includes/site_context.php';
 
 $paymentsScriptPath = __DIR__ . '/../../../public/assets/js/payments.jsx';
 $paymentsScriptVersion = file_exists($paymentsScriptPath) ? (string) filemtime($paymentsScriptPath) : (string) time();
+$paymentsCssPath = __DIR__ . '/../../../public/assets/css/user_css/payments.css';
+$paymentsCssVersion = file_exists($paymentsCssPath) ? (string) filemtime($paymentsCssPath) : (string) time();
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -15,7 +17,7 @@ $paymentsScriptVersion = file_exists($paymentsScriptPath) ? (string) filemtime($
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/payments.css'); ?>">
+    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/payments.css'); ?>?v=<?php echo urlencode($paymentsCssVersion); ?>">
 
     <title>Αγορές</title>
 </head>
