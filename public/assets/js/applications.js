@@ -4,7 +4,25 @@
    FORM FIELD TEMPLATES  (keyed by formType)
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const FORM_FIELDS = {
-    general: []
+    general: [
+        { name: 'parent_name', label: 'Ονοματεπώνυμο Γονέα', type: 'text', icon: 'fa-user', required: true },
+        { name: 'parent_email', label: 'Email Επικοινωνίας', type: 'email', icon: 'fa-envelope', required: true },
+        { name: 'parent_phone', label: 'Τηλέφωνο Επικοινωνίας', type: 'text', icon: 'fa-phone', required: true },
+        { name: 'student_name', label: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας', type: 'text', icon: 'fa-user-graduate', required: true },
+        { name: 'student_class', label: 'Τμήμα / Τάξη', type: 'text', icon: 'fa-school', required: true },
+        { name: 'manual_application_text', label: 'Κείμενο Αίτησης', type: 'textarea', icon: 'fa-keyboard', required: true }
+    ]
+};
+
+const SUBMISSION_FIELD_LABELS = {
+    parent_name: 'Ονοματεπώνυμο Γονέα',
+    parent_email: 'Email Επικοινωνίας',
+    parent_phone: 'Τηλέφωνο Επικοινωνίας',
+    student_name: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας',
+    student_class: 'Τμήμα / Τάξη',
+    manual_application_text: 'Κείμενο Αίτησης',
+    applied_at: 'Ημερομηνία Υποβολής',
+    _submission_mode: 'Τρόπος Υποβολής'
 };
 
 const APP_META = [
@@ -18,6 +36,10 @@ const APP_META = [
 
 var MAX_SUBMISSION_FILES = 4;
 var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+var SUBMISSION_MODE_LABELS = {
+    manual: 'Online Συμπλήρωση',
+    upload: 'Ανέβασμα Αρχείου'
+};
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    IN-PAGE APPLIED TRACKING  (resets on page reload â€” DB is the source of truth)
@@ -46,6 +68,95 @@ function escHtml(str) {
         .replace(/>/g,  '&gt;')
         .replace(/"/g,  '&quot;')
         .replace(/'/g,  '&#039;');
+}
+
+function normalizeSubmissionMode(mode) {
+    return mode === 'manual' ? 'manual' : 'upload';
+}
+
+function getSubmissionModeLabel(mode) {
+    var normalizedMode = normalizeSubmissionMode(mode);
+    return SUBMISSION_MODE_LABELS[normalizedMode] || SUBMISSION_MODE_LABELS.upload;
+}
+
+function humanizeSubmissionFieldKey(key) {
+    return SUBMISSION_FIELD_LABELS[key] || String(key || '').replace(/_/g, ' ');
+}
+
+function getDisplayableSubmissionEntries(submissionDataObj) {
+    var data = submissionDataObj && typeof submissionDataObj === 'object' ? submissionDataObj : {};
+    var entries = [];
+    var preferredOrder = [
+        '_submission_mode',
+        'parent_name',
+        'parent_email',
+        'parent_phone',
+        'student_name',
+        'student_class',
+        'manual_application_text',
+        'applied_at'
+    ];
+    var seen = {};
+
+    preferredOrder.forEach(function (key) {
+        if (!Object.prototype.hasOwnProperty.call(data, key)) {
+            return;
+        }
+
+        var rawValue = data[key];
+        if (key.charAt(0) === '_' && key !== '_submission_mode') {
+            return;
+        }
+        if (key === 'applied_at') {
+            return;
+        }
+        if (Array.isArray(rawValue) || rawValue == null) {
+            return;
+        }
+
+        var value = String(rawValue).trim();
+        if (!value) {
+            return;
+        }
+
+        if (key === '_submission_mode') {
+            value = getSubmissionModeLabel(value);
+        }
+
+        entries.push({
+            key: key,
+            label: humanizeSubmissionFieldKey(key),
+            value: value
+        });
+        seen[key] = true;
+    });
+
+    Object.keys(data).forEach(function (key) {
+        if (seen[key] || key.charAt(0) === '_') {
+            return;
+        }
+        if (key === 'applied_at') {
+            return;
+        }
+
+        var rawValue = data[key];
+        if (Array.isArray(rawValue) || rawValue == null) {
+            return;
+        }
+
+        var value = String(rawValue).trim();
+        if (!value) {
+            return;
+        }
+
+        entries.push({
+            key: key,
+            label: humanizeSubmissionFieldKey(key),
+            value: value
+        });
+    });
+
+    return entries;
 }
 
 function draftStorageKey(appId) {
@@ -125,7 +236,7 @@ function getAppTitleById(appId) {
 function getDraftStudentInfo(draftData) {
     return {
         studentName: draftData && draftData.student_name ? draftData.student_name : 'â€”',
-        studentClass: draftData && draftData.class ? draftData.class : 'â€”'
+        studentClass: draftData && draftData.student_class ? draftData.student_class : 'â€”'
     };
 }
 
@@ -341,6 +452,9 @@ function addSubmissionRow(sub) {
     if (!tbody) return;
 
     var uploadedFiles = Array.isArray(sub.uploadedFiles) ? sub.uploadedFiles : [];
+    var submissionModeHtml = sub && sub.submissionMode
+        ? '<div class="small text-muted mt-1">' + escHtml(getSubmissionModeLabel(sub.submissionMode)) + '</div>'
+        : '';
     var filesHtml = uploadedFiles.map(function (fileItem) {
         if (fileItem && typeof fileItem === 'object' && fileItem.url) {
             var itemName = fileItem.name ? String(fileItem.name) : 'Αρχείο';
@@ -353,7 +467,7 @@ function addSubmissionRow(sub) {
     var tr = document.createElement('tr');
     tr.dataset.jsRow = sub.appId;
     tr.innerHTML =
-        '<td><strong>' + escHtml(sub.appTitle) + '</strong>' + filesHtml + '</td>' +
+        '<td><strong>' + escHtml(sub.appTitle) + '</strong>' + submissionModeHtml + filesHtml + '</td>' +
         '<td>' + escHtml(sub.submittedDate) + '</td>';
     tbody.appendChild(tr);
 
@@ -399,11 +513,9 @@ function buildField(field) {
    SHOW VIEW MODAL  â€“ handles both PHP-rendered DB rows and JS-submitted rows
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
-    var fields = FORM_FIELDS[submissionDataObj._formType] || FORM_FIELDS.general;
-    var rows = fields.map(function (f) {
-        var val = submissionDataObj[f.name] || 'â€”';
+    var rows = getDisplayableSubmissionEntries(submissionDataObj).map(function (entry) {
         return '<tr><th class="text-muted font-weight-normal" style="width:45%">' +
-               escHtml(f.label) + '</th><td><strong>' + escHtml(val) + '</strong></td></tr>';
+               escHtml(entry.label) + '</th><td><strong>' + escHtml(entry.value) + '</strong></td></tr>';
     }).join('');
 
     var submittedLabel = submittedAt || submissionDataObj.applied_at || 'â€”';
@@ -513,6 +625,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var viewModalSubmitBtn = document.getElementById('application-view-submit-btn');
     var viewModalFileInput = document.getElementById('application-view-file-input');
     var viewModalSelectedFiles = document.getElementById('application-view-selected-files');
+    var viewManualForm = document.getElementById('application-view-manual-form');
+    var viewManualFields = document.getElementById('application-view-manual-fields');
+    var viewModeCards = Array.from(document.querySelectorAll('#application-submit-methods [data-submit-mode]'));
+    var viewManualPanel = document.getElementById('application-view-manual-panel');
+    var viewUploadPanel = document.getElementById('application-view-upload-panel');
     var unavailableMessageEl = document.getElementById('application-unavailable-message');
     var applicationNoticeBox = document.getElementById('application-notice-box');
     var applicationNoticeBackdrop = document.getElementById('application-notice-backdrop');
@@ -594,6 +711,70 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
+    function renderManualApplicationFields(prefill) {
+        if (!viewManualFields) {
+            return;
+        }
+
+        var fields = FORM_FIELDS.general || [];
+        viewManualFields.innerHTML = fields.map(buildField).join('');
+
+        if (!prefill) {
+            return;
+        }
+
+        Object.keys(prefill).forEach(function (key) {
+            if (!viewManualForm || !viewManualForm.elements) {
+                return;
+            }
+
+            var field = viewManualForm.elements.namedItem(key);
+            if (!field || field.type === 'file') {
+                return;
+            }
+
+            if (!String(field.value || '').trim()) {
+                field.value = prefill[key];
+            }
+        });
+    }
+
+    function setApplicationSubmitButtonText(mode) {
+        if (!viewModalSubmitBtn) {
+            return;
+        }
+
+        var normalizedMode = normalizeSubmissionMode(mode);
+        viewModalSubmitBtn.innerHTML = normalizedMode === 'manual'
+            ? '<i class="fas fa-keyboard mr-1"></i>Υποβολή Online Αίτησης'
+            : '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+    }
+
+    function setApplicationSubmitMode(mode) {
+        var normalizedMode = normalizeSubmissionMode(mode);
+        _modal.submitMode = normalizedMode;
+
+        viewModeCards.forEach(function (card) {
+            var isActive = card.getAttribute('data-submit-mode') === normalizedMode;
+            card.classList.toggle('is-active', isActive);
+            card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        if (viewManualPanel) {
+            viewManualPanel.classList.toggle('is-active', normalizedMode === 'manual');
+        }
+        if (viewUploadPanel) {
+            viewUploadPanel.classList.toggle('is-active', normalizedMode === 'upload');
+        }
+
+        if (normalizedMode === 'manual' && viewModalFileInput) {
+            viewModalFileInput.value = '';
+            renderSelectedSubmissionFiles();
+        }
+
+        setApplicationSubmitButtonText(normalizedMode);
+    }
+
     function openApplicationViewModal(card) {
         if (!card) return;
 
@@ -608,6 +789,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var appIndex = parseInt(card.dataset.appIndex, 10);
         var title = card.dataset.applicationTitle || '\u039b\u03b5\u03c0\u03c4\u03bf\u03bc\u03ad\u03c1\u03b5\u03b9\u03b5\u03c2 \u0391\u03af\u03c4\u03b7\u03c3\u03b7\u03c2';
         var description = card.dataset.applicationDescription || '\u0394\u03b5\u03bd \u03c5\u03c0\u03ac\u03c1\u03c7\u03b5\u03b9 \u03b4\u03b9\u03b1\u03b8\u03ad\u03c3\u03b9\u03bc\u03b7 \u03c0\u03b5\u03c1\u03b9\u03b3\u03c1\u03b1\u03c6\u03ae.';
+        var parentEmail = card.dataset.parentEmail || '';
         var docsRaw = card.dataset.applicationDocuments || '[]';
         var docs = [];
 
@@ -626,6 +808,10 @@ document.addEventListener('DOMContentLoaded', function () {
             appId: appId,
             appTitle: title,
             appIndex: appIndex,
+            submitMode: 'upload',
+            prefill: {
+                parent_email: parentEmail
+            },
             meta: {
                 formType: meta.formType || 'general',
                 category: meta.category || '',
@@ -655,9 +841,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         renderSelectedSubmissionFiles();
 
+        if (viewManualForm) {
+            viewManualForm.reset();
+        }
+        renderManualApplicationFields(_modal.prefill);
+        setApplicationSubmitMode('upload');
+
+        var uploadTitleEl = document.querySelector('#application-view-upload .upload-title span');
+        if (uploadTitleEl) {
+            uploadTitleEl.textContent = 'Upload Αίτησης (έως 4 αρχεία)';
+        }
+
+        var uploadNoteEl = document.querySelector('#application-view-upload .application-view-upload-note');
+        if (uploadNoteEl) {
+            uploadNoteEl.innerHTML = 'Απαιτείται τουλάχιστον 1 αρχείο. Επιτρεπόμενοι τύποι: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.';
+        }
+
         if (viewModalSubmitBtn) {
             viewModalSubmitBtn.disabled = false;
-            viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+            setApplicationSubmitButtonText(_modal.submitMode);
         }
 
         $('#applicationViewModal').modal('show');
@@ -683,6 +885,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    viewModeCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            var selectedMode = card.getAttribute('data-submit-mode') || 'upload';
+            setApplicationSubmitMode(selectedMode);
+        });
+    });
+
     if (viewModalFileInput) {
         viewModalFileInput.addEventListener('change', function () {
             var selectedFiles = Array.from(viewModalFileInput.files || []);
@@ -699,6 +908,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (viewModalFileInput) {
             viewModalFileInput.value = '';
         }
+        if (viewManualForm) {
+            viewManualForm.reset();
+        }
+        if (viewManualFields) {
+            viewManualFields.innerHTML = '';
+        }
+        if (viewManualPanel) {
+            viewManualPanel.classList.remove('is-active');
+        }
+        if (viewUploadPanel) {
+            viewUploadPanel.classList.remove('is-active');
+        }
+        viewModeCards.forEach(function (card) {
+            card.classList.remove('is-active');
+            card.setAttribute('aria-pressed', 'false');
+        });
         renderSelectedSubmissionFiles();
         _viewAppId = 0;
         _modal = {};
@@ -708,30 +933,48 @@ document.addEventListener('DOMContentLoaded', function () {
         viewModalSubmitBtn.addEventListener('click', function () {
             if (!_modal.appId) return;
 
+            var selectedMode = normalizeSubmissionMode(_modal.submitMode);
             var files = viewModalFileInput ? Array.from(viewModalFileInput.files || []) : [];
-            if (files.length === 0) {
-                showCenterNotice('Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.');
-                return;
-            }
-            if (files.length > MAX_SUBMISSION_FILES) {
-                showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
-                return;
-            }
-
-            for (var i = 0; i < files.length; i++) {
-                var fileName = String(files[i].name || '');
-                var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
-                if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
-                    showCenterNotice('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
-                    return;
-                }
-            }
-
             var data = {
                 applied_at: todayLabel(),
                 _formType: (_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general',
-                _category: (_modal.meta && _modal.meta.category) ? _modal.meta.category : ''
+                _category: (_modal.meta && _modal.meta.category) ? _modal.meta.category : '',
+                _submission_mode: selectedMode
             };
+
+            if (selectedMode === 'manual') {
+                if (!viewManualForm) {
+                    showCenterNotice('Δεν είναι διαθέσιμη η online φόρμα αυτή τη στιγμή.');
+                    return;
+                }
+
+                if (!viewManualForm.checkValidity()) {
+                    viewManualForm.reportValidity();
+                    return;
+                }
+
+                new FormData(viewManualForm).forEach(function (value, key) {
+                    data[key] = value;
+                });
+            } else {
+                if (files.length === 0) {
+                    showCenterNotice('Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.');
+                    return;
+                }
+                if (files.length > MAX_SUBMISSION_FILES) {
+                    showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
+                    return;
+                }
+
+                for (var i = 0; i < files.length; i++) {
+                    var fileName = String(files[i].name || '');
+                    var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+                    if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
+                        showCenterNotice('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
+                        return;
+                    }
+                }
+            }
 
             viewModalSubmitBtn.disabled = true;
             viewModalSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Αποστολή...';
@@ -739,10 +982,13 @@ document.addEventListener('DOMContentLoaded', function () {
             var body = new FormData();
             body.append('ajax_submit_v2', '1');
             body.append('application_id', String(_modal.appId));
+            body.append('submission_mode', selectedMode);
             body.append('submission_data', JSON.stringify(data));
-            files.forEach(function (file) {
-                body.append('submission_files[]', file);
-            });
+            if (selectedMode === 'upload') {
+                files.forEach(function (file) {
+                    body.append('submission_files[]', file);
+                });
+            }
 
             fetch(window.location.pathname, {
                 method: 'POST',
@@ -759,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(function (json) {
                 viewModalSubmitBtn.disabled = false;
-                viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+                setApplicationSubmitButtonText(selectedMode);
 
                 if (!json.success) {
                     showCenterNotice(json.message || 'Σφάλμα.');
@@ -778,6 +1024,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     appId: _modal.appId,
                     appTitle: _modal.appTitle,
                     submittedDate: new Date().toLocaleDateString('el-GR'),
+                    submissionMode: selectedMode,
                     uploadedFiles: Array.isArray(json.uploaded_file_links) ? json.uploaded_file_links : files.map(function (file) {
                         return {
                             name: String(file.name || ''),
@@ -788,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(function () {
                 viewModalSubmitBtn.disabled = false;
-                viewModalSubmitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
+                setApplicationSubmitButtonText(selectedMode);
                 showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
             });
         });
@@ -804,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var meta     = getMeta(appIndex) || { formType: 'general', category: '', openDate: '', closeDate: '' };
         var appOpenDate = btn.data('app-open-date') || '';
         var appCloseDate = btn.data('app-close-date') || '';
+        var parentEmail = btn.data('parent-email') || '';
         if (appOpenDate) {
             meta.openDate = appOpenDate;
         }
@@ -811,7 +1059,16 @@ document.addEventListener('DOMContentLoaded', function () {
             meta.closeDate = appCloseDate;
         }
 
-        _modal = { appId: appId, appTitle: appTitle, appIndex: appIndex, meta: meta };
+        _modal = {
+            appId: appId,
+            appTitle: appTitle,
+            appIndex: appIndex,
+            meta: meta,
+            submitMode: 'manual',
+            prefill: {
+                parent_email: parentEmail
+            }
+        };
 
         // Header text
         document.getElementById('modal-title').textContent       = appTitle;
@@ -837,6 +1094,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var draft = loadDraft(appId);
         if (form && draft) {
             restoreDraftToForm(form, draft);
+        } else if (form && _modal.prefill) {
+            Object.keys(_modal.prefill).forEach(function (key) {
+                var field = form.elements.namedItem(key);
+                if (field && field.type !== 'file' && !String(field.value || '').trim()) {
+                    field.value = _modal.prefill[key];
+                }
+            });
         }
     });
 
@@ -864,6 +1128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         data.applied_at = todayLabel();
         data._formType = (_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general';
         data._category = (_modal.meta && _modal.meta.category) ? _modal.meta.category : '';
+        data._submission_mode = 'manual';
 
         var btn = document.getElementById('modal-submit-btn');
         btn.disabled = true;
@@ -872,6 +1137,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var body = new FormData();
         body.append('ajax_submit_v2', '1');
         body.append('application_id', String(_modal.appId));
+        body.append('submission_mode', 'manual');
         body.append('submission_data', JSON.stringify(data));
 
         var fileInput = document.getElementById('modal-submission-file');
@@ -916,7 +1182,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 appId:        _modal.appId,
                 appTitle:     _modal.appTitle,
                 studentName:  data.student_name  || 'â€”',
-                studentClass: data.class         || 'â€”',
+                studentClass: data.student_class || 'â€”',
+                submissionMode: data._submission_mode || 'manual',
                 submittedDate: new Date().toLocaleDateString('el-GR')
             });
         })

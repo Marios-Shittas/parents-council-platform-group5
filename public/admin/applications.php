@@ -206,6 +206,33 @@ function getDocumentAbsolutePath(string $storedPath): string {
     return $storedPath;
 }
 
+function normalizeSubmissionMode(string $mode): string {
+    return in_array($mode, ['manual', 'upload'], true) ? $mode : '';
+}
+
+function resolveSubmissionMode(array $formData, array $submissionFiles = []): string {
+    $storedMode = normalizeSubmissionMode((string)($formData['_submission_mode'] ?? ''));
+    if ($storedMode !== '') {
+        return $storedMode;
+    }
+
+    return !empty($submissionFiles) ? 'upload' : 'manual';
+}
+
+function getSubmissionModeUi(string $mode): array {
+    if (normalizeSubmissionMode($mode) === 'manual') {
+        return [
+            'label' => 'Online Συμπλήρωση',
+            'class' => 'submission-mode-badge submission-mode-badge-manual',
+        ];
+    }
+
+    return [
+        'label' => 'Ανέβασμα Αρχείου',
+        'class' => 'submission-mode-badge submission-mode-badge-upload',
+    ];
+}
+
 
 function getApplicationUiMetaPath(): string {
     return __DIR__ . '/../../storage/application_ui_meta.json';
@@ -547,14 +574,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message = 'Σφάλμα κατά τη διαγραφή της υποβολής.';
                     $messageType = 'danger';
                 }
-            } elseif (in_array($sub_status, ['waiting', 'approved', 'rejected'], true)) {
-                if ($applicationsService->updateSubmissionStatus($application_id, $user_id, $sub_status)) {
-                    $message = 'Η κατάσταση της υποβολής ενημερώθηκε επιτυχώς!';
-                    $messageType = 'success';
-                } else {
-                    $message = 'Σφάλμα κατά την ενημέρωση της υποβολής.';
-                    $messageType = 'danger';
-                }
             }
         }
     }
@@ -599,9 +618,6 @@ foreach ($documents as $document) {
 }
 
 $submissionCountByApplication = [];
-$pendingReviews = 0;
-$approvedSubmissions = 0;
-$rejectedSubmissions = 0;
 
 foreach ($submissions as $submission) {
     $applicationId = (int)($submission['application_id'] ?? 0);
@@ -609,14 +625,6 @@ foreach ($submissions as $submission) {
         $submissionCountByApplication[$applicationId] = 0;
     }
     $submissionCountByApplication[$applicationId]++;
-
-    if (($submission['sub_status'] ?? '') === 'waiting') {
-        $pendingReviews++;
-    } elseif (($submission['sub_status'] ?? '') === 'approved') {
-        $approvedSubmissions++;
-    } elseif (($submission['sub_status'] ?? '') === 'rejected') {
-        $rejectedSubmissions++;
-    }
 }
 
 $selectedApplicationId = (int)($_GET['view_submissions'] ?? 0);
@@ -842,6 +850,7 @@ if ($selectedApplicationId > 0) {
                                 <tr>
                                     <th>Γονέας</th>
                                     <th>Ημ. Υποβολής</th>
+                                    <th>Τρόπος Υποβολής</th>
                                     <th>Συνημμένα</th>
                                     <th>Ενέργειες</th>
                                 </tr>
@@ -849,10 +858,15 @@ if ($selectedApplicationId > 0) {
                             <tbody>
                                 <?php foreach ($selectedSubmissions as $submission): ?>
                                     <?php
-                                        $formData = json_decode($submission['submission_data'] ?? '{}', true) ?? [];
+                                        $formData = json_decode($submission['submission_data'] ?? '{}', true);
+                                        if (!is_array($formData)) {
+                                            $formData = [];
+                                        }
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $studentName = (string)($formData['student_name'] ?? '—');
+                                        $studentClass = (string)($formData['student_class'] ?? '—');
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
+                                        $parentAccountName = trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $submissionFiles = [];
                                         $uploadedFileNames = [];
 
@@ -881,6 +895,25 @@ if ($selectedApplicationId > 0) {
                                         }
 
                                         $submissionFiles = array_values(array_unique($submissionFiles));
+                                        $submissionMode = resolveSubmissionMode(is_array($formData) ? $formData : [], $submissionFiles);
+                                        $submissionModeUi = getSubmissionModeUi($submissionMode);
+                                        $primarySubmissionFile = $submissionFiles[0] ?? '';
+                                        $submissionDetailPayload = [
+                                            'application_id' => (int)($submission['application_id'] ?? 0),
+                                            'user_id' => (int)($submission['user_id'] ?? 0),
+                                            'application_title' => (string)($submission['application_title'] ?? ($selectedApplication['application_title'] ?? '')),
+                                            'student_name' => $studentName,
+                                            'student_class' => $studentClass,
+                                            'parent_name' => (string)$parentName,
+                                            'parent_account' => $parentAccountName !== '' ? $parentAccountName : '—',
+                                            'submitted_at' => $submittedAt,
+                                            'submission_mode' => $submissionMode,
+                                            'submission_mode_label' => $submissionModeUi['label'],
+                                            'submission_data' => $formData,
+                                            'file_url' => $primarySubmissionFile !== '' ? getDocumentPublicUrl($primarySubmissionFile) : '',
+                                            'file_name' => $primarySubmissionFile !== '' ? ($uploadedFileNames[$primarySubmissionFile] ?? basename($primarySubmissionFile)) : '',
+                                        ];
+                                        $submissionDetailJson = json_encode($submissionDetailPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
                                     ?>
                                     <tr>
                                         <td>
@@ -888,6 +921,11 @@ if ($selectedApplicationId > 0) {
                                             <div class="small text-muted"><?php echo htmlspecialchars((string)($submission['email'] ?? '')); ?></div>
                                         </td>
                                         <td><?php echo htmlspecialchars((string)$submittedAt); ?></td>
+                                        <td>
+                                            <span class="<?php echo htmlspecialchars($submissionModeUi['class']); ?>">
+                                                <?php echo htmlspecialchars($submissionModeUi['label']); ?>
+                                            </span>
+                                        </td>
                                         <td>
                                             <?php if (!empty($submissionFiles)): ?>
                                                 <div class="d-flex flex-column gap-1">
@@ -903,17 +941,28 @@ if ($selectedApplicationId > 0) {
                                         </td>
 
                                         <td>
-                                            <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>" data-application-title="<?php echo htmlspecialchars((string)($submission['application_title'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
-                                                <input type="hidden" name="action" value="update_submission_status">
-                                                <input type="hidden" name="application_id" value="<?php echo (int)$submission['application_id']; ?>">
-                                                <input type="hidden" name="user_id" value="<?php echo (int)$submission['user_id']; ?>">
-                                                <input type="hidden" name="sub_status" value="delete">
-                                                <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
-                                                <input type="hidden" name="return_scroll_y" value="0">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-trash-alt me-1"></i>Διαγραφή
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary js-view-submission"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#submissionDetailModal"
+                                                    data-submission="<?php echo htmlspecialchars((string)$submissionDetailJson, ENT_QUOTES, 'UTF-8'); ?>"
+                                                >
+                                                    <i class="fas fa-eye me-1"></i>Προβολή
                                                 </button>
-                                            </form>
+                                                <form method="POST" class="d-flex align-items-center gap-2 js-submission-action-form m-0" data-parent-name="<?php echo htmlspecialchars((string)$parentName, ENT_QUOTES, 'UTF-8'); ?>" data-application-title="<?php echo htmlspecialchars((string)($submission['application_title'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <input type="hidden" name="action" value="update_submission_status">
+                                                    <input type="hidden" name="application_id" value="<?php echo (int)$submission['application_id']; ?>">
+                                                    <input type="hidden" name="user_id" value="<?php echo (int)$submission['user_id']; ?>">
+                                                    <input type="hidden" name="sub_status" value="delete">
+                                                    <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
+                                                    <input type="hidden" name="return_scroll_y" value="0">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash-alt me-1"></i>Διαγραφή
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
 
                                     </tr>
@@ -1100,8 +1149,6 @@ if ($selectedApplicationId > 0) {
             <div class="modal-body">
                 <div class="row g-3 mb-3">
                     <div class="col-md-6"><div class="detail-card"><span>Αίτηση</span><strong id="detail_application_title">—</strong></div></div>
-                    <div class="col-md-6"><div class="detail-card"><span>Κατάσταση</span><strong id="detail_status_badge_wrapper">—</strong></div></div>
-
                     <div class="col-md-6"><div class="detail-card"><span>Μαθητής</span><strong id="detail_student_name">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Τάξη</span><strong id="detail_student_class">—</strong></div></div>
                     <div class="col-md-6"><div class="detail-card"><span>Γονέας</span><strong id="detail_parent_name">—</strong></div></div>
@@ -1143,24 +1190,7 @@ if ($selectedApplicationId > 0) {
                 </div>
             </div>
 
-            <div class="modal-footer justify-content-between flex-wrap gap-2">
-                <form method="POST" class="d-flex align-items-center flex-wrap gap-2 mb-0" id="submission_status_form">
-                    <input type="hidden" name="action" value="update_submission_status">
-                    <input type="hidden" name="application_id" id="detail_application_id_input">
-                    <input type="hidden" name="user_id" id="detail_user_id_input">
-
-                    <label for="detail_status_select" class="mb-0 fw-semibold">Κατάσταση</label>
-                    <select name="sub_status" id="detail_status_select" class="form-select form-select-sm">
-                        <option value="waiting">Υπό Εξέταση</option>
-                        <option value="approved">Εγκρίθηκε</option>
-                        <option value="rejected">Απορρίφθηκε</option>
-                    </select>
-
-                    <button type="submit" class="btn btn-primary-custom btn-sm">
-                        <i class="fas fa-save me-1"></i>Ενημέρωση Κατάστασης
-                    </button>
-                </form>
-
+            <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Κλείσιμο</button>
             </div>
         </div>
@@ -1331,6 +1361,68 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    function humanizeSubmissionDetailLabel(key) {
+        var labels = {
+            parent_name: 'Ονοματεπώνυμο Γονέα',
+            parent_email: 'Email Επικοινωνίας',
+            parent_phone: 'Τηλέφωνο Επικοινωνίας',
+            student_name: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας',
+            student_class: 'Τμήμα / Τάξη',
+            manual_application_text: 'Κείμενο Αίτησης',
+            applied_at: 'Ημερομηνία Υποβολής',
+            _submission_mode: 'Τρόπος Υποβολής'
+        };
+
+        return labels[key] || String(key || '').replace(/_/g, ' ');
+    }
+
+    function formatSubmissionDetailValue(key, value) {
+        if (key === '_submission_mode') {
+            return value === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
+        }
+
+        var raw = Array.isArray(value) ? value.join(', ') : String(value == null ? '' : value);
+        raw = raw.trim();
+        if (!raw) {
+            return '—';
+        }
+
+        return escapeHtml(raw).replace(/\r?\n/g, '<br>');
+    }
+
+    function buildSubmissionDetailHtml(fields) {
+        if (!fields || typeof fields !== 'object') {
+            return '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
+        }
+
+        var html = '';
+        Object.keys(fields).forEach(function (key) {
+            if (key === '_formType' || key === '_category' || key === '_uploaded_files' || key === '_uploaded_file_names') {
+                return;
+            }
+
+            var value = fields[key];
+            if (value == null) {
+                return;
+            }
+
+            if (Array.isArray(value) && value.length === 0) {
+                return;
+            }
+
+            var formattedValue = formatSubmissionDetailValue(key, value);
+            if (formattedValue === '—') {
+                return;
+            }
+
+            html += '<div class="detail-field-item"><span>' +
+                escapeHtml(humanizeSubmissionDetailLabel(key)) +
+                '</span><strong>' + formattedValue + '</strong></div>';
+        });
+
+        return html || '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
     }
 
     function renderEditApplicationFiles(applicationId, documents) {
@@ -1522,10 +1614,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('detail_student_class').textContent = data.student_class || '—';
                 document.getElementById('detail_parent_name').textContent = data.parent_name || data.parent_account || '—';
                 document.getElementById('detail_submitted_at').textContent = data.submitted_at || '—';
-                document.getElementById('detail_application_id_input').value = data.application_id || '';
-                document.getElementById('detail_user_id_input').value = data.user_id || '';
-                document.getElementById('detail_status_select').value = data.status || 'waiting';
-                document.getElementById('detail_status_badge_wrapper').innerHTML = '<span class="badge ' + (data.status_badge || 'bg-secondary') + '">' + (data.status_label || data.status || '—') + '</span>';
 
                 if (data.file_url) {
                     detailFileLink.href = data.file_url;
@@ -1538,12 +1626,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 var fields = data.submission_data || {};
-                var html = '';
-                Object.keys(fields).forEach(function (key) {
-                    if (key === '_formType' || key === '_category') return;
-                    var label = key.replace(/_/g, ' ');
-                    html += '<div class="detail-field-item"><span>' + label + '</span><strong>' + String(fields[key] || '—') + '</strong></div>';
-                });
+                var html = buildSubmissionDetailHtml(fields);
                 detailFields.innerHTML = html || '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
 
                 currentSubmissionNoteKey = getSubmissionNoteKey(data.application_id, data.user_id);

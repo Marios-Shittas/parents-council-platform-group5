@@ -103,8 +103,38 @@ function getUploadedSubmissionDisplayName(string $fileName): string {
     return basename(str_replace('\\', '/', $fileName));
 }
 
+function normalizeSubmissionMode($mode): string {
+    $mode = trim((string)$mode);
+    return in_array($mode, ['manual', 'upload'], true) ? $mode : 'upload';
+}
+
+function validateManualSubmissionPayload(array $payload): string {
+    $requiredMessages = [
+        'parent_name' => 'Παρακαλώ συμπληρώστε το ονοματεπώνυμο γονέα.',
+        'parent_email' => 'Παρακαλώ συμπληρώστε το email επικοινωνίας.',
+        'parent_phone' => 'Παρακαλώ συμπληρώστε το τηλέφωνο επικοινωνίας.',
+        'student_name' => 'Παρακαλώ συμπληρώστε το ονοματεπώνυμο μαθητή/μαθήτριας.',
+        'student_class' => 'Παρακαλώ συμπληρώστε το τμήμα ή την τάξη.',
+        'manual_application_text' => 'Παρακαλώ συμπληρώστε το κείμενο της αίτησης.',
+    ];
+
+    foreach ($requiredMessages as $field => $message) {
+        if (trim((string)($payload[$field] ?? '')) === '') {
+            return $message;
+        }
+    }
+
+    $email = trim((string)($payload['parent_email'] ?? ''));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return 'Παρακαλώ εισάγετε έγκυρο email επικοινωνίας.';
+    }
+
+    return '';
+}
+
 // Προσωρινό parent id μέχρι να συνδεθεί το πραγματικό auth flow.
 $user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
+$currentUserEmail = trim((string)($_SESSION['email'] ?? ''));
 
 $uploadDir = __DIR__ . '/../../../storage/uploads/submissions/';
 if (!is_dir($uploadDir)) {
@@ -137,12 +167,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             exit;
         }
 
+        foreach ($decoded as $key => $value) {
+            if (is_scalar($value) || $value === null) {
+                $decoded[$key] = trim((string)$value);
+            }
+        }
+
         if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
             exit;
         }
+
+        $submissionMode = normalizeSubmissionMode($decoded['_submission_mode'] ?? ($_POST['submission_mode'] ?? 'upload'));
+        $decoded['_submission_mode'] = $submissionMode;
 
         $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
         $maxSubmissionFiles = 4;
@@ -155,11 +194,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             $incomingFiles = array_merge($incomingFiles, normalizeUploadedSubmissionFiles((array)$_FILES['submission_file']));
         }
 
-        if (count($incomingFiles) === 0) {
+        if ($submissionMode === 'upload' && count($incomingFiles) === 0) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Παρακαλώ ανεβάστε τουλάχιστον ένα αρχείο για την υποβολή της αίτησης.']);
             exit;
+        }
+
+        if ($submissionMode === 'manual') {
+            $manualValidationMessage = validateManualSubmissionPayload($decoded);
+            if ($manualValidationMessage !== '') {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => $manualValidationMessage]);
+                exit;
+            }
         }
 
         if (count($incomingFiles) > $maxSubmissionFiles) {
@@ -263,6 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             echo json_encode([
                 'success' => true,
                 'message' => 'Η αίτηση υποβλήθηκε επιτυχώς.',
+                'submission_mode' => $submissionMode,
                 'uploaded_files' => array_values($uploadedOriginalNames),
                 'uploaded_file_links' => $uploadedFileLinks,
             ]);
@@ -618,6 +668,127 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             font-weight: 600;
         }
 
+        .application-submit-methods {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .application-submit-option {
+            position: relative;
+            width: 100%;
+            border: 1px solid #d7e6f7;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fbfdff 0%, #f2f8ff 100%);
+            padding: 18px 18px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+            color: #1f456d;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .application-submit-option:hover {
+            border-color: #a8c7ec;
+            box-shadow: 0 10px 24px rgba(31, 79, 143, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .application-submit-option.is-active {
+            border-color: #1f6fc4;
+            box-shadow: 0 14px 28px rgba(31, 111, 196, 0.16);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+        }
+
+        .application-submit-option__icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eaf3ff;
+            color: #2368b9;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .application-submit-option__title {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #173a63;
+        }
+
+        .application-submit-option__text {
+            display: block;
+            margin-top: 5px;
+            color: #60758e;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+        .application-submit-option__check {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            border: 1px solid #bdd3ef;
+            background: #ffffff;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .application-submit-option.is-active .application-submit-option__check {
+            background: #1f6fc4;
+            border-color: #1f6fc4;
+            color: #ffffff;
+        }
+
+        .application-submit-panel {
+            display: none;
+        }
+
+        .application-submit-panel.is-active {
+            display: block;
+        }
+
+        .application-submit-helper {
+            margin-bottom: 14px;
+            color: #60758e;
+            font-size: 0.93rem;
+            line-height: 1.5;
+        }
+
+        .application-view-manual-fields .form-group:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .application-view-manual-fields .form-control {
+            border: 1px solid #b9d1ef;
+            border-radius: 10px;
+            color: #223d60;
+            background: #fbfdff;
+        }
+
+        .application-view-manual-fields .form-control:focus {
+            border-color: #2b76cc;
+            box-shadow: 0 0 0 0.2rem rgba(43, 118, 204, 0.12);
+        }
+
+        .application-view-manual-fields textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
         #application-view-upload {
             background: #ffffff;
             border: 1px solid #dce9f8;
@@ -845,6 +1016,16 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             padding: 0.28rem 0.62rem;
             margin-right: 0.5rem;
         }
+
+        @media (max-width: 767.98px) {
+            .application-submit-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .application-submit-option {
+                padding: 16px 16px 14px;
+            }
+        }
     </style>
 
     <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
@@ -930,6 +1111,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                          data-application-description="<?php echo htmlspecialchars($fullDescription, ENT_QUOTES, 'UTF-8'); ?>"
                                          data-app-open-date="<?php echo htmlspecialchars($openDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
                                          data-app-close-date="<?php echo htmlspecialchars($closeDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
+                                         data-parent-email="<?php echo htmlspecialchars($currentUserEmail, ENT_QUOTES, 'UTF-8'); ?>"
                                          data-instruction-url="<?php echo htmlspecialchars($primaryInstructionUrl, ENT_QUOTES, 'UTF-8'); ?>"
                                          data-instruction-name="<?php echo htmlspecialchars($primaryInstructionName, ENT_QUOTES, 'UTF-8'); ?>"
                                          data-application-documents="<?php echo htmlspecialchars($attachmentsJson ?: '[]', ENT_QUOTES, 'UTF-8'); ?>">
@@ -975,6 +1157,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                             data-app-index="<?php echo $appIndex; ?>"
                                             data-app-open-date="<?php echo htmlspecialchars($openDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
                                             data-app-close-date="<?php echo htmlspecialchars($closeDateFormatted, ENT_QUOTES, 'UTF-8'); ?>"
+                                            data-parent-email="<?php echo htmlspecialchars($currentUserEmail, ENT_QUOTES, 'UTF-8'); ?>"
                                         >
                                             <i class="fas fa-paper-plane mr-1"></i> Υποβολή Αίτησης
                                         </button>
@@ -1036,6 +1219,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     }
 
                                     $submissionFiles = array_values(array_unique($submissionFiles));
+                                    $submissionMode = ($formData['_submission_mode'] ?? 'upload') === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
                                     $submittedDate = !empty($submission['submitted_at'])
                                         ? date('d/m/Y', strtotime($submission['submitted_at']))
                                         : '—';
@@ -1043,6 +1227,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     <tr data-db-row="1">
                                         <td>
                                             <strong><?php echo htmlspecialchars((string)$submission['application_title']); ?></strong>
+                                            <div class="small text-muted mt-1"><?php echo htmlspecialchars($submissionMode); ?></div>
                                             <?php if (!empty($submissionFiles)): ?>
                                                 <div class="mt-2">
                                                     <?php foreach ($submissionFiles as $submissionFilePath): ?>
@@ -1080,10 +1265,41 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     <h6 class="mb-2">Συνημμένα Αρχεία</h6>
                     <ul id="application-view-attachments-list"></ul>
                 </div>
-                <div id="application-view-upload">
+                <div class="application-submit-methods" id="application-submit-methods">
+                    <button type="button" class="application-submit-option" data-submit-mode="manual" aria-pressed="false">
+                        <span class="application-submit-option__check"><i class="fas fa-check"></i></span>
+                        <span class="application-submit-option__icon"><i class="fas fa-keyboard"></i></span>
+                        <span>
+                            <span class="application-submit-option__title">Online Συμπλήρωση</span>
+                            <span class="application-submit-option__text">Συμπληρώστε την αίτηση απευθείας εδώ, χωρίς download, εκτύπωση ή νέο upload.</span>
+                        </span>
+                    </button>
+
+                    <button type="button" class="application-submit-option" data-submit-mode="upload" aria-pressed="false">
+                        <span class="application-submit-option__check"><i class="fas fa-check"></i></span>
+                        <span class="application-submit-option__icon"><i class="fas fa-upload"></i></span>
+                        <span>
+                            <span class="application-submit-option__title">Ανέβασμα Αρχείου</span>
+                            <span class="application-submit-option__text">Κατεβάστε την αίτηση, συμπληρώστε την και ανεβάστε εδώ έως 4 αρχεία για υποβολή.</span>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="application-submit-panel" id="application-view-manual-panel">
+                    <div class="application-view-files-panel mb-0">
+                        <h6 class="mb-2">Συμπλήρωση Αίτησης Online</h6>
+                        <p class="application-submit-helper mb-3">Συμπληρώστε τα παρακάτω στοιχεία και γράψτε το αίτημά σας στο πεδίο κειμένου.</p>
+                        <form id="application-view-manual-form" novalidate>
+                            <div id="application-view-manual-fields" class="application-view-manual-fields"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="application-submit-panel" id="application-view-upload-panel">
+                    <div id="application-view-upload">
                     <label class="upload-title" for="application-view-file-input">
                         <i class="fas fa-paperclip"></i>
-                        <span>Apply (έως 4 αρχεία)</span>
+                        <span>Upload Αίτησης (έως 4 αρχεία)</span>
                     </label>
                     <input
                         type="file"
@@ -1094,6 +1310,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     >
                     <small class="application-view-upload-note">Απαιτείται τουλάχιστον 1 αρχείο. Επιτρεπόμενοι τύποι: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.</small>
                     <ul id="application-view-selected-files"></ul>
+                </div>
                 </div>
             </div>
             <div class="modal-footer">

@@ -112,6 +112,40 @@
     border-bottom: 0;
 }
 
+.submission-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.38rem 0.72rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.submission-mode-badge::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+}
+
+.submission-mode-badge-manual {
+    background: #eaf7ef;
+    border-color: #cce9d7;
+    color: #237347;
+}
+
+.submission-mode-badge-upload {
+    background: #eef4fb;
+    border-color: #d4e3f3;
+    color: #245f99;
+}
+
 /* Truncate 2 γραμμών για μακρύ κείμενο τίτλου/περιγραφής */
 .text-truncate-two-lines {
     display: -webkit-box;

@@ -8,7 +8,12 @@ if (session_status() === PHP_SESSION_NONE) {
 
 function parentsPageRenderMultiline($value)
 {
-    return nl2br(htmlspecialchars(trim((string)$value), ENT_QUOTES, 'UTF-8'));
+    return nl2br(htmlspecialchars(parentsPageNormalizeText($value), ENT_QUOTES, 'UTF-8'));
+}
+
+function parentsPageNormalizeText($value)
+{
+    return is_array($value) ? '' : trim((string)$value);
 }
 
 function parentsPageSanitizeList($items)
@@ -17,9 +22,16 @@ function parentsPageSanitizeList($items)
         return [];
     }
 
-    return array_values(array_filter($items, function ($item) {
-        return trim((string)$item) !== '';
-    }));
+    $sanitizedItems = [];
+
+    foreach ($items as $item) {
+        $item = parentsPageNormalizeText($item);
+        if ($item !== '') {
+            $sanitizedItems[] = $item;
+        }
+    }
+
+    return $sanitizedItems;
 }
 
 function parentsPageSanitizeRows($rows)
@@ -28,11 +40,59 @@ function parentsPageSanitizeRows($rows)
         return [];
     }
 
-    return array_values(array_filter($rows, function ($row) {
-        return is_array($row) && count(array_filter($row, function ($cell) {
-            return trim((string)$cell) !== '';
-        })) > 0;
-    }));
+    $sanitizedRows = [];
+
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+
+        $sanitizedRow = [];
+        $hasValue = false;
+
+        foreach ($row as $key => $cell) {
+            $cell = parentsPageNormalizeText($cell);
+            $sanitizedRow[$key] = $cell;
+
+            if ($cell !== '') {
+                $hasValue = true;
+            }
+        }
+
+        if ($hasValue) {
+            $sanitizedRows[] = $sanitizedRow;
+        }
+    }
+
+    return $sanitizedRows;
+}
+
+function parentsPageSanitizeScheduleBlocks($blocks)
+{
+    if (!is_array($blocks)) {
+        return [];
+    }
+
+    $sanitizedBlocks = [];
+
+    foreach ($blocks as $block) {
+        if (!is_array($block)) {
+            continue;
+        }
+
+        $sanitizedBlock = [
+            'title' => parentsPageNormalizeText($block['title'] ?? ''),
+            'rows' => parentsPageSanitizeRows($block['rows'] ?? []),
+        ];
+
+        if ($sanitizedBlock['title'] === '' && empty($sanitizedBlock['rows'])) {
+            continue;
+        }
+
+        $sanitizedBlocks[] = $sanitizedBlock;
+    }
+
+    return $sanitizedBlocks;
 }
 
 $parentsPageService = new ParentsPageService();
@@ -48,7 +108,7 @@ $electronicAdminSection = $sections['electronic_admin_section'] ?? ['title' => '
 $gallerySection = $sections['gallery_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
 $historyItems = parentsPageSanitizeList($historySection['content']['items'] ?? []);
-$scheduleBlocks = parentsPageSanitizeRows($scheduleSection['content']['blocks'] ?? []);
+$scheduleBlocks = parentsPageSanitizeScheduleBlocks($scheduleSection['content']['blocks'] ?? []);
 $boardMembers = parentsPageSanitizeRows($boardSection['content']['board_members'] ?? []);
 $committeeMembers = parentsPageSanitizeList($boardSection['content']['committee_members'] ?? []);
 $classResponsibles = parentsPageSanitizeRows($classResponsiblesSection['content']['rows'] ?? []);
