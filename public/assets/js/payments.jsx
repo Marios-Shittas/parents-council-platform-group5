@@ -5,6 +5,7 @@ function Payments() {
     const [sizeErrors, setSizeErrors] = React.useState({});
     const [cartLoading, setCartLoading] = React.useState(true);
     const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+    const [paymentFeedback, setPaymentFeedback] = React.useState(null);
     const [notice, setNotice] = React.useState({
         open: false,
         title: '',
@@ -15,6 +16,65 @@ function Payments() {
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+
+    function getPaymentFeedback(status, message) {
+        const normalizedStatus = (status || '').toLowerCase();
+        const normalizedMessage = (message || '').trim() || 'Η πληρωμή σας ενημερώθηκε.';
+
+        if (normalizedStatus === 'completed') {
+            return {
+                title: 'Η πληρωμή ολοκληρώθηκε',
+                message: normalizedMessage,
+                variant: 'success'
+            };
+        }
+
+        if (normalizedStatus === 'pending') {
+            return {
+                title: 'Η πληρωμή είναι σε αναμονή',
+                message: normalizedMessage,
+                variant: 'info'
+            };
+        }
+
+        if (normalizedStatus === 'refunded') {
+            return {
+                title: 'Η πληρωμή σημειώθηκε ως επιστροφή',
+                message: normalizedMessage,
+                variant: 'warning'
+            };
+        }
+
+        return {
+            title: 'Η πληρωμή δεν ολοκληρώθηκε',
+            message: normalizedMessage,
+            variant: 'error'
+        };
+    }
+
+    const clearPaymentResultParams = React.useCallback(() => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete("payment_status");
+        params.delete("payment_message");
+
+        const nextSearch = params.toString();
+        const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash || ''}`;
+        window.history.replaceState({}, document.title, nextUrl);
+    }, []);
+
+    const consumePaymentResult = React.useCallback(() => {
+        const params = new URLSearchParams(window.location.search);
+        const paymentStatus = params.get("payment_status");
+        const paymentMessage = params.get("payment_message");
+
+        if (!paymentStatus || !paymentMessage) {
+            return false;
+        }
+
+        setPaymentFeedback(getPaymentFeedback(paymentStatus, paymentMessage));
+        clearPaymentResultParams();
+        return true;
+    }, [clearPaymentResultParams]);
 
     const showNotice = React.useCallback((message, options = {}) => {
         setNotice({
@@ -49,27 +109,7 @@ function Payments() {
             .catch(err => console.error("Fetch products error:", err));
     }, []);
 
-    React.useEffect(() => {
-        loadCart();
-    }, []);
-
-    React.useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const paymentStatus = params.get("payment_status");
-        const paymentMessage = params.get("payment_message");
-
-        if (!paymentStatus || !paymentMessage) {
-            return;
-        }
-
-        showNotice(paymentMessage, {
-            title: paymentStatus === 'success' ? 'Η πληρωμή ολοκληρώθηκε' : 'Η πληρωμή δεν ολοκληρώθηκε',
-            variant: paymentStatus === 'success' ? 'info' : 'warning'
-        });
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }, [showNotice]);
-
-    function loadCart() {
+    const loadCart = React.useCallback(() => {
         setCartLoading(true);
 
         fetch(`${cartUrl}?action=get`)
@@ -90,7 +130,29 @@ function Payments() {
             .finally(() => {
                 setCartLoading(false);
             });
-    }
+    }, [cartUrl]);
+
+    React.useEffect(() => {
+        loadCart();
+    }, [loadCart]);
+
+    React.useEffect(() => {
+        consumePaymentResult();
+    }, [consumePaymentResult]);
+
+    React.useEffect(() => {
+        function handlePageShow() {
+            setCheckoutLoading(false);
+            loadCart();
+            consumePaymentResult();
+        }
+
+        window.addEventListener('pageshow', handlePageShow);
+
+        return () => {
+            window.removeEventListener('pageshow', handlePageShow);
+        };
+    }, [consumePaymentResult, loadCart]);
 
     function postCartAction(formData) {
         return fetch(cartUrl, {
@@ -202,6 +264,10 @@ function Payments() {
         return cart.reduce((total, item) => total + Number(item.quantity), 0);
     }
 
+    function dismissPaymentFeedback() {
+        setPaymentFeedback(null);
+    }
+
     function handleCheckout() {
         if (cart.length === 0) {
             showNotice('Το καλάθι είναι κενό!', {
@@ -211,14 +277,65 @@ function Payments() {
             return;
         }
 
+        if (checkoutLoading) {
+            return;
+        }
+
         setCheckoutLoading(true);
-        window.location.href = `${checkoutUrl}?action=checkout`;
+
+        fetch(checkoutUrl, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: new URLSearchParams({ action: 'checkout' }).toString()
+        })
+        .then(async (res) => {
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Δεν ήταν δυνατή η εκκίνηση της πληρωμής.');
+            }
+
+            if (!data.redirect_url) {
+                throw new Error('Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.');
+            }
+
+            window.location.assign(data.redirect_url);
+        })
+        .catch(err => {
+            console.error("Checkout error:", err);
+            setCheckoutLoading(false);
+            showNotice(err.message || 'Παρουσιάστηκε σφάλμα κατά τη μετάβαση στην πληρωμή.', {
+                title: 'Σφάλμα πληρωμής',
+                variant: 'error'
+            });
+        });
     }
 
     return (
         <>
             <div className="Page">
                 <div className="container md-4">
+                    {paymentFeedback && (
+                        <div className={`eshop-feedback-banner eshop-feedback-banner--${paymentFeedback.variant}`}>
+                            <div className="eshop-feedback-copy">
+                                <strong>{paymentFeedback.title}</strong>
+                                <span>{paymentFeedback.message}</span>
+                            </div>
+                            <button
+                                type="button"
+                                className="eshop-feedback-dismiss"
+                                onClick={dismissPaymentFeedback}
+                                aria-label="Κλείσιμο μηνύματος πληρωμής"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                    )}
+
                     <div className="row">
                         {products.map(product => (
                             <div className="col-md-4" key={product.product_id}>

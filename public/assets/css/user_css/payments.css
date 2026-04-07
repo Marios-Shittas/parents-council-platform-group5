@@ -90,6 +90,72 @@
     max-width: 1200px;
 }
 
+.eshop-feedback-banner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 1rem 1.5rem;
+    padding: 1rem 1.15rem;
+    border-radius: 18px;
+    border: 1px solid #d9e6f2;
+    background: #ffffff;
+    box-shadow: 0 16px 32px rgba(19, 45, 72, 0.09);
+}
+
+.eshop-feedback-banner--success {
+    border-color: #b9e3c8;
+    background: linear-gradient(135deg, #f3fff7 0%, #ecfff4 100%);
+}
+
+.eshop-feedback-banner--info {
+    border-color: #c8dbef;
+    background: linear-gradient(135deg, #f4f9ff 0%, #eef6ff 100%);
+}
+
+.eshop-feedback-banner--warning {
+    border-color: #f0d48a;
+    background: linear-gradient(135deg, #fffaf0 0%, #fff6e6 100%);
+}
+
+.eshop-feedback-banner--error {
+    border-color: #efb2b2;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffeded 100%);
+}
+
+.eshop-feedback-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    color: #17314d;
+}
+
+.eshop-feedback-copy strong {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.eshop-feedback-copy span {
+    color: #51687e;
+    line-height: 1.6;
+}
+
+.eshop-feedback-dismiss {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(23, 49, 77, 0.08);
+    color: #17314d;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.eshop-feedback-dismiss:hover {
+    background: rgba(23, 49, 77, 0.14);
+    transform: translateY(-1px);
+}
+
 /* ============================================
    PRODUCT CARDS STYLING
    ============================================ */
@@ -433,11 +499,107 @@
     transform: translateY(0);
 }
 
+.checkout-btn:disabled {
+    opacity: 0.75;
+    cursor: wait;
+    transform: none;
+    box-shadow: 0 10px 18px rgba(40, 167, 69, 0.14);
+}
+
+.payments-notice-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(11, 25, 41, 0.62);
+    padding: 1rem;
+}
+
+.payments-notice-card {
+    width: min(500px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    border-top: 5px solid #2f6ea0;
+    box-shadow: 0 20px 50px rgba(11, 25, 41, 0.32);
+    padding: 1.25rem 1.1rem;
+}
+
+.payments-notice-card--success {
+    border-top-color: #2c9c5f;
+}
+
+.payments-notice-card--info {
+    border-top-color: #2f6ea0;
+}
+
+.payments-notice-card--warning {
+    border-top-color: #d79f0d;
+}
+
+.payments-notice-card--error {
+    border-top-color: #c84545;
+}
+
+.payments-notice-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.payments-notice-message {
+    font-family: 'Lato', sans-serif;
+    color: #344055;
+    line-height: 1.55;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.payments-notice-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.payments-notice-button {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.48rem 1.2rem;
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    background: #1f5f93;
+}
+
+.payments-notice-button--success {
+    background: #248452;
+}
+
+.payments-notice-button--info {
+    background: #1f5f93;
+}
+
+.payments-notice-button--warning {
+    background: #b8860b;
+}
+
+.payments-notice-button--error {
+    background: #bb3535;
+}
+
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
 
 @media (max-width: 768px) {
+    .eshop-feedback-banner {
+        margin: 0 0 1.25rem;
+        padding: 0.95rem 1rem;
+    }
+
     .wholecart {
         padding: 20px;
         margin-top: 30px;
