@@ -49,7 +49,7 @@ function handleLogin() {
   .then(data => {
       if (data.success) {
           if (data.role === 'admin') {
-            window.location.href = 'admin/announcements.php';
+            window.location.href = 'admin/index.php';
           }
           else if (data.role === 'parent') {
             window.location.href = 'parent/index.php';
