@@ -1,21 +1,19 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/UsersService.php';
+require_once __DIR__ . '/ApprovalMailer.php';
 require_once __DIR__ . '/../config/db.php';
+
+$autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
+}
 
 class ForgotPasswordService {
     private $usersService;
     private $db;
-
-    private $smtpHost = 'smtp.gmail.com';
-    private $smtpUser = 'nigkaleta@gmail.com';
-    private $smtpPass = 'dyjs vehc oyiy dvmv';
-    private $smtpPort = 587;
-    private $smtpSecure = 'tls';
-    private $smtpFromEmail = 'nigkaleta@gmail.com';
     private $tokenExpirationMinutes = 600; 
 
     public function __construct() {
@@ -34,6 +32,11 @@ class ForgotPasswordService {
         $result = $this->usersService->forgot($email);
 
         if ($result['success']) {
+            $user = $this->usersService->getUserByEmail($email);
+            if ($user) {
+                $name = trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? ''));
+            }
+
             // Generate and store reset token in Users table
             $token = $this->generateAndStoreToken($email);
             
@@ -43,6 +46,7 @@ class ForgotPasswordService {
 
             $emailSent = $this->sendResetEmail($name, $email, $token);
             if (!$emailSent) {
+                $this->clearResetToken($email);
                 return ['success' => false, 'message' => 'Failed to send reset email.'];
             }
         }
@@ -74,51 +78,110 @@ class ForgotPasswordService {
             }
             
             return false;
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             error_log("Error generating reset token: " . $e->getMessage());
             return false;
         }
     }
 
+    private function clearResetToken($email): void
+    {
+        $stmt = $this->db->prepare("UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?");
+        if (!$stmt) {
+            return;
+        }
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     private function sendResetEmail($name, $email, $token) {
-        $mail = new PHPMailer(true);
-
         try {
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host = $this->smtpHost;
-            $mail->SMTPAuth = true;
-            $mail->Username = $this->smtpUser;
-            $mail->Password = $this->smtpPass;
-            $mail->Port = $this->smtpPort;
-            $mail->SMTPSecure = $this->smtpSecure;
+            $subject = 'Password Reset Request';
+            $resetLink = $this->buildResetLink($email, $token);
+            $body = $this->buildResetEmailBody($name, $resetLink);
 
-            $mail->setFrom($this->smtpFromEmail, 'Parent Council Platform');
-            $mail->addAddress($email, $name);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Password Reset Request';
-            $resetLink = "http://localhost/parents-council-platform-group5/public/reset-password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
-            $mail->Body = "Hi $name,
-                <br><br>We received a request to reset your password. Click the link below to reset your password:
-                <br><br><a href='$resetLink'>Reset Password</a>
-                <br><br>This link will expire in {$this->tokenExpirationMinutes} minutes.
-                <br><br>If you didn't request a password reset, please ignore this email.
-                <br><br>Best regards,
-                <br>Parent Council Platform";
-
-            $mail->send();
+            $mailer = new ApprovalMailer([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+            $mailer->sendHtmlEmail($email, $subject, $body);
             return true;
         }
-        catch (Exception $e) {
-            error_log("Error sending email: " . $e->getMessage());
-            return false;
+        catch (\Throwable $smtpException) {
+            error_log("Error sending reset email via SMTP: " . $smtpException->getMessage());
         }
+
+        if (class_exists(PHPMailer::class)) {
+            try {
+                $mail = new PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host = SMTP_HOST;
+                $mail->SMTPAuth = true;
+                $mail->Username = SMTP_USER;
+                $mail->Password = SMTP_PASS;
+                $mail->Port = SMTP_PORT;
+
+                if (defined('SMTP_ENCRYPTION') && SMTP_ENCRYPTION !== '') {
+                    $mail->SMTPSecure = SMTP_ENCRYPTION;
+                }
+
+                $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+                $mail->addAddress($email, $name);
+                $mail->isHTML(true);
+                $mail->Subject = 'Password Reset Request';
+                $mail->Body = $this->buildResetEmailBody($name, $this->buildResetLink($email, $token));
+                $mail->send();
+
+                return true;
+            } catch (\Throwable $phpMailerException) {
+                error_log("Error sending reset email via PHPMailer: " . $phpMailerException->getMessage());
+            }
+        }
+
+        $subject = 'Password Reset Request';
+        $message = $this->buildResetEmailBody($name, $this->buildResetLink($email, $token));
+        $headers =
+            'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: text/html; charset=UTF-8";
+
+        if (mail($email, $subject, $message, $headers)) {
+            return true;
+        }
+
+        error_log('Error sending reset email via mail() fallback.');
+        return false;
+    }
+
+    private function buildResetLink(string $email, string $token): string
+    {
+        return rtrim(APP_BASE_URL, '/') . '/public/reset-password.php?email=' . urlencode($email) . '&token=' . urlencode($token);
+    }
+
+    private function buildResetEmailBody(string $name, string $resetLink): string
+    {
+        $safeName = htmlspecialchars(trim($name) !== '' ? trim($name) : 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeLink = htmlspecialchars($resetLink, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+        return "Hi {$safeName},
+            <br><br>We received a request to reset your password. Click the link below to reset your password:
+            <br><br><a href='{$safeLink}'>Reset Password</a>
+            <br><br>This link will expire in {$this->tokenExpirationMinutes} minutes.
+            <br><br>If you didn't request a password reset, please ignore this email.
+            <br><br>Best regards,
+            <br>Parent Council Platform";
     }
     
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $service = new ForgotPasswordService();
     $result = $service->handleRequest();
     echo json_encode($result);
