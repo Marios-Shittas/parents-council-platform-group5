@@ -9,11 +9,14 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-chec
 header("Pragma: no-cache");
 header("Expires: 0");
 
+require_once __DIR__ . '/../app/config/config.php';
 require_once __DIR__ . '/../app/config/db.php';
 require_once __DIR__ . '/../app/includes/TokenValidator.php';
 
 global $conn;
 $tokenValidator = new TokenValidator($conn);
+
+$resetPasswordServiceUrl = rtrim(APP_BASE_URL, '/') . '/app/services/ResetPasswordService.php';
 
 $token = trim((string) ($_GET['token'] ?? ''));
 $email = trim((string) ($_GET['email'] ?? ''));
@@ -103,6 +106,7 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             <script>
                 window.RESET_EMAIL = <?php echo $emailJson ?: '""'; ?>;
                 window.RESET_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
+                window.RESET_PASSWORD_SERVICE_URL = <?php echo json_encode($resetPasswordServiceUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
             </script>
             
             <script type="text/javascript" src="assets/js/reset-password.jsx"></script>

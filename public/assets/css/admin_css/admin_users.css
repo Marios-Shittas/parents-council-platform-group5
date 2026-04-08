@@ -299,6 +299,10 @@
 }
 
 @media (max-width: 991.98px) {
+    .users-table {
+        min-width: 1120px;
+    }
+
     .users-toolbar-actions {
         width: 100%;
         justify-content: stretch;
@@ -329,5 +333,30 @@
     .history-item-meta,
     .child-preview-actions {
         width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .admin-page-header .btn-primary-custom {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .user-stat-card .card-body {
+        padding: 1.2rem;
+    }
+
+    .user-stat-card .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .history-preview-row > td,
+    .children-preview-row > td {
+        padding: 0.7rem 0.75rem 0.85rem;
+    }
+
+    .history-preview-grid,
+    .children-preview-grid {
+        grid-template-columns: 1fr;
     }
 }

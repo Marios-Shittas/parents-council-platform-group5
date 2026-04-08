@@ -233,3 +233,24 @@
     text-align: center;
     margin-top: 2px;
 }
+
+@media (max-width: 767.98px) {
+    .admin-table {
+        min-width: 920px;
+    }
+
+    .thumbnail {
+        width: 56px;
+        height: 56px;
+    }
+
+    .image-preview-item {
+        width: 84px;
+        height: 84px;
+    }
+
+    .page-notice-actions,
+    .page-confirm-actions {
+        flex-direction: column;
+    }
+}

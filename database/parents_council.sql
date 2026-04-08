@@ -233,6 +233,7 @@ CREATE TABLE IF NOT EXISTS ProductsImages (
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Fresh demo installs should seed these commerce tables empty, so admin users can freely manage products.
 CREATE TABLE IF NOT EXISTS Orders (
     order_id           INT NOT NULL AUTO_INCREMENT,
     user_id            INT NOT NULL,

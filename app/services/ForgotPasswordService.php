@@ -4,18 +4,13 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/UsersService.php';
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 
 class ForgotPasswordService {
     private $usersService;
     private $db;
 
-    private $smtpHost = 'smtp.gmail.com';
-    private $smtpUser = 'nigkaleta@gmail.com';
-    private $smtpPass = 'dyjs vehc oyiy dvmv';
-    private $smtpPort = 587;
-    private $smtpSecure = 'tls';
-    private $smtpFromEmail = 'nigkaleta@gmail.com';
     private $tokenExpirationMinutes = 600; 
 
     public function __construct() {
@@ -86,19 +81,19 @@ class ForgotPasswordService {
         try {
             // Server settings
             $mail->isSMTP();
-            $mail->Host = $this->smtpHost;
+            $mail->Host = SMTP_HOST;
             $mail->SMTPAuth = true;
-            $mail->Username = $this->smtpUser;
-            $mail->Password = $this->smtpPass;
-            $mail->Port = $this->smtpPort;
-            $mail->SMTPSecure = $this->smtpSecure;
+            $mail->Username = SMTP_USER;
+            $mail->Password = SMTP_PASS;
+            $mail->Port = SMTP_PORT;
+            $mail->SMTPSecure = SMTP_ENCRYPTION;
 
-            $mail->setFrom($this->smtpFromEmail, 'Parent Council Platform');
+            $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
             $mail->addAddress($email, $name);
 
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = "http://localhost/parents-council-platform-group5/public/reset-password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
+            $resetLink = rtrim(APP_BASE_URL, '/') . "/public/reset-password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
             $mail->Body = "Hi $name,
                 <br><br>We received a request to reset your password. Click the link below to reset your password:
                 <br><br><a href='$resetLink'>Reset Password</a>

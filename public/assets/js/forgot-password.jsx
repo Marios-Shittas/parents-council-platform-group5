@@ -2,6 +2,7 @@
 function handleForgotPassword() {
   const email = document.getElementById("email-input").value;
   const errorMessage = document.getElementById("error-message");
+  const serviceUrl = window.FORGOT_PASSWORD_SERVICE_URL || '/parents-council-platform-group5/app/services/ForgotPasswordService.php';
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -13,7 +14,7 @@ function handleForgotPassword() {
     errorMessage.textContent = "Please enter a valid email address.";
     return;
   }
-  fetch ('/parents-council-platform-group5/app/services/ForgotPasswordService.php', {
+  fetch (serviceUrl, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',

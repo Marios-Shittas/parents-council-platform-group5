@@ -64,19 +64,11 @@ INSERT INTO SystemSchedule (ss_id, feature, start_date, end_date, ss_status) VAL
 INSERT INTO PricingSettings (id, subscription_price, insurance_price) VALUES
 (1, 20.00, 7.50);
 
-INSERT INTO Orders (order_id, user_id, total_price, created_at, order_status) VALUES
-(1, 2, 28.50, '2026-03-07 11:59:24', 'paid'),
-(2, 3, 25.00, '2026-03-07 11:59:24', 'pending');
-
-INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES
-(1, 1, 25.00, 1, NULL),
-(1, 3, 3.50, 1, NULL),
-(2, 1, 25.00, 1, NULL);
+-- Intentionally no seeded Orders / OrderItems so demo products can be deleted from admin after a fresh import.
 
 INSERT INTO Payments (payment_id, user_id, amount, payment_date, payment_status, payment_type, transaction_id) VALUES
 (100, 2, 20.00, '2026-03-10 10:00:00', 'completed', 'membership', 'JCC_MEMB_001'),
-(101, 2, 15.00, '2026-03-10 10:05:00', 'completed', 'insurance', 'JCC_INS_001'),
-(102, 2, 28.50, '2026-03-11 12:00:00', 'completed', 'product', 'JCC_PROD_001');
+(101, 2, 15.00, '2026-03-10 10:05:00', 'completed', 'insurance', 'JCC_INS_001');
 INSERT INTO AnnouncementsImages (an_image_id, announcement_id, image_path) VALUES
 (31, 37, '/parents-council-platform-group5/public/assets/Announcements_img/69b16b4e53d13_1773235022.png'),
 (33, 38, '/parents-council-platform-group5/public/assets/Announcements_img/69b16b940919b_1773235092.jpeg'),
@@ -134,9 +126,8 @@ INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES
 (1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', 'approved'),
 (2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', 'waiting');
 
-INSERT INTO PaymentsDetails (payment_item_id, payment_id, product_id, quantity, price_at_purchase, size) VALUES
-(1, 102, 1, 1, 25.00, NULL),
-(2, 102, 3, 1, 3.50, NULL);
+-- Intentionally no seeded PaymentsDetails for products so Products remain deletable in a fresh database.
+
 INSERT INTO ProductsImages (pro_image_id, product_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
 (2, 2, '/parents-council-platform-group5/public/assets/Products_img/product_69c4ffe67280e6.61595091.jpg'),
