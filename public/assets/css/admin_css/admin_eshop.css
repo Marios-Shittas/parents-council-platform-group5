@@ -64,3 +64,14 @@
     opacity: 1 !important;
     text-shadow: none !important;
 }
+
+@media (max-width: 767.98px) {
+    .admin-table {
+        min-width: 860px;
+    }
+
+    .thumbnail {
+        width: 56px;
+        height: 56px;
+    }
+}

@@ -21,7 +21,9 @@
     }
 
     function resetPassword(newPassword) {
-        fetch('/parents-council-platform-group5/app/services/ResetPasswordService.php', {
+        const serviceUrl = window.RESET_PASSWORD_SERVICE_URL || '/parents-council-platform-group5/app/services/ResetPasswordService.php';
+
+        fetch(serviceUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

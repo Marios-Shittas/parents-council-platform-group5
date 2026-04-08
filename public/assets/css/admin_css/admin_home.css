@@ -561,8 +561,28 @@ body {
 }
 
 @media (max-width: 767.98px) {
+    .dashboard-hero {
+        padding: 22px 18px;
+    }
+
     .dashboard-hero h1 {
         font-size: 1.72rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .dashboard-hero-actions {
+        width: 100%;
+    }
+
+    .dashboard-link-btn {
+        display: inline-flex;
+        align-items: center;
+        width: 100%;
+        justify-content: center;
+        text-align: center;
     }
 
     .calendar-panel-header {
@@ -571,6 +591,17 @@ body {
 
     .calendar-legend {
         justify-content: flex-start;
+    }
+
+    .admin-calendar-shell {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-calendar-shell .cal-header,
+    .admin-calendar-shell .cal-days-row,
+    .admin-calendar-shell .admin-cal-grid {
+        min-width: 620px;
     }
 
     .admin-cal-cell,

@@ -16,11 +16,24 @@ if ($unreadContactMessages > 0) {
 }
 ?>
 
-<nav class="admin-sidebar">
+<button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
+    <i class="fas fa-bars"></i>
+    <span>Menu</span>
+</button>
+
+<div class="admin-sidebar-backdrop" data-admin-sidebar-backdrop></div>
+
+<nav class="admin-sidebar" id="adminSidebar" aria-label="Admin navigation">
     
-    <div class="brand">
-        <i class="fas fa-school"></i>
-        Admin Panel
+    <div class="admin-sidebar-top">
+        <div class="brand">
+            <i class="fas fa-school"></i>
+            Admin Panel
+        </div>
+
+        <button class="admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Κλείσιμο admin menu">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
 
     <ul class="nav flex-column">
@@ -99,3 +112,121 @@ if ($unreadContactMessages > 0) {
     </ul>
 
 </nav>
+
+<script>
+    (function () {
+        if (window.__adminSidebarToggleBound) return;
+        window.__adminSidebarToggleBound = true;
+
+        var wrapper = document.querySelector('.admin-wrapper');
+        var sidebar = document.getElementById('adminSidebar');
+        var toggleButton = document.querySelector('[data-admin-sidebar-toggle]');
+        var closeButton = document.querySelector('[data-admin-sidebar-close]');
+        var backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
+        var mobileQuery = window.matchMedia('(max-width: 991.98px)');
+
+        if (!wrapper || !sidebar || !toggleButton || !backdrop) return;
+
+        function isMobile() {
+            return mobileQuery.matches;
+        }
+
+        function getDesktopCollapsedPreference() {
+            try {
+                return window.localStorage.getItem('adminSidebarDesktopCollapsed') === 'true';
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function setDesktopCollapsedPreference(isCollapsed) {
+            try {
+                window.localStorage.setItem('adminSidebarDesktopCollapsed', String(isCollapsed));
+            } catch (error) {
+                // Ignore storage failures and keep the UI functional.
+            }
+        }
+
+        function updateToggleButton(isOpen) {
+            var shouldShowToggle = isMobile() || wrapper.classList.contains('sidebar-collapsed');
+            toggleButton.hidden = !shouldShowToggle;
+            toggleButton.setAttribute('aria-expanded', String(isOpen));
+        }
+
+        function setSidebarOpen(isOpen, options) {
+            var settings = options || {};
+
+            wrapper.classList.remove('sidebar-open', 'sidebar-collapsed');
+
+            if (isMobile()) {
+                wrapper.classList.toggle('sidebar-open', isOpen);
+                document.body.classList.toggle('admin-sidebar-lock', isOpen);
+            } else {
+                wrapper.classList.toggle('sidebar-collapsed', !isOpen);
+                document.body.classList.remove('admin-sidebar-lock');
+
+                if (!settings.skipPersist) {
+                    setDesktopCollapsedPreference(!isOpen);
+                }
+            }
+
+            updateToggleButton(isOpen);
+        }
+
+        function closeSidebar() {
+            setSidebarOpen(false);
+        }
+
+        function isSidebarVisible() {
+            return isMobile()
+                ? wrapper.classList.contains('sidebar-open')
+                : !wrapper.classList.contains('sidebar-collapsed');
+        }
+
+        function handleToggle() {
+            if (isMobile()) {
+                setSidebarOpen(!wrapper.classList.contains('sidebar-open'));
+                return;
+            }
+
+            setSidebarOpen(wrapper.classList.contains('sidebar-collapsed'));
+        }
+
+        toggleButton.addEventListener('click', handleToggle);
+        backdrop.addEventListener('click', closeSidebar);
+
+        if (closeButton) {
+            closeButton.addEventListener('click', closeSidebar);
+        }
+
+        sidebar.querySelectorAll('.nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (isMobile()) closeSidebar();
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && isSidebarVisible()) {
+                closeSidebar();
+            }
+        });
+
+        function syncSidebarState() {
+            if (isMobile()) {
+                wrapper.classList.remove('sidebar-collapsed');
+                setSidebarOpen(false, { skipPersist: true });
+                return;
+            }
+
+            setSidebarOpen(!getDesktopCollapsedPreference(), { skipPersist: true });
+        }
+
+        if (typeof mobileQuery.addEventListener === 'function') {
+            mobileQuery.addEventListener('change', syncSidebarState);
+        } else if (typeof mobileQuery.addListener === 'function') {
+            mobileQuery.addListener(syncSidebarState);
+        }
+
+        syncSidebarState();
+    })();
+</script>

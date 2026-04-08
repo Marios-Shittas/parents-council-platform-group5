@@ -395,6 +395,10 @@
 
 /* Tablet breakpoint: header αριστερή στοίχιση και full-width truncate */
 @media (max-width: 991.98px) {
+    .admin-dashboard-table {
+        min-width: 980px;
+    }
+
     .admin-page-header {
         align-items: flex-start;
     }
@@ -406,6 +410,20 @@
 
 /* Mobile breakpoint: μικρότερο stat value + stacked actions */
 @media (max-width: 767.98px) {
+    .admin-page-header .btn-primary-custom {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .section-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .section-toolbar > * {
+        width: 100%;
+    }
+
     .stat-value {
         font-size: 1.7rem;
     }

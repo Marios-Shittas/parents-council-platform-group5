@@ -386,6 +386,25 @@ $nav_items[] = [
 
         /* Ρυθμίσεις για κινητό/tablet. */
         @media (max-width: 991.98px) {
+            .navbar-brand {
+                max-width: calc(100% - 78px);
+            }
+
+            .navbar-brand img {
+                width: 58px;
+                height: 58px;
+            }
+
+            .brand-text {
+                display: inline-block;
+                max-width: calc(100vw - 150px);
+                font-size: .92rem;
+                line-height: 1.2;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
             .navbar-nav {
                 margin-top: .75rem;
                 /* Σε κινητό πάμε στο κλασικό στοίχισμα αριστερά. */
@@ -515,7 +534,7 @@ $nav_items[] = [
         <!-- Λογότυπο + τίτλος σχολείου. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo" class="mr-2">
-            <span class="brand-text d-none d-md-inline"><?php echo $site_title; ?></span>
+            <span class="brand-text"><?php echo $site_title; ?></span>
         </a>
 
         <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->
@@ -584,23 +603,42 @@ $nav_items[] = [
 </header>
 
 <script>
-    // Απλό fallback: αν δεν υπάρχει Bootstrap JS, ανοίγει/κλείνει το mobile menu.
+    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
     (function () {
-        // Ελέγχουμε αν υπάρχει έτοιμο bootstrap collapse.
-        var hasBootstrapCollapse = window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
-        if (hasBootstrapCollapse) return;
+        function hasBootstrapCollapse() {
+            return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
+        }
 
-        // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
-        var toggler = document.querySelector('[data-target="#mainNavbar"]');
-        var menu = document.getElementById('mainNavbar');
-        if (!toggler || !menu) return;
+        function bindFallbackNavbarToggle() {
+            if (hasBootstrapCollapse()) return;
 
-        // Εναλλαγή open/close όταν πατάμε το hamburger.
-        toggler.addEventListener('click', function () {
-            var isOpen = menu.classList.contains('show');
-            menu.classList.toggle('show', !isOpen);
-            // Ενημέρωση του aria-expanded για accessibility.
-            toggler.setAttribute('aria-expanded', String(!isOpen));
-        });
+            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+            var toggler = document.querySelector('[data-target="#mainNavbar"]');
+            var menu = document.getElementById('mainNavbar');
+            if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
+
+            toggler.dataset.fallbackBound = 'true';
+
+            // Εναλλαγή open/close όταν πατάμε το hamburger.
+            toggler.addEventListener('click', function (event) {
+                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
+                if (hasBootstrapCollapse()) return;
+
+                event.preventDefault();
+
+                var isOpen = menu.classList.contains('show');
+                menu.classList.toggle('show', !isOpen);
+                toggler.classList.toggle('collapsed', isOpen);
+                // Ενημέρωση του aria-expanded για accessibility.
+                toggler.setAttribute('aria-expanded', String(!isOpen));
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindFallbackNavbarToggle);
+            return;
+        }
+
+        bindFallbackNavbarToggle();
     })();
 </script>

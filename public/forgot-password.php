@@ -3,6 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../app/config/config.php';
+
+$forgotPasswordServiceUrl = rtrim(APP_BASE_URL, '/') . '/app/services/ForgotPasswordService.php';
+
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
 header("Pragma: no-cache");
 header("Expires: 0");
@@ -45,6 +49,9 @@ header("Expires: 0");
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+        <script>
+            window.FORGOT_PASSWORD_SERVICE_URL = <?php echo json_encode($forgotPasswordServiceUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+        </script>
         <script type="text/babel" src="assets/js/forgot-password.jsx"></script>
     </body>
 </html>

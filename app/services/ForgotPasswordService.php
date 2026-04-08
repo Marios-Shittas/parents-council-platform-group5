@@ -14,7 +14,7 @@ if (file_exists($autoloadPath)) {
 class ForgotPasswordService {
     private $usersService;
     private $db;
-    private $tokenExpirationMinutes = 600; 
+    private $tokenExpirationMinutes = 600;
 
     public function __construct() {
         $this->usersService = new UsersService();
@@ -34,12 +34,10 @@ class ForgotPasswordService {
         if ($result['success']) {
             $user = $this->usersService->getUserByEmail($email);
             if ($user) {
-                $name = trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? ''));
+                $name = trim((string) ($user['name'] ?? '') . ' ' . (string) ($user['surname'] ?? ''));
             }
 
-            // Generate and store reset token in Users table
             $token = $this->generateAndStoreToken($email);
-            
             if (!$token) {
                 return ['success' => false, 'message' => 'Failed to generate reset token.'];
             }
@@ -54,29 +52,21 @@ class ForgotPasswordService {
         return $result;
     }
 
-    /**
-     * Generate a secure token and store it in the Users table
-     * @param string $email User's email
-     * @return string|false Token if successful, false otherwise
-     */
     private function generateAndStoreToken($email) {
         try {
-            // Generate a secure random token
             $token = bin2hex(random_bytes(32));
-            
-            // Store token in Users table with expiration time
             $expiresAt = date('Y-m-d H:i:s', time() + ($this->tokenExpirationMinutes * 60));
             $stmt = $this->db->prepare("
-                UPDATE Users 
-                SET token = ?, token_expiry = ? 
+                UPDATE Users
+                SET token = ?, token_expiry = ?
                 WHERE email = ?
             ");
             $stmt->bind_param("sss", $token, $expiresAt, $email);
-            
+
             if ($stmt->execute()) {
                 return $token;
             }
-            
+
             return false;
         } catch (\Throwable $e) {
             error_log("Error generating reset token: " . $e->getMessage());
@@ -113,8 +103,7 @@ class ForgotPasswordService {
             ]);
             $mailer->sendHtmlEmail($email, $subject, $body);
             return true;
-        }
-        catch (\Throwable $smtpException) {
+        } catch (\Throwable $smtpException) {
             error_log("Error sending reset email via SMTP: " . $smtpException->getMessage());
         }
 
@@ -178,7 +167,6 @@ class ForgotPasswordService {
             <br><br>Best regards,
             <br>Parent Council Platform";
     }
-    
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
