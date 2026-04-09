@@ -35,14 +35,36 @@ function parentsPageSanitizeRows($rows)
     }));
 }
 
+function parentsPageGroupArchiveRowsByYear($rows)
+{
+    $grouped = [];
+
+    foreach (parentsPageSanitizeRows($rows) as $row) {
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year === '') {
+            $year = 'Χωρίς σχολική χρονιά';
+        }
+
+        if (!isset($grouped[$year])) {
+            $grouped[$year] = [];
+        }
+
+        $grouped[$year][] = $row;
+    }
+
+    return $grouped;
+}
+
 $parentsPageService = new ParentsPageService();
 $sections = $parentsPageService->getAllSections();
 $galleryImages = $parentsPageService->getGalleryImages();
 
-$pageHeaderSection = $sections['page_header'] ?? ['title' => 'Γονείς', 'subtitle' => '', 'content' => []];
+$pageHeaderSection = $sections['page_header'] ?? ['title' => 'Συνδεσμος Γωνεων', 'subtitle' => '', 'content' => []];
 $historySection = $sections['history_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
+$associationSection = $sections['association_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $scheduleSection = $sections['schedule_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $boardSection = $sections['board_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
+$boardArchiveSection = $sections['board_archive_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $classResponsiblesSection = $sections['class_responsibles_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $electronicAdminSection = $sections['electronic_admin_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $gallerySection = $sections['gallery_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
@@ -51,6 +73,7 @@ $historyItems = parentsPageSanitizeList($historySection['content']['items'] ?? [
 $scheduleBlocks = parentsPageSanitizeRows($scheduleSection['content']['blocks'] ?? []);
 $boardMembers = parentsPageSanitizeRows($boardSection['content']['board_members'] ?? []);
 $committeeMembers = parentsPageSanitizeList($boardSection['content']['committee_members'] ?? []);
+$boardArchiveRows = parentsPageGroupArchiveRowsByYear($boardArchiveSection['content']['rows'] ?? []);
 $classResponsibles = parentsPageSanitizeRows($classResponsiblesSection['content']['rows'] ?? []);
 $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content']['registration_steps'] ?? []);
 $loginSteps = parentsPageSanitizeList($electronicAdminSection['content']['login_steps'] ?? []);
@@ -77,7 +100,7 @@ $pageHeaderEyebrow = site_is_parent()
     <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/parents.css'); ?>">
-    <title>Γονείς - Γυμνάσιο Αγίου Αθανασίου</title>
+    <title>Συνδεσμος Γωνεων - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
 <body>
 <?php include __DIR__ . '/../../includes/header.php'; ?>
@@ -103,6 +126,53 @@ $pageHeaderEyebrow = site_is_parent()
                                 <li><?php echo htmlspecialchars($item); ?></li>
                             <?php endforeach; ?>
                         </ul>
+                    <?php endif; ?>
+                </div>
+
+                <div class="parents-card parents-card--association">
+                    <div class="parents-section-heading">
+                        <span class="parents-section-heading__icon"><i class="fas fa-handshake"></i></span>
+                        <div>
+                            <p class="parents-section-heading__eyebrow"><?php echo htmlspecialchars($associationSection['content']['eyebrow'] ?? ''); ?></p>
+                            <h2><?php echo htmlspecialchars($associationSection['title']); ?></h2>
+                        </div>
+                    </div>
+
+                    <?php if (trim((string)$associationSection['subtitle']) !== ''): ?>
+                        <p class="parents-lead"><?php echo parentsPageRenderMultiline($associationSection['subtitle']); ?></p>
+                    <?php endif; ?>
+
+                    <div class="row">
+                        <div class="col-lg-4 mb-3">
+                            <article class="content-card h-100">
+                                <h3><?php echo htmlspecialchars($associationSection['content']['greeting_title'] ?? 'Χαιρετισμός'); ?></h3>
+                                <p class="mb-0"><?php echo parentsPageRenderMultiline($associationSection['content']['greeting_body'] ?? ''); ?></p>
+                            </article>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <article class="content-card h-100">
+                                <h3><?php echo htmlspecialchars($associationSection['content']['purpose_title'] ?? 'Σκοπός'); ?></h3>
+                                <p class="mb-0"><?php echo parentsPageRenderMultiline($associationSection['content']['purpose_body'] ?? ''); ?></p>
+                            </article>
+                        </div>
+                        <div class="col-lg-4 mb-3">
+                            <article class="content-card h-100">
+                                <h3><?php echo htmlspecialchars($associationSection['content']['history_title'] ?? 'Ιστορικό'); ?></h3>
+                                <p class="mb-0"><?php echo parentsPageRenderMultiline($associationSection['content']['history_body'] ?? ''); ?></p>
+                            </article>
+                        </div>
+                    </div>
+
+                    <?php if (trim((string)($associationSection['content']['contact_value'] ?? '')) !== ''): ?>
+                        <div class="note-card mt-2">
+                            <i class="fas fa-envelope"></i>
+                            <p class="mb-0">
+                                <strong><?php echo htmlspecialchars($associationSection['content']['contact_label'] ?? 'Επικοινωνία'); ?>:</strong>
+                                <a href="mailto:<?php echo htmlspecialchars($associationSection['content']['contact_value']); ?>">
+                                    <?php echo htmlspecialchars($associationSection['content']['contact_value']); ?>
+                                </a>
+                            </p>
+                        </div>
                     <?php endif; ?>
                 </div>
 
@@ -156,6 +226,10 @@ $pageHeaderEyebrow = site_is_parent()
                         <p class="parents-lead"><?php echo parentsPageRenderMultiline($boardSection['subtitle']); ?></p>
                     <?php endif; ?>
 
+                    <?php if (trim((string)($boardSection['content']['current_board_label'] ?? '')) !== ''): ?>
+                        <p class="parents-section-heading__eyebrow mb-3"><?php echo htmlspecialchars($boardSection['content']['current_board_label']); ?></p>
+                    <?php endif; ?>
+
                     <div class="table-responsive">
                         <table class="table parents-table mb-0">
                             <thead>
@@ -185,6 +259,60 @@ $pageHeaderEyebrow = site_is_parent()
                             </tbody>
                         </table>
                     </div>
+
+                    <?php if (trim((string)($boardSection['content']['contact_email_value'] ?? '')) !== ''): ?>
+                        <div class="note-card mt-3">
+                            <i class="fas fa-envelope-open-text"></i>
+                            <p class="mb-0">
+                                <strong><?php echo htmlspecialchars($boardSection['content']['contact_email_label'] ?? 'Email'); ?>:</strong>
+                                <a href="mailto:<?php echo htmlspecialchars($boardSection['content']['contact_email_value']); ?>">
+                                    <?php echo htmlspecialchars($boardSection['content']['contact_email_value']); ?>
+                                </a>
+                            </p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="parents-card parents-card--board-archive">
+                    <div class="parents-section-heading">
+                        <span class="parents-section-heading__icon"><i class="fas fa-archive"></i></span>
+                        <div>
+                            <p class="parents-section-heading__eyebrow"><?php echo htmlspecialchars($boardArchiveSection['content']['eyebrow'] ?? ''); ?></p>
+                            <h2><?php echo htmlspecialchars($boardArchiveSection['title']); ?></h2>
+                        </div>
+                    </div>
+
+                    <?php if (trim((string)$boardArchiveSection['subtitle']) !== ''): ?>
+                        <p class="parents-lead"><?php echo parentsPageRenderMultiline($boardArchiveSection['subtitle']); ?></p>
+                    <?php endif; ?>
+
+                    <?php if (empty($boardArchiveRows)): ?>
+                        <p class="mb-0">Δεν έχουν προστεθεί ακόμη συμβούλια ανά σχολική χρονιά.</p>
+                    <?php else: ?>
+                        <?php foreach ($boardArchiveRows as $schoolYear => $rows): ?>
+                            <article class="parents-timetable-block mb-3">
+                                <h3><?php echo htmlspecialchars($schoolYear); ?></h3>
+                                <div class="table-responsive">
+                                    <table class="table parents-table parents-table--compact mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th><?php echo htmlspecialchars($boardArchiveSection['content']['position_label'] ?? 'Θέση'); ?></th>
+                                                <th><?php echo htmlspecialchars($boardArchiveSection['content']['name_label'] ?? 'Ονοματεπώνυμο'); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($rows as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['role'] ?? ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['name'] ?? ''); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </section>
 
@@ -206,6 +334,7 @@ $pageHeaderEyebrow = site_is_parent()
                 <?php if ($showParentsGallery): ?>
                     <div class="parents-widget">
                         <h3><i class="fas fa-camera"></i> <?php echo htmlspecialchars($gallerySection['title']); ?></h3>
+                        <p class="parents-widget-note">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
                         <?php if (!empty($galleryImages)): ?>
                             <div class="parents-gallery">
                                 <?php foreach ($galleryImages as $image): ?>

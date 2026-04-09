@@ -20,6 +20,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+const EVENT_IMAGE_LIMIT = 6;
+
+function getDefaultEventGdprNotice() {
+    return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
+}
+
 function getEventImageUploadDir() {
     return dirname(__DIR__) . '/assets/Events_img/';
 }
@@ -49,7 +55,25 @@ function uploadEventImages($eventsService, $eventId) {
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     $maxFileSize = 5 * 1024 * 1024;
 
+    $existingImagesCount = $eventsService->countImages($eventId);
+    $availableSlots = max(0, EVENT_IMAGE_LIMIT - $existingImagesCount);
+    $selectedFilesCount = is_array($_FILES['images']['name'] ?? null) ? count($_FILES['images']['name']) : 0;
+
+    if ($availableSlots === 0) {
+        $uploadErrors[] = 'Η εκδήλωση έχει ήδη τον μέγιστο επιτρεπόμενο αριθμό φωτογραφιών (' . EVENT_IMAGE_LIMIT . ').';
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    if ($selectedFilesCount > $availableSlots) {
+        $uploadErrors[] = 'Επιλέχθηκαν ' . $selectedFilesCount . ' αρχεία, αλλά μπορούν να αποθηκευτούν μόνο ' . $availableSlots . ' ακόμη φωτογραφίες για αυτή την εκδήλωση.';
+    }
+
     foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
+        if ($uploadedCount >= $availableSlots) {
+            $uploadErrors[] = 'Μπορούν να αποθηκευτούν έως ' . EVENT_IMAGE_LIMIT . ' φωτογραφίες ανά εκδήλωση.';
+            break;
+        }
+
         $fileName = basename($_FILES['images']['name'][$key] ?? '');
         $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
         $uploadError = $_FILES['images']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
@@ -101,7 +125,16 @@ function uploadEventImages($eventsService, $eventId) {
             if ($eventsService->addImage($eventId, $imagePath)) {
                 $uploadedCount++;
             } else {
-                $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
+                if (file_exists($targetPath)) {
+                    unlink($targetPath);
+                }
+
+                $serviceError = trim((string)$eventsService->getLastOperationError());
+                if ($serviceError !== '') {
+                    $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν αποθηκεύτηκε. {$serviceError}";
+                } else {
+                    $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
+                }
             }
         } else {
             $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
@@ -122,13 +155,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultEventGdprNotice());
         $eventDate = trim($_POST['event_date'] ?? '');
         $eventTime = trim($_POST['event_time'] ?? '00:00');
         $publishDate = date('Y-m-d');
         $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
 
         if (!empty($title) && !empty($eventDate)) {
-            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate);
+            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, $gdprNotice);
 
             if ($eventId) {
                 [$uploadedCount, $uploadErrors] = uploadEventImages($eventsService, $eventId);
@@ -159,13 +193,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultEventGdprNotice());
         $eventDate = trim($_POST['event_date'] ?? '');
         $eventTime = trim($_POST['event_time'] ?? '00:00');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
 
         if ($id > 0 && !empty($title) && !empty($eventDate)) {
-            if ($eventsService->updateEvent($id, $title, $description, $eventDateTime, $publishDate)) {
+            if ($eventsService->updateEvent($id, $title, $description, $eventDateTime, $publishDate, $gdprNotice)) {
                 [$uploadedCount, $uploadErrors] = uploadEventImages($eventsService, $id);
 
                 if ($uploadedCount > 0) {
@@ -358,6 +393,11 @@ $events = $eventsService->getAllEvents();
                         <textarea id="edit_description" name="description" class="form-control form-control-custom" rows="5"><?php echo htmlspecialchars($editEvent['event_description'] ?? ''); ?></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="edit_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea id="edit_gdpr_notice" name="gdpr_notice" class="form-control form-control-custom" rows="3"><?php echo htmlspecialchars($editEvent['gdpr_notice'] ?? getDefaultEventGdprNotice()); ?></textarea>
+                    </div>
+
                     <?php if (!empty($editImages)): ?>
                         <div class="form-group">
                             <label><strong>Υπάρχουσες Εικόνες</strong></label>
@@ -380,12 +420,21 @@ $events = $eventsService->getAllEvents();
 
                     <div class="form-group">
                         <label for="edit_images"><strong>Προσθήκη Νέων Εικόνων</strong></label>
-                        <input type="file" id="edit_images" name="images[]" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            id="edit_images"
+                            name="images[]"
+                            class="form-control-file"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="<?php echo count($editImages); ?>"
+                            <?php echo count($editImages) >= EVENT_IMAGE_LIMIT ? 'disabled' : ''; ?>
+                        >
                         <small class="text-muted d-block mt-1">
-                            Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo EVENT_IMAGE_LIMIT; ?> φωτογραφίες ανά εκδήλωση
                         </small>
                         <small class="text-muted d-block">
-                            Οι νέες εικόνες θα προστεθούν στις υπάρχουσες
+                            Οι νέες εικόνες θα προστεθούν στις υπάρχουσες. Αυτή τη στιγμή μπορείτε να προσθέσετε έως <?php echo max(0, EVENT_IMAGE_LIMIT - count($editImages)); ?> ακόμη.
                         </small>
                     </div>
 
@@ -512,10 +561,23 @@ $events = $eventsService->getAllEvents();
                     </div>
 
                     <div class="form-group">
+                        <label for="gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(getDefaultEventGdprNotice()); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label for="images"><strong>Εικόνες</strong></label>
-                        <input type="file" class="form-control-file" id="images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="images"
+                            name="images[]"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="0"
+                        >
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo EVENT_IMAGE_LIMIT; ?> φωτογραφίες ανά εκδήλωση
                         </small>
                         <small class="text-muted d-block">
                             <i class="fas fa-lightbulb"></i> Μπορείτε να επιλέξετε πολλές εικόνες ταυτόχρονα
@@ -683,9 +745,28 @@ function validateAndPreviewImages(input, previewId) {
 
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     const maxFileSize = 5 * 1024 * 1024;
+    const eventImageLimit = <?php echo EVENT_IMAGE_LIMIT; ?>;
+    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
+    const availableSlots = Math.max(0, eventImageLimit - existingCount);
     let warnings = [];
+    let files = [...input.files];
 
-    [...input.files].forEach((file) => {
+    if (availableSlots === 0) {
+        input.value = '';
+        warnings.push(`Η εκδήλωση έχει ήδη ${eventImageLimit} φωτογραφίες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+    } else if (files.length > availableSlots) {
+        warnings.push(`Μπορείτε να προσθέσετε μόνο ${availableSlots} ακόμη φωτογραφία/ες σε αυτή την εκδήλωση. Θα κρατηθούν μόνο οι πρώτες ${availableSlots}.`);
+
+        files = files.slice(0, availableSlots);
+
+        if (typeof DataTransfer !== 'undefined') {
+            const dataTransfer = new DataTransfer();
+            files.forEach((file) => dataTransfer.items.add(file));
+            input.files = dataTransfer.files;
+        }
+    }
+
+    files.forEach((file) => {
         const fileExt = file.name.split('.').pop().toLowerCase();
         let hasWarning = false;
 
@@ -720,7 +801,7 @@ function validateAndPreviewImages(input, previewId) {
     });
 
     if (warnings.length > 0) {
-        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.', {
+        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
             title: 'Έλεγχος αρχείων',
             variant: 'warning'
         });

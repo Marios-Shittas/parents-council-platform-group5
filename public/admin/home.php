@@ -48,7 +48,12 @@ function adminCalendarBuildAnnouncementImageWebPath($fileName)
     return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
 }
 
-function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback)
+function adminCalendarGetDefaultAnnouncementGdprNotice()
+{
+    return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
+}
+
+function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
 {
     $uploadedCount = 0;
     $uploadErrors = [];
@@ -70,6 +75,11 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
     $maxFileSize = 5 * 1024 * 1024;
 
     foreach ($_FILES[$fileField]['tmp_name'] as $key => $tmpName) {
+        if ($maxFiles !== null && $uploadedCount >= $maxFiles) {
+            $uploadErrors[] = "Μπορούν να αποθηκευτούν έως {$maxFiles} εικόνες.";
+            break;
+        }
+
         $fileName = basename($_FILES[$fileField]['name'][$key] ?? '');
         $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
         $uploadError = $_FILES[$fileField]['error'][$key] ?? UPLOAD_ERR_NO_FILE;
@@ -125,6 +135,18 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
         if ($persistImageCallback($imagePath)) {
             $uploadedCount++;
             continue;
+        }
+
+        if (file_exists($targetPath)) {
+            unlink($targetPath);
+        }
+
+        if (is_callable($persistErrorCallback)) {
+            $persistError = trim((string)$persistErrorCallback());
+            if ($persistError !== '') {
+                $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν αποθηκεύτηκε. {$persistError}";
+                continue;
+            }
         }
 
         $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων.";
@@ -250,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $publishDate = date('Y-m-d');
             $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
-            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate);
+            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.');
 
             if ($eventId) {
                 [$uploadedCount, $uploadErrors] = adminCalendarUploadImages(
@@ -259,6 +281,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'adminCalendarBuildEventImageWebPath',
                     static function ($imagePath) use ($eventsService, $eventId) {
                         return $eventsService->addImage($eventId, $imagePath);
+                    },
+                    6,
+                    static function () use ($eventsService) {
+                        return $eventsService->getLastOperationError();
                     }
                 );
 
@@ -297,7 +323,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $publishDate = date('Y-m-d');
             }
 
-            $announcementId = $announcementsService->createAnnouncement($title, $description, $announcementDate, $publishDate);
+            $announcementId = $announcementsService->createAnnouncement(
+                $title,
+                $description,
+                $announcementDate,
+                $publishDate,
+                adminCalendarGetDefaultAnnouncementGdprNotice()
+            );
 
             if ($announcementId) {
                 [$uploadedCount, $uploadErrors] = adminCalendarUploadImages(
@@ -306,6 +338,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'adminCalendarBuildAnnouncementImageWebPath',
                     static function ($imagePath) use ($announcementsService, $announcementId) {
                         return $announcementsService->addImage($announcementId, $imagePath);
+                    },
+                    6,
+                    static function () use ($announcementsService) {
+                        return $announcementsService->getLastOperationError();
                     }
                 );
 
@@ -486,7 +522,7 @@ $calendarPayload = [
                         <label for="calendar_event_images"><strong>Εικόνες</strong></label>
                         <input type="file" class="form-control-file" id="calendar_event_images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο 6 εικόνες ανά εκδήλωση
                         </small>
                     </div>
                 </div>
@@ -542,7 +578,7 @@ $calendarPayload = [
                         <label for="calendar_announcement_images"><strong>Εικόνες</strong></label>
                         <input type="file" class="form-control-file" id="calendar_announcement_images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο 6 εικόνες ανά ανακοίνωση
                         </small>
                     </div>
                 </div>

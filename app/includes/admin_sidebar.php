@@ -64,7 +64,7 @@ if ($unreadContactMessages > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
-                <i class="fas fa-users"></i> Γονείς
+                <i class="fas fa-users"></i> Συνδεσμος Γωνεων
             </a>
         </li>
 

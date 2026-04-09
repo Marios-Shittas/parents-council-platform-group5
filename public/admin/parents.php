@@ -26,6 +26,11 @@ function parentsAdminTextarea($value)
     return trim($value);
 }
 
+function parentsAdminUrl($value)
+{
+    return trim((string)$value);
+}
+
 function parentsAdminTextareaToList($value)
 {
     $lines = explode("\n", parentsAdminTextarea($value));
@@ -153,11 +158,19 @@ function uploadParentsGalleryImages($service)
             $uploadErrors[] = "Αδυναμία δημιουργίας του φακέλου ανεβάσματος: {$uploadDir}";
             return [$uploadedCount, $uploadErrors];
         }
-
-        @chmod($uploadDir, 0777);
     }
 
-    if (!is_writable($uploadDir)) {
+    @chmod($uploadDir, 0777);
+    clearstatcache(true, $uploadDir);
+
+    $probeFile = rtrim($uploadDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.parents_upload_probe_' . uniqid('', true);
+    $probeHandle = @fopen($probeFile, 'wb');
+    if ($probeHandle !== false) {
+        fclose($probeHandle);
+        @unlink($probeFile);
+    }
+
+    if (!is_writable($uploadDir) && $probeHandle === false) {
         $uploadErrors[] = "Ο φάκελος ανεβάσματος δεν είναι εγγράψιμος: {$uploadDir}";
         return [$uploadedCount, $uploadErrors];
     }
@@ -222,6 +235,33 @@ function uploadParentsGalleryImages($service)
     return [$uploadedCount, $uploadErrors];
 }
 
+function addParentsGalleryImageFromUrl($service)
+{
+    $imageUrl = parentsAdminUrl($_POST['image_url'] ?? '');
+
+    if ($imageUrl === '') {
+        return [false, 'Δώστε το URL της εικόνας.'];
+    }
+
+    if (filter_var($imageUrl, FILTER_VALIDATE_URL) === false) {
+        return [false, 'Το URL της εικόνας δεν είναι έγκυρο.'];
+    }
+
+    $imagePath = parse_url($imageUrl, PHP_URL_PATH) ?? '';
+    $imageExt = strtolower(pathinfo((string)$imagePath, PATHINFO_EXTENSION));
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+    if (!in_array($imageExt, $allowedExtensions, true)) {
+        return [false, 'Βάλτε direct URL εικόνας που να οδηγεί κατευθείαν σε αρχείο JPG, JPEG, PNG, GIF ή WEBP.'];
+    }
+
+    if ($service->addGalleryImage($imageUrl, $imageUrl, 'Φωτογραφικό υλικό σχολείου')) {
+        return [true, 'Η φωτογραφία από εξωτερικό σύνδεσμο προστέθηκε επιτυχώς.'];
+    }
+
+    return [false, 'Αποτυχία αποθήκευσης της φωτογραφίας. ' . $service->getLastError()];
+}
+
 $parentsPageService = new ParentsPageService();
 $flashMessage = $_SESSION['flash_message'] ?? '';
 $flashType = $_SESSION['flash_type'] ?? 'success';
@@ -261,6 +301,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 break;
 
+            case 'association_section':
+                $saved = $parentsPageService->updateSection(
+                    'association_section',
+                    parentsAdminTrim($_POST['title'] ?? ''),
+                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    [
+                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
+                        'greeting_title' => parentsAdminTrim($_POST['greeting_title'] ?? ''),
+                        'greeting_body' => parentsAdminTextarea($_POST['greeting_body'] ?? ''),
+                        'purpose_title' => parentsAdminTrim($_POST['purpose_title'] ?? ''),
+                        'purpose_body' => parentsAdminTextarea($_POST['purpose_body'] ?? ''),
+                        'history_title' => parentsAdminTrim($_POST['history_title'] ?? ''),
+                        'history_body' => parentsAdminTextarea($_POST['history_body'] ?? ''),
+                        'contact_label' => parentsAdminTrim($_POST['contact_label'] ?? ''),
+                        'contact_value' => parentsAdminTrim($_POST['contact_value'] ?? ''),
+                    ]
+                );
+                break;
+
             case 'schedule_section':
                 $blocks = [];
                 for ($index = 1; $index <= 2; $index++) {
@@ -290,11 +349,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     parentsAdminTextarea($_POST['subtitle'] ?? ''),
                     [
                         'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
+                        'current_board_label' => parentsAdminTrim($_POST['current_board_label'] ?? ''),
                         'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
                         'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
                         'committee_label' => parentsAdminTrim($_POST['committee_label'] ?? ''),
+                        'contact_email_label' => parentsAdminTrim($_POST['contact_email_label'] ?? ''),
+                        'contact_email_value' => parentsAdminTrim($_POST['contact_email_value'] ?? ''),
                         'board_members' => parentsAdminTextareaToRows($_POST['board_members'] ?? '', ['role', 'name']),
                         'committee_members' => parentsAdminTextareaToList($_POST['committee_members'] ?? ''),
+                    ]
+                );
+                break;
+
+            case 'board_archive_section':
+                $saved = $parentsPageService->updateSection(
+                    'board_archive_section',
+                    parentsAdminTrim($_POST['title'] ?? ''),
+                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    [
+                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
+                        'year_label' => parentsAdminTrim($_POST['year_label'] ?? ''),
+                        'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
+                        'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
+                        'rows' => parentsAdminTextareaToRows($_POST['rows'] ?? '', ['year', 'role', 'name']),
                     ]
                 );
                 break;
@@ -350,7 +427,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['flash_message'] = $saved
-            ? 'Το περιεχόμενο της σελίδας Γονείς ενημερώθηκε επιτυχώς.'
+            ? 'Το περιεχόμενο της σελίδας Συνδεσμος Γωνεων ενημερώθηκε επιτυχώς.'
             : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $parentsPageService->getLastError();
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectUrl .= '#content-management';
@@ -371,6 +448,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_SESSION['flash_message'] = $message;
         $_SESSION['flash_type'] = $type;
+        $redirectUrl .= '#gallery-management';
+    } elseif ($action === 'add_gallery_image_url') {
+        [$saved, $message] = addParentsGalleryImageFromUrl($parentsPageService);
+
+        $_SESSION['flash_message'] = $message;
+        $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectUrl .= '#gallery-management';
     } elseif ($action === 'delete_gallery_image') {
         $imageId = (int)($_POST['image_id'] ?? 0);
@@ -403,8 +486,10 @@ $galleryImages = $parentsPageService->getGalleryImages();
 
 $pageHeaderSection = $sections['page_header'];
 $historySection = $sections['history_section'];
+$associationSection = $sections['association_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
+$boardArchiveSection = $sections['board_archive_section'];
 $classResponsiblesSection = $sections['class_responsibles_section'];
 $electronicAdminSection = $sections['electronic_admin_section'];
 $gallerySection = $sections['gallery_section'];
@@ -414,7 +499,7 @@ $gallerySection = $sections['gallery_section'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Διαχείριση Σελίδας Γονείς - Admin</title>
+    <title>Διαχείριση Σελίδας Συνδεσμος Γωνεων - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -436,7 +521,7 @@ $gallerySection = $sections['gallery_section'];
         <div class="admin-header">
             <h1>
                 <i class="fas fa-users"></i>
-                Διαχείριση Σελίδας Γονείς
+                Διαχείριση Σελίδας Συνδεσμος Γωνεων
             </h1>
         </div>
 
@@ -451,7 +536,7 @@ $gallerySection = $sections['gallery_section'];
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-edit"></i> Διαχείριση Περιεχομένου</h2>
-                    <p>Από εδώ αλλάζεις όλα τα κείμενα που εμφανίζονται και στο <code>public/parents.php</code> και στο <code>public/parent/parents.php</code>. Τα sections αποθηκεύονται ξεχωριστά όπως στις άλλες editable σελίδες του admin panel.</p>
+                    <p>Από εδώ αλλάζεις όλα τα κείμενα που εμφανίζονται και στο <code>public/parents.php</code> και στο <code>public/parent/parents.php</code>. Τα sections αποθηκεύονται ξεχωριστά για τη σελίδα Συνδεσμος Γωνεων, όπως στις άλλες editable σελίδες του admin panel.</p>
                 </div>
             </div>
 
@@ -545,6 +630,90 @@ $gallerySection = $sections['gallery_section'];
                 <section class="content-editor-card">
                     <div class="content-editor-card__header">
                         <div>
+                            <h3>Συνδεσμος Γωνεων</h3>
+                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδεσμου Γωνεων.</p>
+                        </div>
+                        <span class="content-editor-card__icon"><i class="fas fa-handshake"></i></span>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_content_section">
+                        <input type="hidden" name="section_key" value="association_section">
+
+                        <div class="content-form-grid">
+                            <div class="form-group">
+                                <label for="association-title">Τίτλος</label>
+                                <input type="text" class="form-control" id="association-title" name="title" value="<?php echo htmlspecialchars($associationSection['title']); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="association-eyebrow">Eyebrow</label>
+                                <input type="text" class="form-control" id="association-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($associationSection['content']['eyebrow'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="association-subtitle">Εισαγωγικό κείμενο</label>
+                                <textarea class="form-control content-textarea" id="association-subtitle" name="subtitle"><?php echo htmlspecialchars($associationSection['subtitle']); ?></textarea>
+                            </div>
+
+                            <div class="content-subcard">
+                                <h4>Χαιρετισμός</h4>
+                                <div class="form-group">
+                                    <label for="association-greeting-title">Τίτλος</label>
+                                    <input type="text" class="form-control" id="association-greeting-title" name="greeting_title" value="<?php echo htmlspecialchars($associationSection['content']['greeting_title'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="association-greeting-body">Κείμενο</label>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="association-greeting-body" name="greeting_body"><?php echo htmlspecialchars($associationSection['content']['greeting_body'] ?? ''); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="content-subcard">
+                                <h4>Σκοπός</h4>
+                                <div class="form-group">
+                                    <label for="association-purpose-title">Τίτλος</label>
+                                    <input type="text" class="form-control" id="association-purpose-title" name="purpose_title" value="<?php echo htmlspecialchars($associationSection['content']['purpose_title'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="association-purpose-body">Κείμενο</label>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="association-purpose-body" name="purpose_body"><?php echo htmlspecialchars($associationSection['content']['purpose_body'] ?? ''); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="content-subcard">
+                                <h4>Ιστορικό Συνδέσμου</h4>
+                                <div class="form-group">
+                                    <label for="association-history-title">Τίτλος</label>
+                                    <input type="text" class="form-control" id="association-history-title" name="history_title" value="<?php echo htmlspecialchars($associationSection['content']['history_title'] ?? ''); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="association-history-body">Κείμενο</label>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="association-history-body" name="history_body"><?php echo htmlspecialchars($associationSection['content']['history_body'] ?? ''); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="association-contact-label">Label επικοινωνίας</label>
+                                <input type="text" class="form-control" id="association-contact-label" name="contact_label" value="<?php echo htmlspecialchars($associationSection['content']['contact_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="association-contact-value">Τιμή επικοινωνίας</label>
+                                <input type="text" class="form-control" id="association-contact-value" name="contact_value" value="<?php echo htmlspecialchars($associationSection['content']['contact_value'] ?? ''); ?>">
+                            </div>
+                        </div>
+
+                        <div class="content-editor-card__actions">
+                            <button type="submit" class="btn-save-section">
+                                <i class="fas fa-save"></i> Αποθήκευση Συνδεσμου Γωνεων
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="content-editor-card">
+                    <div class="content-editor-card__header">
+                        <div>
                             <h3>Ωράριο</h3>
                             <p>Οι 2 πίνακες του ωραρίου. Μορφή γραμμής: <code>Περίοδος | Ώρα</code>.</p>
                         </div>
@@ -608,7 +777,7 @@ $gallerySection = $sections['gallery_section'];
                 <section class="content-editor-card">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Σύνδεσμος Γονέων</h3>
+                            <h3>Συνδεσμος Γωνεων</h3>
                             <p>Lead paragraph, labels πίνακα και μέλη Δ.Σ. Μορφή γραμμής: <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-user-friends"></i></span>
@@ -630,6 +799,11 @@ $gallerySection = $sections['gallery_section'];
                             </div>
 
                             <div class="form-group">
+                                <label for="board-current-label">Label τρέχοντος συμβουλίου</label>
+                                <input type="text" class="form-control" id="board-current-label" name="current_board_label" value="<?php echo htmlspecialchars($boardSection['content']['current_board_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
                                 <label for="board-position-label">Κεφαλίδα στήλης θέσης</label>
                                 <input type="text" class="form-control" id="board-position-label" name="position_label" value="<?php echo htmlspecialchars($boardSection['content']['position_label'] ?? ''); ?>">
                             </div>
@@ -642,6 +816,16 @@ $gallerySection = $sections['gallery_section'];
                             <div class="form-group">
                                 <label for="board-committee-label">Label για τα μέλη</label>
                                 <input type="text" class="form-control" id="board-committee-label" name="committee_label" value="<?php echo htmlspecialchars($boardSection['content']['committee_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-contact-email-label">Label email</label>
+                                <input type="text" class="form-control" id="board-contact-email-label" name="contact_email_label" value="<?php echo htmlspecialchars($boardSection['content']['contact_email_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-contact-email-value">Email</label>
+                                <input type="text" class="form-control" id="board-contact-email-value" name="contact_email_value" value="<?php echo htmlspecialchars($boardSection['content']['contact_email_value'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group full-width">
@@ -663,6 +847,64 @@ $gallerySection = $sections['gallery_section'];
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
                                 <i class="fas fa-save"></i> Αποθήκευση Συνδέσμου
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="content-editor-card">
+                    <div class="content-editor-card__header">
+                        <div>
+                            <h3>Συμβούλια ανά Σχολική Χρονιά</h3>
+                            <p>Αρχείο συνθέσεων ανά χρονιά. Μορφή γραμμής: <code>Σχολική Χρονιά | Θέση | Ονοματεπώνυμο</code>.</p>
+                        </div>
+                        <span class="content-editor-card__icon"><i class="fas fa-archive"></i></span>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_content_section">
+                        <input type="hidden" name="section_key" value="board_archive_section">
+
+                        <div class="content-form-grid">
+                            <div class="form-group">
+                                <label for="board-archive-title">Τίτλος</label>
+                                <input type="text" class="form-control" id="board-archive-title" name="title" value="<?php echo htmlspecialchars($boardArchiveSection['title']); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-archive-eyebrow">Eyebrow</label>
+                                <input type="text" class="form-control" id="board-archive-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($boardArchiveSection['content']['eyebrow'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="board-archive-subtitle">Εισαγωγικό κείμενο</label>
+                                <textarea class="form-control content-textarea" id="board-archive-subtitle" name="subtitle"><?php echo htmlspecialchars($boardArchiveSection['subtitle']); ?></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-archive-year-label">Κεφαλίδα χρονιάς</label>
+                                <input type="text" class="form-control" id="board-archive-year-label" name="year_label" value="<?php echo htmlspecialchars($boardArchiveSection['content']['year_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-archive-position-label">Κεφαλίδα θέσης</label>
+                                <input type="text" class="form-control" id="board-archive-position-label" name="position_label" value="<?php echo htmlspecialchars($boardArchiveSection['content']['position_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="board-archive-name-label">Κεφαλίδα ονόματος</label>
+                                <input type="text" class="form-control" id="board-archive-name-label" name="name_label" value="<?php echo htmlspecialchars($boardArchiveSection['content']['name_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="board-archive-rows">Γραμμές αρχείου συμβουλίων</label>
+                                <textarea class="form-control content-textarea content-textarea--large" id="board-archive-rows" name="rows"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($boardArchiveSection['content']['rows'] ?? [], ['year', 'role', 'name'])); ?></textarea>
+                            </div>
+                        </div>
+
+                        <div class="content-editor-card__actions">
+                            <button type="submit" class="btn-save-section">
+                                <i class="fas fa-save"></i> Αποθήκευση Αρχείου Συμβουλίων
                             </button>
                         </div>
                     </form>
@@ -879,7 +1121,7 @@ $gallerySection = $sections['gallery_section'];
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-images"></i> Φωτογραφικό Υλικό</h2>
-                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες αποθηκεύονται στο <code>public/assets/Parents_img</code> και εμφανίζονται αυτόματα στη σελίδα Γονείς.</p>
+                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες αποθηκεύονται στο <code>public/assets/Parents_img</code> και εμφανίζονται αυτόματα στη σελίδα Συνδεσμος Γωνεων.</p>
                 </div>
             </div>
 
@@ -915,6 +1157,32 @@ $gallerySection = $sections['gallery_section'];
                     <div class="content-editor-card__actions">
                         <button type="submit" class="btn-save-section parents-upload-submit">
                             <i class="fas fa-cloud-upload-alt"></i> Ανέβασμα Φωτογραφιών
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="content-editor-card">
+                <div class="content-editor-card__header">
+                    <div>
+                        <h3>Προσθήκη Από Εξωτερικό Σύνδεσμο</h3>
+                        <p>Βάλε μόνο direct URL εικόνας από άλλο site, όπως γίνεται ήδη με τις αρχικές φωτογραφίες της gallery.</p>
+                    </div>
+                    <span class="content-editor-card__icon"><i class="fas fa-link"></i></span>
+                </div>
+
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_gallery_image_url">
+
+                    <div class="form-group">
+                        <label for="gallery-image-url">URL εικόνας</label>
+                        <input type="url" class="form-control" id="gallery-image-url" name="image_url" placeholder="https://example.com/image.jpg" required>
+                        <small class="form-text text-muted">Βάλε link που να ανοίγει κατευθείαν την εικόνα, όχι link σε σελίδα.</small>
+                    </div>
+
+                    <div class="content-editor-card__actions">
+                        <button type="submit" class="btn-save-section">
+                            <i class="fas fa-plus-circle"></i> Προσθήκη Από URL
                         </button>
                     </div>
                 </form>
