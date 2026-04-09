@@ -41,6 +41,11 @@ include __DIR__ . '/../../includes/public_page_header.php';
             <p>Δεν έχουν καταχωρηθεί εκδηλώσεις αυτή τη στιγμή.</p>
         </div>
     <?php else: ?>
+        <div class="note-card mb-4">
+            <i class="fas fa-user-shield"></i>
+            <p class="mb-0">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
+        </div>
+
         <section class="mb-5">
             <div class="events-section-title">
                 <span class="section-badge"><i class="fas fa-calendar-alt"></i></span>

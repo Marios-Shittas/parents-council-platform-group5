@@ -40,6 +40,11 @@ include __DIR__ . '/../../includes/public_page_header.php';
             <p>Δεν έχουν δημοσιευτεί ανακοινώσεις ακόμα.</p>
         </div>
     <?php else: ?>
+        <div class="note-card mb-4">
+            <i class="fas fa-user-shield"></i>
+            <p class="mb-0">Το περιεχόμενο των ανακοινώσεων και τα συνημμένα έγγραφα δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
+        </div>
+
         <section class="mb-5">
             <div class="announcements-section-title">
                 <span class="section-badge"><i class="fas fa-bullhorn"></i></span>

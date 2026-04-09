@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS PostsImages;
 DROP TABLE IF EXISTS Posts;
 DROP TABLE IF EXISTS EventsImages;
 DROP TABLE IF EXISTS Events;
+DROP TABLE IF EXISTS AnnouncementAttachments;
 DROP TABLE IF EXISTS AnnouncementsImages;
 DROP TABLE IF EXISTS Announcements;
 DROP TABLE IF EXISTS contact_messages;
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS Announcements (
     announcement_date        DATE DEFAULT NULL,
     publish_date             DATE NOT NULL,
     announcement_description TEXT DEFAULT NULL,
+    gdpr_notice              TEXT DEFAULT NULL,
     PRIMARY KEY (announcement_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -79,6 +81,18 @@ CREATE TABLE IF NOT EXISTS AnnouncementsImages (
     image_path        VARCHAR(255) NOT NULL,
     PRIMARY KEY (an_image_id),
     CONSTRAINT fk_an_img
+        FOREIGN KEY (announcement_id) REFERENCES Announcements(announcement_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS AnnouncementAttachments (
+    attachment_id     INT NOT NULL AUTO_INCREMENT,
+    announcement_id   INT NOT NULL,
+    file_path         VARCHAR(255) NOT NULL,
+    original_name     VARCHAR(255) DEFAULT NULL,
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (attachment_id),
+    CONSTRAINT fk_announcement_attachment
         FOREIGN KEY (announcement_id) REFERENCES Announcements(announcement_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -144,6 +158,7 @@ CREATE TABLE IF NOT EXISTS Events (
     event_id          INT NOT NULL AUTO_INCREMENT,
     event_title       VARCHAR(255) NOT NULL,
     event_description TEXT DEFAULT NULL,
+    gdpr_notice       TEXT DEFAULT NULL,
     event_date        DATETIME NOT NULL,
     publish_date      DATE NOT NULL,
     PRIMARY KEY (event_id)

@@ -14,15 +14,15 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Σύνδεσμος Γονέων';
+$site_title = 'Συνδεσμος Γωνεων';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 
-$useful_info_item = [
-    'label' => 'Χρήσιμες Πληροφορίες',
-    'href' => site_section_url('useful-information.php'),
-    'icon' => 'fas fa-info-circle',
-    'match' => ['useful-information.php'],
+$parents_utility_item = [
+    'label' => 'Συνδεσμος Γωνεων',
+    'href' => site_section_url('parents.php'),
+    'icon' => 'fas fa-users',
+    'match' => ['parents.php'],
 ];
 
 $profile_item = [
@@ -52,10 +52,10 @@ $nav_items = [
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => 'Γονείς',
-        'href' => site_section_url('parents.php'),
-        'icon' => 'fas fa-users',
-        'match' => ['parents.php'],
+        'label' => 'Χρήσιμες Πληροφορίες',
+        'href' => site_section_url('useful-information.php'),
+        'icon' => 'fas fa-info-circle',
+        'match' => ['useful-information.php'],
     ],
 ];
 
@@ -586,13 +586,13 @@ $nav_items[] = [
                     </a>
                 <?php endif; ?>
 
-                <?php $is_useful_info_active = in_array($current_page, $useful_info_item['match'], true); ?>
-                <a href="<?php echo $useful_info_item['href']; ?>"
-                   class="mt-2 mt-lg-0 utility-icon-link info-icon-link<?php echo $is_useful_info_active ? ' active' : ''; ?>"
-                   aria-label="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
-                   title="<?php echo htmlspecialchars($useful_info_item['label']); ?>"
-                   <?php echo $is_useful_info_active ? 'aria-current="page"' : ''; ?>>
-                    <i class="<?php echo $useful_info_item['icon']; ?>"></i>
+                <?php $is_parents_utility_active = in_array($current_page, $parents_utility_item['match'], true); ?>
+                <a href="<?php echo $parents_utility_item['href']; ?>"
+                   class="mt-2 mt-lg-0 utility-icon-link info-icon-link<?php echo $is_parents_utility_active ? ' active' : ''; ?>"
+                   aria-label="<?php echo htmlspecialchars($parents_utility_item['label']); ?>"
+                   title="<?php echo htmlspecialchars($parents_utility_item['label']); ?>"
+                   <?php echo $is_parents_utility_active ? 'aria-current="page"' : ''; ?>>
+                    <i class="<?php echo $parents_utility_item['icon']; ?>"></i>
                 </a>
 
             </div>

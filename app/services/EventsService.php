@@ -7,10 +7,19 @@ require_once __DIR__ . '/../config/db.php';
 
 class EventsService {
     private $conn;
+    private $lastOperationError = '';
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
+    }
+
+    public function getMaxImagesPerEvent() {
+        return 6;
+    }
+
+    public function getLastOperationError() {
+        return $this->lastOperationError;
     }
     
     /**
@@ -129,12 +138,12 @@ class EventsService {
      * @param string $publishDate Publish date (Y-m-d format)
      * @return int|false The new event ID or false on failure
      */
-    public function createEvent($title, $description, $eventDate, $publishDate) {
-        $sql = "INSERT INTO Events (event_title, event_description, event_date, publish_date) 
-                VALUES (?, ?, ?, ?)";
+    public function createEvent($title, $description, $eventDate, $publishDate, $gdprNotice = '') {
+        $sql = "INSERT INTO Events (event_title, event_description, gdpr_notice, event_date, publish_date) 
+                VALUES (?, ?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssss", $title, $description, $eventDate, $publishDate);
+        $stmt->bind_param("sssss", $title, $description, $gdprNotice, $eventDate, $publishDate);
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
@@ -152,16 +161,17 @@ class EventsService {
      * @param string $publishDate Publish date (Y-m-d format)
      * @return bool True on success, false on failure
      */
-    public function updateEvent($id, $title, $description, $eventDate, $publishDate) {
+    public function updateEvent($id, $title, $description, $eventDate, $publishDate, $gdprNotice = '') {
         $sql = "UPDATE Events 
                 SET event_title = ?, 
                     event_description = ?, 
+                    gdpr_notice = ?,
                     event_date = ?,
                     publish_date = ?
                 WHERE event_id = ?";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssssi", $title, $description, $eventDate, $publishDate, $id);
+        $stmt->bind_param("sssssi", $title, $description, $gdprNotice, $eventDate, $publishDate, $id);
         
         return $stmt->execute();
     }
@@ -188,12 +198,21 @@ class EventsService {
      * @return bool True on success, false on failure
      */
     public function addImage($eventId, $imagePath) {
+        $currentImagesCount = $this->countImages($eventId);
+        if ($currentImagesCount >= $this->getMaxImagesPerEvent()) {
+            $this->lastOperationError = 'Μπορούν να αποθηκευτούν έως ' . $this->getMaxImagesPerEvent() . ' φωτογραφίες ανά εκδήλωση.';
+            return false;
+        }
+
         $sql = "INSERT INTO EventsImages (event_id, image_path) VALUES (?, ?)";
         
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("is", $eventId, $imagePath);
-        
-        return $stmt->execute();
+
+        $executed = $stmt->execute();
+        $this->lastOperationError = $executed ? '' : 'Σφάλμα κατά την αποθήκευση της εικόνας στη βάση δεδομένων.';
+
+        return $executed;
     }
     
     /**
@@ -224,6 +243,18 @@ class EventsService {
         $result = $stmt->get_result();
         
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function countImages($eventId) {
+        $sql = "SELECT COUNT(*) AS total FROM EventsImages WHERE event_id = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $eventId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+
+        return (int)($row['total'] ?? 0);
     }
     
     /**

@@ -21,6 +21,205 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+const ANNOUNCEMENT_IMAGE_LIMIT = 6;
+
+function getDefaultAnnouncementGdprNotice() {
+    return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
+}
+
+function getAnnouncementImageUploadDir() {
+    return dirname(__DIR__) . '/assets/Announcements_img/';
+}
+
+function buildAnnouncementImageWebPath($fileName) {
+    return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
+}
+
+function getAnnouncementAttachmentUploadDir() {
+    return dirname(__DIR__) . '/assets/Announcements_docs/';
+}
+
+function buildAnnouncementAttachmentWebPath($fileName) {
+    return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
+}
+
+function resolveAnnouncementAssetFilePath($filePath, $type = 'image') {
+    $baseDir = $type === 'attachment' ? getAnnouncementAttachmentUploadDir() : getAnnouncementImageUploadDir();
+    return $baseDir . basename((string)$filePath);
+}
+
+function uploadAnnouncementImages($announcementsService, $announcementId) {
+    $uploadedCount = 0;
+    $uploadErrors = [];
+
+    if (empty($_FILES['images']['name'][0])) {
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    $uploadDir = getAnnouncementImageUploadDir();
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    $maxFileSize = 5 * 1024 * 1024;
+    $existingImagesCount = $announcementsService->countImages($announcementId);
+    $availableSlots = max(0, ANNOUNCEMENT_IMAGE_LIMIT - $existingImagesCount);
+    $selectedFilesCount = is_array($_FILES['images']['name'] ?? null) ? count($_FILES['images']['name']) : 0;
+
+    if ($availableSlots === 0) {
+        $uploadErrors[] = 'Η ανακοίνωση έχει ήδη τον μέγιστο επιτρεπόμενο αριθμό εικόνων (' . ANNOUNCEMENT_IMAGE_LIMIT . ').';
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    if ($selectedFilesCount > $availableSlots) {
+        $uploadErrors[] = 'Επιλέχθηκαν ' . $selectedFilesCount . ' αρχεία, αλλά μπορούν να αποθηκευτούν μόνο ' . $availableSlots . ' ακόμη εικόνες για αυτή την ανακοίνωση.';
+    }
+
+    foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
+        if ($uploadedCount >= $availableSlots) {
+            $uploadErrors[] = 'Μπορούν να αποθηκευτούν έως ' . ANNOUNCEMENT_IMAGE_LIMIT . ' εικόνες ανά ανακοίνωση.';
+            break;
+        }
+
+        $fileName = basename($_FILES['images']['name'][$key] ?? '');
+        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
+
+        if (($_FILES['images']['error'][$key] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$_FILES['images']['error'][$key]})";
+            continue;
+        }
+
+        $fileSize = $_FILES['images']['size'][$key];
+        $fileMime = mime_content_type($tmpName);
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if (!in_array($fileExt, $allowedExtensions, true)) {
+            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
+            continue;
+        }
+
+        if ($fileSize > $maxFileSize) {
+            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 5MB";
+            continue;
+        }
+
+        if (!getimagesize($tmpName)) {
+            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα";
+            continue;
+        }
+
+        if (!in_array($fileMime, $allowedTypes, true) && !str_starts_with($fileMime, 'image/')) {
+            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο τύπο εικόνας (MIME: {$fileMime})";
+            continue;
+        }
+
+        $newFileName = uniqid() . '_' . time() . '.' . $fileExt;
+        $targetPath = $uploadDir . $newFileName;
+
+        if (!file_exists($tmpName)) {
+            $uploadErrors[] = "Το προσωρινό αρχείο για '{$safeFileName}' δεν βρέθηκε";
+            continue;
+        }
+
+        if (!is_writable($uploadDir)) {
+            $uploadErrors[] = "Ο φάκελος δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα (chmod 777 {$uploadDir})";
+            continue;
+        }
+
+        if (move_uploaded_file($tmpName, $targetPath)) {
+            $imagePath = buildAnnouncementImageWebPath($newFileName);
+            if ($announcementsService->addImage($announcementId, $imagePath)) {
+                $uploadedCount++;
+            } else {
+                if (file_exists($targetPath)) {
+                    unlink($targetPath);
+                }
+
+                $serviceError = trim((string)$announcementsService->getLastOperationError());
+                if ($serviceError !== '') {
+                    $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν αποθηκεύτηκε. {$serviceError}";
+                } else {
+                    $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
+                }
+            }
+        } else {
+            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
+        }
+    }
+
+    return [$uploadedCount, $uploadErrors];
+}
+
+function uploadAnnouncementAttachments($announcementsService, $announcementId) {
+    $uploadedCount = 0;
+    $uploadErrors = [];
+
+    if (empty($_FILES['attachments']['name'][0])) {
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    $uploadDir = getAnnouncementAttachmentUploadDir();
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    $maxFileSize = 8 * 1024 * 1024;
+
+    foreach ($_FILES['attachments']['tmp_name'] as $key => $tmpName) {
+        $fileName = basename($_FILES['attachments']['name'][$key] ?? '');
+        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
+        $errorCode = $_FILES['attachments']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
+
+        if ($errorCode !== UPLOAD_ERR_OK) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' απέτυχε να ανέβει (Error: {$errorCode})";
+            continue;
+        }
+
+        $fileSize = (int)($_FILES['attachments']['size'][$key] ?? 0);
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if (!in_array($fileExt, $allowedExtensions, true)) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
+            continue;
+        }
+
+        if ($fileSize > $maxFileSize) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 8MB";
+            continue;
+        }
+
+        if (!file_exists($tmpName)) {
+            $uploadErrors[] = "Το προσωρινό αρχείο για το συνημμένο '{$safeFileName}' δεν βρέθηκε";
+            continue;
+        }
+
+        if (!is_writable($uploadDir)) {
+            $uploadErrors[] = "Ο φάκελος συνημμένων δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα του {$uploadDir}";
+            continue;
+        }
+
+        $newFileName = uniqid('announcement_attachment_', true) . '.' . $fileExt;
+        $targetPath = $uploadDir . $newFileName;
+
+        if (move_uploaded_file($tmpName, $targetPath)) {
+            $attachmentPath = buildAnnouncementAttachmentWebPath($newFileName);
+            if ($announcementsService->addAttachment($announcementId, $attachmentPath, $fileName)) {
+                $uploadedCount++;
+            } else {
+                @unlink($targetPath);
+                $uploadErrors[] = "Αποτυχία αποθήκευσης του συνημμένου '{$safeFileName}' στη βάση δεδομένων";
+            }
+        } else {
+            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του συνημμένου '{$safeFileName}'.";
+        }
+    }
+
+    return [$uploadedCount, $uploadErrors];
+}
+
 $announcementsService = new AnnouncementsService();
 $message = $_SESSION['flash_message'] ?? '';
 $messageType = $_SESSION['flash_message_type'] ?? '';
@@ -34,103 +233,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice());
         $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
         if (!empty($title)) {
-            $announcementId = $announcementsService->createAnnouncement($title, $description, $announcementDate, $publishDate);
+            $announcementId = $announcementsService->createAnnouncement($title, $description, $announcementDate, $publishDate, $gdprNotice);
             
             if ($announcementId) {
-                $uploadedCount = 0;
-                $uploadErrors = [];
-                
-                // Αν ο χρήστης έβαλε εικόνες, ξεκινά η διαδικασία ανεβάσματος
-                if (!empty($_FILES['images']['name'][0])) {
-                    $uploadDir = __DIR__ . '/../assets/Announcements_img/';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-                    
-                    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-                    $maxFileSize = 5 * 1024 * 1024; // Μέγιστο 5MB ανά αρχείο
-                    
-                    foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
-                        $fileName = basename($_FILES['images']['name'][$key]);
-                        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-                        
-                        if ($_FILES['images']['error'][$key] !== UPLOAD_ERR_OK) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$_FILES['images']['error'][$key]})";
-                            continue;
-                        }
-                        
-                        $fileSize = $_FILES['images']['size'][$key];
-                        $fileMime = mime_content_type($tmpName);
-                        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                        
-                        // Έλεγχος επέκτασης (π.χ. jpg, png)
-                        if (!in_array($fileExt, $allowedExtensions)) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
-                            continue;
-                        }
-                        
-                        // Έλεγχος μεγέθους αρχείου
-                        if ($fileSize > $maxFileSize) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 5MB";
-                            continue;
-                        }
-                        
-                        // Έλεγχος ότι το αρχείο είναι πράγματι εικόνα
-                        if (!getimagesize($tmpName)) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα";
-                            continue;
-                        }
-                        
-                        // Έλεγχος τύπου MIME με πιο χαλαρό τρόπο για συμβατότητα
-                        if (!in_array($fileMime, $allowedTypes) && !str_starts_with($fileMime, 'image/')) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο τύπο εικόνας (MIME: {$fileMime})";
-                            continue;
-                        }
-                        
-                        // Όλοι οι έλεγχοι πέρασαν, άρα προσπαθούμε να σώσουμε το αρχείο
-                        $newFileName = uniqid() . '_' . time() . '.' . $fileExt;
-                        $targetPath = $uploadDir . $newFileName;
-                        
-                        // Έλεγχος ότι υπάρχει ακόμα το προσωρινό αρχείο του upload
-                        if (!file_exists($tmpName)) {
-                            $uploadErrors[] = "Το προσωρινό αρχείο για '{$safeFileName}' δεν βρέθηκε";
-                            continue;
-                        }
-                        
-                        // Έλεγχος ότι ο φάκελος επιτρέπει εγγραφή
-                        if (!is_writable($uploadDir)) {
-                            $uploadErrors[] = "Ο φάκελος δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα (chmod 777 {$uploadDir})";
-                            continue;
-                        }
-                        
-                        if (move_uploaded_file($tmpName, $targetPath)) {
-                            $imagePath = '/parents-council-platform-group5/public/assets/Announcements_img/' . $newFileName;
-                            if ($announcementsService->addImage($announcementId, $imagePath)) {
-                                $uploadedCount++;
-                            } else {
-                                $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
-                            }
-                        } else {
-                            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
-                        }
-                    }
-                }
+                [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $announcementId);
+                [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $announcementId);
                 
                 // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
-                if ($uploadedCount > 0) {
-                    $message = "Η ανακοίνωση δημιουργήθηκε επιτυχώς με {$uploadedCount} εικόνα/ες!";
+                if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
+                    $message = "Η ανακοίνωση δημιουργήθηκε επιτυχώς";
+                    if ($uploadedCount > 0) {
+                        $message .= " με {$uploadedCount} εικόνα/ες";
+                    }
+                    if ($uploadedAttachmentsCount > 0) {
+                        $message .= ($uploadedCount > 0 ? ' και ' : ' με ') . "{$uploadedAttachmentsCount} συνημμένο/α";
+                    }
+                    $message .= '!';
                 } else {
-                    $message = 'Η ανακοίνωση δημιουργήθηκε επιτυχώς (χωρίς εικόνες).';
+                    $message = 'Η ανακοίνωση δημιουργήθηκε επιτυχώς (χωρίς εικόνες ή συνημμένα).';
                 }
                 
                 // Αν υπάρχουν λάθη σε αρχεία, τα δείχνουμε μαζεμένα
-                if (!empty($uploadErrors)) {
-                    $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $uploadErrors) . '</li></ul>';
+                $allUploadErrors = array_merge($uploadErrors, $attachmentErrors);
+                if (!empty($allUploadErrors)) {
+                    $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $allUploadErrors) . '</li></ul>';
                     $messageType = 'warning';
                 } else {
                     $messageType = 'success';
@@ -150,101 +281,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice());
         $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
         if ($id > 0 && !empty($title)) {
-            if ($announcementsService->updateAnnouncement($id, $title, $description, $announcementDate, $publishDate)) {
-                $uploadedCount = 0;
-                $uploadErrors = [];
-                
-                // Αν ανέβηκαν νέες εικόνες, τις προσθέτουμε στην ανακοίνωση
-                if (!empty($_FILES['images']['name'][0])) {
-                    $uploadDir = __DIR__ . '/../assets/Announcements_img/';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-                    
-                    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-                    $maxFileSize = 5 * 1024 * 1024; // Μέγιστο 5MB ανά αρχείο
-                    
-                    foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
-                        $fileName = basename($_FILES['images']['name'][$key]);
-                        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-                        
-                        if ($_FILES['images']['error'][$key] !== UPLOAD_ERR_OK) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$_FILES['images']['error'][$key]})";
-                            continue;
-                        }
-                        
-                        $fileSize = $_FILES['images']['size'][$key];
-                        $fileMime = mime_content_type($tmpName);
-                        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                        
-                        // Έλεγχος επέκτασης (π.χ. jpg, png)
-                        if (!in_array($fileExt, $allowedExtensions)) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
-                            continue;
-                        }
-                        
-                        // Έλεγχος μεγέθους αρχείου
-                        if ($fileSize > $maxFileSize) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 5MB";
-                            continue;
-                        }
-                        
-                        // Έλεγχος ότι το αρχείο είναι πράγματι εικόνα
-                        if (!getimagesize($tmpName)) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα";
-                            continue;
-                        }
-                        
-                        // Έλεγχος τύπου MIME με πιο χαλαρό τρόπο για συμβατότητα
-                        if (!in_array($fileMime, $allowedTypes) && !str_starts_with($fileMime, 'image/')) {
-                            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο τύπο εικόνας (MIME: {$fileMime})";
-                            continue;
-                        }
-                        
-                        // Όλοι οι έλεγχοι πέρασαν, άρα προσπαθούμε να σώσουμε το αρχείο
-                        $newFileName = uniqid() . '_' . time() . '.' . $fileExt;
-                        $targetPath = $uploadDir . $newFileName;
-                        
-                        // Έλεγχος ότι υπάρχει ακόμα το προσωρινό αρχείο του upload
-                        if (!file_exists($tmpName)) {
-                            $uploadErrors[] = "Το προσωρινό αρχείο για '{$safeFileName}' δεν βρέθηκε";
-                            continue;
-                        }
-                        
-                        // Έλεγχος ότι ο φάκελος επιτρέπει εγγραφή
-                        if (!is_writable($uploadDir)) {
-                            $uploadErrors[] = "Ο φάκελος δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα (chmod 777 {$uploadDir})";
-                            continue;
-                        }
-                        
-                        if (move_uploaded_file($tmpName, $targetPath)) {
-                            $imagePath = '/parents-council-platform-group5/public/assets/Announcements_img/' . $newFileName;
-                            if ($announcementsService->addImage($id, $imagePath)) {
-                                $uploadedCount++;
-                            } else {
-                                $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
-                            }
-                        } else {
-                            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
-                        }
-                    }
-                }
+            if ($announcementsService->updateAnnouncement($id, $title, $description, $announcementDate, $publishDate, $gdprNotice)) {
+                [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $id);
+                [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $id);
                 
                 // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
-                if ($uploadedCount > 0) {
-                    $message = "Η ανακοίνωση ενημερώθηκε επιτυχώς με {$uploadedCount} νέα/ες εικόνα/ες!";
+                if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
+                    $message = "Η ανακοίνωση ενημερώθηκε επιτυχώς";
+                    if ($uploadedCount > 0) {
+                        $message .= " με {$uploadedCount} νέα/ες εικόνα/ες";
+                    }
+                    if ($uploadedAttachmentsCount > 0) {
+                        $message .= ($uploadedCount > 0 ? ' και ' : ' με ') . "{$uploadedAttachmentsCount} νέο/α συνημμένο/α";
+                    }
+                    $message .= '!';
                 } else {
                     $message = 'Η ανακοίνωση ενημερώθηκε επιτυχώς!';
                 }
                 
                 // Αν υπάρχουν λάθη σε αρχεία, τα δείχνουμε μαζεμένα
-                if (!empty($uploadErrors)) {
-                    $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $uploadErrors) . '</li></ul>';
+                $allUploadErrors = array_merge($uploadErrors, $attachmentErrors);
+                if (!empty($allUploadErrors)) {
+                    $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $allUploadErrors) . '</li></ul>';
                     $messageType = 'warning';
                 } else {
                     $messageType = 'success';
@@ -259,8 +322,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Διαγραφή ανακοίνωσης
     if ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);
-        
+
+        $imagesToDelete = $id > 0 ? $announcementsService->getImages($id) : [];
+        $attachmentsToDelete = $id > 0 ? $announcementsService->getAttachments($id) : [];
+
         if ($id > 0 && $announcementsService->deleteAnnouncement($id)) {
+            foreach ($imagesToDelete as $image) {
+                $filePath = resolveAnnouncementAssetFilePath($image['image_path'] ?? '', 'image');
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
+            foreach ($attachmentsToDelete as $attachment) {
+                $filePath = resolveAnnouncementAssetFilePath($attachment['file_path'] ?? '', 'attachment');
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
             $message = 'Η ανακοίνωση διαγράφηκε επιτυχώς!';
             $messageType = 'success';
         } else {
@@ -272,12 +352,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Διαγραφή μίας εικόνας από ανακοίνωση
     if ($action === 'delete_image') {
         $imageId = (int)($_POST['image_id'] ?? 0);
-        
+        $imageToDelete = null;
+
+        if ($imageId > 0) {
+            $announcementId = (int)($_POST['announcement_id'] ?? 0);
+            $existingImages = $announcementId > 0 ? $announcementsService->getImages($announcementId) : [];
+            foreach ($existingImages as $image) {
+                if ((int)($image['an_image_id'] ?? 0) === $imageId) {
+                    $imageToDelete = $image;
+                    break;
+                }
+            }
+        }
+
         if ($imageId > 0 && $announcementsService->deleteImage($imageId)) {
+            if ($imageToDelete) {
+                $filePath = resolveAnnouncementAssetFilePath($imageToDelete['image_path'] ?? '', 'image');
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
             $message = 'Η εικόνα διαγράφηκε επιτυχώς!';
             $messageType = 'success';
         } else {
             $message = 'Σφάλμα κατά τη διαγραφή της εικόνας.';
+            $messageType = 'danger';
+        }
+    }
+
+    if ($action === 'delete_attachment') {
+        $attachmentId = (int)($_POST['attachment_id'] ?? 0);
+        $attachment = $attachmentId > 0 ? $announcementsService->getAttachmentById($attachmentId) : null;
+
+        if ($attachment && $announcementsService->deleteAttachment($attachmentId)) {
+            $filePath = resolveAnnouncementAssetFilePath($attachment['file_path'] ?? '', 'attachment');
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $message = 'Το συνημμένο διαγράφηκε επιτυχώς!';
+            $messageType = 'success';
+        } else {
+            $message = 'Σφάλμα κατά τη διαγραφή του συνημμένου.';
             $messageType = 'danger';
         }
     }
@@ -301,7 +416,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($action === 'delete_image') {
+    if ($action === 'delete_image' || $action === 'delete_attachment') {
         $redirectEditId = (int)($_POST['announcement_id'] ?? ($_GET['edit'] ?? 0));
         if ($redirectEditId > 0) {
             $redirectUrl = 'announcements.php?edit=' . $redirectEditId;
@@ -315,11 +430,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Αν ζητήθηκε edit από το URL, φορτώνουμε τα δεδομένα για επεξεργασία
 $editAnnouncement = null;
 $editImages = [];
+$editAttachments = [];
 if (isset($_GET['edit'])) {
     $editId = (int)$_GET['edit'];
     $editAnnouncement = $announcementsService->getAnnouncementById($editId);
     if ($editAnnouncement) {
         $editImages = $announcementsService->getImages($editId);
+        $editAttachments = $announcementsService->getAttachments($editId);
     }
 }
 
@@ -409,6 +526,11 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <label for="edit_description"><strong>Περιγραφή</strong></label>
                         <textarea class="form-control form-control-custom" id="edit_description" name="description" rows="5"><?php echo htmlspecialchars($editAnnouncement['announcement_description'] ?? ''); ?></textarea>
                     </div>
+
+                    <div class="form-group">
+                        <label for="edit_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="edit_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars($editAnnouncement['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice()); ?></textarea>
+                    </div>
                     
                     <!-- Οι εικόνες που υπάρχουν ήδη -->
                     <?php if (!empty($editImages)): ?>
@@ -429,15 +551,58 @@ $announcements = $announcementsService->getAllAnnouncements();
                             </div>
                         </div>
                     <?php endif; ?>
+
+                    <?php if (!empty($editAttachments)): ?>
+                        <div class="form-group">
+                            <label><strong>Υπάρχοντα Συνημμένα</strong></label>
+                            <div class="list-group">
+                                <?php foreach ($editAttachments as $attachment): ?>
+                                    <?php
+                                    $attachmentName = trim((string)($attachment['original_name'] ?? '')) !== ''
+                                        ? (string)$attachment['original_name']
+                                        : basename((string)($attachment['file_path'] ?? ''));
+                                    ?>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <a href="<?php echo htmlspecialchars($attachment['file_path']); ?>" target="_blank" rel="noopener noreferrer">
+                                            <i class="fas fa-paperclip mr-2"></i><?php echo htmlspecialchars($attachmentName); ?>
+                                        </a>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteAnnouncementAttachment(<?php echo (int)$attachment['attachment_id']; ?>, <?php echo (int)$editAnnouncement['announcement_id']; ?>)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     
                     <div class="form-group">
                         <label for="edit_images"><strong>Προσθήκη Νέων Εικόνων</strong></label>
-                        <input type="file" class="form-control-file" id="edit_images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="edit_images"
+                            name="images[]"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="<?php echo count($editImages); ?>"
+                            <?php echo count($editImages) >= ANNOUNCEMENT_IMAGE_LIMIT ? 'disabled' : ''; ?>
+                        >
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?> εικόνες ανά ανακοίνωση
                         </small>
                         <small class="text-muted d-block">
-                            <i class="fas fa-lightbulb"></i> Οι νέες εικόνες θα προστεθούν στις υπάρχουσες
+                            <i class="fas fa-lightbulb"></i> Οι νέες εικόνες θα προστεθούν στις υπάρχουσες. Αυτή τη στιγμή μπορείτε να προσθέσετε έως <?php echo max(0, ANNOUNCEMENT_IMAGE_LIMIT - count($editImages)); ?> ακόμη.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_attachments"><strong>Προσθήκη Συνημμένων Επιστολών</strong></label>
+                        <input type="file" class="form-control-file" id="edit_attachments" name="attachments[]" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: PDF, JPG, JPEG, PNG | Μέγιστο μέγεθος: 8MB ανά αρχείο
                         </small>
                     </div>
                     
@@ -471,6 +636,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                                     <th>Τίτλος</th>
                                     <th>Ημ. Ανακοίνωσης</th>
                                     <th>Ημ. Δημοσίευσης</th>
+                                    <th>Συνημμένα</th>
                                     <th>Περιγραφή</th>
                                     <th style="width: 150px;">Ενέργειες</th>
                                 </tr>
@@ -492,6 +658,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                                         <td><strong><?php echo htmlspecialchars($ann['announcement_title']); ?></strong></td>
                                         <td><?php echo date('d/m/Y', strtotime($ann['announcement_date'] ?? $ann['publish_date'])); ?></td>
                                         <td><?php echo date('d/m/Y', strtotime($ann['publish_date'])); ?></td>
+                                        <td><?php echo count($ann['attachments'] ?? []); ?></td>
                                         <td>
                                             <?php 
                                                 $desc = $ann['announcement_description'] ?? '';
@@ -567,17 +734,41 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <textarea class="form-control form-control-custom" id="description" name="description" rows="5" 
                                   placeholder="Πληκτρολογήστε την περιγραφή της ανακοίνωσης..."></textarea>
                     </div>
+
+                    <div class="form-group">
+                        <label for="gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(getDefaultAnnouncementGdprNotice()); ?></textarea>
+                    </div>
                     
                     <div class="form-group">
                         <label for="images"><strong>Εικόνες</strong></label>
-                        <input type="file" class="form-control-file" id="images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="images"
+                            name="images[]"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="0"
+                        >
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?> εικόνες ανά ανακοίνωση
                         </small>
                         <small class="text-muted d-block">
                             <i class="fas fa-lightbulb"></i> Μπορείτε να επιλέξετε πολλές εικόνες ταυτόχρονα
                         </small>
                         <div id="imagePreview" class="image-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attachments"><strong>Συνημμένες Επιστολές</strong></label>
+                        <input type="file" class="form-control-file" id="attachments" name="attachments[]" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: PDF, JPG, JPEG, PNG | Μέγιστο μέγεθος: 8MB ανά αρχείο
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-paperclip"></i> Κάθε ανακοίνωση μπορεί να συνοδεύεται από την αντίστοιχη επιστολή ή σχετικό έγγραφο.
+                        </small>
                     </div>
                 </div>
                 
@@ -736,6 +927,37 @@ function deleteAnnouncementImage(imageId, announcementId) {
     });
 }
 
+function deleteAnnouncementAttachment(attachmentId, announcementId) {
+    showConfirm('Διαγραφή συνημμένου;', function () {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_attachment';
+
+        const attachmentIdInput = document.createElement('input');
+        attachmentIdInput.type = 'hidden';
+        attachmentIdInput.name = 'attachment_id';
+        attachmentIdInput.value = String(attachmentId);
+
+        const announcementIdInput = document.createElement('input');
+        announcementIdInput.type = 'hidden';
+        announcementIdInput.name = 'announcement_id';
+        announcementIdInput.value = String(announcementId);
+
+        form.appendChild(actionInput);
+        form.appendChild(attachmentIdInput);
+        form.appendChild(announcementIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }, {
+        title: 'Επιβεβαίωση διαγραφής'
+    });
+}
+
 // Έλεγχος αρχείων και μικρή προεπισκόπηση εικόνων πριν το submit
 function validateAndPreviewImages(input, previewId) {
     const preview = document.getElementById(previewId);
@@ -743,9 +965,28 @@ function validateAndPreviewImages(input, previewId) {
     
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     const maxFileSize = 5 * 1024 * 1024; // Μέγιστο 5MB ανά αρχείο
+    const announcementImageLimit = <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?>;
+    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
+    const availableSlots = Math.max(0, announcementImageLimit - existingCount);
     let warnings = [];
+    let files = [...input.files];
+
+    if (availableSlots === 0) {
+        input.value = '';
+        warnings.push(`Η ανακοίνωση έχει ήδη ${announcementImageLimit} εικόνες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+    } else if (files.length > availableSlots) {
+        warnings.push(`Μπορείτε να προσθέσετε μόνο ${availableSlots} ακόμη εικόνα/ες σε αυτή την ανακοίνωση. Θα κρατηθούν μόνο οι πρώτες ${availableSlots}.`);
+
+        files = files.slice(0, availableSlots);
+
+        if (typeof DataTransfer !== 'undefined') {
+            const dataTransfer = new DataTransfer();
+            files.forEach((file) => dataTransfer.items.add(file));
+            input.files = dataTransfer.files;
+        }
+    }
     
-    [...input.files].forEach((file, index) => {
+    files.forEach((file) => {
         const fileExt = file.name.split('.').pop().toLowerCase();
         let hasWarning = false;
         
@@ -783,9 +1024,8 @@ function validateAndPreviewImages(input, previewId) {
         }
     });
     
-    // Δείχνουμε προειδοποιήσεις, αλλά αφήνουμε τον server να κάνει τον τελικό έλεγχο
     if (warnings.length > 0) {
-        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.', {
+        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
             title: 'Έλεγχος αρχείων',
             variant: 'warning'
         });
