@@ -5,25 +5,50 @@ function TwoFactorForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const sendCodeAgain = async () => {
     setErrorMessage('');
     setSuccessMessage('');
-    setIsLoading(true);
+    setIsResending(true);
 
-    if (!code.trim()) {
-      setErrorMessage('Please enter the 2FA code');
-      setIsLoading(false);
+    try {
+      const response = await fetch('/parents-council-platform-group5/app/services/TwoFactorAuthService.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSuccessMessage('A new 2FA code was sent to your email.');
+      } else {
+        setErrorMessage(data.message || 'Failed to resend code.');
+      }
+    } catch (error) {
+      console.error('Error resending code:', error);
+      setErrorMessage('An error occurred while resending the code.');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (code.trim().length !== 8) {
+      setErrorMessage('Please enter the 8-character code.');
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const response = await fetch('/parents-council-platform-group5/app/services/TwoFactorAuthService.php', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ code: code.trim() })
       });
@@ -31,29 +56,28 @@ function TwoFactorForm() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccessMessage('Verification successful! Redirecting...');
-        // Redirect based on user role
+        setSuccessMessage('Verification successful. Redirecting...');
         setTimeout(() => {
           fetch('/parents-council-platform-group5/app/services/SessionCheck.php', {
             credentials: 'include'
           })
-          .then(res => res.json())
-          .then(sessionData => {
-            if (sessionData.role === 'admin') {
-              window.location.href = 'admin/index.php';
-            } else {
-              window.location.href = 'parent/index.php';
-            }
-          })
-          .catch(() => {
-            window.location.href = 'index.php';
-          });
+            .then((res) => res.json())
+            .then((sessionData) => {
+              if (sessionData.role === 'admin') {
+                window.location.href = 'admin/index.php';
+              } else {
+                window.location.href = 'parent/index.php';
+              }
+            })
+            .catch(() => {
+              window.location.href = 'index.php';
+            });
         }, 1000);
       } else {
-        setErrorMessage(data.message);
+        setErrorMessage(data.message || 'Invalid code.');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error verifying code:', error);
       setErrorMessage('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -67,26 +91,25 @@ function TwoFactorForm() {
         <input
           type="text"
           id="code-input"
-          placeholder="Enter 6-digit code"
+          placeholder="Enter 8-character code"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-          maxLength="6"
-          pattern="[0-9]{6}"
+          onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8))}
+          maxLength="8"
+          pattern="[A-Za-z0-9]{8}"
           required
         />
-        <button
-          id="confirm-button"
-          type="submit"
-          disabled={isLoading || code.length !== 6}
-        >
+        <button id="confirm-button" type="submit" disabled={isLoading || code.length !== 8}>
           {isLoading ? 'Verifying...' : 'Confirm'}
         </button>
       </form>
+      <button id="resend-button" type="button" onClick={sendCodeAgain} disabled={isResending || isLoading}>
+        {isResending ? 'Sending...' : 'Resend code'}
+      </button>
       {errorMessage && <span id="error-message">{errorMessage}</span>}
       {successMessage && <span id="success-message">{successMessage}</span>}
     </div>
   );
 }
 
-const root = document.getElementById("two-factor-root");
+const root = document.getElementById('two-factor-root');
 ReactDOM.render(<TwoFactorForm />, root);
