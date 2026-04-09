@@ -112,6 +112,40 @@
     border-bottom: 0;
 }
 
+.submission-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.38rem 0.72rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.submission-mode-badge::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+}
+
+.submission-mode-badge-manual {
+    background: #eaf7ef;
+    border-color: #cce9d7;
+    color: #237347;
+}
+
+.submission-mode-badge-upload {
+    background: #eef4fb;
+    border-color: #d4e3f3;
+    color: #245f99;
+}
+
 /* Truncate 2 γραμμών για μακρύ κείμενο τίτλου/περιγραφής */
 .text-truncate-two-lines {
     display: -webkit-box;
@@ -219,6 +253,31 @@
     word-break: break-word;
 }
 
+.detail-field-link {
+    color: #1d5f9b;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.detail-field-link:hover,
+.detail-field-link:focus {
+    color: #144a7c;
+    text-decoration: underline;
+}
+
+.detail-checkbox-input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #1f6fd0;
+    vertical-align: middle;
+    pointer-events: none;
+}
+
+.detail-checkbox-input:disabled {
+    opacity: 1;
+}
+
 /* Dropdown forms: αφαίρεση extra margin για καθαρό layout */
 .dropdown-menu form {
     margin: 0;
@@ -235,8 +294,7 @@
 }
 
 /* Περιορισμός ύψους στα μεγάλα modals create/edit */
-#createApplicationModal .modal-content,
-#editApplicationModal .modal-content {
+#createApplicationModal .modal-content {
     max-height: calc(100vh - 2rem);
 }
 
@@ -258,8 +316,7 @@
 }
 
 /* Scrollable σώμα modal για μικρές οθόνες */
-#createApplicationModal .modal-body,
-#editApplicationModal .modal-body {
+#createApplicationModal .modal-body {
     overflow-y: auto;
     max-height: calc(100vh - 210px);
 }
@@ -277,19 +334,18 @@
     max-width: 900px;
 }
 
-#editApplicationModal .modal-content {
-    max-height: calc(100vh - 1.25rem);
-}
-
 #editApplicationModal .modal-header,
 #editApplicationModal .modal-footer {
     padding: 0.55rem 0.9rem;
 }
 
 #editApplicationModal .modal-body {
-    overflow-y: visible;
-    max-height: none;
     padding: 0.8rem 0.9rem;
+}
+
+#editApplicationModal .modal-footer {
+    background: #ffffff;
+    border-top: 1px solid #e4e9f0;
 }
 
 #editApplicationModal .nav-tabs .nav-link {
@@ -387,9 +443,8 @@
 
 /* Fallback scroll μόνο σε πολύ μικρό ύψος viewport */
 @media (max-height: 760px) {
-    #editApplicationModal .modal-body {
-        overflow-y: auto;
-        max-height: calc(100vh - 165px);
+    #editApplicationModal .modal-dialog {
+        margin: 0.5rem auto;
     }
 }
 
