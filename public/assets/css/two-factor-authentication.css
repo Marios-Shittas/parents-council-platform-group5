@@ -1,0 +1,101 @@
+.body {
+    background-color: #EEF2F7;
+}
+
+.page-content {
+    background: #ffffff;
+    width: 420px;
+    height: 520px;
+    border-radius: 12px;
+    padding: 2rem 2rem 1.5rem;
+    margin: 100px auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+#two-factor-title {
+    text-align: left;
+    margin: 20px;
+    width: 240px;
+    color: #1E2D5A;
+}
+
+#error-message {
+    color: red;
+    font-size: 10px;
+    margin-left: 20px;
+}
+
+#success-message {
+    color: green;
+    font-size: 10px;
+    margin-left: 20px;
+}
+
+.two-factor-container {
+    margin: auto;
+    padding: 10px;
+    width: 250px;
+}
+
+#two-factor-label {
+    color: #444;
+    font-size: 18px;
+    font-size: 0.82rem;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+#code-input {
+    border: 1.5px solid #B0BDD8; 
+    color: #1E2D5A; 
+    background: #F8FAFF;
+    border-radius: 6px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    outline: none;
+    font-family: 'Lato', sans-serif;
+}
+#code-input:focus {
+    border-color: #1E2D5A;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 45, 90, 0.15);
+}
+
+#confirm-button {
+    background: #1E2D5A; 
+    color: #fff; 
+    margin-top: 25px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+}
+
+#back-button {
+    background: transparent; 
+    color: lightgray; 
+    margin-top: 5px;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+#confirm-button:hover {
+    background: #2A3F7E;
+    color: #fff; 
+}

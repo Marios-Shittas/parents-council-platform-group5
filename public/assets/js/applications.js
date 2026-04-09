@@ -4,14 +4,7 @@
    FORM FIELD TEMPLATES  (keyed by formType)
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const FORM_FIELDS = {
-    general: [
-        { name: 'parent_name', label: 'Ονοματεπώνυμο Γονέα', type: 'text', icon: 'fa-user', required: true },
-        { name: 'parent_email', label: 'Email Επικοινωνίας', type: 'email', icon: 'fa-envelope', required: true },
-        { name: 'parent_phone', label: 'Τηλέφωνο Επικοινωνίας', type: 'text', icon: 'fa-phone', required: true },
-        { name: 'student_name', label: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας', type: 'text', icon: 'fa-user-graduate', required: true },
-        { name: 'student_class', label: 'Τμήμα / Τάξη', type: 'text', icon: 'fa-school', required: true },
-        { name: 'manual_application_text', label: 'Κείμενο Αίτησης', type: 'textarea', icon: 'fa-keyboard', required: true }
-    ]
+    general: []
 };
 
 const SUBMISSION_FIELD_LABELS = {
@@ -483,29 +476,51 @@ function buildField(field) {
         ? '<span class="text-danger ml-1" aria-hidden="true">*</span>'
         : '';
     var control = '';
+    var showTopLabel = true;
 
-    if (field.type === 'select') {
-        var opts = field.options.map(function (o) {
-            return '<option value="' + escHtml(o) + '">' + escHtml(o) + '</option>';
-        }).join('');
+    if (field.type === 'checkbox') {
+        showTopLabel = false;
+        control = '<label class="application-checkbox-row" for="field_' + escHtml(field.name) + '">' +
+                  '<span class="application-checkbox-text">• ' + escHtml(field.label) + req + '</span>' +
+                  '<input type="checkbox" id="field_' + escHtml(field.name) + '" class="application-checkbox-input" name="' + field.name + '" value="1"' +
+                  (field.required ? ' required' : '') + ' aria-label="' + escHtml(field.label) + '">' +
+                  '</label>';
+    } else if (field.type === 'file_upload') {
+        control = '<input type="file" class="form-control" name="' + field.name + '" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"' +
+                  (field.required ? ' required' : '') + '>';
+    } else if (field.type === 'tel') {
+        control = '<input type="tel" class="form-control js-phone-only" name="' + field.name + '" inputmode="numeric" pattern="[0-9]{6,15}" minlength="6" maxlength="15" autocomplete="tel" title="Μόνο αριθμοί (6-15 ψηφία)"' +
+                  (field.required ? ' required' : '') + '>';
+    } else if (field.type === 'select') {
+        var opts = (field.options && Array.isArray(field.options)) 
+            ? field.options.map(function (o) {
+                  return '<option value="' + escHtml(o) + '">' + escHtml(o) + '</option>';
+              }).join('')
+            : '';
         control = '<select class="form-control" name="' + field.name + '"' +
                   (field.required ? ' required' : '') + '>' +
                   '<option value="" disabled selected>\u0395\u03c0\u03b9\u03bb\u03ad\u03be\u03c4\u03b5...</option>' +
                   opts + '</select>';
+    } else if (field.type === 'radio') {
+        // For checkbox and radio, render as basic text input for now
+        // (proper support requires options stored in DB)
+        control = '<input type="text" class="form-control" name="' +
+                  field.name + '"' +
+                  (field.required ? ' required' : '') + '>';
     } else if (field.type === 'textarea') {
         control = '<textarea class="form-control" name="' + field.name +
-                  '" rows="3" placeholder="' + escHtml(field.label) + '..."' +
+                  '" rows="3"' +
                   (field.required ? ' required' : '') + '></textarea>';
     } else {
         control = '<input type="' + field.type + '" class="form-control" name="' +
-                  field.name + '" placeholder="' + escHtml(field.label) + '..."' +
+                  field.name + '"' +
                   (field.required ? ' required' : '') + '>';
     }
 
     return '<div class="form-group mb-3">' +
-           '<label class="form-label-custom">' +
-           '<i class="fas ' + field.icon + ' text-primary mr-1"></i>' +
-           escHtml(field.label) + req + '</label>' +
+           (showTopLabel
+               ? '<label class="form-label-custom">' + escHtml(field.label) + req + '</label>'
+               : '') +
            control + '</div>';
 }
 
@@ -636,6 +651,18 @@ document.addEventListener('DOMContentLoaded', function () {
     var applicationNoticeMessage = document.getElementById('application-notice-message');
     var applicationNoticeClose = document.getElementById('application-notice-close');
 
+    document.addEventListener('input', function (event) {
+        var target = event.target;
+        if (!target || !target.classList || !target.classList.contains('js-phone-only')) {
+            return;
+        }
+
+        var digitsOnly = String(target.value || '').replace(/[^0-9]/g, '');
+        if (digitsOnly !== target.value) {
+            target.value = digitsOnly;
+        }
+    });
+
     function hideCenterNotice() {
         if (applicationNoticeBox) {
             applicationNoticeBox.classList.remove('is-visible');
@@ -711,13 +738,161 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
-    function renderManualApplicationFields(prefill) {
+    function getFallbackManualFields(formType) {
+        return FORM_FIELDS[formType] || FORM_FIELDS.general || [];
+    }
+
+    function normalizeManualFieldType(type) {
+        var normalizedType = String(type || 'text').toLowerCase();
+        if (normalizedType === 'phone') {
+            normalizedType = 'tel';
+        }
+        if (normalizedType === 'file') {
+            normalizedType = 'file_upload';
+        }
+
+        var allowedTypes = ['text', 'email', 'number', 'date', 'textarea', 'select', 'checkbox', 'radio', 'tel', 'url', 'file_upload'];
+        return allowedTypes.indexOf(normalizedType) !== -1 ? normalizedType : 'text';
+    }
+
+    function collectFormUploadFiles(formElement) {
+        if (!formElement) {
+            return [];
+        }
+
+        var allFiles = [];
+        formElement.querySelectorAll('input[type="file"]').forEach(function (input) {
+            Array.from(input.files || []).forEach(function (file) {
+                if (!file || !file.name) {
+                    return;
+                }
+                allFiles.push(file);
+            });
+        });
+
+        return allFiles;
+    }
+
+    function applyFormDataValuesWithoutFiles(formElement, targetData) {
+        if (!formElement || !targetData) {
+            return;
+        }
+
+        new FormData(formElement).forEach(function (value, key) {
+            var isFileValue = typeof File !== 'undefined' && value instanceof File;
+            if (isFileValue) {
+                if (value.name) {
+                    targetData[key] = value.name;
+                }
+                return;
+            }
+
+            targetData[key] = value;
+        });
+    }
+
+    function getSubmissionFilesValidationMessage(files, requireAtLeastOne) {
+        var selectedFiles = Array.isArray(files) ? files : [];
+        if (requireAtLeastOne && selectedFiles.length === 0) {
+            return 'Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.';
+        }
+
+        if (selectedFiles.length > MAX_SUBMISSION_FILES) {
+            return 'Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.';
+        }
+
+        for (var i = 0; i < selectedFiles.length; i++) {
+            var fileName = String(selectedFiles[i].name || '');
+            var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+            if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
+                return 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+            }
+        }
+
+        return '';
+    }
+
+    function normalizeManualField(field, index) {
+        if (!field || typeof field !== 'object') {
+            return null;
+        }
+
+        var rawName = String(field.name || '').trim();
+        var safeName = rawName
+            .replace(/\s+/g, '_')
+            .replace(/[^a-zA-Z0-9_]/g, '_')
+            .replace(/^_+|_+$/g, '');
+
+        if (!safeName) {
+            safeName = 'field_' + String((index || 0) + 1);
+        }
+
+        var rawLabel = String(field.label || rawName || ('Πεδίο ' + String((index || 0) + 1))).trim();
+        var rawIcon = String(field.icon || '').trim();
+
+        return {
+            name: safeName,
+            label: rawLabel || ('Πεδίο ' + String((index || 0) + 1)),
+            type: normalizeManualFieldType(field.type),
+            required: Boolean(field.required),
+            icon: rawIcon || 'fa-keyboard',
+            options: Array.isArray(field.options) ? field.options : []
+        };
+    }
+
+    function fetchManualFieldsForApplication(appId, formType) {
+        var fallbackFields = getFallbackManualFields(formType);
+        if (!appId) {
+            return Promise.resolve(fallbackFields);
+        }
+
+        return fetch(window.location.pathname + '?ajax_get_form_fields=1&application_id=' + encodeURIComponent(String(appId)), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error('Unable to load form fields');
+            }
+            return response.json();
+        })
+        .then(function (payload) {
+            if (!payload || payload.success !== true || payload.hasCustomFields !== true || !Array.isArray(payload.fields) || payload.fields.length === 0) {
+                return fallbackFields;
+            }
+
+            var normalizedFields = payload.fields
+                .map(function (field, index) {
+                    return normalizeManualField(field, index);
+                })
+                .filter(function (field) {
+                    return Boolean(field);
+                });
+
+            return normalizedFields.length > 0 ? normalizedFields : fallbackFields;
+        })
+        .catch(function () {
+            return fallbackFields;
+        });
+    }
+
+    function renderManualApplicationFields(prefill, fields) {
         if (!viewManualFields) {
             return;
         }
 
-        var fields = FORM_FIELDS.general || [];
-        viewManualFields.innerHTML = fields.map(buildField).join('');
+        var resolvedFields = Array.isArray(fields) && fields.length > 0
+            ? fields
+            : getFallbackManualFields((_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general');
+
+        if (!resolvedFields || resolvedFields.length === 0) {
+            viewManualFields.innerHTML = '';
+            return;
+        }
+
+        viewManualFields.innerHTML = resolvedFields.map(buildField).join('');
 
         if (!prefill) {
             return;
@@ -830,7 +1005,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 viewModalAttachments.innerHTML = docs.map(function (doc) {
                     var rawPath = doc && doc.file_path ? doc.file_path : '';
                     var url = normalizeDocPath(rawPath);
-                    var name = rawPath ? rawPath.split('/').pop() : '\u0388\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf';
+                    var mappedName = doc && doc.display_name ? String(doc.display_name).trim() : '';
+                    var name = mappedName || (rawPath ? rawPath.split('/').pop() : '\u0388\u03b3\u03b3\u03c1\u03b1\u03c6\u03bf');
                     return '<li><a href="' + escHtml(url) + '" target="_blank"><i class="fas fa-file-alt mr-1 text-primary"></i>' + escHtml(name) + '</a></li>';
                 }).join('');
             }
@@ -844,7 +1020,23 @@ document.addEventListener('DOMContentLoaded', function () {
         if (viewManualForm) {
             viewManualForm.reset();
         }
-        renderManualApplicationFields(_modal.prefill);
+
+        if (viewManualFields) {
+            viewManualFields.innerHTML = '<div class="text-muted small py-2">Φόρτωση πεδίων φόρμας...</div>';
+        }
+
+        _modal.manualFieldsLoading = true;
+        _modal.manualFields = getFallbackManualFields(_modal.meta.formType);
+        fetchManualFieldsForApplication(appId, _modal.meta.formType).then(function (manualFields) {
+            if (!_modal || _modal.appId !== appId) {
+                return;
+            }
+
+            _modal.manualFieldsLoading = false;
+            _modal.manualFields = manualFields;
+            renderManualApplicationFields(_modal.prefill, manualFields);
+        });
+
         setApplicationSubmitMode('upload');
 
         var uploadTitleEl = document.querySelector('#application-view-upload .upload-title span');
@@ -943,6 +1135,11 @@ document.addEventListener('DOMContentLoaded', function () {
             };
 
             if (selectedMode === 'manual') {
+                if (_modal.manualFieldsLoading) {
+                    showCenterNotice('Γίνεται φόρτωση των πεδίων. Περιμένετε λίγα δευτερόλεπτα και δοκιμάστε ξανά.');
+                    return;
+                }
+
                 if (!viewManualForm) {
                     showCenterNotice('Δεν είναι διαθέσιμη η online φόρμα αυτή τη στιγμή.');
                     return;
@@ -953,26 +1150,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                new FormData(viewManualForm).forEach(function (value, key) {
-                    data[key] = value;
-                });
-            } else {
-                if (files.length === 0) {
-                    showCenterNotice('Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.');
-                    return;
-                }
-                if (files.length > MAX_SUBMISSION_FILES) {
-                    showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
-                    return;
-                }
+                applyFormDataValuesWithoutFiles(viewManualForm, data);
 
-                for (var i = 0; i < files.length; i++) {
-                    var fileName = String(files[i].name || '');
-                    var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
-                    if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
-                        showCenterNotice('Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.');
-                        return;
-                    }
+                files = collectFormUploadFiles(viewManualForm);
+                var manualFilesValidationMessage = getSubmissionFilesValidationMessage(files, false);
+                if (manualFilesValidationMessage !== '') {
+                    showCenterNotice(manualFilesValidationMessage);
+                    return;
+                }
+            } else {
+                var uploadFilesValidationMessage = getSubmissionFilesValidationMessage(files, true);
+                if (uploadFilesValidationMessage !== '') {
+                    showCenterNotice(uploadFilesValidationMessage);
+                    return;
                 }
             }
 
@@ -984,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', function () {
             body.append('application_id', String(_modal.appId));
             body.append('submission_mode', selectedMode);
             body.append('submission_data', JSON.stringify(data));
-            if (selectedMode === 'upload') {
+            if (files.length > 0) {
                 files.forEach(function (file) {
                     body.append('submission_files[]', file);
                 });
@@ -1074,34 +1264,76 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('modal-title').textContent       = appTitle;
         document.getElementById('modal-description').textContent = appDesc;
 
-        // Dynamic form fields
-        var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
-        var container = document.getElementById('modal-dynamic-fields');
-        // Add the file input inside the form.
-        container.innerHTML =
-            '<form id="application-form" enctype="multipart/form-data">' +
-            fields.map(buildField).join('') +
-            '<div class="form-group mt-3 mb-0">' +
-            '<label class="form-label-custom mb-2">' +
-            '<i class="fas fa-paperclip text-primary mr-1"></i>\u03a0\u03c1\u03bf\u03b1\u03b9\u03c1\u03b5\u03c4\u03b9\u03ba\u03cc \u03b1\u03c1\u03c7\u03b5\u03af\u03bf \u03c5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</label>' +
-            '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
-            '<small class="text-muted d-block mt-1">\u0395\u03c0\u03b9\u03c4\u03c1\u03b5\u03c0\u03cc\u03bc\u03b5\u03bd\u03bf\u03b9 \u03c4\u03cd\u03c0\u03bf\u03b9: pdf, doc, docx, jpg, jpeg, png.</small>' +
-            '</div>' +
-            '</form>';
+        // Fetch custom form fields from server
+        fetch(window.location.pathname + '?ajax_get_form_fields=1&application_id=' + appId, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            // Use custom fields if available, otherwise fall back to hardcoded fields
+            var fields = (data.hasCustomFields && Array.isArray(data.fields) && data.fields.length > 0)
+                ? data.fields
+                : (FORM_FIELDS[meta.formType] || FORM_FIELDS.general);
 
-        // Restore saved draft for this application, if available.
-        var form = document.getElementById('application-form');
-        var draft = loadDraft(appId);
-        if (form && draft) {
-            restoreDraftToForm(form, draft);
-        } else if (form && _modal.prefill) {
-            Object.keys(_modal.prefill).forEach(function (key) {
-                var field = form.elements.namedItem(key);
-                if (field && field.type !== 'file' && !String(field.value || '').trim()) {
-                    field.value = _modal.prefill[key];
-                }
-            });
-        }
+            var container = document.getElementById('modal-dynamic-fields');
+            // Add the file input inside the form.
+            container.innerHTML =
+                '<form id="application-form" enctype="multipart/form-data">' +
+                fields.map(buildField).join('') +
+                '<div class="form-group mt-3 mb-0">' +
+                '<label class="form-label-custom mb-2">' +
+                '<i class="fas fa-paperclip text-primary mr-1"></i>\u03a0\u03c1\u03bf\u03b1\u03b9\u03c1\u03b5\u03c4\u03b9\u03ba\u03cc \u03b1\u03c1\u03c7\u03b5\u03af\u03bf \u03c5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</label>' +
+                '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
+                '<small class="text-muted d-block mt-1">\u0395\u03c0\u03b9\u03c4\u03c1\u03b5\u03c0\u03cc\u03bc\u03b5\u03bd\u03bf\u03b9 \u03c4\u03cd\u03c0\u03bf\u03b9: pdf, doc, docx, jpg, jpeg, png.</small>' +
+                '</div>' +
+                '</form>';
+
+            // Restore saved draft for this application, if available.
+            var form = document.getElementById('application-form');
+            var draft = loadDraft(appId);
+            if (form && draft) {
+                restoreDraftToForm(form, draft);
+            } else if (form && _modal.prefill) {
+                Object.keys(_modal.prefill).forEach(function (key) {
+                    var field = form.elements.namedItem(key);
+                    if (field && field.type !== 'file' && !String(field.value || '').trim()) {
+                        field.value = _modal.prefill[key];
+                    }
+                });
+            }
+        })
+        .catch(function(err) {
+            // If fetch fails, fall back to hardcoded fields
+            console.error('Error fetching custom fields:', err);
+            var fields    = FORM_FIELDS[meta.formType] || FORM_FIELDS.general;
+            var container = document.getElementById('modal-dynamic-fields');
+            container.innerHTML =
+                '<form id="application-form" enctype="multipart/form-data">' +
+                fields.map(buildField).join('') +
+                '<div class="form-group mt-3 mb-0">' +
+                '<label class="form-label-custom mb-2">' +
+                '<i class="fas fa-paperclip text-primary mr-1"></i>\u03a0\u03c1\u03bf\u03b1\u03b9\u03c1\u03b5\u03c4\u03b9\u03ba\u03cc \u03b1\u03c1\u03c7\u03b5\u03af\u03bf \u03c5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</label>' +
+                '<input type="file" id="modal-submission-file" name="submission_file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
+                '<small class="text-muted d-block mt-1">\u0395\u03c0\u03b9\u03c4\u03c1\u03b5\u03c0\u03cc\u03bc\u03b5\u03bd\u03bf\u03b9 \u03c4\u03cd\u03c0\u03bf\u03b9: pdf, doc, docx, jpg, jpeg, png.</small>' +
+                '</div>' +
+                '</form>';
+
+            var form = document.getElementById('application-form');
+            var draft = loadDraft(appId);
+            if (form && draft) {
+                restoreDraftToForm(form, draft);
+            } else if (form && _modal.prefill) {
+                Object.keys(_modal.prefill).forEach(function (key) {
+                    var field = form.elements.namedItem(key);
+                    if (field && field.type !== 'file' && !String(field.value || '').trim()) {
+                        field.value = _modal.prefill[key];
+                    }
+                });
+            }
+        });
     });
 
     /* â”€â”€ Clear form on modal close â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -1124,11 +1356,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         var data = {};
-        new FormData(form).forEach(function (value, key) { data[key] = value; });
+        applyFormDataValuesWithoutFiles(form, data);
         data.applied_at = todayLabel();
         data._formType = (_modal.meta && _modal.meta.formType) ? _modal.meta.formType : 'general';
         data._category = (_modal.meta && _modal.meta.category) ? _modal.meta.category : '';
         data._submission_mode = 'manual';
+
+        var files = collectFormUploadFiles(form);
+        var manualFilesValidationMessage = getSubmissionFilesValidationMessage(files, false);
+        if (manualFilesValidationMessage !== '') {
+            showCenterNotice(manualFilesValidationMessage);
+            return;
+        }
 
         var btn = document.getElementById('modal-submit-btn');
         btn.disabled = true;
@@ -1139,11 +1378,9 @@ document.addEventListener('DOMContentLoaded', function () {
         body.append('application_id', String(_modal.appId));
         body.append('submission_mode', 'manual');
         body.append('submission_data', JSON.stringify(data));
-
-        var fileInput = document.getElementById('modal-submission-file');
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-            body.append('submission_file', fileInput.files[0]);
-        }
+        files.forEach(function (file) {
+            body.append('submission_files[]', file);
+        });
 
         fetch(window.location.pathname, {
             method:  'POST',
@@ -1205,6 +1442,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var data = {};
             new FormData(form).forEach(function (value, key) {
+                if (typeof File !== 'undefined' && value instanceof File) {
+                    return;
+                }
                 data[key] = value;
             });
 

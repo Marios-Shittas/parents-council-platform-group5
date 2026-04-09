@@ -49,7 +49,7 @@ function handleLogin() {
   .then(data => {
       if (data.success) {
           if (data.role === 'admin') {
-            window.location.href = 'admin/announcements.php';
+            window.location.href = 'admin/index.php';
           }
           else if (data.role === 'parent') {
             window.location.href = 'parent/index.php';
@@ -61,3 +61,11 @@ function handleLogin() {
   .catch(error => console.error('Error during login:', error));
 }
 document.getElementById("login-button").addEventListener("click", handleLogin);
+
+function handleKeyPress(event) {
+  if (event.key === 'Enter') {
+    handleLogin();
+  }
+}
+document.getElementById("email-input").addEventListener("keypress", handleKeyPress);
+document.getElementById("password-input").addEventListener("keypress", handleKeyPress);

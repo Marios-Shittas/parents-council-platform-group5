@@ -10,3 +10,4 @@ auth_require_role('parent');
 
 $siteContext = 'parent';
 require __DIR__ . '/../../app/views/pages/applications.php';
+?>

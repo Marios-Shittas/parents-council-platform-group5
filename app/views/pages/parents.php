@@ -23,14 +23,12 @@ function parentsPageSanitizeList($items)
     }
 
     $sanitizedItems = [];
-
     foreach ($items as $item) {
         $item = parentsPageNormalizeText($item);
         if ($item !== '') {
             $sanitizedItems[] = $item;
         }
     }
-
     return $sanitizedItems;
 }
 
@@ -39,31 +37,19 @@ function parentsPageSanitizeRows($rows)
     if (!is_array($rows)) {
         return [];
     }
-
     $sanitizedRows = [];
-
     foreach ($rows as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-
-        $sanitizedRow = [];
-        $hasValue = false;
-
-        foreach ($row as $key => $cell) {
-            $cell = parentsPageNormalizeText($cell);
-            $sanitizedRow[$key] = $cell;
-
-            if ($cell !== '') {
-                $hasValue = true;
+        if (is_array($row)) {
+            $sanitizedRow = [];
+            foreach ($row as $key => $cell) {
+                $sanitizedRow[$key] = parentsPageNormalizeText($cell);
+            }
+            // Only add non-empty rows
+            if (count(array_filter($sanitizedRow, function ($cell) { return $cell !== ''; })) > 0) {
+                $sanitizedRows[] = $sanitizedRow;
             }
         }
-
-        if ($hasValue) {
-            $sanitizedRows[] = $sanitizedRow;
-        }
     }
-
     return $sanitizedRows;
 }
 
@@ -74,7 +60,6 @@ function parentsPageSanitizeScheduleBlocks($blocks)
     }
 
     $sanitizedBlocks = [];
-
     foreach ($blocks as $block) {
         if (!is_array($block)) {
             continue;

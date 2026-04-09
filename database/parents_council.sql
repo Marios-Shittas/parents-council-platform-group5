@@ -198,6 +198,21 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS ApplicationsFormFields (
+    field_id          INT NOT NULL AUTO_INCREMENT,
+    application_id    INT NOT NULL,
+    field_name        VARCHAR(255) NOT NULL,
+    field_type        VARCHAR(50) NOT NULL DEFAULT 'text',
+    field_order       INT NOT NULL DEFAULT 0,
+    is_required       TINYINT(1) NOT NULL DEFAULT 1,
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (field_id),
+    CONSTRAINT fk_aff_app
+        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    KEY idx_application_order (application_id, field_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS Submissions (
     application_id    INT NOT NULL,
     user_id           INT NOT NULL,

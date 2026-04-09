@@ -376,5 +376,365 @@ class ApplicationsService {
         $row = $result->fetch_assoc();
         return (int)$row['count'];
     }
+
+    // ============================================
+    // APPLICATION FORM FIELDS METHODS
+    // ============================================
+
+    /**
+     * Λήψη όλων των πεδίων φόρμας για μια αίτηση
+     * @param int $applicationId ID της αίτησης
+     * @return array Πίνακας με τα πεδία
+     */
+    public function getApplicationFormFields($applicationId) {
+        $sql = "SELECT * FROM ApplicationsFormFields 
+                WHERE application_id = ? 
+                ORDER BY field_order ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $fields = [];
+        while ($row = $result->fetch_assoc()) {
+            $fields[] = $row;
+        }
+        return $fields;
+    }
+
+    /**
+     * Προσθήκη νέου πεδίου φόρμας
+     * @param int $applicationId ID της αίτησης
+     * @param string $fieldName Όνομα του πεδίου
+     * @param string $fieldType Τύπος του πεδίου (text, email, tel, κ.λπ.)
+     * @param int $fieldOrder Σειρά εμφάνισης
+     * @param bool $isRequired Απαιτείται ή όχι;
+     * @return bool Επιτυχία ή αποτυχία
+     */
+    public function addFormField($applicationId, $fieldName, $fieldType = 'text', $fieldOrder = 0, $isRequired = true) {
+        $sql = "INSERT INTO ApplicationsFormFields 
+                (application_id, field_name, field_type, field_order, is_required) 
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $isReq = $isRequired ? 1 : 0;
+        $stmt->bind_param("issii", $applicationId, $fieldName, $fieldType, $fieldOrder, $isReq);
+        return $stmt->execute();
+    }
+
+    /**
+     * Ενημέρωση πεδίου φόρμας
+     * @param int $fieldId ID του πεδίου
+     * @param string $fieldName Νέο όνομα
+     * @param string $fieldType Νέος τύπος
+     * @param bool $isRequired Απαιτείται ή όχι;
+     * @return bool Επιτυχία ή αποτυχία
+     */
+    public function updateFormField($fieldId, $fieldName, $fieldType = 'text', $isRequired = true) {
+        $sql = "UPDATE ApplicationsFormFields 
+                SET field_name = ?, field_type = ?, is_required = ? 
+                WHERE field_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $isReq = $isRequired ? 1 : 0;
+        $stmt->bind_param("ssii", $fieldName, $fieldType, $isReq, $fieldId);
+        return $stmt->execute();
+    }
+
+    /**
+     * Διαγραφή πεδίου φόρμας
+     * @param int $fieldId ID του πεδίου
+     * @return bool Επιτυχία ή αποτυχία
+     */
+    public function deleteFormField($fieldId) {
+        $sql = "DELETE FROM ApplicationsFormFields WHERE field_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $fieldId);
+        return $stmt->execute();
+    }
+
+    /**
+     * Αναδιάταξη των πεδίων
+     * @param array $fieldIds Πίνακας με τα IDs των πεδίων στη σωστή σειρά
+     * @return bool Επιτυχία ή αποτυχία
+     */
+    public function reorderFormFields($fieldIds) {
+        foreach ($fieldIds as $order => $fieldId) {
+            $sql = "UPDATE ApplicationsFormFields SET field_order = ? WHERE field_id = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("ii", $order, $fieldId);
+            if (!$stmt->execute()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ============================================================
+    // NEW: Enhanced Application Management (v2)
+    // ============================================================
+    
+    /**
+     * Create application from template or blank
+     */
+    public function createApplicationFromTemplate($templateId, $title, $description, $academicYear, $openDate, $dueDate, $allowOnline = true, $allowFile = true, $requireSignature = false, $createdBy = null) {
+        $formSchema = null;
+        if ($templateId) {
+            // Get template schema
+            $sql = "SELECT form_schema FROM ApplicationTemplates WHERE template_id = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $templateId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $formSchema = $row['form_schema'];
+            }
+        }
+        
+        $sql = "INSERT INTO Applications 
+               (template_id, application_title, title, application_description, description,
+                academic_year, open_date, due_date, status,
+                allow_online_submission, allow_file_submission, require_signature,
+                form_schema, created_by)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param(
+            "isssssssiiisi",
+            $templateId, $title, $title, $description, $description,
+            $academicYear, $openDate, $dueDate,
+            $allowOnline, $allowFile, $requireSignature,
+            $formSchema, $createdBy
+        );
+        
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
+        }
+        return false;
+    }
+    
+    /**
+     * Get application with all details (new schema)
+     */
+    public function getApplicationWithDetails($applicationId) {
+        $sql = "SELECT a.*, t.name as template_name, t.template_key
+                FROM Applications a
+                LEFT JOIN ApplicationTemplates t ON a.template_id = t.template_id
+                WHERE a.application_id = ?";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($row = $result->fetch_assoc()) {
+            // Parse JSON fields
+            if ($row['form_schema']) {
+                $row['form_schema'] = json_decode($row['form_schema'], true);
+            }
+            if ($row['target_audience']) {
+                $row['target_audience'] = json_decode($row['target_audience'], true);
+            }
+            
+            // Get attachments
+            $row['attachments'] = $this->getApplicationAttachments($applicationId);
+            
+            return $row;
+        }
+        return null;
+    }
+    
+    /**
+     * Update application with new schema
+     */
+    public function updateApplicationDetails($applicationId, $title, $description, $academicYear, $openDate, $dueDate, $allowOnline, $allowFile, $requireSignature, $formSchema = null) {
+        $formSchemaJson = $formSchema ? json_encode($formSchema, JSON_UNESCAPED_UNICODE) : null;
+        
+        $sql = "UPDATE Applications 
+                SET application_title = ?, title = ?,
+                    application_description = ?, description = ?,
+                    academic_year = ?, open_date = ?, due_date = ?,
+                    allow_online_submission = ?, allow_file_submission = ?,
+                    require_signature = ?, form_schema = ?,
+                    updated_at = NOW()
+                WHERE application_id = ?";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param(
+            "sssssssiiis",
+            $title, $title,
+            $description, $description,
+            $academicYear, $openDate, $dueDate,
+            $allowOnline, $allowFile, $requireSignature,
+            $formSchemaJson, $applicationId
+        );
+        
+        return $stmt->execute();
+    }
+    
+    /**
+     * Publish application (change status from draft to published)
+     */
+    public function publishApplication($applicationId) {
+        $sql = "UPDATE Applications SET status = 'published', updated_at = NOW() WHERE application_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Close application (prevent new submissions)
+     */
+    public function closeApplication($applicationId) {
+        $sql = "UPDATE Applications SET status = 'closed', updated_at = NOW() WHERE application_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Add attachment to application
+     */
+    public function addApplicationAttachment($applicationId, $filePath, $originalFilename) {
+        // Get highest order
+        $sql = "SELECT MAX(upload_order) as max_order FROM ApplicationAttachments WHERE application_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $order = 0;
+        if ($row = $result->fetch_assoc()) {
+            $order = ($row['max_order'] ?? -1) + 1;
+        }
+        
+        $sql = "INSERT INTO ApplicationAttachments (application_id, file_path, original_filename, upload_order)
+                VALUES (?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("issi", $applicationId, $filePath, $originalFilename, $order);
+        
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
+        }
+        return false;
+    }
+    
+    /**
+     * Get attachments for application
+     */
+    public function getApplicationAttachments($applicationId) {
+        $sql = "SELECT * FROM ApplicationAttachments WHERE application_id = ? ORDER BY upload_order ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $attachments = [];
+        while ($row = $result->fetch_assoc()) {
+            $attachments[] = $row;
+        }
+        return $attachments;
+    }
+    
+    /**
+     * Delete attachment
+     */
+    public function deleteApplicationAttachment($attachmentId) {
+        // Get file path first
+        $sql = "SELECT file_path FROM ApplicationAttachments WHERE attachment_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $attachmentId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $filePath = null;
+        if ($row = $result->fetch_assoc()) {
+            $filePath = $row['file_path'];
+        }
+        
+        // Delete from DB
+        $sql = "DELETE FROM ApplicationAttachments WHERE attachment_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $attachmentId);
+        $deleted = $stmt->execute();
+        
+        // Delete file
+        if ($deleted && $filePath) {
+            $fullPath = __DIR__ . '/../../' . $filePath;
+            if (file_exists($fullPath)) {
+                @unlink($fullPath);
+            }
+        }
+        
+        return $deleted;
+    }
+    
+    /**
+     * Create submission in new ApplicationSubmissions table
+     */
+    public function createApplicationSubmission($applicationId, $userId, $submissionType, $formData = null, $uploadedFiles = null, $signatureData = null) {
+        $formDataJson = $formData ? json_encode($formData, JSON_UNESCAPED_UNICODE) : null;
+        $uploadedFilesJson = $uploadedFiles ? json_encode($uploadedFiles, JSON_UNESCAPED_UNICODE) : null;
+        
+        $sql = "INSERT INTO ApplicationSubmissions 
+                (application_id, user_id, submission_type, status, form_data, uploaded_files, signature_data)
+                VALUES (?, ?, ?, 'submitted', ?, ?, ?)";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param(
+            "isssss",
+            $applicationId, $userId, $submissionType,
+            $formDataJson, $uploadedFilesJson, $signatureData
+        );
+        
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
+        }
+        return false;
+    }
+    
+    /**
+     * Get submissions for application (new table)
+     */
+    public function getApplicationSubmissions($applicationId) {
+        $sql = "SELECT s.*, u.name, u.surname, u.email
+                FROM ApplicationSubmissions s
+                JOIN Users u ON s.user_id = u.user_id
+                WHERE s.application_id = ?
+                ORDER BY s.submitted_at DESC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $submissions = [];
+        while ($row = $result->fetch_assoc()) {
+            if ($row['form_data']) {
+                $row['form_data'] = json_decode($row['form_data'], true);
+            }
+            if ($row['uploaded_files']) {
+                $row['uploaded_files'] = json_decode($row['uploaded_files'], true);
+            }
+            $submissions[] = $row;
+        }
+        return $submissions;
+    }
+    
+    /**
+     * Get published applications (for parent portal)
+     */
+    public function getPublishedApplications() {
+        $sql = "SELECT a.* FROM Applications a 
+                WHERE a.status = 'published'
+                ORDER BY a.due_date ASC, a.open_date DESC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $applications = [];
+        while ($row = $result->fetch_assoc()) {
+            $applications[] = $row;
+        }
+        return $applications;
+    }
 }
 ?>
