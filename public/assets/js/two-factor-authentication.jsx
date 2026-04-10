@@ -3,7 +3,7 @@ const { useState } = React;
 function TwoFactorForm() {
   const [code, setCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(window.initialTwoFactorSuccess || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -86,6 +86,8 @@ function TwoFactorForm() {
 
   return (
     <div className="two-factor-container">
+      {errorMessage && <span id="error-message" className="two-factor-message">{errorMessage}</span>}
+      {successMessage && <span id="success-message" className="two-factor-message">{successMessage}</span>}
       <p id="two-factor-label">Please enter the code sent to your email:</p>
       <form onSubmit={handleSubmit}>
         <input
@@ -102,11 +104,13 @@ function TwoFactorForm() {
           {isLoading ? 'Verifying...' : 'Confirm'}
         </button>
       </form>
-      <button id="resend-button" type="button" onClick={sendCodeAgain} disabled={isResending || isLoading}>
-        {isResending ? 'Sending...' : 'Resend code'}
-      </button>
-      {errorMessage && <span id="error-message">{errorMessage}</span>}
-      {successMessage && <span id="success-message">{successMessage}</span>}
+      <div className="resend-wrapper">
+        <span className="resend-hint">Didn't receive it?</span>
+        <button id="resend-button" type="button" onClick={sendCodeAgain} disabled={isResending || isLoading}>
+          <i className="fas fa-rotate-right" aria-hidden="true"></i>
+          <span>{isResending ? 'Sending new code...' : 'Resend code'}</span>
+        </button>
+      </div>
     </div>
   );
 }
