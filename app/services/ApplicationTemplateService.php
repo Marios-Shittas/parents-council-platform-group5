@@ -5,9 +5,89 @@
  */
 class ApplicationTemplateService {
     private $conn;
+    private $templatesTable = 'ApplicationTemplates';
+    private $templatesTableChecked = false;
+    private $templatesTableReady = false;
     
     public function __construct($conn) {
         $this->conn = $conn;
+        $this->ensureTemplatesTableReady();
+    }
+
+    /**
+     * Ensure the templates table exists for older installs that have not run the
+     * applications v2 migration yet.
+     */
+    private function ensureTemplatesTableReady() {
+        if ($this->templatesTableChecked) {
+            return $this->templatesTableReady;
+        }
+
+        $this->templatesTableChecked = true;
+
+        try {
+            if (!$this->templatesTableExists()) {
+                $this->createTemplatesTable();
+            }
+
+            $this->templatesTableReady = true;
+            $this->seedDefaultTemplatesIfNeeded();
+        } catch (Throwable $e) {
+            $this->templatesTableReady = false;
+            error_log('ApplicationTemplateService initialization failed: ' . $e->getMessage());
+        }
+
+        return $this->templatesTableReady;
+    }
+
+    private function templatesTableExists() {
+        $tableName = $this->conn->real_escape_string($this->templatesTable);
+        $result = $this->conn->query("SHOW TABLES LIKE '{$tableName}'");
+        return $result instanceof mysqli_result && $result->num_rows > 0;
+    }
+
+    private function createTemplatesTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS `ApplicationTemplates` (
+                    `template_id` INT NOT NULL AUTO_INCREMENT,
+                    `template_key` VARCHAR(150) NOT NULL,
+                    `name` VARCHAR(255) NOT NULL,
+                    `description` TEXT DEFAULT NULL,
+                    `category` VARCHAR(100) NOT NULL DEFAULT 'standard',
+                    `form_schema` LONGTEXT DEFAULT NULL,
+                    `is_system_template` TINYINT(1) NOT NULL DEFAULT 0,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`template_id`),
+                    UNIQUE KEY `uq_application_templates_template_key` (`template_key`),
+                    KEY `idx_application_templates_category` (`category`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+        $this->conn->query($sql);
+    }
+
+    private function seedDefaultTemplatesIfNeeded() {
+        if (!$this->templatesTableReady) {
+            return;
+        }
+
+        $result = $this->conn->query(
+            "SELECT COUNT(*) AS total FROM `ApplicationTemplates` WHERE `is_system_template` = 1"
+        );
+
+        if (!$result) {
+            return;
+        }
+
+        $row = $result->fetch_assoc();
+        if ((int)($row['total'] ?? 0) > 0) {
+            return;
+        }
+
+        try {
+            $this->seedDefaultTemplates();
+        } catch (Throwable $e) {
+            error_log('ApplicationTemplateService seeding failed: ' . $e->getMessage());
+        }
     }
     
     // ============================================================
@@ -18,7 +98,11 @@ class ApplicationTemplateService {
      * Get all templates
      */
     public function getAllTemplates($isSystemOnly = false) {
-        $sql = "SELECT * FROM ApplicationTemplates";
+        if (!$this->ensureTemplatesTableReady()) {
+            return [];
+        }
+
+        $sql = "SELECT * FROM `ApplicationTemplates`";
         if ($isSystemOnly) {
             $sql .= " WHERE is_system_template = 1";
         }
@@ -41,7 +125,11 @@ class ApplicationTemplateService {
      * Get template by ID
      */
     public function getTemplateById($templateId) {
-        $sql = "SELECT * FROM ApplicationTemplates WHERE template_id = ?";
+        if (!$this->ensureTemplatesTableReady()) {
+            return null;
+        }
+
+        $sql = "SELECT * FROM `ApplicationTemplates` WHERE template_id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $templateId);
         $stmt->execute();
@@ -60,7 +148,11 @@ class ApplicationTemplateService {
      * Get template by key
      */
     public function getTemplateByKey($templateKey) {
-        $sql = "SELECT * FROM ApplicationTemplates WHERE template_key = ?";
+        if (!$this->ensureTemplatesTableReady()) {
+            return null;
+        }
+
+        $sql = "SELECT * FROM `ApplicationTemplates` WHERE template_key = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $templateKey);
         $stmt->execute();
@@ -79,7 +171,11 @@ class ApplicationTemplateService {
      * Get templates by category
      */
     public function getTemplatesByCategory($category) {
-        $sql = "SELECT * FROM ApplicationTemplates WHERE category = ? ORDER BY name";
+        if (!$this->ensureTemplatesTableReady()) {
+            return [];
+        }
+
+        $sql = "SELECT * FROM `ApplicationTemplates` WHERE category = ? ORDER BY name";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("s", $category);
         $stmt->execute();
@@ -103,13 +199,17 @@ class ApplicationTemplateService {
      * Create a new template
      */
     public function createTemplate($templateKey, $name, $description, $category, $formSchema, $isSystemTemplate = false) {
+        if (!$this->ensureTemplatesTableReady()) {
+            return false;
+        }
+
         if (empty($templateKey) || empty($name) || !is_array($formSchema)) {
             return false;
         }
         
         $formSchemaJson = json_encode($formSchema, JSON_UNESCAPED_UNICODE);
         
-        $sql = "INSERT INTO ApplicationTemplates 
+        $sql = "INSERT INTO `ApplicationTemplates` 
                 (template_key, name, description, category, form_schema, is_system_template)
                 VALUES (?, ?, ?, ?, ?, ?)";
         
@@ -131,6 +231,10 @@ class ApplicationTemplateService {
      * Update a custom template
      */
     public function updateTemplate($templateId, $name, $description, $category, $formSchema) {
+        if (!$this->ensureTemplatesTableReady()) {
+            return false;
+        }
+
         $template = $this->getTemplateById($templateId);
         if (!$template || $template['is_system_template']) {
             return false;
@@ -143,7 +247,7 @@ class ApplicationTemplateService {
             $formSchemaJson = $formSchema;
         }
         
-        $sql = "UPDATE ApplicationTemplates 
+        $sql = "UPDATE `ApplicationTemplates` 
                 SET name = ?, description = ?, category = ?, form_schema = ?, updated_at = NOW()
                 WHERE template_id = ?";
         
@@ -157,12 +261,16 @@ class ApplicationTemplateService {
      * Delete a custom template (not system templates)
      */
     public function deleteTemplate($templateId) {
+        if (!$this->ensureTemplatesTableReady()) {
+            return false;
+        }
+
         $template = $this->getTemplateById($templateId);
         if (!$template || $template['is_system_template']) {
             return false;
         }
         
-        $sql = "DELETE FROM ApplicationTemplates WHERE template_id = ? AND is_system_template = 0";
+        $sql = "DELETE FROM `ApplicationTemplates` WHERE template_id = ? AND is_system_template = 0";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $templateId);
         

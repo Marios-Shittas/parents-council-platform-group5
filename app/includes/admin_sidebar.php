@@ -10,9 +10,23 @@ try {
     $unreadContactMessages = 0;
 }
 
+$pendingUserRegistrations = 0;
+try {
+    require_once __DIR__ . '/../services/UsersService.php';
+    $usersService = new UsersService();
+    $pendingUserRegistrations = max(0, (int)$usersService->getPendingRegistrationCount());
+} catch (Throwable $exception) {
+    $pendingUserRegistrations = 0;
+}
+
 $epikoinoniaBadgeText = '';
 if ($unreadContactMessages > 0) {
     $epikoinoniaBadgeText = $unreadContactMessages > 10 ? '10+' : (string)$unreadContactMessages;
+}
+
+$usersBadgeText = '';
+if ($pendingUserRegistrations > 0) {
+    $usersBadgeText = $pendingUserRegistrations > 10 ? '10+' : (string)$pendingUserRegistrations;
 }
 ?>
 
@@ -123,8 +137,20 @@ if ($unreadContactMessages > 0) {
         var closeButton = document.querySelector('[data-admin-sidebar-close]');
         var backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
         var mobileQuery = window.matchMedia('(max-width: 991.98px)');
+        var usersBadgeText = <?php echo json_encode($usersBadgeText); ?>;
 
         if (!wrapper || !sidebar || !toggleButton || !backdrop) return;
+
+        if (usersBadgeText) {
+            var usersNavLink = sidebar.querySelector('a[href="users.php"]');
+            if (usersNavLink && !usersNavLink.querySelector('.admin-notification-badge')) {
+                var usersBadge = document.createElement('span');
+                usersBadge.className = 'admin-notification-badge';
+                usersBadge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + usersBadgeText);
+                usersBadge.textContent = usersBadgeText;
+                usersNavLink.appendChild(usersBadge);
+            }
+        }
 
         function isMobile() {
             return mobileQuery.matches;

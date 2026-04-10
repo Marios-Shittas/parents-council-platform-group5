@@ -446,6 +446,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         $userId = (int)($user['user_id'] ?? 0);
                                         $isCurrentUser = $userId === $currentAdminId;
                                         $isProtected = isPrimaryProtectedAdmin($userId);
+                                        $isNewRegistration = (($user['role'] ?? '') === 'parent') && (($user['account_status'] ?? '') === 'pending');
                                         $hasHistory = ((int)($user['order_count'] ?? 0) > 0) || ((int)($user['payment_count'] ?? 0) > 0);
                                         $orderHistory = $ordersByUserId[$userId] ?? [];
                                         $paymentHistory = $paymentsByUserId[$userId] ?? [];
@@ -454,7 +455,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         $historyRowId = 'history-preview-' . $userId;
                                         $inlineRowId = 'children-preview-' . $userId;
                                     ?>
-                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? ''))), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row ' : ''; ?><?php echo $isNewRegistration ? 'new-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-is-new-registration="<?php echo $isNewRegistration ? '1' : '0'; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? ''))), ENT_QUOTES, 'UTF-8'); ?>">
                                         <td>
                                             <div class="user-main-cell">
                                                 <div class="user-avatar"><?php echo htmlspecialchars(strtoupper(substr((string)($user['name'] ?? 'U'), 0, 1))); ?></div>
@@ -465,6 +466,9 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                     <div class="small text-muted"><?php echo htmlspecialchars((string)($user['email'] ?? '')); ?></div>
                                                     <div class="small text-muted"><?php echo htmlspecialchars((string)($user['phone_number'] ?? '—')); ?></div>
                                                     <div class="user-flags mt-2">
+                                                        <?php if ($isNewRegistration): ?>
+                                                            <span class="badge bg-primary-subtle text-primary-emphasis js-new-user-badge">Νέος</span>
+                                                        <?php endif; ?>
                                                         <?php if ($isCurrentUser): ?>
                                                             <span class="badge text-bg-info">Εσύ</span>
                                                         <?php endif; ?>
@@ -987,6 +991,101 @@ document.addEventListener('DOMContentLoaded', function () {
     var tableRows = document.querySelectorAll('#usersTable tbody tr.user-data-row');
     var urlParams = new URLSearchParams(window.location.search);
     var managedParentId = urlParams.get('manage_children');
+    var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
+
+    function getSeenNewUsers() {
+        try {
+            var raw = window.localStorage.getItem(seenNewUsersStorageKey);
+            var parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed.map(String) : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function saveSeenNewUsers(userIds) {
+        try {
+            window.localStorage.setItem(seenNewUsersStorageKey, JSON.stringify(userIds));
+        } catch (error) {
+            // Ignore storage failures and keep the page usable.
+        }
+    }
+
+    function updateUsersSidebarNotification() {
+        var usersNavLink = document.querySelector('#adminSidebar a[href="users.php"]');
+        if (!usersNavLink) {
+            return;
+        }
+
+        var unseenNewUsersCount = document.querySelectorAll('#usersTable tbody tr.user-data-row.new-user-row[data-is-new-registration="1"]').length;
+        var badge = usersNavLink.querySelector('.admin-notification-badge');
+
+        if (unseenNewUsersCount <= 0) {
+            if (badge) {
+                badge.remove();
+            }
+            return;
+        }
+
+        var badgeText = unseenNewUsersCount > 10 ? '10+' : String(unseenNewUsersCount);
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'admin-notification-badge';
+            usersNavLink.appendChild(badge);
+        }
+
+        badge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + badgeText);
+        badge.textContent = badgeText;
+    }
+
+    function dismissNewUserRow(row, persistState) {
+        if (!row) {
+            return;
+        }
+
+        row.classList.remove('new-user-row');
+
+        var badge = row.querySelector('.js-new-user-badge');
+        if (badge) {
+            badge.remove();
+        }
+
+        updateUsersSidebarNotification();
+
+        if (!persistState) {
+            return;
+        }
+
+        var userId = String(row.getAttribute('data-user-id') || '');
+        if (!userId) {
+            return;
+        }
+
+        var seenUsers = getSeenNewUsers();
+        if (seenUsers.indexOf(userId) === -1) {
+            seenUsers.push(userId);
+            saveSeenNewUsers(seenUsers);
+        }
+    }
+
+    var seenNewUsers = getSeenNewUsers();
+    tableRows.forEach(function (row) {
+        if (row.getAttribute('data-is-new-registration') !== '1') {
+            return;
+        }
+
+        var userId = String(row.getAttribute('data-user-id') || '');
+        if (userId && seenNewUsers.indexOf(userId) !== -1) {
+            dismissNewUserRow(row, false);
+            return;
+        }
+
+        row.addEventListener('mouseenter', function handleNewUserHover() {
+            dismissNewUserRow(row, true);
+        }, { once: true });
+    });
+
+    updateUsersSidebarNotification();
 
     function setPreviewState(button, targetRow, shouldExpand) {
         if (!button || !targetRow) {
