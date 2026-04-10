@@ -148,6 +148,15 @@
     background: rgba(47, 111, 179, 0.06);
 }
 
+.users-table .new-user-row > td {
+    background: linear-gradient(135deg, rgba(47, 111, 179, 0.14), rgba(127, 178, 230, 0.08));
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.users-table .new-user-row:hover > td {
+    background: rgba(0, 0, 0, 0.04);
+}
+
 .history-summary {
     display: flex;
     align-items: center;

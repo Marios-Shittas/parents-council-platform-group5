@@ -242,6 +242,24 @@ class UsersService
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function getPendingRegistrationCount(): int
+    {
+        $sql = "
+            SELECT COUNT(*) AS count
+            FROM Users
+            WHERE role = 'parent'
+              AND account_status = 'pending'
+        ";
+
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            return 0;
+        }
+
+        $row = $result->fetch_assoc();
+        return max(0, (int)($row['count'] ?? 0));
+    }
+
     public function createUserByAdmin(array $data, ?int $actorUserId = null): array
     {
         $name = trim((string)($data['name'] ?? ''));
