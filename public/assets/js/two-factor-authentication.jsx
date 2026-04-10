@@ -84,6 +84,15 @@ function TwoFactorForm() {
     }
   };
 
+  const handleCodeKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (!isLoading && code.trim().length === 8) {
+        handleSubmit(event);
+      }
+    }
+  };
+
   return (
     <div className="two-factor-container">
       {errorMessage && <span id="error-message" className="two-factor-message">{errorMessage}</span>}
@@ -96,6 +105,7 @@ function TwoFactorForm() {
           placeholder="Enter 8-character code"
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8))}
+          onKeyDown={handleCodeKeyDown}
           maxLength="8"
           pattern="[A-Za-z0-9]{8}"
           required

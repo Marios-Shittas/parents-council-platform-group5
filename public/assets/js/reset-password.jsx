@@ -1,23 +1,38 @@
 (function() {
+    const resetPasswordForm = document.getElementById('reset-password-form');
     const confirmButton = document.getElementById('confirm-button');
     const errorMessage = document.getElementById('error-message');
+    const passwordRuleRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
-    if (confirmButton) {
-        confirmButton.addEventListener('click', function() {
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+    function handleResetSubmit(event) {
+        if (event) {
+            event.preventDefault();
+        }
 
-            if (!newPassword || !confirmPassword) {
-                showError('Please enter and confirm your new password');
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
 
-            resetPassword(newPassword);
-        });
+        if (!newPassword || !confirmPassword) {
+            showError('Please enter and confirm your new password');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+        }
+
+        if (!passwordRuleRegex.test(newPassword)) {
+            showError('Password must be at least 8 characters and include letters, numbers, and 1 special character');
+            return;
+        }
+
+        resetPassword(newPassword);
+    }
+
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', handleResetSubmit);
+    } else if (confirmButton) {
+        confirmButton.addEventListener('click', handleResetSubmit);
     }
 
     function resetPassword(newPassword) {
