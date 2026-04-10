@@ -1,4 +1,19 @@
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS = [
+  "Ιανουάριος",
+  "Φεβρουάριος",
+  "Μάρτιος",
+  "Απρίλιος",
+  "Μάιος",
+  "Ιούνιος",
+  "Ιούλιος",
+  "Αύγουστος",
+  "Σεπτέμβριος",
+  "Οκτώβριος",
+  "Νοέμβριος",
+  "Δεκέμβριος"
+];
+
+const WEEKDAYS = ["ΔΕΥ", "ΤΡΙ", "ΤΕΤ", "ΠΕΜ", "ΠΑΡ", "ΣΑΒ", "ΚΥΡ"];
 
 class Calendar extends React.Component {
   constructor(props) {
@@ -60,7 +75,7 @@ class Calendar extends React.Component {
         </div>
 
         <div className="cal-row">
-          {["MON","TUE","WED","THU","FRI","SAT","SUN"].map(day => (
+          {WEEKDAYS.map(day => (
             <div key={day} className="cal-cell">{day}</div>
           ))}
         </div>
@@ -102,7 +117,7 @@ class Calendar extends React.Component {
               <div key={i}>
                 <h5 className="event-detail-title">{event.title}</h5>
                 <p className="event-detail-description">{event.description}</p>
-                <p className="event-detail-date">{new Date(event.date).toLocaleDateString()}</p>
+                <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
               </div>
             ))}
           </div>,
