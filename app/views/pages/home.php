@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
         <link rel="stylesheet" href="<?php echo site_asset_url('css/home.css'); ?>">
-        <title>Αρχική - Γυμνάσιο Αγίου Αθανασίου</title>
+        <title>Αρχική - Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</title>
     </head>
 
     <body>
@@ -22,43 +22,21 @@ require_once __DIR__ . '/../../includes/site_context.php';
         <section class="home-hero container-fluid px-0">
             <div class="home-hero-inner container">
                 <div class="hero-copy">
-                    <p class="hero-kicker">Σύλλογος Γονέων &amp; Κηδεμόνων</p>
-                    <h1>Γυμνάσιο Αγίου Αθανασίου</h1>
-                    <p class="hero-description">Ένας σύγχρονος, οργανωμένος χώρος ενημέρωσης για την καθημερινότητα του σχολείου. Παρακολουθήστε ανακοινώσεις, ημερολόγιο και επερχόμενες δράσεις σε μία κεντρική αρχική σελίδα.</p>
+                    <p class="hero-kicker">Καλωσορίσατε στην επίσημη ιστοσελίδα</p>
+                    <h1>Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</h1>
+                    <p class="hero-description">Στην ιστοσελίδα μας μπορείτε να ενημερώνεστε για όλες τις ανακοινώσεις, δράσεις και εκδηλώσεις του Συνδέσμου Γονέων. Μπορείτε να βρείτε χρήσιμες πληροφορίες, αιτήσεις, φωτογραφικό υλικό και πρωτοβουλίες που συμβάλλουν στη δημιουργία ενός καλύτερου σχολικού περιβάλλοντος για τα παιδιά μας.</p>
                     <div class="hero-actions">
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn hero-outline-btn">Ανακοινώσεις</a>
-                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">Εκδηλώσεις</a>
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn hero-outline-btn">
+                            <i class="fas fa-bullhorn"></i>
+                            Ανακοινώσεις
+                        </a>
+                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">
+                            <i class="fas fa-calendar-check"></i>
+                            Εκδηλώσεις
+                        </a>
                     </div>
                 </div>
-                <div class="hero-highlights">
-                    <div class="highlight-card">
-                        <span class="highlight-label">Ενημέρωση</span>
-                        <p>Ανακοινώσεις με άμεση πληροφόρηση για γονείς και μαθητές.</p>
-                    </div>
-                    <div class="highlight-card">
-                        <span class="highlight-label">Οργάνωση</span>
-                        <p>Ημερολόγιο σχολικών δράσεων με καθαρή προβολή ανά μήνα.</p>
-                    </div>
-                    <div class="highlight-card">
-                        <span class="highlight-label">Συμμετοχή</span>
-                        <p>Προβολή επερχόμενων εκδηλώσεων και ενεργός συμμετοχή της κοινότητας.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="home-content container">
-            <div class="row home-grid">
-                <div class="col-12 col-lg-4 mb-3 mb-lg-0">
-                    <div class="block-content" id="announcements-block">
-                        <div class="block-heading-wrap">
-                            <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i>Ανακοινώσεις</h5>
-                        </div>
-                        <div id="announcements-root"></div>
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn">Περισσότερα</a>
-                    </div>
-                </div>
-                <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+                <div class="hero-calendar">
                     <div class="block-content" id="calendar-block">
                         <div class="block-heading-wrap">
                             <h5 class="block-title"><i class="fas fa-calendar-alt mr-2"></i>Ημερολόγιο</h5>
@@ -67,13 +45,27 @@ require_once __DIR__ . '/../../includes/site_context.php';
                         <div id="event-detail-root"></div>
                     </div>
                 </div>
-                <div class="col-12 col-lg-4">
+            </div>
+        </section>
+
+        <section class="home-content container">
+            <div class="row home-grid">
+                <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                    <div class="block-content" id="announcements-block">
+                        <div class="block-heading-wrap">
+                            <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i>Τελευταίες Ανακοινώσεις</h5>
+                        </div>
+                        <div id="announcements-root"></div>
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn">Όλες οι Ανακοινώσεις</a>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
                     <div class="block-content" id="upcoming-events-block">
                         <div class="block-heading-wrap">
-                            <h5 class="block-title"><i class="fas fa-star mr-2"></i>Επερχόμενες Εκδηλώσεις</h5>
+                            <h5 class="block-title"><i class="fas fa-star mr-2"></i>Τελευταίες Εκδηλώσεις</h5>
                         </div>
                         <div id="upcoming-events-root"></div>
-                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn">Περισσότερα</a>
+                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn">Όλες οι Εκδηλώσεις</a>
                     </div>
                 </div>
             </div>

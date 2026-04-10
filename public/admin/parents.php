@@ -430,7 +430,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? 'Το περιεχόμενο της σελίδας Συνδεσμος Γωνεων ενημερώθηκε επιτυχώς.'
             : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $parentsPageService->getLastError();
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
-        $redirectUrl .= '#content-management';
+        $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
+        $redirectUrl .= '?active_tab=' . urlencode($redirectTab) . '#content-management';
     } elseif ($action === 'upload_gallery_images') {
         [$uploadedCount, $uploadErrors] = uploadParentsGalleryImages($parentsPageService);
 
@@ -448,13 +449,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $_SESSION['flash_message'] = $message;
         $_SESSION['flash_type'] = $type;
-        $redirectUrl .= '#gallery-management';
+        $redirectUrl .= '?active_tab=gallery_management#content-management';
     } elseif ($action === 'add_gallery_image_url') {
         [$saved, $message] = addParentsGalleryImageFromUrl($parentsPageService);
 
         $_SESSION['flash_message'] = $message;
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
-        $redirectUrl .= '#gallery-management';
+        $redirectUrl .= '?active_tab=gallery_management#content-management';
     } elseif ($action === 'delete_gallery_image') {
         $imageId = (int)($_POST['image_id'] ?? 0);
         $image = $parentsPageService->getGalleryImageById($imageId);
@@ -474,7 +475,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash_type'] = 'danger';
         }
 
-        $redirectUrl .= '#gallery-management';
+        $redirectUrl .= '?active_tab=gallery_management#content-management';
     }
 
     header('Location: ' . $redirectUrl);
@@ -493,6 +494,22 @@ $boardArchiveSection = $sections['board_archive_section'];
 $classResponsiblesSection = $sections['class_responsibles_section'];
 $electronicAdminSection = $sections['electronic_admin_section'];
 $gallerySection = $sections['gallery_section'];
+$parentsContentTabs = [
+    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
+    'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
+    'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
+    'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
+    'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
+    'class_responsibles_section' => ['label' => 'Τμήματα', 'icon' => 'fas fa-table'],
+    'electronic_admin_section' => ['label' => 'Ηλεκτρονική Διοίκηση', 'icon' => 'fas fa-laptop-house'],
+    'gallery_section' => ['label' => 'Gallery Texts', 'icon' => 'fas fa-camera'],
+    'gallery_management' => ['label' => 'Φωτογραφίες', 'icon' => 'fas fa-images'],
+];
+$activeParentsTab = (string)($_GET['active_tab'] ?? 'page_header');
+if (!isset($parentsContentTabs[$activeParentsTab])) {
+    $activeParentsTab = 'page_header';
+}
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -540,8 +557,25 @@ $gallerySection = $sections['gallery_section'];
                 </div>
             </div>
 
-            <div class="content-sections-grid">
-                <section class="content-editor-card">
+            <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
+                <?php foreach ($parentsContentTabs as $tabKey => $tab): ?>
+                    <?php $isActiveTab = $activeParentsTab === $tabKey; ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $isActiveTab ? 'active' : ''; ?>"
+                           id="tab-<?php echo htmlspecialchars($tabKey); ?>-link"
+                           data-toggle="tab"
+                           href="#tab-<?php echo htmlspecialchars($tabKey); ?>"
+                           role="tab"
+                           aria-controls="tab-<?php echo htmlspecialchars($tabKey); ?>"
+                           aria-selected="<?php echo $isActiveTab ? 'true' : 'false'; ?>">
+                            <i class="<?php echo htmlspecialchars($tab['icon']); ?> mr-2"></i><?php echo htmlspecialchars($tab['label']); ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <div class="tab-content content-sections-grid admin-section-tabs-content">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Page Header</h3>
@@ -589,7 +623,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'history_section' ? 'show active' : ''; ?>" id="tab-history_section" role="tabpanel" aria-labelledby="tab-history_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Ιστορικό Σχολείου</h3>
@@ -627,7 +661,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'association_section' ? 'show active' : ''; ?>" id="tab-association_section" role="tabpanel" aria-labelledby="tab-association_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Συνδεσμος Γωνεων</h3>
@@ -711,7 +745,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'schedule_section' ? 'show active' : ''; ?>" id="tab-schedule_section" role="tabpanel" aria-labelledby="tab-schedule_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Ωράριο</h3>
@@ -774,7 +808,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'board_section' ? 'show active' : ''; ?>" id="tab-board_section" role="tabpanel" aria-labelledby="tab-board_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Συνδεσμος Γωνεων</h3>
@@ -852,7 +886,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'board_archive_section' ? 'show active' : ''; ?>" id="tab-board_archive_section" role="tabpanel" aria-labelledby="tab-board_archive_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Συμβούλια ανά Σχολική Χρονιά</h3>
@@ -910,7 +944,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'class_responsibles_section' ? 'show active' : ''; ?>" id="tab-class_responsibles_section" role="tabpanel" aria-labelledby="tab-class_responsibles_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Υπεύθυνοι Τμημάτων</h3>
@@ -973,7 +1007,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'electronic_admin_section' ? 'show active' : ''; ?>" id="tab-electronic_admin_section" role="tabpanel" aria-labelledby="tab-electronic_admin_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Ηλεκτρονική Διοίκηση</h3>
@@ -1082,7 +1116,7 @@ $gallerySection = $sections['gallery_section'];
                     </form>
                 </section>
 
-                <section class="content-editor-card">
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'gallery_section' ? 'show active' : ''; ?>" id="tab-gallery_section" role="tabpanel" aria-labelledby="tab-gallery_section-link">
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Gallery Texts</h3>
@@ -1114,10 +1148,8 @@ $gallerySection = $sections['gallery_section'];
                         </div>
                     </form>
                 </section>
-            </div>
-        </div>
 
-        <section id="gallery-management" class="content-management">
+                <section id="tab-gallery_management" class="content-management tab-pane fade <?php echo $activeParentsTab === 'gallery_management' ? 'show active' : ''; ?>" role="tabpanel" aria-labelledby="tab-gallery_management-link">
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-images"></i> Φωτογραφικό Υλικό</h2>
@@ -1240,9 +1272,13 @@ $gallerySection = $sections['gallery_section'];
                     </div>
                 <?php endif; ?>
             </div>
-        </section>
+                </section>
+            </div>
+        </div>
     </main>
 </div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('gallery-images');

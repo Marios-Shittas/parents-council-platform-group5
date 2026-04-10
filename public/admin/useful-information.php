@@ -209,11 +209,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $usefulInformationService->getLastError();
     $_SESSION['flash_message_type'] = $saved ? 'success' : 'danger';
 
-    header('Location: useful-information.php');
+    $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
+    header('Location: useful-information.php?active_tab=' . urlencode($redirectTab));
     exit;
 }
 
 $sections = $usefulInformationService->getAllSections();
+$usefulInfoTabs = [
+    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'quick_links' => ['label' => 'Σύνδεσμοι', 'icon' => 'fas fa-link'],
+    'school_year' => ['label' => 'Σχολική Χρονιά', 'icon' => 'fas fa-calendar-check'],
+    'holidays' => ['label' => 'Αργίες', 'icon' => 'fas fa-calendar-alt'],
+    'safety' => ['label' => 'Ασφάλεια', 'icon' => 'fas fa-user-shield'],
+    'uniform' => ['label' => 'Στολή', 'icon' => 'fas fa-tshirt'],
+];
+$activeUsefulInfoTab = (string)($_GET['active_tab'] ?? 'page_header');
+if (!isset($usefulInfoTabs[$activeUsefulInfoTab])) {
+    $activeUsefulInfoTab = 'page_header';
+}
 $pageHeader = $sections['page_header'];
 $quickLinks = $sections['quick_links'];
 $schoolYear = $sections['school_year'];
@@ -265,8 +278,25 @@ $uniform = $sections['uniform'];
             <p>Από εδώ αλλάζεις τα κείμενα, links, αργίες και ενότητες που εμφανίζονται στο <code>public/useful-information.php</code>. Κάθε ενότητα αποθηκεύεται ξεχωριστά.</p>
         </div>
 
-        <div class="admin-sections-grid">
-            <section class="card card-custom section-editor">
+        <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
+            <?php foreach ($usefulInfoTabs as $tabKey => $tab): ?>
+                <?php $isActiveTab = $activeUsefulInfoTab === $tabKey; ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo $isActiveTab ? 'active' : ''; ?>"
+                       id="tab-<?php echo htmlspecialchars($tabKey); ?>-link"
+                       data-toggle="tab"
+                       href="#tab-<?php echo htmlspecialchars($tabKey); ?>"
+                       role="tab"
+                       aria-controls="tab-<?php echo htmlspecialchars($tabKey); ?>"
+                       aria-selected="<?php echo $isActiveTab ? 'true' : 'false'; ?>">
+                        <i class="<?php echo htmlspecialchars($tab['icon']); ?> mr-2"></i><?php echo htmlspecialchars($tab['label']); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <div class="tab-content admin-section-tabs-content">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Header Σελίδας</h2>
@@ -300,7 +330,7 @@ $uniform = $sections['uniform'];
                 </form>
             </section>
 
-            <section class="card card-custom section-editor">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'quick_links' ? 'show active' : ''; ?>" id="tab-quick_links" role="tabpanel" aria-labelledby="tab-quick_links-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Γρήγοροι Σύνδεσμοι</h2>
@@ -354,7 +384,7 @@ $uniform = $sections['uniform'];
                 </form>
             </section>
 
-            <section class="card card-custom section-editor">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'school_year' ? 'show active' : ''; ?>" id="tab-school_year" role="tabpanel" aria-labelledby="tab-school_year-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Σχολική Χρονιά</h2>
@@ -408,7 +438,7 @@ $uniform = $sections['uniform'];
                 </form>
             </section>
 
-            <section class="card card-custom section-editor">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'holidays' ? 'show active' : ''; ?>" id="tab-holidays" role="tabpanel" aria-labelledby="tab-holidays-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Επίσημες Αργίες</h2>
@@ -443,7 +473,7 @@ $uniform = $sections['uniform'];
                 </form>
             </section>
 
-            <section class="card card-custom section-editor">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'safety' ? 'show active' : ''; ?>" id="tab-safety" role="tabpanel" aria-labelledby="tab-safety-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Ασφάλεια & Λήψεις</h2>
@@ -491,7 +521,7 @@ $uniform = $sections['uniform'];
                 </form>
             </section>
 
-            <section class="card card-custom section-editor">
+            <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'uniform' ? 'show active' : ''; ?>" id="tab-uniform" role="tabpanel" aria-labelledby="tab-uniform-link">
                 <div class="section-editor__header">
                     <div>
                         <h2>Μαθητική Στολή</h2>

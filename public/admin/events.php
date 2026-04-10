@@ -465,7 +465,7 @@ $events = $eventsService->getAllEvents();
                                 <tr>
                                     <th>Εικόνα</th>
                                     <th>Τίτλος</th>
-                                    <th>Ημερομηνία Εκδήλωσης</th>
+                                    <th>Ημ. Εκδήλωσης</th>
                                     <th>Ημ. Δημοσίευσης</th>
                                     <th>Περιγραφή</th>
                                     <th style="width: 150px;">Ενέργειες</th>
