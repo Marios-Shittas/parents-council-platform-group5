@@ -102,14 +102,13 @@ if ($unreadContactMessages > 0) {
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="../logout.php">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-        </li>
-      
-        
     </ul>
+
+    <div class="admin-sidebar-footer">
+        <a class="nav-link admin-logout-link" href="../logout.php">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
 
 </nav>
 

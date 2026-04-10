@@ -301,7 +301,7 @@ class EventsService {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
 
-        $eventsQuery = "SELECT event_title, event_description FROM events ORDER BY event_date DESC LIMIT 5";
+        $eventsQuery = "SELECT event_title, event_description, event_date FROM Events ORDER BY event_date DESC LIMIT 5";
         $result = $this->conn->query($eventsQuery);
 
         if (!$result) {

@@ -1,5 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
 
@@ -14,12 +14,12 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Συνδεσμος Γωνεων';
+$site_title = 'Σύνδεσμος Γονέων & Κηδεμόνων Γυμνασίου Αγίου Αθανασίου';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 
 $parents_utility_item = [
-    'label' => 'Συνδεσμος Γωνεων',
+    'label' => 'Σύνδεσμος Γονέων',
     'href' => site_section_url('parents.php'),
     'icon' => 'fas fa-users',
     'match' => ['parents.php'],
@@ -126,7 +126,7 @@ $nav_items[] = [
             backdrop-filter: blur(8px);
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
             border-bottom: 1px solid var(--header-border);
-            padding: .5rem 0;
+            padding: .65rem 0;
             font-family: 'Lato', sans-serif;
         }
 
@@ -153,12 +153,19 @@ $nav_items[] = [
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
+            display: inline-block;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
-            font-size: 1.12rem;
-            letter-spacing: .1px;
-            white-space: nowrap;
+            font-size: .94rem;
+            line-height: 1.15;
+            letter-spacing: 0;
+            white-space: normal;
+            max-width: 230px;
+        }
+
+        .brand-line {
+            display: block;
         }
 
         /* Λίγο κενό ανάμεσα στα menu items. */
@@ -215,32 +222,34 @@ $nav_items[] = [
         }
 
         /* Κουμπί login. */
-        .login-btn {
-            font-family: 'Lato', sans-serif;
+        .site-header .login-btn,
+        .site-header .login-btn.btn,
+        .site-header .login-btn.btn-sm {
+            font-family: 'Lato', sans-serif !important;
             border-radius: 999px;
             font-weight: 600 !important;
-            padding: .3rem .9rem;
-            border-width: 2px;
-            font-size: .9rem !important;
+            padding: .3rem .9rem !important;
+            border-width: 2px !important;
+            font-size: .95rem !important;
             line-height: 1.25 !important;
             letter-spacing: 0 !important;
             text-rendering: geometricPrecision;
         }
 
-        .login-btn i,
-        .login-btn span {
+        .site-header .login-btn i,
+        .site-header .login-btn span {
             font-size: inherit !important;
             line-height: inherit !important;
         }
 
-        .login-btn:visited,
-        .login-btn:focus,
-        .login-btn:active {
+        .site-header .login-btn:visited,
+        .site-header .login-btn:focus,
+        .site-header .login-btn:active {
             color: var(--text-main) !important;
             font-weight: 600 !important;
         }
 
-        .login-btn:hover {
+        .site-header .login-btn:hover {
             color: var(--text-strong) !important;
         }
 
@@ -327,6 +336,7 @@ $nav_items[] = [
         /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
         .navbar-brand {
             margin-right: .7rem;
+            flex: 0 0 auto;
         }
 
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
@@ -334,21 +344,21 @@ $nav_items[] = [
             /* Χωρίζει menu και δεξιά εργαλεία σε 2 καθαρές ζώνες. */
             justify-content: space-between;
             align-items: center;
-            gap: 1.35rem;
+            gap: .8rem;
         }
 
         .navbar-nav {
             /* Το menu κάθεται πιο κεντραρισμένα αφού δεν υπάρχει search. */
             flex: 1 1 auto;
             justify-content: center;
-            margin: 0 1.6rem;
-            gap: .35rem;
+            margin: 0 .9rem;
+            gap: .25rem;
         }
 
         .navbar-public .navbar-nav {
             justify-content: space-evenly;
-            margin: 0 2.4rem;
-            gap: .8rem;
+            margin: 0 1rem;
+            gap: .35rem;
         }
 
         .navbar-public .navbar-nav .nav-item {
@@ -372,7 +382,7 @@ $nav_items[] = [
 
         .navbar .container {
             /* Μεγαλύτερο max-width για να γεμίζει καλύτερα η μπάρα. */
-            max-width: 1500px;
+            max-width: 1560px;
         }
 
         /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
@@ -382,6 +392,29 @@ $nav_items[] = [
         .navbar-toggler:focus-visible {
             outline: 2px solid rgba(26, 58, 92, 0.45);
             outline-offset: 2px;
+        }
+
+        @media (max-width: 1199.98px) {
+            .navbar-brand img {
+                width: 68px;
+                height: 68px;
+            }
+
+            .brand-text {
+                max-width: 210px;
+                font-size: .86rem;
+            }
+
+            .navbar-public .navbar-nav {
+                margin: 0 .55rem;
+                gap: .25rem;
+            }
+
+            .navbar-public .navbar-nav .nav-link,
+            .navbar-nav .nav-link {
+                padding: .45rem .65rem;
+                font-size: .9rem;
+            }
         }
 
         /* Ρυθμίσεις για κινητό/tablet. */
@@ -398,11 +431,11 @@ $nav_items[] = [
             .brand-text {
                 display: inline-block;
                 max-width: calc(100vw - 150px);
-                font-size: .92rem;
-                line-height: 1.2;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+                font-size: .78rem;
+                line-height: 1.18;
+                overflow: visible;
+                text-overflow: clip;
+                white-space: normal;
             }
 
             .navbar-nav {
@@ -534,7 +567,11 @@ $nav_items[] = [
         <!-- Λογότυπο + τίτλος σχολείου. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo" class="mr-2">
-            <span class="brand-text"><?php echo $site_title; ?></span>
+            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">
+                <span class="brand-line">Σύνδεσμος Γονέων</span>
+                <span class="brand-line">Κηδεμόνων Γυμνασίου</span>
+                <span class="brand-line">Αγίου Αθανασίου</span>
+            </span>
         </a>
 
         <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->

@@ -231,6 +231,57 @@
     margin-top: 2px;
 }
 
+/* Admin events table tuning, aligned with announcements */
+.admin-table {
+    table-layout: fixed;
+}
+
+.admin-table th {
+    font-size: 16px;
+    line-height: 1.25;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.admin-table td {
+    font-size: 15px;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 120px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    width: 180px;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    width: 175px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    width: 170px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(5) {
+    text-align: left;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+    width: 150px;
+    text-align: center;
+}
+
 @media (max-width: 767.98px) {
     .admin-table {
         min-width: 900px;
