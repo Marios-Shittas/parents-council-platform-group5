@@ -29,9 +29,65 @@
 }
 
 .home-hero,
-.home-content {
+.home-content,
+.home-school-banner {
     position: relative;
     z-index: 1;
+}
+
+.home-school-banner {
+    padding: 0.9rem 0 0.35rem;
+}
+
+.home-school-banner__frame {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 8px;
+    border-radius: 30px;
+    border: 1px solid rgba(26, 58, 92, 0.08);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 20px 42px rgba(18, 44, 74, 0.14);
+    backdrop-filter: blur(6px);
+}
+
+.home-school-banner__carousel {
+    position: relative;
+    min-height: clamp(90px, 10vw, 150px);
+    border-radius: 22px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(14, 48, 88, 0.16), rgba(255, 255, 255, 0.28));
+}
+
+.home-school-banner__image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 22px;
+    opacity: 0;
+    transform: scale(1.015);
+    transition: opacity 0.85s ease-in-out, transform 1.1s ease-out;
+}
+
+.home-school-banner__image.is-active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-school-banner__image {
+        opacity: 0;
+        transform: none;
+        transition: none;
+    }
+
+    .home-school-banner__image.is-active {
+        opacity: 1;
+    }
 }
 
 .home-hero {
@@ -604,8 +660,27 @@
 }
 
 @media (max-width: 991.98px) {
+    .home-school-banner {
+        padding-top: 0.55rem;
+        padding-bottom: 0.2rem;
+    }
+
+    .home-school-banner__frame {
+        padding: 6px;
+        border-radius: 24px;
+    }
+
+    .home-school-banner__carousel {
+        min-height: clamp(80px, 12vw, 120px);
+        border-radius: 18px;
+    }
+
+    .home-school-banner__image {
+        border-radius: 18px;
+    }
+
     .home-hero {
-        padding-top: 1.4rem;
+        padding-top: 1.35rem;
     }
 
     .hero-copy {
@@ -622,6 +697,25 @@
 }
 
 @media (max-width: 575.98px) {
+    .home-school-banner {
+        padding-top: 0.35rem;
+        padding-bottom: 0.15rem;
+    }
+
+    .home-school-banner__frame {
+        padding: 4px;
+        border-radius: 18px;
+    }
+
+    .home-school-banner__carousel {
+        min-height: clamp(70px, 18vw, 90px);
+        border-radius: 14px;
+    }
+
+    .home-school-banner__image {
+        border-radius: 14px;
+    }
+
     .hero-copy h1 {
         font-size: 1.45rem;
     }
