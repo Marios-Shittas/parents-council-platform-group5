@@ -96,7 +96,7 @@ class Calendar extends React.Component {
                   d && d === today.getDate() && m === today.getMonth() && y === today.getFullYear()
                     ? "current-day" : "normal-day"
                 }`}
-                onClick={() => d && dayEvents.length > 0 && this.setState({ selectedDay: d })}
+                onClick={() => d && dayEvents.length > 0 && this.setState({ selectedDay: selectedDay === d ? null : d })}
                 style={{ cursor: dayEvents.length > 0 ? 'pointer' : 'default' }}
               >
                 {d || ''}
@@ -110,18 +110,19 @@ class Calendar extends React.Component {
           })}
         </div>
 
-        {selectedDay && selectedEvents.length > 0 && ReactDOM.createPortal(
-          <div className="event-detail-box">
-            <button className="close-btn" onClick={() => this.setState({ selectedDay: null })}>✕</button>
-            {selectedEvents.map((event, i) => (
-              <div key={i}>
-                <h5 className="event-detail-title">{event.title}</h5>
-                <p className="event-detail-description">{event.description}</p>
-                <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
-              </div>
-            ))}
-          </div>,
-          document.getElementById("event-detail-root")
+        {selectedDay && selectedEvents.length > 0 && (
+          <div className="calendar-day-popup" role="dialog" aria-label="Event details">
+            <button className="close-btn" type="button" onClick={() => this.setState({ selectedDay: null })}>✕</button>
+            <div className="calendar-day-popup-content">
+              {selectedEvents.map((event, i) => (
+                <div key={i} className="calendar-day-popup-item">
+                  <h5 className="event-detail-title">{event.title}</h5>
+                  <p className="event-detail-description">{event.description}</p>
+                  <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     );
