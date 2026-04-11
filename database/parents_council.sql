@@ -14,9 +14,13 @@ DROP TABLE IF EXISTS OrderItems;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS ProductsImages;
 DROP TABLE IF EXISTS Products;
+DROP TABLE IF EXISTS ApplicationSubmissions;
+DROP TABLE IF EXISTS ApplicationAttachments;
+DROP TABLE IF EXISTS ApplicationsFormFields;
 DROP TABLE IF EXISTS Submissions;
 DROP TABLE IF EXISTS ApplicationsDocuments;
 DROP TABLE IF EXISTS Applications;
+DROP TABLE IF EXISTS ApplicationTemplates;
 DROP TABLE IF EXISTS PostsImages;
 DROP TABLE IF EXISTS Posts;
 DROP TABLE IF EXISTS EventsImages;
@@ -195,12 +199,51 @@ CREATE TABLE IF NOT EXISTS PostsImages (
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS ApplicationTemplates (
+    template_id         INT NOT NULL AUTO_INCREMENT,
+    template_key        VARCHAR(150) NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    description         TEXT DEFAULT NULL,
+    category            VARCHAR(100) NOT NULL DEFAULT 'standard',
+    form_schema         LONGTEXT DEFAULT NULL,
+    is_system_template  TINYINT(1) NOT NULL DEFAULT 0,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (template_id),
+    UNIQUE KEY uq_application_templates_template_key (template_key),
+    KEY idx_application_templates_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS Applications (
     application_id          INT NOT NULL AUTO_INCREMENT,
+    template_id             INT DEFAULT NULL,
     application_title       VARCHAR(255) NOT NULL,
+    title                   VARCHAR(255) DEFAULT NULL,
     application_description TEXT DEFAULT NULL,
+    description             TEXT DEFAULT NULL,
     submission_type         ENUM('file', 'text') NOT NULL DEFAULT 'file',
-    PRIMARY KEY (application_id)
+    academic_year           VARCHAR(20) DEFAULT NULL,
+    open_date               DATE DEFAULT NULL,
+    due_date                DATE DEFAULT NULL,
+    status                  ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
+    allow_online_submission TINYINT(1) NOT NULL DEFAULT 1,
+    allow_file_submission   TINYINT(1) NOT NULL DEFAULT 1,
+    require_signature       TINYINT(1) NOT NULL DEFAULT 0,
+    form_schema             LONGTEXT DEFAULT NULL,
+    target_audience         LONGTEXT DEFAULT NULL,
+    created_by              INT DEFAULT NULL,
+    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (application_id),
+    KEY idx_applications_template_id (template_id),
+    KEY idx_applications_status_dates (status, open_date, due_date),
+    KEY idx_applications_created_by (created_by),
+    CONSTRAINT fk_applications_template
+        FOREIGN KEY (template_id) REFERENCES ApplicationTemplates(template_id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_applications_created_by
+        FOREIGN KEY (created_by) REFERENCES Users(user_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
@@ -209,6 +252,20 @@ CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
     file_path         VARCHAR(255) NOT NULL,
     PRIMARY KEY (ap_document_id),
     CONSTRAINT fk_app_doc
+        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ApplicationAttachments (
+    attachment_id      INT NOT NULL AUTO_INCREMENT,
+    application_id     INT NOT NULL,
+    file_path          VARCHAR(255) NOT NULL,
+    original_filename  VARCHAR(255) DEFAULT NULL,
+    upload_order       INT NOT NULL DEFAULT 0,
+    created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (attachment_id),
+    KEY idx_app_attachment_order (application_id, upload_order),
+    CONSTRAINT fk_app_attachment_application
         FOREIGN KEY (application_id) REFERENCES Applications(application_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -243,6 +300,33 @@ CREATE TABLE IF NOT EXISTS Submissions (
     CONSTRAINT fk_sub_user
         FOREIGN KEY (user_id) REFERENCES Users(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ApplicationSubmissions (
+    submission_id      INT NOT NULL AUTO_INCREMENT,
+    application_id     INT NOT NULL,
+    user_id            INT NOT NULL,
+    submission_type    VARCHAR(50) NOT NULL DEFAULT 'manual',
+    status             VARCHAR(50) NOT NULL DEFAULT 'submitted',
+    form_data          LONGTEXT DEFAULT NULL,
+    uploaded_files     LONGTEXT DEFAULT NULL,
+    signature_data     LONGTEXT DEFAULT NULL,
+    submitted_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at        DATETIME DEFAULT NULL,
+    reviewed_by        INT DEFAULT NULL,
+    PRIMARY KEY (submission_id),
+    KEY idx_app_submissions_application (application_id, submitted_at),
+    KEY idx_app_submissions_user (user_id),
+    KEY idx_app_submissions_reviewed_by (reviewed_by),
+    CONSTRAINT fk_appsub_application
+        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_appsub_user
+        FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_appsub_reviewed_by
+        FOREIGN KEY (reviewed_by) REFERENCES Users(user_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS Products (

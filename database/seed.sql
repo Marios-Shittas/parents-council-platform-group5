@@ -19,9 +19,27 @@ INSERT INTO Announcements (announcement_id, announcement_title, announcement_dat
 (38, 'Νέο Ωρολόγιο Πρόγραμμα', '2026-03-14', '2026-03-05', 'Το νέο πρόγραμμα μαθημάτων θα ισχύει από τη Δευτέρα.', 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.'),
 (39, 'Υπενθύμιση Εργασιών', '2026-03-11', '2026-03-11', 'Οι μαθητές πρέπει να παραδώσουν τις εργασίες τους μέχρι το τέλος της εβδομάδας.', 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.');
 
-INSERT INTO Applications (application_id, application_title, application_description) VALUES
-(1, 'Field Trip Permission', 'Form to allow your child to attend field trip'),
-(2, 'Library Membership', 'Sign up for school library access');
+INSERT INTO Applications (
+    application_id,
+    template_id,
+    application_title,
+    title,
+    application_description,
+    description,
+    submission_type,
+    academic_year,
+    open_date,
+    due_date,
+    status,
+    allow_online_submission,
+    allow_file_submission,
+    require_signature,
+    form_schema,
+    target_audience,
+    created_by
+) VALUES
+(1, NULL, 'Field Trip Permission', 'Field Trip Permission', 'Form to allow your child to attend field trip', 'Form to allow your child to attend field trip', 'file', '2025-2026', '2026-03-01', '2026-06-15', 'published', 1, 1, 0, NULL, NULL, 1),
+(2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1);
 
 INSERT INTO Events (event_id, event_title, event_description, gdpr_notice, event_date, publish_date) VALUES
 (12, 'Σχολική Γιορτή', 'Μια μικρή γιορτή με μουσική και δραστηριότητες για τους μαθητές
