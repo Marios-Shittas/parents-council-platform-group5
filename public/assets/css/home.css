@@ -453,6 +453,14 @@
     text-overflow: ellipsis;
 }
 
+.event-count-preview {
+    margin-top: 2px;
+    font-size: 8px;
+    font-weight: 700;
+    color: #5f6f82;
+    line-height: 1.1;
+}
+
 .event-detail-box {
     position: relative;
     margin-top: 10px;
@@ -527,6 +535,22 @@
     letter-spacing: 0.01em;
 }
 
+.event-detail-title-text {
+    color: #123e69;
+}
+
+.event-detail-type-label--holiday {
+    color: #b43f31;
+}
+
+.event-detail-type-label--event {
+    color: #1f5ea6;
+}
+
+.event-detail-type-label--announcement {
+    color: #176648;
+}
+
 .event-detail-description {
     font-size: 0.86rem;
     line-height: 1.45;
@@ -567,6 +591,10 @@
 
 .event-title-preview.holiday-preview {
     background-color: #e74c3c;
+}
+
+.event-title-preview.announcement-preview {
+    background-color: #1e7f5c;
 }
 
 @media (max-width: 1199.98px) {
