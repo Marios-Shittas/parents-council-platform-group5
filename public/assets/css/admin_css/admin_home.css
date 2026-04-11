@@ -340,12 +340,15 @@ body {
 }
 
 .selected-day-chip {
+    display: inline-flex;
+    align-items: center;
     background: #e9f3ff;
     color: #0f5caa;
     border-radius: 999px;
     padding: 8px 12px;
     font-weight: 700;
     font-size: 0.82rem;
+    white-space: nowrap;
 }
 
 .selected-day-counts {

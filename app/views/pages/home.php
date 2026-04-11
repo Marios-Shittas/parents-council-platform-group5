@@ -19,6 +19,39 @@ require_once __DIR__ . '/../../includes/site_context.php';
     <?php include __DIR__ . '/../../includes/header.php'; ?>
 
     <main class="home-page">
+        <?php
+        $homeBannerSlides = [
+            [
+                'src' => site_asset_url('img/home-school-banner.png'),
+                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1',
+            ],
+            [
+                'src' => site_asset_url('img/home-school-banner-2.png'),
+                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2',
+            ],
+            [
+                'src' => site_asset_url('img/home-school-banner-3.png'),
+                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3',
+            ],
+        ];
+        ?>
+
+        <section class="home-school-banner container-fluid px-0" aria-label="Banner σχολείου">
+            <div class="container">
+                <div class="home-school-banner__frame">
+                    <div class="home-school-banner__carousel" aria-live="polite" data-interval="15000">
+                        <?php foreach ($homeBannerSlides as $index => $slide): ?>
+                            <img
+                                src="<?php echo htmlspecialchars($slide['src'], ENT_QUOTES, 'UTF-8'); ?>"
+                                alt="<?php echo htmlspecialchars($slide['alt'], ENT_QUOTES, 'UTF-8'); ?>"
+                                class="home-school-banner__image<?php echo $index === 0 ? ' is-active' : ''; ?>"
+                            >
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="home-hero container-fluid px-0">
             <div class="home-hero-inner container">
                 <div class="hero-copy">
@@ -73,6 +106,27 @@ require_once __DIR__ . '/../../includes/site_context.php';
     </main>
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.home-school-banner__carousel').forEach(function (carousel) {
+                var slides = carousel.querySelectorAll('.home-school-banner__image');
+
+                if (slides.length <= 1) {
+                    return;
+                }
+
+                var currentIndex = 0;
+                var intervalMs = parseInt(carousel.getAttribute('data-interval'), 10) || 15000;
+
+                window.setInterval(function () {
+                    slides[currentIndex].classList.remove('is-active');
+                    currentIndex = (currentIndex + 1) % slides.length;
+                    slides[currentIndex].classList.add('is-active');
+                }, intervalMs);
+            });
+        });
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>

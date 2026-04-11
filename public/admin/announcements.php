@@ -162,7 +162,14 @@ function uploadAnnouncementAttachments($announcementsService, $announcementId) {
 
     $uploadDir = getAnnouncementAttachmentUploadDir();
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+        mkdir($uploadDir, 0777, true);
+    }
+
+    clearstatcache(true, $uploadDir);
+
+    if (!is_writable($uploadDir)) {
+        @chmod($uploadDir, 0777);
+        clearstatcache(true, $uploadDir);
     }
 
     $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];

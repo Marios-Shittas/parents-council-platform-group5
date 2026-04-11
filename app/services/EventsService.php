@@ -317,7 +317,7 @@ class EventsService {
     }
 
     public function getAllEventsForCalendar() {
-        $eventsQuery = "SELECT event_title as title, event_description as description, event_date as date FROM Events ORDER BY event_date ASC";
+        $eventsQuery = "SELECT event_title as title, event_description as description, event_date as date, 'event' as type FROM Events ORDER BY event_date ASC";
         $result = $this->conn->query($eventsQuery);
 
         if (!$result) {

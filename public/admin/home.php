@@ -48,9 +48,24 @@ function adminCalendarBuildAnnouncementImageWebPath($fileName)
     return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
 }
 
+function adminCalendarGetAnnouncementAttachmentUploadDir()
+{
+    return dirname(__DIR__) . '/assets/Announcements_docs/';
+}
+
+function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
+{
+    return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
+}
+
 function adminCalendarGetDefaultAnnouncementGdprNotice()
 {
     return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
+}
+
+function adminCalendarGetDefaultEventGdprNotice()
+{
+    return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
 }
 
 function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
@@ -150,6 +165,92 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
         }
 
         $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων.";
+    }
+
+    return [$uploadedCount, $uploadErrors];
+}
+
+function adminCalendarUploadAnnouncementAttachments($announcementsService, $announcementId)
+{
+    $uploadedCount = 0;
+    $uploadErrors = [];
+
+    if (empty($_FILES['attachments']['name'][0])) {
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    $uploadDir = adminCalendarGetAnnouncementAttachmentUploadDir();
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    clearstatcache(true, $uploadDir);
+
+    if (!is_writable($uploadDir)) {
+        @chmod($uploadDir, 0777);
+        clearstatcache(true, $uploadDir);
+    }
+
+    $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    $maxFileSize = 8 * 1024 * 1024;
+
+    foreach ($_FILES['attachments']['tmp_name'] as $key => $tmpName) {
+        $fileName = basename($_FILES['attachments']['name'][$key] ?? '');
+        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
+        $uploadError = $_FILES['attachments']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
+
+        if ($uploadError !== UPLOAD_ERR_OK) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' απέτυχε να ανέβει (Error: {$uploadError})";
+            continue;
+        }
+
+        $fileSize = (int)($_FILES['attachments']['size'][$key] ?? 0);
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if (!in_array($fileExt, $allowedExtensions, true)) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
+            continue;
+        }
+
+        if ($fileSize > $maxFileSize) {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 8MB";
+            continue;
+        }
+
+        if (!file_exists($tmpName)) {
+            $uploadErrors[] = "Το προσωρινό αρχείο για το συνημμένο '{$safeFileName}' δεν βρέθηκε.";
+            continue;
+        }
+
+        if (!is_writable($uploadDir)) {
+            $uploadErrors[] = "Ο φάκελος συνημμένων δεν είναι εγγράψιμος.";
+            continue;
+        }
+
+        $newFileName = uniqid('announcement_attachment_', true) . '.' . $fileExt;
+        $targetPath = $uploadDir . $newFileName;
+
+        if (!move_uploaded_file($tmpName, $targetPath)) {
+            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του συνημμένου '{$safeFileName}'.";
+            continue;
+        }
+
+        $attachmentPath = adminCalendarBuildAnnouncementAttachmentWebPath($newFileName);
+        if ($announcementsService->addAttachment($announcementId, $attachmentPath, $fileName)) {
+            $uploadedCount++;
+            continue;
+        }
+
+        if (file_exists($targetPath)) {
+            unlink($targetPath);
+        }
+
+        $serviceError = trim((string)$announcementsService->getLastOperationError());
+        if ($serviceError !== '') {
+            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' δεν αποθηκεύτηκε. {$serviceError}";
+        } else {
+            $uploadErrors[] = "Αποτυχία αποθήκευσης του συνημμένου '{$safeFileName}' στη βάση δεδομένων.";
+        }
     }
 
     return [$uploadedCount, $uploadErrors];
@@ -263,6 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create_event_from_calendar') {
         $title = trim((string)($_POST['title'] ?? ''));
         $description = trim((string)($_POST['description'] ?? ''));
+        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? adminCalendarGetDefaultEventGdprNotice()));
         $eventDate = trim((string)($_POST['event_date'] ?? ''));
         $eventTime = adminCalendarNormalizeTime($_POST['event_time'] ?? '09:00');
 
@@ -272,7 +374,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $publishDate = date('Y-m-d');
             $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
-            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.');
+            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, $gdprNotice);
 
             if ($eventId) {
                 [$uploadedCount, $uploadErrors] = adminCalendarUploadImages(
@@ -312,6 +414,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create_announcement_from_calendar') {
         $title = trim((string)($_POST['title'] ?? ''));
         $description = trim((string)($_POST['description'] ?? ''));
+        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? adminCalendarGetDefaultAnnouncementGdprNotice()));
         $announcementDate = trim((string)($_POST['announcement_date'] ?? ''));
         $publishDate = trim((string)($_POST['publish_date'] ?? date('Y-m-d')));
 
@@ -328,7 +431,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $description,
                 $announcementDate,
                 $publishDate,
-                adminCalendarGetDefaultAnnouncementGdprNotice()
+                $gdprNotice
             );
 
             if ($announcementId) {
@@ -344,15 +447,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         return $announcementsService->getLastOperationError();
                     }
                 );
+                [$uploadedAttachmentsCount, $attachmentErrors] = adminCalendarUploadAnnouncementAttachments(
+                    $announcementsService,
+                    $announcementId
+                );
 
-                if ($uploadedCount > 0) {
-                    $flashMessage = "Η ανακοίνωση δημιουργήθηκε με {$uploadedCount} εικόνα/ες και εμφανίζεται πλέον στο πάνελ ανακοινώσεων.";
+                if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
+                    $flashMessage = 'Η ανακοίνωση δημιουργήθηκε';
+                    if ($uploadedCount > 0) {
+                        $flashMessage .= " με {$uploadedCount} εικόνα/ες";
+                    }
+                    if ($uploadedAttachmentsCount > 0) {
+                        $flashMessage .= ($uploadedCount > 0 ? ' και ' : ' με ') . "{$uploadedAttachmentsCount} συνημμένο/α";
+                    }
+                    $flashMessage .= ' και εμφανίζεται πλέον στο πάνελ ανακοινώσεων.';
                 } else {
                     $flashMessage = 'Η ανακοίνωση δημιουργήθηκε και εμφανίζεται πλέον στο πάνελ ανακοινώσεων.';
                 }
 
-                if (!empty($uploadErrors)) {
-                    $flashMessage .= ' Προβλήματα αρχείων: ' . implode(' | ', $uploadErrors);
+                $allUploadErrors = array_merge($uploadErrors, $attachmentErrors);
+                if (!empty($allUploadErrors)) {
+                    $flashMessage .= ' Προβλήματα αρχείων: ' . implode(' | ', $allUploadErrors);
                     $flashType = 'warning';
                 } else {
                     $flashType = 'success';
@@ -519,6 +634,11 @@ $calendarPayload = [
                     </div>
 
                     <div class="form-group">
+                        <label for="calendar_event_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="calendar_event_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(adminCalendarGetDefaultEventGdprNotice()); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label for="calendar_event_images"><strong>Εικόνες</strong></label>
                         <input type="file" class="form-control-file" id="calendar_event_images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
                         <small class="text-muted d-block mt-1">
@@ -575,10 +695,23 @@ $calendarPayload = [
                     </div>
 
                     <div class="form-group">
+                        <label for="calendar_announcement_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="calendar_announcement_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(adminCalendarGetDefaultAnnouncementGdprNotice()); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label for="calendar_announcement_images"><strong>Εικόνες</strong></label>
                         <input type="file" class="form-control-file" id="calendar_announcement_images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
                         <small class="text-muted d-block mt-1">
                             <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο 6 εικόνες ανά ανακοίνωση
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="calendar_announcement_attachments"><strong>Συνημμένες Επιστολές</strong></label>
+                        <input type="file" class="form-control-file" id="calendar_announcement_attachments" name="attachments[]" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                        <small class="text-muted d-block mt-1">
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: PDF, JPG, JPEG, PNG | Μέγιστο μέγεθος: 8MB ανά αρχείο
                         </small>
                     </div>
                 </div>

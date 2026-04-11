@@ -118,7 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             ? 'Το περιεχόμενο της σελίδας επικοινωνίας ενημερώθηκε επιτυχώς.'
             : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $pageService->getLastError();
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
-        $redirectUrl .= '#content-management';
+        $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
+        $redirectUrl .= '?active_tab=' . urlencode($redirectTab) . '#content-management';
     } elseif ($action === 'delete' && isset($_POST['message_id'])) {
         $messageId = intval($_POST['message_id']);
         if ($service->deleteMessage($messageId)) {
@@ -160,6 +161,17 @@ $contactInfoSection = $contentSections['contact_info'];
 $mapSection = $contentSections['map_section'];
 $formSection = $contentSections['form_section'];
 $socialSection = $contentSections['social_section'];
+$epikoinoniaContentTabs = [
+    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'contact_info' => ['label' => 'Επικοινωνία', 'icon' => 'fas fa-address-card'],
+    'map_section' => ['label' => 'Χάρτης', 'icon' => 'fas fa-map-marked-alt'],
+    'form_section' => ['label' => 'Φόρμα', 'icon' => 'fas fa-paper-plane'],
+    'social_section' => ['label' => 'Social', 'icon' => 'fas fa-share-alt'],
+];
+$activeEpikoinoniaTab = (string)($_GET['active_tab'] ?? 'page_header');
+if (!isset($epikoinoniaContentTabs[$activeEpikoinoniaTab])) {
+    $activeEpikoinoniaTab = 'page_header';
+}
 
 $allMessages = $service->getAllMessages(999999, 0);
 $filteredMessages = $allMessages;
@@ -237,6 +249,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Διαχείριση Επικοινωνίας - Πίνακας Ελέγχου</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
@@ -395,8 +408,25 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                         </div>
                     </div>
 
-                    <div class="content-sections-grid">
-                        <section class="content-editor-card">
+                    <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
+                        <?php foreach ($epikoinoniaContentTabs as $tabKey => $tab): ?>
+                            <?php $isActiveTab = $activeEpikoinoniaTab === $tabKey; ?>
+                            <li class="nav-item">
+                                <a class="nav-link <?php echo $isActiveTab ? 'active' : ''; ?>"
+                                   id="tab-<?php echo htmlspecialchars($tabKey); ?>-link"
+                                   data-toggle="tab"
+                                   href="#tab-<?php echo htmlspecialchars($tabKey); ?>"
+                                   role="tab"
+                                   aria-controls="tab-<?php echo htmlspecialchars($tabKey); ?>"
+                                   aria-selected="<?php echo $isActiveTab ? 'true' : 'false'; ?>">
+                                    <i class="<?php echo htmlspecialchars($tab['icon']); ?> mr-2"></i><?php echo htmlspecialchars($tab['label']); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+
+                    <div class="tab-content content-sections-grid admin-section-tabs-content">
+                        <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Page Header</h3>
@@ -439,7 +469,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             </form>
                         </section>
 
-                        <section class="content-editor-card">
+                        <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'contact_info' ? 'show active' : ''; ?>" id="tab-contact_info" role="tabpanel" aria-labelledby="tab-contact_info-link">
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Πληροφορίες Επικοινωνίας</h3>
@@ -508,7 +538,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             </form>
                         </section>
 
-                        <section class="content-editor-card">
+                        <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'map_section' ? 'show active' : ''; ?>" id="tab-map_section" role="tabpanel" aria-labelledby="tab-map_section-link">
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Χάρτης</h3>
@@ -546,7 +576,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             </form>
                         </section>
 
-                        <section class="content-editor-card">
+                        <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'form_section' ? 'show active' : ''; ?>" id="tab-form_section" role="tabpanel" aria-labelledby="tab-form_section-link">
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Φόρμα Επικοινωνίας</h3>
@@ -594,7 +624,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             </form>
                         </section>
 
-                        <section class="content-editor-card">
+                        <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'social_section' ? 'show active' : ''; ?>" id="tab-social_section" role="tabpanel" aria-labelledby="tab-social_section-link">
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Social Links</h3>
