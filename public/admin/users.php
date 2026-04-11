@@ -68,19 +68,26 @@ function formatStatusLabel(string $status): string
     return $map[$status] ?? ucfirst($status);
 }
 
+function roleBadgeClass(string $role): string
+{
+    return $role === 'admin'
+        ? 'status-pill status-pill--accent'
+        : 'status-pill status-pill--neutral';
+}
+
 function statusBadgeClass(string $status): string
 {
     switch ($status) {
         case 'active':
-            return 'badge bg-success-subtle text-success-emphasis';
+            return 'status-pill status-pill--success';
         case 'approved':
-            return 'badge bg-primary-subtle text-primary-emphasis';
+            return 'status-pill status-pill--info';
         case 'waiting_payment':
-            return 'badge bg-warning-subtle text-warning-emphasis';
+            return 'status-pill status-pill--warning';
         case 'rejected':
-            return 'badge bg-danger-subtle text-danger-emphasis';
+            return 'status-pill status-pill--danger';
         default:
-            return 'badge bg-secondary-subtle text-secondary-emphasis';
+            return 'status-pill status-pill--neutral';
     }
 }
 
@@ -408,13 +415,13 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                             <?php if ($managedParentId > 0): ?>
                                 <input type="hidden" name="manage_children" value="<?php echo $managedParentId; ?>">
                             <?php endif; ?>
-                            <label for="usersSortSelect" class="users-sort-label">Sort by</label>
+                            <label for="usersSortSelect" class="users-sort-label">Ταξινόμηση</label>
                             <select name="sort" id="usersSortSelect" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="pending_first" <?php echo $selectedSort === 'pending_first' ? 'selected' : ''; ?>>Pending first</option>
-                                <option value="newest" <?php echo $selectedSort === 'newest' ? 'selected' : ''; ?>>Newest first</option>
-                                <option value="oldest" <?php echo $selectedSort === 'oldest' ? 'selected' : ''; ?>>Oldest first</option>
-                                <option value="name_az" <?php echo $selectedSort === 'name_az' ? 'selected' : ''; ?>>Name A-Z</option>
-                                <option value="status_az" <?php echo $selectedSort === 'status_az' ? 'selected' : ''; ?>>Status</option>
+                                <option value="pending_first" <?php echo $selectedSort === 'pending_first' ? 'selected' : ''; ?>>Πρώτα σε αναμονή</option>
+                                <option value="newest" <?php echo $selectedSort === 'newest' ? 'selected' : ''; ?>>Νεότεροι πρώτα</option>
+                                <option value="oldest" <?php echo $selectedSort === 'oldest' ? 'selected' : ''; ?>>Παλαιότεροι πρώτα</option>
+                                <option value="name_az" <?php echo $selectedSort === 'name_az' ? 'selected' : ''; ?>>Όνομα Α-Ω</option>
+                                <option value="status_az" <?php echo $selectedSort === 'status_az' ? 'selected' : ''; ?>>Κατάσταση</option>
                             </select>
                         </form>
                     </div>
@@ -424,7 +431,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <div class="empty-state">
                         <i class="fas fa-user-slash"></i>
                         <h3>Δεν υπάρχουν χρήστες</h3>
-                        <p>Δημιούργησε τον πρώτο parent από το panel.</p>
+                        <p>Δημιούργησε τον πρώτο γονέα από το panel.</p>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
@@ -433,7 +440,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                 <tr>
                                     <th>Χρήστης</th>
                                     <th>Ρόλος</th>
-                                    <th>Status</th>
+                                    <th>Κατάσταση</th>
                                     <th>Παιδιά</th>
                                     <th>Ιστορικό</th>
                                     <th>Δημιουργία</th>
@@ -459,51 +466,59 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         <td>
                                             <div class="user-main-cell">
                                                 <div class="user-avatar"><?php echo htmlspecialchars(strtoupper(substr((string)($user['name'] ?? 'U'), 0, 1))); ?></div>
-                                                <div>
-                                                    <div class="fw-bold text-dark">
+                                                <div class="user-info">
+                                                    <div class="user-full-name">
                                                         <?php echo htmlspecialchars(trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? ''))); ?>
                                                     </div>
-                                                    <div class="small text-muted"><?php echo htmlspecialchars((string)($user['email'] ?? '')); ?></div>
-                                                    <div class="small text-muted"><?php echo htmlspecialchars((string)($user['phone_number'] ?? '—')); ?></div>
-                                                    <div class="user-flags mt-2">
+                                                    <div class="user-contact-list">
+                                                        <span class="user-contact-item">
+                                                            <i class="far fa-envelope"></i>
+                                                            <?php echo htmlspecialchars((string)($user['email'] ?? '')); ?>
+                                                        </span>
+                                                        <span class="user-contact-item">
+                                                            <i class="fas fa-phone-alt"></i>
+                                                            <?php echo htmlspecialchars((string)($user['phone_number'] ?? '—')); ?>
+                                                        </span>
+                                                    </div>
+                                                    <div class="user-flags">
                                                         <?php if ($isNewRegistration): ?>
-                                                            <span class="badge bg-primary-subtle text-primary-emphasis js-new-user-badge">Νέος</span>
+                                                            <span class="status-pill status-pill--accent js-new-user-badge">Νέος</span>
                                                         <?php endif; ?>
                                                         <?php if ($isCurrentUser): ?>
-                                                            <span class="badge text-bg-info">Εσύ</span>
+                                                            <span class="status-pill status-pill--info">Εσύ</span>
                                                         <?php endif; ?>
                                                         <?php if ($isProtected): ?>
-                                                            <span class="badge text-bg-dark"><i class="fas fa-lock me-1"></i>Προστατευμένος</span>
+                                                            <span class="status-pill status-pill--locked"><i class="fas fa-lock"></i>Προστατευμένος</span>
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge <?php echo ($user['role'] ?? '') === 'admin' ? 'bg-primary-subtle text-primary-emphasis' : 'bg-light text-dark border'; ?>">
+                                        <td class="text-center">
+                                            <span class="<?php echo htmlspecialchars(roleBadgeClass((string)($user['role'] ?? 'parent'))); ?>">
                                                 <?php echo htmlspecialchars(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <span class="<?php echo htmlspecialchars(statusBadgeClass((string)($user['account_status'] ?? 'pending'))); ?>">
                                                 <?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <?php if (($user['role'] ?? '') === 'parent'): ?>
-                                                <span class="badge bg-light text-dark border"><?php echo $displayChildren; ?></span>
+                                                <span class="status-pill status-pill--neutral users-count-pill"><?php echo $displayChildren; ?></span>
                                             <?php else: ?>
-                                                <span class="text-muted">—</span>
+                                                <span class="users-empty-value">—</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($hasHistory): ?>
                                                 <div class="history-summary">
-                                                    <span class="badge bg-warning-subtle text-warning-emphasis"><?php echo (int)($user['order_count'] ?? 0); ?> Παραγγ.</span>
-                                                    <span class="badge bg-info-subtle text-info-emphasis"><?php echo (int)($user['payment_count'] ?? 0); ?> Πληρωμές</span>
+                                                    <span class="status-pill status-pill--warning"><?php echo (int)($user['order_count'] ?? 0); ?> Παραγγ.</span>
+                                                    <span class="status-pill status-pill--info"><?php echo (int)($user['payment_count'] ?? 0); ?> Πληρωμές</span>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-outline-info js-toggle-history-preview"
+                                                        class="btn btn-sm btn-outline-info users-action-btn users-action-btn--compact js-toggle-history-preview"
                                                         data-target="<?php echo $historyRowId; ?>"
                                                         aria-expanded="false"
                                                     >
@@ -511,19 +526,19 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                     </button>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="text-muted">Καθαρό</span>
+                                                <span class="users-empty-value">Καθαρό</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <span class="text-muted">
+                                        <td class="text-center">
+                                            <span class="users-date-value">
                                                 <?php echo !empty($user['created_at']) ? htmlspecialchars(date('d/m/Y H:i', strtotime((string)$user['created_at']))) : '—'; ?>
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                            <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-end users-table-actions">
                                                 <button
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-primary js-open-edit-user"
+                                                    class="btn btn-sm btn-outline-primary users-action-btn js-open-edit-user"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editUserModal"
                                                     data-user-id="<?php echo $userId; ?>"
@@ -542,7 +557,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                 <?php if (($user['role'] ?? '') === 'parent'): ?>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-outline-secondary js-toggle-children-preview"
+                                                        class="btn btn-sm btn-outline-secondary users-action-btn js-toggle-children-preview"
                                                         data-target="<?php echo $inlineRowId; ?>"
                                                         aria-expanded="<?php echo $managedParentId === $userId ? 'true' : 'false'; ?>"
                                                     >
@@ -551,21 +566,21 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                 <?php endif; ?>
 
                                                 <?php if ($isProtected): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-dark" disabled>
+                                                    <button type="button" class="btn btn-sm btn-outline-dark users-action-btn" disabled>
                                                         <i class="fas fa-lock me-1"></i>Κλειδωμένο
                                                     </button>
                                                 <?php elseif ($isCurrentUser): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary users-action-btn" disabled>
                                                         <i class="fas fa-user-lock me-1"></i>Δικός Σου
                                                     </button>
                                                 <?php elseif ($hasHistory): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" disabled>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning users-action-btn" disabled>
                                                         <i class="fas fa-ban me-1"></i>Ιστορικό
                                                     </button>
                                                 <?php else: ?>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-danger js-open-delete-user"
+                                                        class="btn btn-sm btn-danger users-action-btn js-open-delete-user"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#deleteUserModal"
                                                         data-user-id="<?php echo $userId; ?>"
@@ -681,7 +696,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                         <div class="d-flex align-items-center gap-2 flex-wrap">
                                                             <button
                                                                 type="button"
-                                                                class="btn btn-sm btn-primary-custom js-open-create-child"
+                                                                class="btn btn-sm btn-primary-custom users-action-btn js-open-create-child"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#childModal"
                                                                 data-parent-id="<?php echo $userId; ?>"
@@ -704,7 +719,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                                     <div class="child-preview-actions">
                                                                         <button
                                                                             type="button"
-                                                                            class="btn btn-sm btn-outline-primary js-open-edit-child"
+                                                                            class="btn btn-sm btn-outline-primary users-action-btn users-action-btn--compact js-open-edit-child"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#childModal"
                                                                             data-parent-id="<?php echo $userId; ?>"
@@ -719,7 +734,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                                         </button>
                                                                         <button
                                                                             type="button"
-                                                                            class="btn btn-sm btn-outline-danger js-open-delete-child"
+                                                                            class="btn btn-sm btn-outline-danger users-action-btn users-action-btn--compact js-open-delete-child"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#deleteChildModal"
                                                                             data-parent-id="<?php echo $userId; ?>"
