@@ -40,15 +40,13 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     
     <body class="body">
     <script>
-        
+        window.initialTwoFactorSuccess = <?php echo json_encode($successMessage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
     </script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>
             </a>
             <h1 id="two-factor-title">Two-Factor Authentication</h1>
-            <span id="error-message"></span>
-            <span id="success-message"><?php echo htmlspecialchars($successMessage); ?></span>
             <div id="two-factor-root"></div>
         </div>
 

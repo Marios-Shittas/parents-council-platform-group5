@@ -80,21 +80,21 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
                 </a>
                 <h1 id="reset-password-title">Reset Password</h1>
                 <span id="error-message"></span>
-                <div class="password-container">
+                <form id="reset-password-form" class="password-container">
                     <p id="password-label">Enter new password:</p>
                     <div class="password-input-wrapper">
-                        <input type="password" id="new-password" placeholder="New Password">
+                        <input type="password" id="new-password" placeholder="New Password" minlength="8" required>
                         <span id="new-password-toggle"></span>
                     </div>
 
                     <p id="confirm-password-label">Confirm new password:</p>
                     <div class="password-input-wrapper">
-                        <input type="password" id="confirm-password" placeholder="Confirm Password">
+                        <input type="password" id="confirm-password" placeholder="Confirm Password" minlength="8" required>
                         <span id="confirm-password-toggle"></span>
                     </div>
                     
-                    <button id="confirm-button">Reset Password</button>
-                </div>
+                    <button id="confirm-button" type="submit">Reset Password</button>
+                </form>
             </div>
         <?php endif; ?>
 

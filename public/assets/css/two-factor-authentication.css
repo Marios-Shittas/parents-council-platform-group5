@@ -14,27 +14,35 @@
 
 #two-factor-title {
     text-align: left;
-    margin: 20px;
-    width: 240px;
+    margin: 20px 20px 10px;
+    width: 280px;
     color: #1E2D5A;
 }
 
+#two-factor-root {
+    width: 100%;
+}
+
 #error-message {
-    color: red;
-    font-size: 10px;
-    margin-left: 20px;
+    color: #C0392B;
 }
 
 #success-message {
-    color: green;
-    font-size: 10px;
-    margin-left: 20px;
+    color: #1D7D46;
 }
 
 .two-factor-container {
     margin: auto;
-    padding: 10px;
-    width: 250px;
+    padding: 10px 20px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.two-factor-message {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
 #two-factor-label {
@@ -98,4 +106,43 @@
 #confirm-button:hover {
     background: #2A3F7E;
     color: #fff; 
+}
+
+.resend-wrapper {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.resend-hint {
+    color: #51617E;
+    font-size: 0.8rem;
+}
+
+#resend-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: 1px solid #B8C4DE;
+    border-radius: 999px;
+    background: #F8FAFF;
+    color: #1E2D5A;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#resend-button:hover:not(:disabled) {
+    border-color: #7B93C4;
+    background: #EDF2FF;
+}
+
+#resend-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
 }
