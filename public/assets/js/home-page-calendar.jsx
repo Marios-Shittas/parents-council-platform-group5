@@ -113,13 +113,15 @@ class Calendar extends React.Component {
         {selectedDay && selectedEvents.length > 0 && (
           <div className="calendar-day-popup" role="dialog" aria-label="Event details">
             <button className="close-btn" type="button" onClick={() => this.setState({ selectedDay: null })}>✕</button>
-            {selectedEvents.map((event, i) => (
-              <div key={i} className="calendar-day-popup-item">
-                <h5 className="event-detail-title">{event.title}</h5>
-                <p className="event-detail-description">{event.description}</p>
-                <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
-              </div>
-            ))}
+            <div className="calendar-day-popup-content">
+              {selectedEvents.map((event, i) => (
+                <div key={i} className="calendar-day-popup-item">
+                  <h5 className="event-detail-title">{event.title}</h5>
+                  <p className="event-detail-description">{event.description}</p>
+                  <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
