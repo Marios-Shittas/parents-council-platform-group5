@@ -527,32 +527,39 @@ class UsersService
             return ['success' => false, 'message' => 'Ο χρήστης δεν βρέθηκε.'];
         }
 
-        $blockingData = $this->getDeletionBlockingData($userId);
-        if ($blockingData['has_blockers']) {
-            return [
-                'success' => false,
-                'message' => 'Ο χρήστης δεν μπορεί να διαγραφεί γιατί έχει συνδεδεμένες παραγγελίες ή πληρωμές.'
-            ];
-        }
+        try {
+            $this->conn->begin_transaction();
 
-        $stmt = $this->conn->prepare("DELETE FROM Users WHERE user_id = ?");
-        if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας διαγραφής χρήστη.'];
-        }
+            $filesToDelete = $this->collectUserSubmissionFilePaths($userId);
+            $this->deleteUserCommerceHistory($userId);
 
-        $stmt->bind_param("i", $userId);
+            $stmt = $this->conn->prepare("DELETE FROM Users WHERE user_id = ?");
+            if (!$stmt) {
+                throw new RuntimeException('Αποτυχία προετοιμασίας διαγραφής χρήστη.');
+            }
 
-        if (!$stmt->execute()) {
+            $stmt->bind_param("i", $userId);
+
+            if (!$stmt->execute()) {
+                $stmt->close();
+                throw new RuntimeException('Αποτυχία διαγραφής χρήστη.');
+            }
+
+            if ($stmt->affected_rows <= 0) {
+                $stmt->close();
+                throw new RuntimeException('Δεν διαγράφηκε κάποιος χρήστης.');
+            }
+
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία διαγραφής χρήστη.'];
-        }
+            $this->conn->commit();
 
-        if ($stmt->affected_rows <= 0) {
-            $stmt->close();
-            return ['success' => false, 'message' => 'Δεν διαγράφηκε κάποιος χρήστης.'];
+            foreach ($filesToDelete as $filePath) {
+                $this->unlinkProjectRelativeFile($filePath);
+            }
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            return ['success' => false, 'message' => $e->getMessage()];
         }
-
-        $stmt->close();
 
         $this->insertAdminLog(
             $actorUserId,
@@ -561,6 +568,164 @@ class UsersService
         );
 
         return ['success' => true, 'message' => 'Ο χρήστης διαγράφηκε επιτυχώς.'];
+    }
+
+    private function collectUserSubmissionFilePaths(int $userId): array
+    {
+        $paths = [];
+
+        $legacyStmt = $this->conn->prepare("SELECT file_path FROM Submissions WHERE user_id = ? AND file_path IS NOT NULL");
+        if ($legacyStmt) {
+            $legacyStmt->bind_param("i", $userId);
+            $legacyStmt->execute();
+            $result = $legacyStmt->get_result();
+
+            while ($result && $row = $result->fetch_assoc()) {
+                $path = trim((string)($row['file_path'] ?? ''));
+                if ($path !== '') {
+                    $paths[] = $path;
+                }
+            }
+
+            $legacyStmt->close();
+        }
+
+        $submissionStmt = $this->conn->prepare("SELECT uploaded_files FROM ApplicationSubmissions WHERE user_id = ?");
+        if ($submissionStmt) {
+            $submissionStmt->bind_param("i", $userId);
+            $submissionStmt->execute();
+            $result = $submissionStmt->get_result();
+
+            while ($result && $row = $result->fetch_assoc()) {
+                $uploadedFiles = json_decode((string)($row['uploaded_files'] ?? ''), true);
+                if (!is_array($uploadedFiles)) {
+                    continue;
+                }
+
+                foreach ($uploadedFiles as $path) {
+                    if (is_string($path)) {
+                        $path = trim($path);
+                        if ($path !== '') {
+                            $paths[] = $path;
+                        }
+                    }
+                }
+            }
+
+            $submissionStmt->close();
+        }
+
+        return array_values(array_unique($paths));
+    }
+
+    private function deleteUserCommerceHistory(int $userId): void
+    {
+        $paymentIds = [];
+        $paymentStmt = $this->conn->prepare("SELECT payment_id FROM Payments WHERE user_id = ?");
+        if ($paymentStmt) {
+            $paymentStmt->bind_param("i", $userId);
+            $paymentStmt->execute();
+            $result = $paymentStmt->get_result();
+
+            while ($result && $row = $result->fetch_assoc()) {
+                $paymentId = (int)($row['payment_id'] ?? 0);
+                if ($paymentId > 0) {
+                    $paymentIds[] = $paymentId;
+                }
+            }
+
+            $paymentStmt->close();
+        }
+
+        $orderIds = [];
+        $orderStmt = $this->conn->prepare("SELECT order_id FROM Orders WHERE user_id = ?");
+        if ($orderStmt) {
+            $orderStmt->bind_param("i", $userId);
+            $orderStmt->execute();
+            $result = $orderStmt->get_result();
+
+            while ($result && $row = $result->fetch_assoc()) {
+                $orderId = (int)($row['order_id'] ?? 0);
+                if ($orderId > 0) {
+                    $orderIds[] = $orderId;
+                }
+            }
+
+            $orderStmt->close();
+        }
+
+        if (!empty($paymentIds)) {
+            $placeholders = implode(',', array_fill(0, count($paymentIds), '?'));
+            $types = str_repeat('i', count($paymentIds));
+
+            $deletePaymentDetails = $this->conn->prepare("DELETE FROM PaymentsDetails WHERE payment_id IN ({$placeholders})");
+            if ($deletePaymentDetails) {
+                $bindValues = [];
+                foreach ($paymentIds as $index => $value) {
+                    $bindValues[$index] = &$paymentIds[$index];
+                }
+                array_unshift($bindValues, $types);
+                call_user_func_array([$deletePaymentDetails, 'bind_param'], $bindValues);
+                $deletePaymentDetails->execute();
+                $deletePaymentDetails->close();
+            }
+
+            $deletePayments = $this->conn->prepare("DELETE FROM Payments WHERE payment_id IN ({$placeholders})");
+            if ($deletePayments) {
+                $bindValues = [];
+                foreach ($paymentIds as $index => $value) {
+                    $bindValues[$index] = &$paymentIds[$index];
+                }
+                array_unshift($bindValues, $types);
+                call_user_func_array([$deletePayments, 'bind_param'], $bindValues);
+                $deletePayments->execute();
+                $deletePayments->close();
+            }
+        }
+
+        if (!empty($orderIds)) {
+            $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+            $types = str_repeat('i', count($orderIds));
+
+            $deleteOrderItems = $this->conn->prepare("DELETE FROM OrderItems WHERE order_id IN ({$placeholders})");
+            if ($deleteOrderItems) {
+                $bindValues = [];
+                foreach ($orderIds as $index => $value) {
+                    $bindValues[$index] = &$orderIds[$index];
+                }
+                array_unshift($bindValues, $types);
+                call_user_func_array([$deleteOrderItems, 'bind_param'], $bindValues);
+                $deleteOrderItems->execute();
+                $deleteOrderItems->close();
+            }
+
+            $deleteOrders = $this->conn->prepare("DELETE FROM Orders WHERE order_id IN ({$placeholders})");
+            if ($deleteOrders) {
+                $bindValues = [];
+                foreach ($orderIds as $index => $value) {
+                    $bindValues[$index] = &$orderIds[$index];
+                }
+                array_unshift($bindValues, $types);
+                call_user_func_array([$deleteOrders, 'bind_param'], $bindValues);
+                $deleteOrders->execute();
+                $deleteOrders->close();
+            }
+        }
+    }
+
+    private function unlinkProjectRelativeFile(string $path): void
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return;
+        }
+
+        $normalizedPath = ltrim(str_replace('\\', '/', $path), '/');
+        $absolutePath = __DIR__ . '/../../' . $normalizedPath;
+
+        if (is_file($absolutePath)) {
+            @unlink($absolutePath);
+        }
     }
 
     public function getChildrenByUserId(int $userId): array
