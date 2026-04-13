@@ -435,7 +435,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle admin-dashboard-table users-table" id="usersTable">
+                        <table class="table align-middle admin-dashboard-table users-table" id="usersTable">
                             <thead>
                                 <tr>
                                     <th>Χρήστης</th>
@@ -573,10 +573,6 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                     <button type="button" class="btn btn-sm btn-outline-secondary users-action-btn" disabled>
                                                         <i class="fas fa-user-lock me-1"></i>Δικός Σου
                                                     </button>
-                                                <?php elseif ($hasHistory): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning users-action-btn" disabled>
-                                                        <i class="fas fa-ban me-1"></i>Ιστορικό
-                                                    </button>
                                                 <?php else: ?>
                                                     <button
                                                         type="button"
@@ -586,6 +582,10 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                         data-user-id="<?php echo $userId; ?>"
                                                         data-user-name="<?php echo htmlspecialchars(trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-user-email="<?php echo htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-status="<?php echo htmlspecialchars((string)($user['account_status'] ?? 'pending'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-status-label="<?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending')), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-order-count="<?php echo (int)($user['order_count'] ?? 0); ?>"
+                                                        data-user-payment-count="<?php echo (int)($user['payment_count'] ?? 0); ?>"
                                                     >
                                                         <i class="fas fa-trash-alt me-1"></i>Διαγραφή
                                                     </button>
@@ -899,9 +899,11 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST">
+            <form method="POST" id="deleteUserForm">
                 <input type="hidden" name="action" value="delete_user">
                 <input type="hidden" name="user_id" id="delete_user_id">
+                <input type="hidden" id="delete_user_status" value="">
+                <input type="hidden" id="delete_user_status_label" value="">
 
                 <div class="modal-header modal-brand-header">
                     <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής</h5>
@@ -912,6 +914,17 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <p class="mb-2 fw-semibold">Θέλεις σίγουρα να διαγράψεις αυτόν τον χρήστη;</p>
                     <p class="mb-1" id="delete_user_name">—</p>
                     <p class="text-muted mb-0" id="delete_user_email">—</p>
+                    <div class="alert alert-warning mt-3 mb-0 d-none" id="deleteUserExtraWarning">
+                        <div class="mb-1">
+                            Ο χρήστης είναι σε κατάσταση <strong id="delete_user_warning_status">—</strong>.
+                        </div>
+                        <div id="delete_user_history_warning" class="d-none">
+                            Έχει επίσης <strong id="delete_user_history_counts">0 παραγγελίες / 0 πληρωμές</strong>.
+                        </div>
+                        <div class="mt-2">
+                            Αν συνεχίσεις, η διαγραφή θα είναι οριστική και θα αφαιρεθεί και το σχετικό ιστορικό του χρήστη.
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer justify-content-center">
@@ -919,6 +932,27 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <button type="submit" class="btn btn-danger px-4">Ναι, διαγραφή</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteUserFinalConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-brand-header">
+                <h5 class="modal-title"><i class="fas fa-trash-alt me-2"></i>Οριστική Επιβεβαίωση</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p class="mb-2 fw-semibold">Επιβεβαίωσε ότι θέλεις να συνεχίσεις.</p>
+                <p class="mb-0 text-muted" id="deleteUserFinalConfirmMessage">—</p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-danger px-4" id="deleteUserFinalConfirmButton">Ναι, οριστική διαγραφή</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1240,16 +1274,96 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var deleteModal = document.getElementById('deleteUserModal');
     if (deleteModal) {
+        var deleteUserForm = document.getElementById('deleteUserForm');
+        var deleteUserStatusField = document.getElementById('delete_user_status');
+        var deleteUserStatusLabelField = document.getElementById('delete_user_status_label');
+        var deleteUserExtraWarning = document.getElementById('deleteUserExtraWarning');
+        var deleteUserWarningStatus = document.getElementById('delete_user_warning_status');
+        var deleteUserHistoryWarning = document.getElementById('delete_user_history_warning');
+        var deleteUserHistoryCounts = document.getElementById('delete_user_history_counts');
+        var deleteUserFinalConfirmModalElement = document.getElementById('deleteUserFinalConfirmModal');
+        var deleteUserFinalConfirmMessage = document.getElementById('deleteUserFinalConfirmMessage');
+        var deleteUserFinalConfirmButton = document.getElementById('deleteUserFinalConfirmButton');
+        var deleteUserFinalConfirmModal = deleteUserFinalConfirmModalElement
+            ? new bootstrap.Modal(deleteUserFinalConfirmModalElement)
+            : null;
+        var isDeleteUserFinalConfirmed = false;
+
         deleteModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             if (!button) {
                 return;
             }
 
+            isDeleteUserFinalConfirmed = false;
+
+            var status = button.getAttribute('data-user-status') || 'pending';
+            var statusLabel = button.getAttribute('data-user-status-label') || 'Σε Αναμονή';
+            var orderCount = parseInt(button.getAttribute('data-user-order-count') || '0', 10);
+            var paymentCount = parseInt(button.getAttribute('data-user-payment-count') || '0', 10);
+            var hasHistory = orderCount > 0 || paymentCount > 0;
+            var requiresExtraConfirmation = status === 'active' || status === 'rejected' || hasHistory;
+
             document.getElementById('delete_user_id').value = button.getAttribute('data-user-id') || '';
             document.getElementById('delete_user_name').textContent = button.getAttribute('data-user-name') || '—';
             document.getElementById('delete_user_email').textContent = button.getAttribute('data-user-email') || '—';
+            deleteUserStatusField.value = status;
+            deleteUserStatusLabelField.value = statusLabel;
+
+            if (deleteUserExtraWarning && deleteUserWarningStatus && deleteUserHistoryWarning && deleteUserHistoryCounts) {
+                deleteUserWarningStatus.textContent = statusLabel;
+                deleteUserHistoryCounts.textContent = orderCount + ' παραγγελίες / ' + paymentCount + ' πληρωμές';
+                deleteUserExtraWarning.classList.toggle('d-none', !requiresExtraConfirmation);
+                deleteUserHistoryWarning.classList.toggle('d-none', !hasHistory);
+            }
         });
+
+        if (deleteUserForm) {
+            deleteUserForm.addEventListener('submit', function (event) {
+                var status = deleteUserStatusField ? deleteUserStatusField.value : '';
+                var statusLabel = deleteUserStatusLabelField ? deleteUserStatusLabelField.value : 'άγνωστη';
+                var userName = document.getElementById('delete_user_name').textContent || 'τον χρήστη';
+                var hasHistory = deleteUserHistoryWarning && !deleteUserHistoryWarning.classList.contains('d-none');
+
+                if ((status === 'active' || status === 'rejected' || hasHistory) && !isDeleteUserFinalConfirmed) {
+                    event.preventDefault();
+
+                    var confirmMessage = 'Ο χρήστης "' + userName + '" είναι σε κατάσταση "' + statusLabel + '".';
+                    if (hasHistory) {
+                        confirmMessage += ' Θα διαγραφούν επίσης οι σχετικές παραγγελίες και πληρωμές του.';
+                    }
+                    confirmMessage += ' Η ενέργεια αυτή είναι οριστική.';
+
+                    if (deleteUserFinalConfirmMessage) {
+                        deleteUserFinalConfirmMessage.textContent = confirmMessage;
+                    }
+
+                    if (deleteUserFinalConfirmModal) {
+                        deleteUserFinalConfirmModal.show();
+                    }
+                }
+            });
+        }
+
+        if (deleteUserFinalConfirmButton) {
+            deleteUserFinalConfirmButton.addEventListener('click', function () {
+                isDeleteUserFinalConfirmed = true;
+
+                if (deleteUserFinalConfirmModal) {
+                    deleteUserFinalConfirmModal.hide();
+                }
+
+                deleteUserForm.requestSubmit();
+            });
+        }
+
+        if (deleteUserFinalConfirmModalElement) {
+            deleteUserFinalConfirmModalElement.addEventListener('hidden.bs.modal', function () {
+                if (!isDeleteUserFinalConfirmed) {
+                    return;
+                }
+            });
+        }
     }
 
     document.querySelectorAll('.js-open-create-child').forEach(function (button) {
