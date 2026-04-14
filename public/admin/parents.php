@@ -553,7 +553,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-edit"></i> Διαχείριση Περιεχομένου</h2>
-                    <p>Από εδώ αλλάζεις όλα τα κείμενα που εμφανίζονται και στο <code>public/parents.php</code> και στο <code>public/parent/parents.php</code>. Τα sections αποθηκεύονται ξεχωριστά για τη σελίδα Συνδεσμος Γωνεων, όπως στις άλλες editable σελίδες του admin panel.</p>
+                    <p>Από εδώ ενημερώνεις το περιεχόμενο που προβάλλεται δημόσια στη σελίδα του Συνδέσμου Γονέων, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να μπορείς να διαχειρίζεσαι τίτλους, κείμενα και πληροφορίες με μεγαλύτερη ασφάλεια και ακρίβεια.</p>
                 </div>
             </div>
 
@@ -1153,7 +1153,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-images"></i> Φωτογραφικό Υλικό</h2>
-                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες αποθηκεύονται στο <code>public/assets/Parents_img</code> και εμφανίζονται αυτόματα στη σελίδα Συνδεσμος Γωνεων.</p>
+                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες εμφανίζονται αυτόματα στη δημόσια σελίδα του Συνδέσμου Γονέων.</p>
                 </div>
             </div>
 
@@ -1258,7 +1258,14 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                             <i class="fas fa-eye"></i> Προβολή
                                         </a>
 
-                                        <form method="POST" onsubmit="return confirm('Να διαγραφεί αυτή η φωτογραφία;');" class="parents-gallery-delete-form">
+                                        <form
+                                            method="POST"
+                                            class="parents-gallery-delete-form"
+                                            data-image-label="<?php echo htmlspecialchars('Φωτογραφία #' . (int)$image['image_id']); ?>"
+                                            data-image-path="<?php echo htmlspecialchars($fullPath); ?>"
+                                            data-image-thumb="<?php echo htmlspecialchars($thumbPath); ?>"
+                                            data-image-source="<?php echo htmlspecialchars(isLocalParentsGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'); ?>"
+                                        >
                                             <input type="hidden" name="action" value="delete_gallery_image">
                                             <input type="hidden" name="image_id" value="<?php echo (int)$image['image_id']; ?>">
                                             <button type="submit" class="parents-gallery-action parents-gallery-action--delete">
@@ -1277,6 +1284,47 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
         </div>
     </main>
 </div>
+<div class="modal fade parents-confirm-modal" id="deleteGalleryImageConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteGalleryImageConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="deleteGalleryImageConfirmModalLabel">Οριστική Διαγραφή</h5>
+                    <p class="parents-confirm-modal__subtitle mb-0">Η φωτογραφία θα αφαιρεθεί αμέσως από το public gallery.</p>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="parents-confirm-modal__preview">
+                    <div class="parents-confirm-modal__thumb-wrap">
+                        <img src="" alt="" class="parents-confirm-modal__thumb" id="deleteGalleryImageThumb">
+                    </div>
+                    <div class="parents-confirm-modal__details">
+                        <span class="parents-confirm-modal__eyebrow">Επιλεγμένη Φωτογραφία</span>
+                        <strong class="parents-confirm-modal__name" id="deleteGalleryImageLabel">φωτογραφία</strong>
+                        <span class="parents-confirm-modal__meta-badge" id="deleteGalleryImageSource">Τοπικό αρχείο</span>
+                        <p class="parents-confirm-modal__path mb-0" id="deleteGalleryImagePath"></p>
+                    </div>
+                </div>
+                <div class="parents-confirm-modal__warning">
+                    <span class="parents-confirm-modal__icon"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div>
+                        <p class="mb-2">Θέλεις σίγουρα να προχωρήσεις στη διαγραφή;</p>
+                        <p class="mb-0">Η ενέργεια δεν αναιρείται. Αν είναι τοπικό αρχείο, θα αφαιρεθεί και από τον server.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="parents-modal-btn parents-modal-btn--secondary" data-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="parents-modal-btn parents-modal-btn--danger" id="confirmDeleteGalleryImageButton">
+                    <i class="fas fa-trash"></i> Ναι, διαγραφή
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -1286,54 +1334,94 @@ document.addEventListener('DOMContentLoaded', function () {
     var status = document.getElementById('parents-upload-status');
     var dropzone = document.getElementById('parents-upload-dropzone');
 
-    if (!input || !preview || !status || !dropzone) {
-        return;
-    }
+    if (input && preview && status && dropzone) {
+        function renderPreview(files) {
+            preview.innerHTML = '';
 
-    function renderPreview(files) {
-        preview.innerHTML = '';
+            if (!files || files.length === 0) {
+                status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
+                dropzone.classList.remove('is-active');
+                return;
+            }
 
-        if (!files || files.length === 0) {
-            status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
-            dropzone.classList.remove('is-active');
-            return;
+            status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
+            dropzone.classList.add('is-active');
+
+            Array.prototype.forEach.call(files, function (file) {
+                var item = document.createElement('div');
+                item.className = 'parents-upload-preview__item';
+
+                var thumb = document.createElement('img');
+                thumb.className = 'parents-upload-preview__thumb';
+                thumb.alt = file.name;
+                thumb.src = URL.createObjectURL(file);
+                thumb.onload = function () {
+                    URL.revokeObjectURL(thumb.src);
+                };
+
+                var meta = document.createElement('div');
+                meta.className = 'parents-upload-preview__meta';
+
+                var name = document.createElement('strong');
+                name.textContent = file.name;
+
+                var size = document.createElement('span');
+                size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+
+                meta.appendChild(name);
+                meta.appendChild(size);
+                item.appendChild(thumb);
+                item.appendChild(meta);
+                preview.appendChild(item);
+            });
         }
 
-        status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
-        dropzone.classList.add('is-active');
-
-        Array.prototype.forEach.call(files, function (file) {
-            var item = document.createElement('div');
-            item.className = 'parents-upload-preview__item';
-
-            var thumb = document.createElement('img');
-            thumb.className = 'parents-upload-preview__thumb';
-            thumb.alt = file.name;
-            thumb.src = URL.createObjectURL(file);
-            thumb.onload = function () {
-                URL.revokeObjectURL(thumb.src);
-            };
-
-            var meta = document.createElement('div');
-            meta.className = 'parents-upload-preview__meta';
-
-            var name = document.createElement('strong');
-            name.textContent = file.name;
-
-            var size = document.createElement('span');
-            size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-
-            meta.appendChild(name);
-            meta.appendChild(size);
-            item.appendChild(thumb);
-            item.appendChild(meta);
-            preview.appendChild(item);
+        input.addEventListener('change', function () {
+            renderPreview(input.files);
         });
     }
 
-    input.addEventListener('change', function () {
-        renderPreview(input.files);
-    });
+    var galleryDeleteForms = document.querySelectorAll('.parents-gallery-delete-form');
+    var galleryDeleteLabel = document.getElementById('deleteGalleryImageLabel');
+    var galleryDeletePath = document.getElementById('deleteGalleryImagePath');
+    var galleryDeleteThumb = document.getElementById('deleteGalleryImageThumb');
+    var galleryDeleteSource = document.getElementById('deleteGalleryImageSource');
+    var galleryDeleteConfirmButton = document.getElementById('confirmDeleteGalleryImageButton');
+    var pendingGalleryDeleteForm = null;
+
+    if (galleryDeleteForms.length > 0 && galleryDeleteLabel && galleryDeletePath && galleryDeleteThumb && galleryDeleteSource && galleryDeleteConfirmButton && window.jQuery) {
+        Array.prototype.forEach.call(galleryDeleteForms, function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                pendingGalleryDeleteForm = form;
+                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'φωτογραφία';
+                galleryDeletePath.textContent = form.getAttribute('data-image-path') || '';
+                galleryDeleteThumb.src = form.getAttribute('data-image-thumb') || '';
+                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'φωτογραφία';
+                galleryDeleteSource.textContent = form.getAttribute('data-image-source') || '';
+                jQuery('#deleteGalleryImageConfirmModal').modal('show');
+            });
+        });
+
+        galleryDeleteConfirmButton.addEventListener('click', function () {
+            if (!pendingGalleryDeleteForm) {
+                return;
+            }
+
+            var formToSubmit = pendingGalleryDeleteForm;
+            pendingGalleryDeleteForm = null;
+            jQuery('#deleteGalleryImageConfirmModal').modal('hide');
+            formToSubmit.submit();
+        });
+
+        jQuery('#deleteGalleryImageConfirmModal').on('hidden.bs.modal', function () {
+            pendingGalleryDeleteForm = null;
+            galleryDeletePath.textContent = '';
+            galleryDeleteThumb.src = '';
+            galleryDeleteThumb.alt = '';
+            galleryDeleteSource.textContent = '';
+        });
+    }
 });
 </script>
 </body>

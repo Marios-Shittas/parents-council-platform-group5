@@ -14,6 +14,21 @@ const MONTHS = [
 ];
 
 const WEEKDAYS = ["ΔΕΥ", "ΤΡΙ", "ΤΕΤ", "ΠΕΜ", "ΠΑΡ", "ΣΑΒ", "ΚΥΡ"];
+const TYPE_LABELS = {
+  holiday: "ΑΡΓΙΑ",
+  event: "ΕΚΔΗΛΩΣΗ",
+  announcement: "ΑΝΑΚΟΙΝΩΣΗ"
+};
+
+function getTypeLabel(item) {
+  return TYPE_LABELS[item?.type] || "ΚΑΤΑΧΩΡΙΣΗ";
+}
+
+function formatItemTitle(item) {
+  const label = getTypeLabel(item);
+  const title = String(item?.title || "").trim();
+  return `${label}: ${title}`;
+}
 
 class Calendar extends React.Component {
   constructor(props) {
@@ -96,32 +111,49 @@ class Calendar extends React.Component {
                   d && d === today.getDate() && m === today.getMonth() && y === today.getFullYear()
                     ? "current-day" : "normal-day"
                 }`}
-                onClick={() => d && dayEvents.length > 0 && this.setState({ selectedDay: d })}
+                onClick={() => d && dayEvents.length > 0 && this.setState({ selectedDay: selectedDay === d ? null : d })}
                 style={{ cursor: dayEvents.length > 0 ? 'pointer' : 'default' }}
               >
                 {d || ''}
                 {dayEvents.length > 0 && (
-                  <div className={`event-title-preview ${dayEvents[0].type === 'holiday' ? 'holiday-preview' : ''}`}>
-                    {dayEvents[0].title}
-                  </div>
+                  <>
+                    <div className={`event-title-preview ${
+                      dayEvents[0].type === 'holiday'
+                        ? 'holiday-preview'
+                        : dayEvents[0].type === 'announcement'
+                          ? 'announcement-preview'
+                          : ''
+                    }`}>
+                      {formatItemTitle(dayEvents[0])}
+                    </div>
+                    {dayEvents.length > 1 && (
+                      <div className="event-count-preview">
+                        +{dayEvents.length - 1} ακόμη
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             );
           })}
         </div>
 
-        {selectedDay && selectedEvents.length > 0 && ReactDOM.createPortal(
-          <div className="event-detail-box">
-            <button className="close-btn" onClick={() => this.setState({ selectedDay: null })}>✕</button>
-            {selectedEvents.map((event, i) => (
-              <div key={i}>
-                <h5 className="event-detail-title">{event.title}</h5>
-                <p className="event-detail-description">{event.description}</p>
-                <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
-              </div>
-            ))}
-          </div>,
-          document.getElementById("event-detail-root")
+        {selectedDay && selectedEvents.length > 0 && (
+          <div className="calendar-day-popup" role="dialog" aria-label="Event details">
+            <button className="close-btn" type="button" onClick={() => this.setState({ selectedDay: null })}>✕</button>
+            <div className="calendar-day-popup-content">
+              {selectedEvents.map((event, i) => (
+                <div key={i} className="calendar-day-popup-item">
+                  <h5 className="event-detail-title">
+                    <span className={`event-detail-type-label event-detail-type-label--${event.type || 'default'}`}>{getTypeLabel(event)}:</span>{' '}
+                    <span className="event-detail-title-text">{event.title}</span>
+                  </h5>
+                  <p className="event-detail-description">{event.description}</p>
+                  <p className="event-detail-date">{new Date(event.date).toLocaleDateString('el-GR')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     );

@@ -5,7 +5,7 @@ $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
     ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
     ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
-    ['label' => 'Συνδεσμος Γωνεων', 'href' => site_section_url('parents.php')],
+    ['label' => 'Σύνδεσμος Γονέων', 'href' => site_section_url('parents.php')],
 ];
 
 if (site_is_parent()) {
@@ -14,7 +14,7 @@ if (site_is_parent()) {
 }
 
 $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
-$footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')];
+$footer_links[] = ['label' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες', 'href' => site_section_url('useful-information.php')];
 ?>
 <style>
    /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */

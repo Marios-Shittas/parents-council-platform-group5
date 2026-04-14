@@ -320,6 +320,17 @@
     padding: 1.5rem;
 }
 
+.announcement-modal .modal-footer .btn.btn-secondary {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.announcement-modal .modal-footer .btn.btn-secondary:hover,
+.announcement-modal .modal-footer .btn.btn-secondary:focus {
+    background-color: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
+}
+
 /* Modal carousel container */
 .announcement-modal .carousel {
     border-radius: 12px;

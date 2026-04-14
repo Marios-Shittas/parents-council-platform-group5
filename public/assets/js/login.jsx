@@ -48,7 +48,12 @@ function handleLogin() {
   .then(respone => respone.json())
   .then(data => {
       if (data.success) {
-        window.location.href = 'two-factor-authentication.php';
+        if (data.role === 'admin') {
+          window.location.href = 'admin/index.php';
+        }
+        else if (data.role === 'parent') {
+          window.location.href = 'parent/index.php';
+        }
       } else {
         errorMessage.textContent = data.message;
       }

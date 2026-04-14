@@ -185,7 +185,7 @@ class UsefulInformationService
     {
         return [
             'page_header' => [
-                'title' => 'Χρήσιμες Πληροφορίες',
+                'title' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες',
                 'subtitle' => 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.',
                 'content' => [
                     'eyebrow' => 'Οδηγός Γονέων Και Μαθητών',
@@ -209,7 +209,7 @@ class UsefulInformationService
                             'icon' => 'fas fa-file-download',
                         ],
                         [
-                            'title' => 'Έντυπα Ασφάλειας',
+                            'title' => 'Εκπαιδευτικοί Σύνδεσμοι',
                             'description' => 'Επίσημα έντυπα του ΥΠΑΝ για θέματα ασφάλειας και καταγραφής ατυχημάτων.',
                             'url' => 'https://www.moec.gov.cy/politiki_amyna/ay_entypa.html',
                             'icon' => 'fas fa-shield-alt',

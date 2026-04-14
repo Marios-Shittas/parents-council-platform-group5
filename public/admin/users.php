@@ -68,19 +68,26 @@ function formatStatusLabel(string $status): string
     return $map[$status] ?? ucfirst($status);
 }
 
+function roleBadgeClass(string $role): string
+{
+    return $role === 'admin'
+        ? 'status-pill status-pill--accent'
+        : 'status-pill status-pill--neutral';
+}
+
 function statusBadgeClass(string $status): string
 {
     switch ($status) {
         case 'active':
-            return 'badge bg-success-subtle text-success-emphasis';
+            return 'status-pill status-pill--success';
         case 'approved':
-            return 'badge bg-primary-subtle text-primary-emphasis';
+            return 'status-pill status-pill--info';
         case 'waiting_payment':
-            return 'badge bg-warning-subtle text-warning-emphasis';
+            return 'status-pill status-pill--warning';
         case 'rejected':
-            return 'badge bg-danger-subtle text-danger-emphasis';
+            return 'status-pill status-pill--danger';
         default:
-            return 'badge bg-secondary-subtle text-secondary-emphasis';
+            return 'status-pill status-pill--neutral';
     }
 }
 
@@ -397,7 +404,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 <div class="users-toolbar">
                     <div>
                         <h4 class="mb-1"><i class="fas fa-table me-2"></i>Λίστα Χρηστών</h4>
-                        <p class="text-muted mb-0">Ο λογαριασμός `admin 1` είναι προστατευμένος. Επίσης δεν επιτρέπεται διαγραφή του τρέχοντος συνδεδεμένου admin.</p>
+                        <p class="text-muted mb-0">Ορισμένοι λογαριασμοί διαχειριστή προστατεύονται για λόγους ασφάλειας. Επίσης, δεν επιτρέπεται η διαγραφή του λογαριασμού που είναι αυτή τη στιγμή συνδεδεμένος.</p>
                     </div>
                     <div class="users-toolbar-actions">
                         <div class="users-search-wrap">
@@ -408,13 +415,13 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                             <?php if ($managedParentId > 0): ?>
                                 <input type="hidden" name="manage_children" value="<?php echo $managedParentId; ?>">
                             <?php endif; ?>
-                            <label for="usersSortSelect" class="users-sort-label">Sort by</label>
+                            <label for="usersSortSelect" class="users-sort-label">Ταξινόμηση</label>
                             <select name="sort" id="usersSortSelect" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="pending_first" <?php echo $selectedSort === 'pending_first' ? 'selected' : ''; ?>>Pending first</option>
-                                <option value="newest" <?php echo $selectedSort === 'newest' ? 'selected' : ''; ?>>Newest first</option>
-                                <option value="oldest" <?php echo $selectedSort === 'oldest' ? 'selected' : ''; ?>>Oldest first</option>
-                                <option value="name_az" <?php echo $selectedSort === 'name_az' ? 'selected' : ''; ?>>Name A-Z</option>
-                                <option value="status_az" <?php echo $selectedSort === 'status_az' ? 'selected' : ''; ?>>Status</option>
+                                <option value="pending_first" <?php echo $selectedSort === 'pending_first' ? 'selected' : ''; ?>>Πρώτα σε αναμονή</option>
+                                <option value="newest" <?php echo $selectedSort === 'newest' ? 'selected' : ''; ?>>Νεότεροι πρώτα</option>
+                                <option value="oldest" <?php echo $selectedSort === 'oldest' ? 'selected' : ''; ?>>Παλαιότεροι πρώτα</option>
+                                <option value="name_az" <?php echo $selectedSort === 'name_az' ? 'selected' : ''; ?>>Όνομα Α-Ω</option>
+                                <option value="status_az" <?php echo $selectedSort === 'status_az' ? 'selected' : ''; ?>>Κατάσταση</option>
                             </select>
                         </form>
                     </div>
@@ -424,16 +431,16 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <div class="empty-state">
                         <i class="fas fa-user-slash"></i>
                         <h3>Δεν υπάρχουν χρήστες</h3>
-                        <p>Δημιούργησε τον πρώτο parent από το panel.</p>
+                        <p>Δημιούργησε τον πρώτο γονέα από το panel.</p>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle admin-dashboard-table users-table" id="usersTable">
+                        <table class="table align-middle admin-dashboard-table users-table" id="usersTable">
                             <thead>
                                 <tr>
                                     <th>Χρήστης</th>
                                     <th>Ρόλος</th>
-                                    <th>Status</th>
+                                    <th>Κατάσταση</th>
                                     <th>Παιδιά</th>
                                     <th>Ιστορικό</th>
                                     <th>Δημιουργία</th>
@@ -446,6 +453,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         $userId = (int)($user['user_id'] ?? 0);
                                         $isCurrentUser = $userId === $currentAdminId;
                                         $isProtected = isPrimaryProtectedAdmin($userId);
+                                        $isNewRegistration = (($user['role'] ?? '') === 'parent') && (($user['account_status'] ?? '') === 'pending');
                                         $hasHistory = ((int)($user['order_count'] ?? 0) > 0) || ((int)($user['payment_count'] ?? 0) > 0);
                                         $orderHistory = $ordersByUserId[$userId] ?? [];
                                         $paymentHistory = $paymentsByUserId[$userId] ?? [];
@@ -454,52 +462,63 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                         $historyRowId = 'history-preview-' . $userId;
                                         $inlineRowId = 'children-preview-' . $userId;
                                     ?>
-                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? ''))), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <tr class="user-data-row <?php echo $isCurrentUser ? 'current-user-row ' : ''; ?><?php echo $isNewRegistration ? 'new-user-row' : ''; ?>" data-user-id="<?php echo $userId; ?>" data-is-new-registration="<?php echo $isNewRegistration ? '1' : '0'; ?>" data-search="<?php echo htmlspecialchars(strtolower(trim(($user['name'] ?? '') . ' ' . ($user['surname'] ?? '') . ' ' . ($user['email'] ?? '') . ' ' . ($user['role'] ?? '') . ' ' . ($user['account_status'] ?? ''))), ENT_QUOTES, 'UTF-8'); ?>">
                                         <td>
                                             <div class="user-main-cell">
                                                 <div class="user-avatar"><?php echo htmlspecialchars(strtoupper(substr((string)($user['name'] ?? 'U'), 0, 1))); ?></div>
-                                                <div>
-                                                    <div class="fw-bold text-dark">
+                                                <div class="user-info">
+                                                    <div class="user-full-name">
                                                         <?php echo htmlspecialchars(trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? ''))); ?>
                                                     </div>
-                                                    <div class="small text-muted"><?php echo htmlspecialchars((string)($user['email'] ?? '')); ?></div>
-                                                    <div class="small text-muted"><?php echo htmlspecialchars((string)($user['phone_number'] ?? '—')); ?></div>
-                                                    <div class="user-flags mt-2">
+                                                    <div class="user-contact-list">
+                                                        <span class="user-contact-item">
+                                                            <i class="far fa-envelope"></i>
+                                                            <?php echo htmlspecialchars((string)($user['email'] ?? '')); ?>
+                                                        </span>
+                                                        <span class="user-contact-item">
+                                                            <i class="fas fa-phone-alt"></i>
+                                                            <?php echo htmlspecialchars((string)($user['phone_number'] ?? '—')); ?>
+                                                        </span>
+                                                    </div>
+                                                    <div class="user-flags">
+                                                        <?php if ($isNewRegistration): ?>
+                                                            <span class="status-pill status-pill--accent js-new-user-badge">Νέος</span>
+                                                        <?php endif; ?>
                                                         <?php if ($isCurrentUser): ?>
-                                                            <span class="badge text-bg-info">Εσύ</span>
+                                                            <span class="status-pill status-pill--info">Εσύ</span>
                                                         <?php endif; ?>
                                                         <?php if ($isProtected): ?>
-                                                            <span class="badge text-bg-dark"><i class="fas fa-lock me-1"></i>Προστατευμένος</span>
+                                                            <span class="status-pill status-pill--locked"><i class="fas fa-lock"></i>Προστατευμένος</span>
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge <?php echo ($user['role'] ?? '') === 'admin' ? 'bg-primary-subtle text-primary-emphasis' : 'bg-light text-dark border'; ?>">
+                                        <td class="text-center">
+                                            <span class="<?php echo htmlspecialchars(roleBadgeClass((string)($user['role'] ?? 'parent'))); ?>">
                                                 <?php echo htmlspecialchars(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <span class="<?php echo htmlspecialchars(statusBadgeClass((string)($user['account_status'] ?? 'pending'))); ?>">
                                                 <?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             <?php if (($user['role'] ?? '') === 'parent'): ?>
-                                                <span class="badge bg-light text-dark border"><?php echo $displayChildren; ?></span>
+                                                <span class="status-pill status-pill--neutral users-count-pill"><?php echo $displayChildren; ?></span>
                                             <?php else: ?>
-                                                <span class="text-muted">—</span>
+                                                <span class="users-empty-value">—</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($hasHistory): ?>
                                                 <div class="history-summary">
-                                                    <span class="badge bg-warning-subtle text-warning-emphasis"><?php echo (int)($user['order_count'] ?? 0); ?> Παραγγ.</span>
-                                                    <span class="badge bg-info-subtle text-info-emphasis"><?php echo (int)($user['payment_count'] ?? 0); ?> Πληρωμές</span>
+                                                    <span class="status-pill status-pill--warning"><?php echo (int)($user['order_count'] ?? 0); ?> Παραγγ.</span>
+                                                    <span class="status-pill status-pill--info"><?php echo (int)($user['payment_count'] ?? 0); ?> Πληρωμές</span>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-outline-info js-toggle-history-preview"
+                                                        class="btn btn-sm btn-outline-info users-action-btn users-action-btn--compact js-toggle-history-preview"
                                                         data-target="<?php echo $historyRowId; ?>"
                                                         aria-expanded="false"
                                                     >
@@ -507,19 +526,19 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                     </button>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="text-muted">Καθαρό</span>
+                                                <span class="users-empty-value">Καθαρό</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <span class="text-muted">
+                                        <td class="text-center">
+                                            <span class="users-date-value">
                                                 <?php echo !empty($user['created_at']) ? htmlspecialchars(date('d/m/Y H:i', strtotime((string)$user['created_at']))) : '—'; ?>
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                            <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-end users-table-actions">
                                                 <button
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-primary js-open-edit-user"
+                                                    class="btn btn-sm btn-outline-primary users-action-btn js-open-edit-user"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#editUserModal"
                                                     data-user-id="<?php echo $userId; ?>"
@@ -538,7 +557,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                 <?php if (($user['role'] ?? '') === 'parent'): ?>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-outline-secondary js-toggle-children-preview"
+                                                        class="btn btn-sm btn-outline-secondary users-action-btn js-toggle-children-preview"
                                                         data-target="<?php echo $inlineRowId; ?>"
                                                         aria-expanded="<?php echo $managedParentId === $userId ? 'true' : 'false'; ?>"
                                                     >
@@ -547,26 +566,26 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                 <?php endif; ?>
 
                                                 <?php if ($isProtected): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-dark" disabled>
+                                                    <button type="button" class="btn btn-sm btn-outline-dark users-action-btn" disabled>
                                                         <i class="fas fa-lock me-1"></i>Κλειδωμένο
                                                     </button>
                                                 <?php elseif ($isCurrentUser): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary users-action-btn" disabled>
                                                         <i class="fas fa-user-lock me-1"></i>Δικός Σου
-                                                    </button>
-                                                <?php elseif ($hasHistory): ?>
-                                                    <button type="button" class="btn btn-sm btn-outline-warning" disabled>
-                                                        <i class="fas fa-ban me-1"></i>Ιστορικό
                                                     </button>
                                                 <?php else: ?>
                                                     <button
                                                         type="button"
-                                                        class="btn btn-sm btn-danger js-open-delete-user"
+                                                        class="btn btn-sm btn-danger users-action-btn js-open-delete-user"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#deleteUserModal"
                                                         data-user-id="<?php echo $userId; ?>"
                                                         data-user-name="<?php echo htmlspecialchars(trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-user-email="<?php echo htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-status="<?php echo htmlspecialchars((string)($user['account_status'] ?? 'pending'), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-status-label="<?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending')), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-order-count="<?php echo (int)($user['order_count'] ?? 0); ?>"
+                                                        data-user-payment-count="<?php echo (int)($user['payment_count'] ?? 0); ?>"
                                                     >
                                                         <i class="fas fa-trash-alt me-1"></i>Διαγραφή
                                                     </button>
@@ -677,7 +696,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                         <div class="d-flex align-items-center gap-2 flex-wrap">
                                                             <button
                                                                 type="button"
-                                                                class="btn btn-sm btn-primary-custom js-open-create-child"
+                                                                class="btn btn-sm btn-primary-custom users-action-btn js-open-create-child"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#childModal"
                                                                 data-parent-id="<?php echo $userId; ?>"
@@ -700,7 +719,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                                     <div class="child-preview-actions">
                                                                         <button
                                                                             type="button"
-                                                                            class="btn btn-sm btn-outline-primary js-open-edit-child"
+                                                                            class="btn btn-sm btn-outline-primary users-action-btn users-action-btn--compact js-open-edit-child"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#childModal"
                                                                             data-parent-id="<?php echo $userId; ?>"
@@ -715,7 +734,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                                                                         </button>
                                                                         <button
                                                                             type="button"
-                                                                            class="btn btn-sm btn-outline-danger js-open-delete-child"
+                                                                            class="btn btn-sm btn-outline-danger users-action-btn users-action-btn--compact js-open-delete-child"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#deleteChildModal"
                                                                             data-parent-id="<?php echo $userId; ?>"
@@ -790,7 +809,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Δημιουργία
                     </button>
@@ -867,7 +886,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Αποθήκευση
                     </button>
@@ -880,9 +899,11 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <form method="POST">
+            <form method="POST" id="deleteUserForm">
                 <input type="hidden" name="action" value="delete_user">
                 <input type="hidden" name="user_id" id="delete_user_id">
+                <input type="hidden" id="delete_user_status" value="">
+                <input type="hidden" id="delete_user_status_label" value="">
 
                 <div class="modal-header modal-brand-header">
                     <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Επιβεβαίωση Διαγραφής</h5>
@@ -893,6 +914,17 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <p class="mb-2 fw-semibold">Θέλεις σίγουρα να διαγράψεις αυτόν τον χρήστη;</p>
                     <p class="mb-1" id="delete_user_name">—</p>
                     <p class="text-muted mb-0" id="delete_user_email">—</p>
+                    <div class="alert alert-warning mt-3 mb-0 d-none" id="deleteUserExtraWarning">
+                        <div class="mb-1">
+                            Ο χρήστης είναι σε κατάσταση <strong id="delete_user_warning_status">—</strong>.
+                        </div>
+                        <div id="delete_user_history_warning" class="d-none">
+                            Έχει επίσης <strong id="delete_user_history_counts">0 παραγγελίες / 0 πληρωμές</strong>.
+                        </div>
+                        <div class="mt-2">
+                            Αν συνεχίσεις, η διαγραφή θα είναι οριστική και θα αφαιρεθεί και το σχετικό ιστορικό του χρήστη.
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer justify-content-center">
@@ -900,6 +932,27 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                     <button type="submit" class="btn btn-danger px-4">Ναι, διαγραφή</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteUserFinalConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-brand-header">
+                <h5 class="modal-title"><i class="fas fa-trash-alt me-2"></i>Οριστική Επιβεβαίωση</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p class="mb-2 fw-semibold">Επιβεβαίωσε ότι θέλεις να συνεχίσεις.</p>
+                <p class="mb-0 text-muted" id="deleteUserFinalConfirmMessage">—</p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4 modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-danger px-4" id="deleteUserFinalConfirmButton">Ναι, οριστική διαγραφή</button>
+            </div>
         </div>
     </div>
 </div>
@@ -943,7 +996,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Αποθήκευση
                     </button>
@@ -987,6 +1040,101 @@ document.addEventListener('DOMContentLoaded', function () {
     var tableRows = document.querySelectorAll('#usersTable tbody tr.user-data-row');
     var urlParams = new URLSearchParams(window.location.search);
     var managedParentId = urlParams.get('manage_children');
+    var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
+
+    function getSeenNewUsers() {
+        try {
+            var raw = window.localStorage.getItem(seenNewUsersStorageKey);
+            var parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed.map(String) : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function saveSeenNewUsers(userIds) {
+        try {
+            window.localStorage.setItem(seenNewUsersStorageKey, JSON.stringify(userIds));
+        } catch (error) {
+            // Ignore storage failures and keep the page usable.
+        }
+    }
+
+    function updateUsersSidebarNotification() {
+        var usersNavLink = document.querySelector('#adminSidebar a[href="users.php"]');
+        if (!usersNavLink) {
+            return;
+        }
+
+        var unseenNewUsersCount = document.querySelectorAll('#usersTable tbody tr.user-data-row.new-user-row[data-is-new-registration="1"]').length;
+        var badge = usersNavLink.querySelector('.admin-notification-badge');
+
+        if (unseenNewUsersCount <= 0) {
+            if (badge) {
+                badge.remove();
+            }
+            return;
+        }
+
+        var badgeText = unseenNewUsersCount > 10 ? '10+' : String(unseenNewUsersCount);
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'admin-notification-badge';
+            usersNavLink.appendChild(badge);
+        }
+
+        badge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + badgeText);
+        badge.textContent = badgeText;
+    }
+
+    function dismissNewUserRow(row, persistState) {
+        if (!row) {
+            return;
+        }
+
+        row.classList.remove('new-user-row');
+
+        var badge = row.querySelector('.js-new-user-badge');
+        if (badge) {
+            badge.remove();
+        }
+
+        updateUsersSidebarNotification();
+
+        if (!persistState) {
+            return;
+        }
+
+        var userId = String(row.getAttribute('data-user-id') || '');
+        if (!userId) {
+            return;
+        }
+
+        var seenUsers = getSeenNewUsers();
+        if (seenUsers.indexOf(userId) === -1) {
+            seenUsers.push(userId);
+            saveSeenNewUsers(seenUsers);
+        }
+    }
+
+    var seenNewUsers = getSeenNewUsers();
+    tableRows.forEach(function (row) {
+        if (row.getAttribute('data-is-new-registration') !== '1') {
+            return;
+        }
+
+        var userId = String(row.getAttribute('data-user-id') || '');
+        if (userId && seenNewUsers.indexOf(userId) !== -1) {
+            dismissNewUserRow(row, false);
+            return;
+        }
+
+        row.addEventListener('mouseenter', function handleNewUserHover() {
+            dismissNewUserRow(row, true);
+        }, { once: true });
+    });
+
+    updateUsersSidebarNotification();
 
     function setPreviewState(button, targetRow, shouldExpand) {
         if (!button || !targetRow) {
@@ -1126,16 +1274,96 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var deleteModal = document.getElementById('deleteUserModal');
     if (deleteModal) {
+        var deleteUserForm = document.getElementById('deleteUserForm');
+        var deleteUserStatusField = document.getElementById('delete_user_status');
+        var deleteUserStatusLabelField = document.getElementById('delete_user_status_label');
+        var deleteUserExtraWarning = document.getElementById('deleteUserExtraWarning');
+        var deleteUserWarningStatus = document.getElementById('delete_user_warning_status');
+        var deleteUserHistoryWarning = document.getElementById('delete_user_history_warning');
+        var deleteUserHistoryCounts = document.getElementById('delete_user_history_counts');
+        var deleteUserFinalConfirmModalElement = document.getElementById('deleteUserFinalConfirmModal');
+        var deleteUserFinalConfirmMessage = document.getElementById('deleteUserFinalConfirmMessage');
+        var deleteUserFinalConfirmButton = document.getElementById('deleteUserFinalConfirmButton');
+        var deleteUserFinalConfirmModal = deleteUserFinalConfirmModalElement
+            ? new bootstrap.Modal(deleteUserFinalConfirmModalElement)
+            : null;
+        var isDeleteUserFinalConfirmed = false;
+
         deleteModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
             if (!button) {
                 return;
             }
 
+            isDeleteUserFinalConfirmed = false;
+
+            var status = button.getAttribute('data-user-status') || 'pending';
+            var statusLabel = button.getAttribute('data-user-status-label') || 'Σε Αναμονή';
+            var orderCount = parseInt(button.getAttribute('data-user-order-count') || '0', 10);
+            var paymentCount = parseInt(button.getAttribute('data-user-payment-count') || '0', 10);
+            var hasHistory = orderCount > 0 || paymentCount > 0;
+            var requiresExtraConfirmation = status === 'active' || status === 'rejected' || hasHistory;
+
             document.getElementById('delete_user_id').value = button.getAttribute('data-user-id') || '';
             document.getElementById('delete_user_name').textContent = button.getAttribute('data-user-name') || '—';
             document.getElementById('delete_user_email').textContent = button.getAttribute('data-user-email') || '—';
+            deleteUserStatusField.value = status;
+            deleteUserStatusLabelField.value = statusLabel;
+
+            if (deleteUserExtraWarning && deleteUserWarningStatus && deleteUserHistoryWarning && deleteUserHistoryCounts) {
+                deleteUserWarningStatus.textContent = statusLabel;
+                deleteUserHistoryCounts.textContent = orderCount + ' παραγγελίες / ' + paymentCount + ' πληρωμές';
+                deleteUserExtraWarning.classList.toggle('d-none', !requiresExtraConfirmation);
+                deleteUserHistoryWarning.classList.toggle('d-none', !hasHistory);
+            }
         });
+
+        if (deleteUserForm) {
+            deleteUserForm.addEventListener('submit', function (event) {
+                var status = deleteUserStatusField ? deleteUserStatusField.value : '';
+                var statusLabel = deleteUserStatusLabelField ? deleteUserStatusLabelField.value : 'άγνωστη';
+                var userName = document.getElementById('delete_user_name').textContent || 'τον χρήστη';
+                var hasHistory = deleteUserHistoryWarning && !deleteUserHistoryWarning.classList.contains('d-none');
+
+                if ((status === 'active' || status === 'rejected' || hasHistory) && !isDeleteUserFinalConfirmed) {
+                    event.preventDefault();
+
+                    var confirmMessage = 'Ο χρήστης "' + userName + '" είναι σε κατάσταση "' + statusLabel + '".';
+                    if (hasHistory) {
+                        confirmMessage += ' Θα διαγραφούν επίσης οι σχετικές παραγγελίες και πληρωμές του.';
+                    }
+                    confirmMessage += ' Η ενέργεια αυτή είναι οριστική.';
+
+                    if (deleteUserFinalConfirmMessage) {
+                        deleteUserFinalConfirmMessage.textContent = confirmMessage;
+                    }
+
+                    if (deleteUserFinalConfirmModal) {
+                        deleteUserFinalConfirmModal.show();
+                    }
+                }
+            });
+        }
+
+        if (deleteUserFinalConfirmButton) {
+            deleteUserFinalConfirmButton.addEventListener('click', function () {
+                isDeleteUserFinalConfirmed = true;
+
+                if (deleteUserFinalConfirmModal) {
+                    deleteUserFinalConfirmModal.hide();
+                }
+
+                deleteUserForm.requestSubmit();
+            });
+        }
+
+        if (deleteUserFinalConfirmModalElement) {
+            deleteUserFinalConfirmModalElement.addEventListener('hidden.bs.modal', function () {
+                if (!isDeleteUserFinalConfirmed) {
+                    return;
+                }
+            });
+        }
     }
 
     document.querySelectorAll('.js-open-create-child').forEach(function (button) {

@@ -104,7 +104,7 @@ $parentsPageService = new ParentsPageService();
 $sections = $parentsPageService->getAllSections();
 $galleryImages = $parentsPageService->getGalleryImages();
 
-$pageHeaderSection = $sections['page_header'] ?? ['title' => 'Συνδεσμος Γωνεων', 'subtitle' => '', 'content' => []];
+$pageHeaderSection = $sections['page_header'] ?? ['title' => 'Σύνδεσμος Γονέων', 'subtitle' => '', 'content' => []];
 $historySection = $sections['history_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $associationSection = $sections['association_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $scheduleSection = $sections['schedule_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
@@ -126,8 +126,8 @@ $edgeSteps = parentsPageSanitizeList($electronicAdminSection['content']['edge_st
 $chromeSteps = parentsPageSanitizeList($electronicAdminSection['content']['chrome_steps'] ?? []);
 $showParentsGallery = site_is_parent() && (($_SESSION['role'] ?? '') === 'parent');
 
-$pageHeaderTitle = $pageHeaderSection['title'];
-$pageHeaderSubtitle = $pageHeaderSection['subtitle'];
+$pageHeaderTitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['title'] ?? ''));
+$pageHeaderSubtitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['subtitle'] ?? ''));
 $pageHeaderIcon = $pageHeaderSection['content']['icon'] ?? 'fas fa-users';
 $pageHeaderEyebrow = site_is_parent()
     ? ($pageHeaderSection['content']['parent_eyebrow'] ?? 'Χώρος Γονέα')
@@ -145,7 +145,7 @@ $pageHeaderEyebrow = site_is_parent()
     <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/parents.css'); ?>">
-    <title>Συνδεσμος Γωνεων - Γυμνάσιο Αγίου Αθανασίου</title>
+    <title><?php echo htmlspecialchars($pageHeaderTitle); ?> - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
 <body>
 <?php include __DIR__ . '/../../includes/header.php'; ?>
