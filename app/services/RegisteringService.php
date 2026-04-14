@@ -27,6 +27,15 @@ class RegisteringService
             return;
         }
 
+        $registrationWindowState = $this->getRegistrationWindowState();
+        if (!$registrationWindowState['is_open']) {
+            $this->respond(403, [
+                'success' => false,
+                'message' => $registrationWindowState['message'],
+            ]);
+            return;
+        }
+
         $payload = $this->getRequestPayload();
         if ($payload === null) {
             $this->respond(400, [
@@ -266,6 +275,71 @@ class RegisteringService
         $stmt->bind_param('ii', $userId, $userId);
         $stmt->execute();
         $stmt->close();
+    }
+
+    private function getRegistrationWindowState(): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT start_date, end_date, ss_status
+             FROM SystemSchedule
+             WHERE feature = 'registration'
+             ORDER BY start_date ASC, ss_id ASC"
+        );
+
+        if ($stmt === false) {
+            return [
+                'is_open' => false,
+                'message' => 'Η υπηρεσία εγγραφών δεν είναι διαθέσιμη αυτή τη στιγμή.',
+            ];
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $schedules = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        if (empty($schedules)) {
+            return [
+                'is_open' => false,
+                'message' => 'Δεν έχει οριστεί περίοδος εγγραφών από τον διαχειριστή.',
+            ];
+        }
+        $now = time();
+
+        $activePeriods = [];
+        foreach ($schedules as $schedule) {
+            $status = (string)($schedule['ss_status'] ?? 'inactive');
+            if ($status !== 'active') {
+                continue;
+            }
+
+            $start = !empty($schedule['start_date']) ? strtotime((string)$schedule['start_date']) : false;
+            $end = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : false;
+            if ($start === false || $end === false) {
+                continue;
+            }
+
+            $activePeriods[] = date('d/m/Y H:i', $start) . ' - ' . date('d/m/Y H:i', $end);
+
+            if ($now >= $start && $now <= $end) {
+                return [
+                    'is_open' => true,
+                    'message' => '',
+                ];
+            }
+        }
+
+        if (empty($activePeriods)) {
+            return [
+                'is_open' => false,
+                'message' => 'Οι εγγραφές είναι κλειστές. Δεν υπάρχουν ενεργές περίοδοι εγγραφών.',
+            ];
+        }
+
+        return [
+            'is_open' => false,
+            'message' => 'Οι εγγραφές είναι κλειστές. Διαθέσιμες περίοδοι: ' . implode(' | ', $activePeriods),
+        ];
     }
 
     private function respond(int $statusCode, array $body): void

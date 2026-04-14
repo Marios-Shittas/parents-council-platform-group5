@@ -37,6 +37,58 @@ function normalizeUserSort(string $sort): string
     return in_array($sort, $allowed, true) ? $sort : 'pending_first';
 }
 
+function normalizeScheduleStatus(string $status): string
+{
+    return in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
+}
+
+function normalizeScheduleFeature(string $feature): string
+{
+    $allowed = ['registration', 'delete_users', 'cleanup_applications'];
+    return in_array($feature, $allowed, true) ? $feature : 'registration';
+}
+
+function scheduleFeatureLabel(string $feature): string
+{
+    $map = [
+        'registration' => 'Εγγραφές',
+        'delete_users' => 'Διαγραφή Χρηστών',
+        'cleanup_applications' => 'Καθαρισμός Αιτήσεων',
+    ];
+
+    return $map[$feature] ?? $feature;
+}
+
+function normalizeDateTimeLocalInput(string $value): ?string
+{
+    $trimmed = trim($value);
+    if ($trimmed === '') {
+        return null;
+    }
+
+    $dateTime = DateTime::createFromFormat('d/m/Y H:i', $trimmed);
+
+    if (!$dateTime instanceof DateTime) {
+        // Keep backward compatibility in case the browser still submits datetime-local format.
+        $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', $trimmed);
+        if (!$dateTime instanceof DateTime) {
+            return null;
+        }
+    }
+
+    return $dateTime->format('Y-m-d H:i:s');
+}
+
+function toDateTimeLocalValue(?string $value): string
+{
+    if (!is_string($value) || trim($value) === '') {
+        return '';
+    }
+
+    $timestamp = strtotime($value);
+    return $timestamp ? date('Y-m-d\\TH:i', $timestamp) : '';
+}
+
 function redirectWithFlash(string $message, string $type = 'info', int $manageChildrenUserId = 0): void
 {
     $_SESSION['flash_message'] = $message;
@@ -287,6 +339,54 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             !empty($result['success']) ? 'success' : 'danger'
         );
     }
+
+    if ($action === 'update_registration_schedule') {
+        $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
+        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+
+        if ($scheduleId <= 0 || $startDate === null || $endDate === null) {
+            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για το πρόγραμμα εγγραφών.', 'danger');
+        }
+
+        $result = $usersService->updateSystemSchedule($scheduleId, $feature, $startDate, $endDate, $status, $currentAdminId);
+        redirectWithFlash(
+            $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
+            !empty($result['success']) ? 'success' : 'danger'
+        );
+    }
+
+    if ($action === 'add_registration_schedule') {
+        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+
+        if ($startDate === null || $endDate === null) {
+            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για τη νέα περίοδο εγγραφών.', 'danger');
+        }
+
+        $result = $usersService->createSystemSchedule($feature, $startDate, $endDate, $status, $currentAdminId);
+        redirectWithFlash(
+            $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
+            !empty($result['success']) ? 'success' : 'danger'
+        );
+    }
+
+    if ($action === 'delete_registration_schedule') {
+        $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
+        if ($scheduleId <= 0) {
+            redirectWithFlash('Μη έγκυρο πρόγραμμα.', 'danger');
+        }
+
+        $result = $usersService->deleteSystemSchedule($scheduleId, $currentAdminId);
+        redirectWithFlash(
+            $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
+            !empty($result['success']) ? 'success' : 'danger'
+        );
+    }
 }
 
 $selectedSort = normalizeUserSort((string)($_GET['sort'] ?? 'pending_first'));
@@ -317,6 +417,7 @@ foreach ($users as $user) {
 $childrenByParentId = $usersService->getChildrenGroupedByUserIds($parentUserIds);
 $ordersByUserId = $usersService->getOrdersGroupedByUserIds($allUserIds);
 $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
+$registrationSchedules = $usersService->getSystemSchedules();
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -396,6 +497,150 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                         <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card card-custom mb-4 registration-schedule-card">
+            <div class="card-body">
+                <div class="users-toolbar mb-3">
+                    <div>
+                        <h4 class="mb-1"><i class="fas fa-calendar-alt me-2"></i>Προγραμματισμός Λειτουργιών</h4>
+                        <p class="text-muted mb-0">Διαχείριση χρονικών περιόδων για τις βασικές λειτουργίες του συστήματος.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle admin-dashboard-table registration-schedule-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Λειτουργία</th>
+                                <th>Έναρξη</th>
+                                <th>Λήξη</th>
+                                <th>Κατάσταση</th>
+                                <th class="text-end">Ενέργεια</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($registrationSchedules)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">Δεν υπάρχουν περίοδοι εγγραφών ακόμα.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($registrationSchedules as $schedule): ?>
+                                    <?php
+                                        $scheduleId = (int)($schedule['ss_id'] ?? 0);
+                                        $scheduleFormId = 'registration-schedule-form-' . $scheduleId;
+                                        $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $scheduleId; ?></td>
+                                            <td>
+                                                <?php $rowFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration')); ?>
+                                                <select name="schedule_feature" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
+                                                    <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
+                                                    <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
+                                                    <option value="cleanup_applications" <?php echo $rowFeature === 'cleanup_applications' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_applications')); ?></option>
+                                                </select>
+                                            </td>
+                                        <td>
+                                                <input
+                                                    type="datetime-local"
+                                                name="registration_start_date"
+                                                class="form-control"
+                                                value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['start_date'] ?? null)); ?>"
+                                                form="<?php echo htmlspecialchars($scheduleFormId); ?>"
+                                                required
+                                            >
+                                        </td>
+                                        <td>
+                                                <input
+                                                    type="datetime-local"
+                                                name="registration_end_date"
+                                                class="form-control"
+                                                value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['end_date'] ?? null)); ?>"
+                                                form="<?php echo htmlspecialchars($scheduleFormId); ?>"
+                                                required
+                                            >
+                                        </td>
+                                        <td>
+                                            <?php $rowStatus = normalizeScheduleStatus((string)($schedule['ss_status'] ?? 'inactive')); ?>
+                                            <select name="registration_status" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
+                                                <option value="active" <?php echo $rowStatus === 'active' ? 'selected' : ''; ?>>Ενεργό</option>
+                                                <option value="inactive" <?php echo $rowStatus === 'inactive' ? 'selected' : ''; ?>>Ανενεργό</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="submit" class="btn btn-primary-custom" form="<?php echo htmlspecialchars($scheduleFormId); ?>">
+                                                <i class="fas fa-save me-1"></i>Αποθήκευση
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-danger ms-2"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteScheduleModal"
+                                                data-schedule-id="<?php echo $scheduleId; ?>"
+                                                data-schedule-feature="<?php echo htmlspecialchars(scheduleFeatureLabel($rowFeature), ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-schedule-start="<?php echo htmlspecialchars((string)($schedule['start_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-schedule-end="<?php echo htmlspecialchars((string)($schedule['end_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-schedule-delete-form-id="<?php echo htmlspecialchars($scheduleDeleteFormId, ENT_QUOTES, 'UTF-8'); ?>"
+                                            >
+                                                <i class="fas fa-trash-alt me-1"></i>Διαγραφή
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                            <tr class="registration-schedule-new-row">
+                                <?php $newScheduleFormId = 'registration-schedule-form-new'; ?>
+                                <td>Νέο</td>
+                                <td>
+                                    <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
+                                        <option value="registration" selected><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
+                                        <option value="delete_users"><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
+                                        <option value="cleanup_applications"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_applications')); ?></option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="datetime-local" name="registration_start_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
+                                </td>
+                                <td>
+                                    <input type="datetime-local" name="registration_end_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
+                                </td>
+                                <td>
+                                    <select name="registration_status" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
+                                        <option value="active" selected>Ενεργό</option>
+                                        <option value="inactive">Ανενεργό</option>
+                                    </select>
+                                </td>
+                                <td class="text-end">
+                                    <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>">
+                                        <i class="fas fa-plus me-1"></i>Προσθήκη
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <?php foreach ($registrationSchedules as $schedule): ?>
+                    <?php
+                        $scheduleId = (int)($schedule['ss_id'] ?? 0);
+                        $scheduleFormId = 'registration-schedule-form-' . $scheduleId;
+                        $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
+                    ?>
+                    <form id="<?php echo htmlspecialchars($scheduleFormId); ?>" method="POST" class="registration-schedule-form">
+                        <input type="hidden" name="action" value="update_registration_schedule">
+                        <input type="hidden" name="registration_schedule_id" value="<?php echo $scheduleId; ?>">
+                    </form>
+                    <form id="<?php echo htmlspecialchars($scheduleDeleteFormId); ?>" method="POST" class="registration-schedule-form">
+                        <input type="hidden" name="action" value="delete_registration_schedule">
+                        <input type="hidden" name="registration_schedule_id" value="<?php echo $scheduleId; ?>">
+                    </form>
+                <?php endforeach; ?>
+                <form id="registration-schedule-form-new" method="POST" class="registration-schedule-form">
+                    <input type="hidden" name="action" value="add_registration_schedule">
+                </form>
             </div>
         </div>
 
@@ -1033,6 +1278,29 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
     </div>
 </div>
 
+<div class="modal fade" id="deleteScheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-brand-header">
+                <h5 class="modal-title"><i class="fas fa-trash-alt me-2"></i>Διαγραφή Προγράμματος</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p class="mb-2 fw-semibold">Θέλεις σίγουρα να διαγράψεις αυτό το πρόγραμμα;</p>
+                <p class="mb-1" id="delete_schedule_feature">—</p>
+                <p class="text-muted mb-0" id="delete_schedule_dates">—</p>
+                <input type="hidden" id="delete_schedule_form_id" value="">
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-danger px-4" id="confirmDeleteScheduleButton">Ναι, διαγραφή</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -1041,6 +1309,56 @@ document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
     var managedParentId = urlParams.get('manage_children');
     var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
+
+    function isSingleMomentFeature(featureValue) {
+        return featureValue === 'delete_users' || featureValue === 'cleanup_applications';
+    }
+
+    function syncScheduleRowInputs(formId) {
+        if (!formId) {
+            return;
+        }
+
+        var featureSelect = document.querySelector('select[name="schedule_feature"][form="' + formId + '"]');
+        var startInput = document.querySelector('input[name="registration_start_date"][form="' + formId + '"]');
+        var endInput = document.querySelector('input[name="registration_end_date"][form="' + formId + '"]');
+
+        if (!featureSelect || !startInput || !endInput) {
+            return;
+        }
+
+        var forceSameDate = isSingleMomentFeature(featureSelect.value);
+        endInput.readOnly = forceSameDate;
+
+        if (forceSameDate && startInput.value !== '') {
+            endInput.value = startInput.value;
+        }
+    }
+
+    function bindScheduleRowAutoSync() {
+        var featureSelects = document.querySelectorAll('select[name="schedule_feature"][form]');
+        featureSelects.forEach(function (featureSelect) {
+            var formId = featureSelect.getAttribute('form') || '';
+            if (!formId) {
+                return;
+            }
+
+            var startInput = document.querySelector('input[name="registration_start_date"][form="' + formId + '"]');
+            if (startInput) {
+                startInput.addEventListener('change', function () {
+                    syncScheduleRowInputs(formId);
+                });
+            }
+
+            featureSelect.addEventListener('change', function () {
+                syncScheduleRowInputs(formId);
+            });
+
+            syncScheduleRowInputs(formId);
+        });
+    }
+
+    bindScheduleRowAutoSync();
 
     function getSeenNewUsers() {
         try {
@@ -1401,6 +1719,55 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('delete_child_name').textContent = button.getAttribute('data-child-name') || '—';
         });
     });
+
+    var deleteScheduleModal = document.getElementById('deleteScheduleModal');
+    if (deleteScheduleModal) {
+        deleteScheduleModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            if (!button) {
+                return;
+            }
+
+            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
+            var startDate = button.getAttribute('data-schedule-start') || '';
+            var endDate = button.getAttribute('data-schedule-end') || '';
+            var formId = button.getAttribute('data-schedule-delete-form-id') || '';
+
+            var featureEl = document.getElementById('delete_schedule_feature');
+            var datesEl = document.getElementById('delete_schedule_dates');
+            var formIdEl = document.getElementById('delete_schedule_form_id');
+
+            if (featureEl) {
+                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
+            }
+
+            if (datesEl) {
+                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
+            }
+
+            if (formIdEl) {
+                formIdEl.value = formId;
+            }
+        });
+
+        var confirmDeleteScheduleButton = document.getElementById('confirmDeleteScheduleButton');
+        if (confirmDeleteScheduleButton) {
+            confirmDeleteScheduleButton.addEventListener('click', function () {
+                var formIdEl = document.getElementById('delete_schedule_form_id');
+                var formId = formIdEl ? formIdEl.value : '';
+                if (!formId) {
+                    return;
+                }
+
+                var form = document.getElementById(formId);
+                if (!form) {
+                    return;
+                }
+
+                form.submit();
+            });
+        }
+    }
 });
 </script>
 </body>

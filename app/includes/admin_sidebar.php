@@ -14,6 +14,7 @@ $pendingUserRegistrations = 0;
 try {
     require_once __DIR__ . '/../services/UsersService.php';
     $usersService = new UsersService();
+    $usersService->runScheduledMaintenance();
     $pendingUserRegistrations = max(0, (int)$usersService->getPendingRegistrationCount());
 } catch (Throwable $exception) {
     $pendingUserRegistrations = 0;
