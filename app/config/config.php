@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Europe/Athens');
+
 if (!function_exists('app_detect_request_value')) {
     function app_detect_request_value(string $primaryKey, string $fallbackKey = ''): string
     {

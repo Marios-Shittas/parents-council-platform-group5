@@ -44,8 +44,13 @@ function normalizeScheduleStatus(string $status): string
 
 function normalizeScheduleFeature(string $feature): string
 {
-    $allowed = ['registration', 'delete_users', 'cleanup_applications'];
-    return in_array($feature, $allowed, true) ? $feature : 'registration';
+    $normalized = trim((string)$feature);
+    if ($normalized === 'cleanup_applications' || $normalized === 'cleanuo_submissions') {
+        $normalized = 'cleanup_submissions';
+    }
+
+    $allowed = ['registration', 'delete_users', 'cleanup_submissions'];
+    return in_array($normalized, $allowed, true) ? $normalized : 'registration';
 }
 
 function scheduleFeatureLabel(string $feature): string
@@ -53,7 +58,7 @@ function scheduleFeatureLabel(string $feature): string
     $map = [
         'registration' => 'Εγγραφές',
         'delete_users' => 'Διαγραφή Χρηστών',
-        'cleanup_applications' => 'Καθαρισμός Αιτήσεων',
+        'cleanup_submissions' => 'Καθαρισμός Υποβολών',
     ];
 
     return $map[$feature] ?? $feature;
@@ -513,7 +518,6 @@ $registrationSchedules = $usersService->getSystemSchedules();
                     <table class="table align-middle admin-dashboard-table registration-schedule-table mb-0">
                         <thead>
                             <tr>
-                                <th>#</th>
                                 <th>Λειτουργία</th>
                                 <th>Έναρξη</th>
                                 <th>Λήξη</th>
@@ -524,7 +528,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <tbody>
                             <?php if (empty($registrationSchedules)): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Δεν υπάρχουν περίοδοι εγγραφών ακόμα.</td>
+                                    <td colspan="5" class="text-center text-muted py-4">Δεν υπάρχουν περίοδοι εγγραφών ακόμα.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($registrationSchedules as $schedule): ?>
@@ -534,15 +538,14 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                         $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
                                     ?>
                                     <tr>
-                                        <td><?php echo $scheduleId; ?></td>
-                                            <td>
-                                                <?php $rowFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration')); ?>
-                                                <select name="schedule_feature" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
-                                                    <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
-                                                    <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                                    <option value="cleanup_applications" <?php echo $rowFeature === 'cleanup_applications' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_applications')); ?></option>
-                                                </select>
-                                            </td>
+                                        <td>
+                                            <?php $rowFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration')); ?>
+                                            <select name="schedule_feature" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
+                                                <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
+                                                <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
+                                                <option value="cleanup_submissions" <?php echo $rowFeature === 'cleanup_submissions' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
+                                            </select>
+                                        </td>
                                         <td>
                                                 <input
                                                     type="datetime-local"
@@ -594,12 +597,11 @@ $registrationSchedules = $usersService->getSystemSchedules();
 
                             <tr class="registration-schedule-new-row">
                                 <?php $newScheduleFormId = 'registration-schedule-form-new'; ?>
-                                <td>Νέο</td>
                                 <td>
                                     <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
                                         <option value="registration" selected><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
                                         <option value="delete_users"><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                        <option value="cleanup_applications"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_applications')); ?></option>
+                                        <option value="cleanup_submissions"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
                                     </select>
                                 </td>
                                 <td>
@@ -1310,8 +1312,17 @@ document.addEventListener('DOMContentLoaded', function () {
     var managedParentId = urlParams.get('manage_children');
     var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
 
+    function formatDateTimeLocal(dateObj) {
+        var year = String(dateObj.getFullYear());
+        var month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        var day = String(dateObj.getDate()).padStart(2, '0');
+        var hours = String(dateObj.getHours()).padStart(2, '0');
+        var minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+    }
+
     function isSingleMomentFeature(featureValue) {
-        return featureValue === 'delete_users' || featureValue === 'cleanup_applications';
+        return featureValue === 'delete_users' || featureValue === 'cleanup_submissions';
     }
 
     function syncScheduleRowInputs(formId) {
@@ -1331,7 +1342,13 @@ document.addEventListener('DOMContentLoaded', function () {
         endInput.readOnly = forceSameDate;
 
         if (forceSameDate && startInput.value !== '') {
-            endInput.value = startInput.value;
+            var startDate = new Date(startInput.value);
+            if (!isNaN(startDate.getTime())) {
+                startDate.setMinutes(startDate.getMinutes() + 10);
+                endInput.value = formatDateTimeLocal(startDate);
+            } else {
+                endInput.value = startInput.value;
+            }
         }
     }
 
