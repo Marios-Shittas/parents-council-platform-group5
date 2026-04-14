@@ -750,6 +750,36 @@
     font-weight: 700;
 }
 
+.registration-schedule-card {
+    border: 1px solid var(--users-border);
+}
+
+.registration-schedule-table thead th {
+    background: var(--users-surface-soft);
+    color: var(--users-text);
+    border-bottom: 2px solid #dce3ec;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.registration-schedule-table tbody td {
+    border-color: #e7edf4;
+    background: transparent;
+}
+
+.registration-schedule-table .form-control,
+.registration-schedule-table .form-select {
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--users-border);
+}
+
+.registration-schedule-table .btn {
+    min-height: 42px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
 .empty-state {
     padding: 2.4rem 1rem;
     text-align: center;
@@ -802,6 +832,10 @@
 
     .users-action-btn {
         min-width: 124px;
+    }
+
+    .registration-schedule-table {
+        min-width: 860px;
     }
 }
 

@@ -114,6 +114,74 @@ class UsersService
         return max(0, $affectedRows);
     }
 
+    public function runScheduledMaintenance(): void
+    {
+        $this->runScheduledUsersCleanup();
+        $this->runScheduledApplicationsCleanup();
+    }
+
+    private function runScheduledUsersCleanup(): int
+    {
+        $gate = $this->isSystemFeatureOpen('delete_users');
+        if (empty($gate['is_open'])) {
+            return 0;
+        }
+
+        $result = $this->conn->query(
+            "SELECT user_id
+             FROM Users
+             WHERE role <> 'admin'"
+        );
+
+        if (!$result) {
+            return 0;
+        }
+
+        $deletedCount = 0;
+        while ($row = $result->fetch_assoc()) {
+            $userId = (int)($row['user_id'] ?? 0);
+            if ($userId <= 0) {
+                continue;
+            }
+
+            $deleteResult = $this->deleteUserByAdmin($userId, null);
+            if (!empty($deleteResult['success'])) {
+                $deletedCount++;
+            }
+        }
+
+        return $deletedCount;
+    }
+
+    private function runScheduledApplicationsCleanup(): int
+    {
+        $gate = $this->isSystemFeatureOpen('cleanup_applications');
+        if (empty($gate['is_open'])) {
+            return 0;
+        }
+
+        require_once __DIR__ . '/ApplicationsService.php';
+        $applicationsService = new ApplicationsService();
+        $applications = $applicationsService->getAllApplications();
+        if (empty($applications)) {
+            return 0;
+        }
+
+        $deletedCount = 0;
+        foreach ($applications as $application) {
+            $applicationId = (int)($application['application_id'] ?? 0);
+            if ($applicationId <= 0) {
+                continue;
+            }
+
+            if ($applicationsService->deleteApplication($applicationId)) {
+                $deletedCount++;
+            }
+        }
+
+        return $deletedCount;
+    }
+
     public function forgot($email)
     {
         $email = trim((string)$email);
@@ -282,6 +350,219 @@ class UsersService
 
         $row = $result->fetch_assoc();
         return max(0, (int)($row['count'] ?? 0));
+    }
+
+    public function getSystemSchedules(): array
+    {
+        $sql = "
+            SELECT ss_id, feature, start_date, end_date, ss_status
+            FROM SystemSchedule
+            ORDER BY feature ASC, start_date ASC, ss_id ASC
+        ";
+
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            return [];
+        }
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function isSystemFeatureOpen(string $feature): array
+    {
+        $normalizedFeature = $this->normalizeScheduleFeature($feature);
+        if ($normalizedFeature === '') {
+            return [
+                'is_open' => false,
+                'message' => 'Μη έγκυρη λειτουργία προγραμματισμού.',
+            ];
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT start_date, end_date, ss_status
+             FROM SystemSchedule
+             WHERE feature = ?
+             ORDER BY start_date ASC, ss_id ASC"
+        );
+
+        if (!$stmt) {
+            return [
+                'is_open' => false,
+                'message' => 'Η λειτουργία δεν είναι διαθέσιμη αυτή τη στιγμή.',
+            ];
+        }
+
+        $stmt->bind_param('s', $normalizedFeature);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $schedules = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        if (empty($schedules)) {
+            return [
+                'is_open' => false,
+                'message' => 'Δεν υπάρχει ορισμένη περίοδος για τη λειτουργία αυτή.',
+            ];
+        }
+
+        $activePeriods = [];
+        $now = time();
+
+        foreach ($schedules as $schedule) {
+            if ((string)($schedule['ss_status'] ?? 'inactive') !== 'active') {
+                continue;
+            }
+
+            $startTs = !empty($schedule['start_date']) ? strtotime((string)$schedule['start_date']) : false;
+            $endTs = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : $startTs;
+            if ($startTs === false || $endTs === false) {
+                continue;
+            }
+
+            $activePeriods[] = date('d/m/Y H:i', $startTs) . ' - ' . date('d/m/Y H:i', $endTs);
+
+            if ($now >= $startTs && $now <= $endTs) {
+                return [
+                    'is_open' => true,
+                    'message' => '',
+                ];
+            }
+        }
+
+        if (empty($activePeriods)) {
+            return [
+                'is_open' => false,
+                'message' => 'Η λειτουργία είναι ανενεργή. Δεν υπάρχουν ενεργές περίοδοι.',
+            ];
+        }
+
+        return [
+            'is_open' => false,
+            'message' => 'Η λειτουργία είναι κλειστή αυτή τη στιγμή. Ενεργές περίοδοι: ' . implode(' | ', $activePeriods),
+        ];
+    }
+
+    public function updateSystemSchedule(int $ssId, string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
+    {
+        if ($ssId <= 0) {
+            return ['success' => false, 'message' => 'Μη έγκυρο πρόγραμμα.'];
+        }
+
+        $normalized = $this->normalizeScheduleInput($feature, $startDate, $endDate, $status);
+        if (!$normalized['success']) {
+            return $normalized;
+        }
+
+        $normalizedFeature = $normalized['feature'];
+        $normalizedStart = $normalized['start_date'];
+        $normalizedEnd = $normalized['end_date'];
+        $normalizedStatus = $normalized['status'];
+
+        $stmt = $this->conn->prepare(
+            "UPDATE SystemSchedule
+             SET feature = ?, start_date = ?, end_date = ?, ss_status = ?
+             WHERE ss_id = ?"
+        );
+
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας ενημέρωσης χρονοπρογράμματος.'];
+        }
+
+        $stmt->bind_param('ssssi', $normalizedFeature, $normalizedStart, $normalizedEnd, $normalizedStatus, $ssId);
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Αποτυχία ενημέρωσης προγράμματος.'];
+        }
+
+        if ($stmt->affected_rows <= 0) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Το πρόγραμμα δεν βρέθηκε ή δεν άλλαξε.'];
+        }
+
+        $stmt->close();
+
+        $this->insertAdminLog(
+            $actorUserId,
+            'ADMIN_SYSTEM_SCHEDULE_UPDATED',
+            "Updated system schedule #{$ssId}: {$normalizedFeature}, {$normalizedStart} - {$normalizedEnd} ({$normalizedStatus})."
+        );
+
+        return ['success' => true, 'message' => 'Το πρόγραμμα ενημερώθηκε επιτυχώς.'];
+    }
+
+    public function createSystemSchedule(string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
+    {
+        $normalized = $this->normalizeScheduleInput($feature, $startDate, $endDate, $status);
+        if (!$normalized['success']) {
+            return $normalized;
+        }
+
+        $normalizedFeature = $normalized['feature'];
+        $normalizedStart = $normalized['start_date'];
+        $normalizedEnd = $normalized['end_date'];
+        $normalizedStatus = $normalized['status'];
+
+        $stmt = $this->conn->prepare(
+            "INSERT INTO SystemSchedule (feature, start_date, end_date, ss_status)
+             VALUES (?, ?, ?, ?)"
+        );
+
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας δημιουργίας χρονοπρογράμματος.'];
+        }
+
+        $stmt->bind_param('ssss', $normalizedFeature, $normalizedStart, $normalizedEnd, $normalizedStatus);
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Αποτυχία αποθήκευσης προγράμματος.'];
+        }
+
+        $newScheduleId = (int)$stmt->insert_id;
+        $stmt->close();
+
+        $this->insertAdminLog(
+            $actorUserId,
+            'ADMIN_SYSTEM_SCHEDULE_CREATED',
+            "Created system schedule #{$newScheduleId}: {$normalizedFeature}, {$normalizedStart} - {$normalizedEnd} ({$normalizedStatus})."
+        );
+
+        return ['success' => true, 'message' => 'Προστέθηκε νέο πρόγραμμα επιτυχώς.'];
+    }
+
+    public function deleteSystemSchedule(int $ssId, ?int $actorUserId = null): array
+    {
+        if ($ssId <= 0) {
+            return ['success' => false, 'message' => 'Μη έγκυρο πρόγραμμα.'];
+        }
+
+        $stmt = $this->conn->prepare('DELETE FROM SystemSchedule WHERE ss_id = ?');
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας διαγραφής προγράμματος.'];
+        }
+
+        $stmt->bind_param('i', $ssId);
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Αποτυχία διαγραφής προγράμματος.'];
+        }
+
+        if ($stmt->affected_rows <= 0) {
+            $stmt->close();
+            return ['success' => false, 'message' => 'Το πρόγραμμα δεν βρέθηκε.'];
+        }
+
+        $stmt->close();
+
+        $this->insertAdminLog(
+            $actorUserId,
+            'ADMIN_SYSTEM_SCHEDULE_DELETED',
+            "Deleted system schedule #{$ssId}."
+        );
+
+        return ['success' => true, 'message' => 'Το πρόγραμμα διαγράφηκε επιτυχώς.'];
     }
 
     public function createUserByAdmin(array $data, ?int $actorUserId = null): array
@@ -1289,6 +1570,46 @@ class UsersService
     {
         $dt = DateTime::createFromFormat('Y-m-d', $date);
         return $dt instanceof DateTime && $dt->format('Y-m-d') === $date;
+    }
+
+    private function isValidDateTime(string $dateTime): bool
+    {
+        $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
+        return $dt instanceof DateTime && $dt->format('Y-m-d H:i:s') === $dateTime;
+    }
+
+    private function normalizeScheduleInput(string $feature, string $startDate, string $endDate, string $status): array
+    {
+        $normalizedFeature = $this->normalizeScheduleFeature($feature);
+        if ($normalizedFeature === '') {
+            return ['success' => false, 'message' => 'Μη έγκυρη λειτουργία προγράμματος.'];
+        }
+
+        $normalizedStart = trim($startDate);
+        $normalizedEnd = trim($endDate);
+        $normalizedStatus = in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
+
+        if (!$this->isValidDateTime($normalizedStart) || !$this->isValidDateTime($normalizedEnd)) {
+            return ['success' => false, 'message' => 'Μη έγκυρες ημερομηνίες προγράμματος εγγραφών.'];
+        }
+
+        if (strtotime($normalizedStart) === false || strtotime($normalizedEnd) === false || strtotime($normalizedStart) > strtotime($normalizedEnd)) {
+            return ['success' => false, 'message' => 'Η ημερομηνία έναρξης πρέπει να είναι πριν ή ίδια με την ημερομηνία λήξης.'];
+        }
+
+        return [
+            'success' => true,
+            'feature' => $normalizedFeature,
+            'start_date' => $normalizedStart,
+            'end_date' => $normalizedEnd,
+            'status' => $normalizedStatus,
+        ];
+    }
+
+    private function normalizeScheduleFeature(string $feature): string
+    {
+        $allowed = ['registration', 'delete_users', 'cleanup_applications'];
+        return in_array($feature, $allowed, true) ? $feature : '';
     }
 
     private function normalizeRole(string $role): string
