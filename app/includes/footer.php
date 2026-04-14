@@ -5,7 +5,7 @@ $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
     ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
     ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
-    ['label' => 'Συνδεσμος Γωνεων', 'href' => site_section_url('parents.php')],
+    ['label' => 'Σύνδεσμος Γονέων', 'href' => site_section_url('parents.php')],
 ];
 
 if (site_is_parent()) {

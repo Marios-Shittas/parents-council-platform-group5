@@ -10,6 +10,12 @@
     margin-top: 10px;
 }
 
+.attachment-preview {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 /* Individual image item in preview */
 .image-preview-item {
     position: relative;
@@ -40,6 +46,57 @@
     cursor: pointer;
 }
 
+.attachment-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid #dfe5ee;
+    border-radius: 10px;
+    background: #f8fbff;
+}
+
+.attachment-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    color: #244a73;
+}
+
+.attachment-preview-name {
+    font-weight: 600;
+    color: #1f3550;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attachment-preview-size {
+    font-size: 12px;
+    color: #6b7a8c;
+    white-space: nowrap;
+}
+
+.attachment-remove-btn {
+    border: none;
+    background: #dc3545;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.attachment-remove-btn:hover {
+    background: #bf2f3d;
+}
+
 /* Thumbnail in announcements table */
 .thumbnail {
     width: 72px;
@@ -66,6 +123,20 @@
 #createModal .modal-header .close:hover,
 #editModal .modal-header .close:hover {
     opacity: 1;
+}
+
+#createModal .modal-footer .btn-secondary-custom,
+#editModal .modal-footer .btn-secondary-custom {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#createModal .modal-footer .btn-secondary-custom:hover,
+#createModal .modal-footer .btn-secondary-custom:focus,
+#editModal .modal-footer .btn-secondary-custom:hover,
+#editModal .modal-footer .btn-secondary-custom:focus {
+    background: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
 }
 
 /* Modal content rounded corners */

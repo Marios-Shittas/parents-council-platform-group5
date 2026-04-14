@@ -436,6 +436,7 @@ $events = $eventsService->getAllEvents();
                         <small class="text-muted d-block">
                             Οι νέες εικόνες θα προστεθούν στις υπάρχουσες. Αυτή τη στιγμή μπορείτε να προσθέσετε έως <?php echo max(0, EVENT_IMAGE_LIMIT - count($editImages)); ?> ακόμη.
                         </small>
+                        <div id="editPreview" class="image-preview"></div>
                     </div>
 
                     <div class="d-flex gap-2" style="gap: 10px;">
@@ -739,96 +740,182 @@ function deleteEventImage(imageId, eventId) {
     });
 }
 
-function validateAndPreviewImages(input, previewId) {
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
+function getEventImageLimit() {
+    return <?php echo EVENT_IMAGE_LIMIT; ?>;
+}
 
+function getEventImageFileKey(file) {
+    return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function truncatePreviewFileName(fileName, maxLength) {
+    if (fileName.length <= maxLength) {
+        return fileName;
+    }
+
+    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
+}
+
+function validateEventImageFile(file) {
+    const warnings = [];
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     const maxFileSize = 5 * 1024 * 1024;
-    const eventImageLimit = <?php echo EVENT_IMAGE_LIMIT; ?>;
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const availableSlots = Math.max(0, eventImageLimit - existingCount);
-    let warnings = [];
-    let files = [...input.files];
+    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
 
-    if (availableSlots === 0) {
-        input.value = '';
-        warnings.push(`Η εκδήλωση έχει ήδη ${eventImageLimit} φωτογραφίες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
-    } else if (files.length > availableSlots) {
-        warnings.push(`Μπορείτε να προσθέσετε μόνο ${availableSlots} ακόμη φωτογραφία/ες σε αυτή την εκδήλωση. Θα κρατηθούν μόνο οι πρώτες ${availableSlots}.`);
-
-        files = files.slice(0, availableSlots);
-
-        if (typeof DataTransfer !== 'undefined') {
-            const dataTransfer = new DataTransfer();
-            files.forEach((file) => dataTransfer.items.add(file));
-            input.files = dataTransfer.files;
-        }
+    if (!allowedExtensions.includes(fileExt)) {
+        warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
     }
 
-    files.forEach((file) => {
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        let hasWarning = false;
+    if (file.size > maxFileSize) {
+        warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
+    }
 
-        if (!allowedExtensions.includes(fileExt)) {
-            warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-            hasWarning = true;
-        }
+    if (!String(file.type || '').startsWith('image/')) {
+        warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
+    }
 
-        if (file.size > maxFileSize) {
-            warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-            hasWarning = true;
-        }
+    return warnings;
+}
 
-        if (!file.type.startsWith('image/')) {
-            warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-            hasWarning = true;
-        }
+function syncEventImageInputFiles(input, stagedFiles) {
+    if (typeof DataTransfer === 'undefined') {
+        return;
+    }
 
-        if (file.type.startsWith('image/') && !hasWarning) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-item';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <div class="preview-file-caption">${file.name.substring(0, 15)}...</div>
-                `;
-                preview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    const dataTransfer = new DataTransfer();
+    stagedFiles.forEach((file) => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+}
 
-    if (warnings.length > 0) {
-        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-            title: 'Έλεγχος αρχείων',
-            variant: 'warning'
+function renderEventImagePreview(preview, stagedFiles, onRemove) {
+    if (!preview) {
+        return;
+    }
+
+    preview.innerHTML = '';
+
+    stagedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+
+        const image = document.createElement('img');
+        image.alt = file.name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.addEventListener('click', function () {
+            onRemove(index);
         });
-    }
-}
 
-const createImagesInput = document.getElementById('images');
-if (createImagesInput) {
-    createImagesInput.addEventListener('change', function() {
-        validateAndPreviewImages(this, 'imagePreview');
+        const caption = document.createElement('div');
+        caption.className = 'preview-file-caption';
+        caption.textContent = truncatePreviewFileName(file.name, 18);
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            image.src = String(event.target && event.target.result ? event.target.result : '');
+        };
+        reader.readAsDataURL(file);
+
+        item.appendChild(image);
+        item.appendChild(deleteBtn);
+        item.appendChild(caption);
+        preview.appendChild(item);
     });
 }
 
-const editImagesInput = document.getElementById('edit_images');
-if (editImagesInput) {
-    editImagesInput.addEventListener('change', function() {
-        let preview = document.getElementById('editPreview');
-        if (!preview) {
-            preview = document.createElement('div');
-            preview.className = 'image-preview';
-            preview.id = 'editPreview';
-            this.parentElement.appendChild(preview);
+function setupEventImageInput(input, previewId) {
+    if (!input) {
+        return;
+    }
+
+    const preview = document.getElementById(previewId);
+    const eventImageLimit = getEventImageLimit();
+    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
+    const stagedFiles = [];
+    const stagedKeys = new Set();
+
+    function updateInputState() {
+        if (existingCount + stagedFiles.length >= eventImageLimit) {
+            input.disabled = true;
+        } else if (existingCount < eventImageLimit) {
+            input.disabled = false;
+        }
+    }
+
+    function removeStagedFile(index) {
+        const removedFile = stagedFiles[index];
+        if (!removedFile) {
+            return;
         }
 
-        validateAndPreviewImages(this, 'editPreview');
+        stagedFiles.splice(index, 1);
+        stagedKeys.delete(getEventImageFileKey(removedFile));
+        syncEventImageInputFiles(input, stagedFiles);
+        renderEventImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+    }
+
+    input.addEventListener('change', function () {
+        const incomingFiles = Array.from(input.files || []);
+        const warnings = [];
+        let reachedLimit = false;
+
+        if (incomingFiles.length === 0) {
+            return;
+        }
+
+        if (existingCount >= eventImageLimit) {
+            warnings.push(`Η εκδήλωση έχει ήδη ${eventImageLimit} φωτογραφίες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+        } else {
+            incomingFiles.forEach((file) => {
+                const fileKey = getEventImageFileKey(file);
+                const validationWarnings = validateEventImageFile(file);
+
+                if (validationWarnings.length > 0) {
+                    warnings.push(...validationWarnings);
+                    return;
+                }
+
+                if (stagedKeys.has(fileKey)) {
+                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
+                    return;
+                }
+
+                if (existingCount + stagedFiles.length >= eventImageLimit) {
+                    if (!reachedLimit) {
+                        const remainingSlots = Math.max(0, eventImageLimit - existingCount - stagedFiles.length);
+                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη φωτογραφία/ες σε αυτή την εκδήλωση.`);
+                        reachedLimit = true;
+                    }
+                    return;
+                }
+
+                stagedFiles.push(file);
+                stagedKeys.add(fileKey);
+            });
+        }
+
+        syncEventImageInputFiles(input, stagedFiles);
+        renderEventImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+
+        if (warnings.length > 0) {
+            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+                title: 'Έλεγχος αρχείων',
+                variant: 'warning'
+            });
+        }
     });
+
+    updateInputState();
 }
+
+setupEventImageInput(document.getElementById('images'), 'imagePreview');
+setupEventImageInput(document.getElementById('edit_images'), 'editPreview');
 
 document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
     form.addEventListener('submit', function (event) {

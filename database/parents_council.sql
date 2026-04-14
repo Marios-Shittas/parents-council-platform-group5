@@ -1,449 +1,1070 @@
-CREATE DATABASE IF NOT EXISTS parents_council
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost
+-- Generation Time: Apr 14, 2026 at 04:09 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
-USE parents_council;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
-SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS InsurancePayments;
-DROP TABLE IF EXISTS PaymentsDetails;
-DROP TABLE IF EXISTS Payments;
-DROP TABLE IF EXISTS Logs;
-DROP TABLE IF EXISTS OrderItems;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS ProductsImages;
-DROP TABLE IF EXISTS Products;
-DROP TABLE IF EXISTS ApplicationSubmissions;
-DROP TABLE IF EXISTS ApplicationAttachments;
-DROP TABLE IF EXISTS ApplicationsFormFields;
-DROP TABLE IF EXISTS Submissions;
-DROP TABLE IF EXISTS ApplicationsDocuments;
-DROP TABLE IF EXISTS Applications;
-DROP TABLE IF EXISTS ApplicationTemplates;
-DROP TABLE IF EXISTS PostsImages;
-DROP TABLE IF EXISTS Posts;
-DROP TABLE IF EXISTS EventsImages;
-DROP TABLE IF EXISTS Events;
-DROP TABLE IF EXISTS AnnouncementAttachments;
-DROP TABLE IF EXISTS AnnouncementsImages;
-DROP TABLE IF EXISTS Announcements;
-DROP TABLE IF EXISTS contact_messages;
-DROP TABLE IF EXISTS ParentsPageGalleryImages;
-DROP TABLE IF EXISTS ParentsPageSections;
-DROP TABLE IF EXISTS UsefulInformationSections;
-DROP TABLE IF EXISTS SystemSchedule;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Children;
-DROP TABLE IF EXISTS PricingSettings;
-DROP TABLE IF EXISTS EpikoinoniaPageSections;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-SET FOREIGN_KEY_CHECKS = 1;
+--
+-- Database: `parents_council`
+--
 
-CREATE TABLE IF NOT EXISTS Users (
-    user_id              INT NOT NULL AUTO_INCREMENT,
-    name                 VARCHAR(100) NOT NULL,
-    surname              VARCHAR(100) NOT NULL,
-    email                VARCHAR(150) NOT NULL UNIQUE,
-    password             VARCHAR(255) NOT NULL,
-    phone_number         VARCHAR(20) DEFAULT NULL,
-    number_of_children   INT DEFAULT 0,
-    role                 ENUM('parent', 'admin') NOT NULL DEFAULT 'parent',
-    account_status       ENUM('pending', 'approved', 'rejected', 'waiting_payment', 'active') NOT NULL DEFAULT 'pending',
-    token                VARCHAR(255) DEFAULT NULL,
-    token_expiry         DATETIME DEFAULT NULL,
-    created_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `AnnouncementAttachments`
+--
+
+CREATE TABLE `AnnouncementAttachments` (
+  `attachment_id` int(11) NOT NULL,
+  `announcement_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `original_name` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Children (
-    child_id             INT NOT NULL AUTO_INCREMENT,
-    user_id              INT NOT NULL,
-    name                 VARCHAR(100) NOT NULL,
-    surname              VARCHAR(100) NOT NULL,
-    date_of_birth        DATE NOT NULL,
-    school_class         VARCHAR(20) NOT NULL,
-    PRIMARY KEY (child_id),
-    CONSTRAINT fk_child_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Announcements`
+--
+
+CREATE TABLE `Announcements` (
+  `announcement_id` int(11) NOT NULL,
+  `announcement_title` varchar(255) NOT NULL,
+  `announcement_date` date DEFAULT NULL,
+  `publish_date` date NOT NULL,
+  `announcement_description` text DEFAULT NULL,
+  `gdpr_notice` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Announcements (
-    announcement_id          INT NOT NULL AUTO_INCREMENT,
-    announcement_title       VARCHAR(255) NOT NULL,
-    announcement_date        DATE DEFAULT NULL,
-    publish_date             DATE NOT NULL,
-    announcement_description TEXT DEFAULT NULL,
-    gdpr_notice              TEXT DEFAULT NULL,
-    PRIMARY KEY (announcement_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `AnnouncementsImages`
+--
+
+CREATE TABLE `AnnouncementsImages` (
+  `an_image_id` int(11) NOT NULL,
+  `announcement_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS AnnouncementsImages (
-    an_image_id       INT NOT NULL AUTO_INCREMENT,
-    announcement_id   INT NOT NULL,
-    image_path        VARCHAR(255) NOT NULL,
-    PRIMARY KEY (an_image_id),
-    CONSTRAINT fk_an_img
-        FOREIGN KEY (announcement_id) REFERENCES Announcements(announcement_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ApplicationAttachments`
+--
+
+CREATE TABLE `ApplicationAttachments` (
+  `attachment_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `original_filename` varchar(255) DEFAULT NULL,
+  `upload_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS AnnouncementAttachments (
-    attachment_id     INT NOT NULL AUTO_INCREMENT,
-    announcement_id   INT NOT NULL,
-    file_path         VARCHAR(255) NOT NULL,
-    original_name     VARCHAR(255) DEFAULT NULL,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (attachment_id),
-    CONSTRAINT fk_announcement_attachment
-        FOREIGN KEY (announcement_id) REFERENCES Announcements(announcement_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Applications`
+--
+
+CREATE TABLE `Applications` (
+  `application_id` int(11) NOT NULL,
+  `template_id` int(11) DEFAULT NULL,
+  `application_title` varchar(255) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `application_description` text DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `submission_type` enum('file','text') NOT NULL DEFAULT 'file',
+  `academic_year` varchar(20) DEFAULT NULL,
+  `open_date` date DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `status` enum('draft','published','closed') NOT NULL DEFAULT 'draft',
+  `allow_online_submission` tinyint(1) NOT NULL DEFAULT 1,
+  `allow_file_submission` tinyint(1) NOT NULL DEFAULT 1,
+  `require_signature` tinyint(1) NOT NULL DEFAULT 0,
+  `form_schema` longtext DEFAULT NULL,
+  `target_audience` longtext DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS contact_messages (
-    message_id        INT NOT NULL AUTO_INCREMENT,
-    name              VARCHAR(255) NOT NULL,
-    email             VARCHAR(255) NOT NULL,
-    phone             VARCHAR(20) NOT NULL,
-    subject           VARCHAR(255) NOT NULL,
-    message           LONGTEXT NOT NULL,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_read           TINYINT(1) DEFAULT 0,
-    PRIMARY KEY (message_id),
-    KEY idx_created_at (created_at),
-    KEY idx_email (email)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ApplicationsDocuments`
+--
+
+CREATE TABLE `ApplicationsDocuments` (
+  `ap_document_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS UsefulInformationSections (
-    section_id        INT NOT NULL AUTO_INCREMENT,
-    section_key       VARCHAR(100) NOT NULL,
-    section_title     VARCHAR(255) NOT NULL,
-    section_subtitle  TEXT DEFAULT NULL,
-    content_json      LONGTEXT DEFAULT NULL,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (section_id),
-    UNIQUE KEY uq_useful_information_section_key (section_key)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ApplicationsFormFields`
+--
+
+CREATE TABLE `ApplicationsFormFields` (
+  `field_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `field_name` varchar(255) NOT NULL,
+  `field_type` varchar(50) NOT NULL DEFAULT 'text',
+  `field_order` int(11) NOT NULL DEFAULT 0,
+  `is_required` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
-    section_id        INT NOT NULL AUTO_INCREMENT,
-    section_key       VARCHAR(100) NOT NULL,
-    section_title     VARCHAR(255) NOT NULL,
-    section_subtitle  TEXT DEFAULT NULL,
-    content_json      LONGTEXT DEFAULT NULL,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (section_id),
-    UNIQUE KEY uq_epikoinonia_page_section_key (section_key)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ApplicationSubmissions`
+--
+
+CREATE TABLE `ApplicationSubmissions` (
+  `submission_id` int(11) NOT NULL,
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `submission_type` varchar(50) NOT NULL DEFAULT 'manual',
+  `status` varchar(50) NOT NULL DEFAULT 'submitted',
+  `form_data` longtext DEFAULT NULL,
+  `uploaded_files` longtext DEFAULT NULL,
+  `signature_data` longtext DEFAULT NULL,
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `reviewed_at` datetime DEFAULT NULL,
+  `reviewed_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ParentsPageSections (
-    section_id        INT NOT NULL AUTO_INCREMENT,
-    section_key       VARCHAR(100) NOT NULL,
-    section_title     VARCHAR(255) NOT NULL,
-    section_subtitle  TEXT DEFAULT NULL,
-    content_json      LONGTEXT DEFAULT NULL,
-    updated_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (section_id),
-    UNIQUE KEY uq_parents_page_section_key (section_key)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ApplicationTemplates`
+--
+
+CREATE TABLE `ApplicationTemplates` (
+  `template_id` int(11) NOT NULL,
+  `template_key` varchar(150) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `category` varchar(100) NOT NULL DEFAULT 'standard',
+  `form_schema` longtext DEFAULT NULL,
+  `is_system_template` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ParentsPageGalleryImages (
-    image_id          INT NOT NULL AUTO_INCREMENT,
-    full_image_path   VARCHAR(255) NOT NULL,
-    thumb_image_path  VARCHAR(255) DEFAULT NULL,
-    alt_text          VARCHAR(255) DEFAULT NULL,
-    sort_order        INT NOT NULL DEFAULT 0,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (image_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Children`
+--
+
+CREATE TABLE `Children` (
+  `child_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
+  `date_of_birth` date NOT NULL,
+  `school_class` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Events (
-    event_id          INT NOT NULL AUTO_INCREMENT,
-    event_title       VARCHAR(255) NOT NULL,
-    event_description TEXT DEFAULT NULL,
-    gdpr_notice       TEXT DEFAULT NULL,
-    event_date        DATETIME NOT NULL,
-    publish_date      DATE NOT NULL,
-    PRIMARY KEY (event_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contact_messages`
+--
+
+CREATE TABLE `contact_messages` (
+  `message_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` longtext NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_read` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS EventsImages (
-    ev_image_id       INT NOT NULL AUTO_INCREMENT,
-    event_id          INT NOT NULL,
-    image_path        VARCHAR(255) NOT NULL,
-    PRIMARY KEY (ev_image_id),
-    CONSTRAINT fk_ev_img
-        FOREIGN KEY (event_id) REFERENCES Events(event_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `EpikoinoniaPageSections`
+--
+
+CREATE TABLE `EpikoinoniaPageSections` (
+  `section_id` int(11) NOT NULL,
+  `section_key` varchar(100) NOT NULL,
+  `section_title` varchar(255) NOT NULL,
+  `section_subtitle` text DEFAULT NULL,
+  `content_json` longtext DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Posts (
-    post_id           INT NOT NULL AUTO_INCREMENT,
-    event_id          INT NOT NULL,
-    post_title        VARCHAR(255) NOT NULL,
-    post_content      TEXT DEFAULT NULL,
-    PRIMARY KEY (post_id),
-    CONSTRAINT fk_post_event
-        FOREIGN KEY (event_id) REFERENCES Events(event_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Events`
+--
+
+CREATE TABLE `Events` (
+  `event_id` int(11) NOT NULL,
+  `event_title` varchar(255) NOT NULL,
+  `event_description` text DEFAULT NULL,
+  `gdpr_notice` text DEFAULT NULL,
+  `event_date` datetime NOT NULL,
+  `publish_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS PostsImages (
-    post_image_id     INT NOT NULL AUTO_INCREMENT,
-    post_id           INT NOT NULL,
-    image_path        VARCHAR(255) NOT NULL,
-    PRIMARY KEY (post_image_id),
-    CONSTRAINT fk_post_img
-        FOREIGN KEY (post_id) REFERENCES Posts(post_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `EventsImages`
+--
+
+CREATE TABLE `EventsImages` (
+  `ev_image_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ApplicationTemplates (
-    template_id         INT NOT NULL AUTO_INCREMENT,
-    template_key        VARCHAR(150) NOT NULL,
-    name                VARCHAR(255) NOT NULL,
-    description         TEXT DEFAULT NULL,
-    category            VARCHAR(100) NOT NULL DEFAULT 'standard',
-    form_schema         LONGTEXT DEFAULT NULL,
-    is_system_template  TINYINT(1) NOT NULL DEFAULT 0,
-    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (template_id),
-    UNIQUE KEY uq_application_templates_template_key (template_key),
-    KEY idx_application_templates_category (category)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `HomeBannerSlides`
+--
+
+CREATE TABLE `HomeBannerSlides` (
+  `slide_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 1,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Applications (
-    application_id          INT NOT NULL AUTO_INCREMENT,
-    template_id             INT DEFAULT NULL,
-    application_title       VARCHAR(255) NOT NULL,
-    title                   VARCHAR(255) DEFAULT NULL,
-    application_description TEXT DEFAULT NULL,
-    description             TEXT DEFAULT NULL,
-    submission_type         ENUM('file', 'text') NOT NULL DEFAULT 'file',
-    academic_year           VARCHAR(20) DEFAULT NULL,
-    open_date               DATE DEFAULT NULL,
-    due_date                DATE DEFAULT NULL,
-    status                  ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
-    allow_online_submission TINYINT(1) NOT NULL DEFAULT 1,
-    allow_file_submission   TINYINT(1) NOT NULL DEFAULT 1,
-    require_signature       TINYINT(1) NOT NULL DEFAULT 0,
-    form_schema             LONGTEXT DEFAULT NULL,
-    target_audience         LONGTEXT DEFAULT NULL,
-    created_by              INT DEFAULT NULL,
-    created_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at              TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (application_id),
-    KEY idx_applications_template_id (template_id),
-    KEY idx_applications_status_dates (status, open_date, due_date),
-    KEY idx_applications_created_by (created_by),
-    CONSTRAINT fk_applications_template
-        FOREIGN KEY (template_id) REFERENCES ApplicationTemplates(template_id)
-        ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT fk_applications_created_by
-        FOREIGN KEY (created_by) REFERENCES Users(user_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `HomePageSections`
+--
+
+CREATE TABLE `HomePageSections` (
+  `section_id` int(11) NOT NULL,
+  `section_key` varchar(100) NOT NULL,
+  `section_title` varchar(255) NOT NULL,
+  `section_subtitle` text DEFAULT NULL,
+  `content_json` longtext DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ApplicationsDocuments (
-    ap_document_id    INT NOT NULL AUTO_INCREMENT,
-    application_id    INT NOT NULL,
-    file_path         VARCHAR(255) NOT NULL,
-    PRIMARY KEY (ap_document_id),
-    CONSTRAINT fk_app_doc
-        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `InsurancePayments`
+--
+
+CREATE TABLE `InsurancePayments` (
+  `payment_id` int(11) NOT NULL,
+  `child_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ApplicationAttachments (
-    attachment_id      INT NOT NULL AUTO_INCREMENT,
-    application_id     INT NOT NULL,
-    file_path          VARCHAR(255) NOT NULL,
-    original_filename  VARCHAR(255) DEFAULT NULL,
-    upload_order       INT NOT NULL DEFAULT 0,
-    created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (attachment_id),
-    KEY idx_app_attachment_order (application_id, upload_order),
-    CONSTRAINT fk_app_attachment_application
-        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Logs`
+--
+
+CREATE TABLE `Logs` (
+  `log_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ApplicationsFormFields (
-    field_id          INT NOT NULL AUTO_INCREMENT,
-    application_id    INT NOT NULL,
-    field_name        VARCHAR(255) NOT NULL,
-    field_type        VARCHAR(50) NOT NULL DEFAULT 'text',
-    field_order       INT NOT NULL DEFAULT 0,
-    is_required       TINYINT(1) NOT NULL DEFAULT 1,
-    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (field_id),
-    CONSTRAINT fk_aff_app
-        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    KEY idx_application_order (application_id, field_order)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `OrderItems`
+--
+
+CREATE TABLE `OrderItems` (
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `price_at_purchase` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `size` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Submissions (
-    application_id    INT NOT NULL,
-    user_id           INT NOT NULL,
-    file_path         VARCHAR(255) DEFAULT NULL,
-    text_content      TEXT DEFAULT NULL,
-    submission_data   LONGTEXT DEFAULT NULL,
-    submitted_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    sub_status        ENUM('waiting', 'approved', 'rejected') DEFAULT 'waiting',
-    PRIMARY KEY (application_id, user_id),
-    CONSTRAINT fk_sub_ap
-        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_sub_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Orders`
+--
+
+CREATE TABLE `Orders` (
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `total_price` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `order_status` enum('pending','paid','cancelled') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ApplicationSubmissions (
-    submission_id      INT NOT NULL AUTO_INCREMENT,
-    application_id     INT NOT NULL,
-    user_id            INT NOT NULL,
-    submission_type    VARCHAR(50) NOT NULL DEFAULT 'manual',
-    status             VARCHAR(50) NOT NULL DEFAULT 'submitted',
-    form_data          LONGTEXT DEFAULT NULL,
-    uploaded_files     LONGTEXT DEFAULT NULL,
-    signature_data     LONGTEXT DEFAULT NULL,
-    submitted_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    reviewed_at        DATETIME DEFAULT NULL,
-    reviewed_by        INT DEFAULT NULL,
-    PRIMARY KEY (submission_id),
-    KEY idx_app_submissions_application (application_id, submitted_at),
-    KEY idx_app_submissions_user (user_id),
-    KEY idx_app_submissions_reviewed_by (reviewed_by),
-    CONSTRAINT fk_appsub_application
-        FOREIGN KEY (application_id) REFERENCES Applications(application_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_appsub_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_appsub_reviewed_by
-        FOREIGN KEY (reviewed_by) REFERENCES Users(user_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ParentsPageGalleryImages`
+--
+
+CREATE TABLE `ParentsPageGalleryImages` (
+  `image_id` int(11) NOT NULL,
+  `full_image_path` varchar(255) NOT NULL,
+  `thumb_image_path` varchar(255) DEFAULT NULL,
+  `alt_text` varchar(255) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Products (
-    product_id          INT NOT NULL AUTO_INCREMENT,
-    product_name        VARCHAR(255) NOT NULL,
-    product_description TEXT DEFAULT NULL,
-    price               DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    PRIMARY KEY (product_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ParentsPageSections`
+--
+
+CREATE TABLE `ParentsPageSections` (
+  `section_id` int(11) NOT NULL,
+  `section_key` varchar(100) NOT NULL,
+  `section_title` varchar(255) NOT NULL,
+  `section_subtitle` text DEFAULT NULL,
+  `content_json` longtext DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS ProductsImages (
-    pro_image_id       INT NOT NULL AUTO_INCREMENT,
-    product_id         INT NOT NULL,
-    image_path         VARCHAR(255) NOT NULL,
-    PRIMARY KEY (pro_image_id),
-    CONSTRAINT fk_prod_img
-        FOREIGN KEY (product_id) REFERENCES Products(product_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Payments`
+--
+
+CREATE TABLE `Payments` (
+  `payment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `payment_status` enum('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `payment_type` enum('membership','insurance','product') NOT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Fresh demo installs should seed these commerce tables empty, so admin users can freely manage products.
-CREATE TABLE IF NOT EXISTS Orders (
-    order_id           INT NOT NULL AUTO_INCREMENT,
-    user_id            INT NOT NULL,
-    total_price        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    order_status       ENUM('pending', 'paid', 'cancelled') NOT NULL DEFAULT 'pending',
-    PRIMARY KEY (order_id),
-    CONSTRAINT fk_order_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `PaymentsDetails`
+--
+
+CREATE TABLE `PaymentsDetails` (
+  `payment_item_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `price_at_purchase` decimal(10,2) NOT NULL,
+  `size` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS OrderItems (
-    order_id           INT NOT NULL,
-    product_id         INT NOT NULL,
-    price_at_purchase  DECIMAL(10,2) NOT NULL,
-    quantity           INT NOT NULL DEFAULT 1,
-    size               VARCHAR(20) DEFAULT NULL,
-    PRIMARY KEY (order_id, product_id),
-    CONSTRAINT fk_oi_order
-        FOREIGN KEY (order_id) REFERENCES Orders(order_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_oi_product
-        FOREIGN KEY (product_id) REFERENCES Products(product_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Posts`
+--
+
+CREATE TABLE `Posts` (
+  `post_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL,
+  `post_title` varchar(255) NOT NULL,
+  `post_content` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Payments (
-    payment_id         INT NOT NULL AUTO_INCREMENT,
-    user_id            INT NOT NULL,
-    amount             DECIMAL(10,2) NOT NULL,
-    payment_date       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    payment_status     ENUM('pending', 'completed', 'failed', 'refunded') NOT NULL DEFAULT 'pending',
-    payment_type       ENUM('membership', 'insurance', 'product') NOT NULL,
-    transaction_id     VARCHAR(255) NULL,
-    PRIMARY KEY (payment_id),
-    KEY idx_payments_transaction_id (transaction_id),
-    CONSTRAINT fk_pay_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `PostsImages`
+--
+
+CREATE TABLE `PostsImages` (
+  `post_image_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS PaymentsDetails (
-    payment_item_id      INT NOT NULL AUTO_INCREMENT,
-    payment_id           INT NOT NULL,
-    product_id           INT NOT NULL,
-    quantity             INT NOT NULL DEFAULT 1,
-    price_at_purchase    DECIMAL(10,2) NOT NULL,
-    size                 VARCHAR(10) DEFAULT NULL,
-    PRIMARY KEY (payment_item_id),
-    CONSTRAINT fk_pd_payment
-        FOREIGN KEY (payment_id) REFERENCES Payments(payment_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_pd_product
-        FOREIGN KEY (product_id) REFERENCES Products(product_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `PricingSettings`
+--
+
+CREATE TABLE `PricingSettings` (
+  `id` int(11) NOT NULL,
+  `subscription_price` decimal(10,2) NOT NULL,
+  `insurance_price` decimal(10,2) NOT NULL,
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS InsurancePayments (
-    payment_id         INT NOT NULL,
-    child_id           INT NOT NULL,
-    PRIMARY KEY (payment_id, child_id),
-    CONSTRAINT fk_ins_payment
-        FOREIGN KEY (payment_id) REFERENCES Payments(payment_id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_ins_child
-        FOREIGN KEY (child_id) REFERENCES Children(child_id)
-        ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Products`
+--
+
+CREATE TABLE `Products` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `product_description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS Logs (
-    log_id              INT NOT NULL AUTO_INCREMENT,
-    user_id             INT DEFAULT NULL,
-    action              VARCHAR(100) NOT NULL,
-    description         TEXT DEFAULT NULL,
-    created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (log_id),
-    KEY idx_logs_user_id (user_id),
-    CONSTRAINT fk_logs_user
-        FOREIGN KEY (user_id) REFERENCES Users(user_id)
-        ON DELETE SET NULL ON UPDATE CASCADE
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ProductsImages`
+--
+
+CREATE TABLE `ProductsImages` (
+  `pro_image_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS SystemSchedule (
-    ss_id             INT NOT NULL AUTO_INCREMENT,
-    feature           ENUM('registration', 'purchase', 'applications', 'delete_pending_users', 'cleanup_applications') NOT NULL,
-    start_date        DATETIME NOT NULL,
-    end_date          DATETIME NOT NULL,
-    ss_status         ENUM('active', 'inactive') DEFAULT 'inactive',
-    PRIMARY KEY (ss_id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Submissions`
+--
+
+CREATE TABLE `Submissions` (
+  `application_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `text_content` text DEFAULT NULL,
+  `submission_data` longtext DEFAULT NULL,
+  `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `sub_status` enum('waiting','approved','rejected') DEFAULT 'waiting'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS PricingSettings (
-    id INT NOT NULL AUTO_INCREMENT,
-    subscription_price DECIMAL(10,2) NOT NULL,
-    insurance_price DECIMAL(10,2) NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id)
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `SystemSchedule`
+--
+
+CREATE TABLE `SystemSchedule` (
+  `ss_id` int(11) NOT NULL,
+  `feature` enum('registration','purchase','applications','delete_pending_users','cleanup_applications') NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime NOT NULL,
+  `ss_status` enum('active','inactive') DEFAULT 'inactive'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `UsefulInformationSections`
+--
+
+CREATE TABLE `UsefulInformationSections` (
+  `section_id` int(11) NOT NULL,
+  `section_key` varchar(100) NOT NULL,
+  `section_title` varchar(255) NOT NULL,
+  `section_subtitle` text DEFAULT NULL,
+  `content_json` longtext DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Users`
+--
+
+CREATE TABLE `Users` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `number_of_children` int(11) DEFAULT 0,
+  `role` enum('parent','admin') NOT NULL DEFAULT 'parent',
+  `account_status` enum('pending','approved','rejected','waiting_payment','active') NOT NULL DEFAULT 'pending',
+  `token` varchar(255) DEFAULT NULL,
+  `token_expiry` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `AnnouncementAttachments`
+--
+ALTER TABLE `AnnouncementAttachments`
+  ADD PRIMARY KEY (`attachment_id`),
+  ADD KEY `fk_announcement_attachment` (`announcement_id`);
+
+--
+-- Indexes for table `Announcements`
+--
+ALTER TABLE `Announcements`
+  ADD PRIMARY KEY (`announcement_id`);
+
+--
+-- Indexes for table `AnnouncementsImages`
+--
+ALTER TABLE `AnnouncementsImages`
+  ADD PRIMARY KEY (`an_image_id`),
+  ADD KEY `fk_an_img` (`announcement_id`);
+
+--
+-- Indexes for table `ApplicationAttachments`
+--
+ALTER TABLE `ApplicationAttachments`
+  ADD PRIMARY KEY (`attachment_id`),
+  ADD KEY `idx_app_attachment_order` (`application_id`,`upload_order`);
+
+--
+-- Indexes for table `Applications`
+--
+ALTER TABLE `Applications`
+  ADD PRIMARY KEY (`application_id`),
+  ADD KEY `idx_applications_template_id` (`template_id`),
+  ADD KEY `idx_applications_status_dates` (`status`,`open_date`,`due_date`),
+  ADD KEY `idx_applications_created_by` (`created_by`);
+
+--
+-- Indexes for table `ApplicationsDocuments`
+--
+ALTER TABLE `ApplicationsDocuments`
+  ADD PRIMARY KEY (`ap_document_id`),
+  ADD KEY `fk_app_doc` (`application_id`);
+
+--
+-- Indexes for table `ApplicationsFormFields`
+--
+ALTER TABLE `ApplicationsFormFields`
+  ADD PRIMARY KEY (`field_id`),
+  ADD KEY `idx_application_order` (`application_id`,`field_order`);
+
+--
+-- Indexes for table `ApplicationSubmissions`
+--
+ALTER TABLE `ApplicationSubmissions`
+  ADD PRIMARY KEY (`submission_id`),
+  ADD KEY `idx_app_submissions_application` (`application_id`,`submitted_at`),
+  ADD KEY `idx_app_submissions_user` (`user_id`),
+  ADD KEY `idx_app_submissions_reviewed_by` (`reviewed_by`);
+
+--
+-- Indexes for table `ApplicationTemplates`
+--
+ALTER TABLE `ApplicationTemplates`
+  ADD PRIMARY KEY (`template_id`),
+  ADD UNIQUE KEY `uq_application_templates_template_key` (`template_key`),
+  ADD KEY `idx_application_templates_category` (`category`);
+
+--
+-- Indexes for table `Children`
+--
+ALTER TABLE `Children`
+  ADD PRIMARY KEY (`child_id`),
+  ADD KEY `fk_child_user` (`user_id`);
+
+--
+-- Indexes for table `contact_messages`
+--
+ALTER TABLE `contact_messages`
+  ADD PRIMARY KEY (`message_id`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `idx_email` (`email`);
+
+--
+-- Indexes for table `EpikoinoniaPageSections`
+--
+ALTER TABLE `EpikoinoniaPageSections`
+  ADD PRIMARY KEY (`section_id`),
+  ADD UNIQUE KEY `uq_epikoinonia_page_section_key` (`section_key`);
+
+--
+-- Indexes for table `Events`
+--
+ALTER TABLE `Events`
+  ADD PRIMARY KEY (`event_id`);
+
+--
+-- Indexes for table `EventsImages`
+--
+ALTER TABLE `EventsImages`
+  ADD PRIMARY KEY (`ev_image_id`),
+  ADD KEY `fk_ev_img` (`event_id`);
+
+--
+-- Indexes for table `HomeBannerSlides`
+--
+ALTER TABLE `HomeBannerSlides`
+  ADD PRIMARY KEY (`slide_id`);
+
+--
+-- Indexes for table `HomePageSections`
+--
+ALTER TABLE `HomePageSections`
+  ADD PRIMARY KEY (`section_id`),
+  ADD UNIQUE KEY `uq_home_page_section_key` (`section_key`);
+
+--
+-- Indexes for table `InsurancePayments`
+--
+ALTER TABLE `InsurancePayments`
+  ADD PRIMARY KEY (`payment_id`,`child_id`),
+  ADD KEY `fk_ins_child` (`child_id`);
+
+--
+-- Indexes for table `Logs`
+--
+ALTER TABLE `Logs`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `idx_logs_user_id` (`user_id`);
+
+--
+-- Indexes for table `OrderItems`
+--
+ALTER TABLE `OrderItems`
+  ADD PRIMARY KEY (`order_id`,`product_id`),
+  ADD KEY `fk_oi_product` (`product_id`);
+
+--
+-- Indexes for table `Orders`
+--
+ALTER TABLE `Orders`
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `fk_order_user` (`user_id`);
+
+--
+-- Indexes for table `ParentsPageGalleryImages`
+--
+ALTER TABLE `ParentsPageGalleryImages`
+  ADD PRIMARY KEY (`image_id`);
+
+--
+-- Indexes for table `ParentsPageSections`
+--
+ALTER TABLE `ParentsPageSections`
+  ADD PRIMARY KEY (`section_id`),
+  ADD UNIQUE KEY `uq_parents_page_section_key` (`section_key`);
+
+--
+-- Indexes for table `Payments`
+--
+ALTER TABLE `Payments`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD KEY `idx_payments_transaction_id` (`transaction_id`),
+  ADD KEY `fk_pay_user` (`user_id`);
+
+--
+-- Indexes for table `PaymentsDetails`
+--
+ALTER TABLE `PaymentsDetails`
+  ADD PRIMARY KEY (`payment_item_id`),
+  ADD KEY `fk_pd_payment` (`payment_id`),
+  ADD KEY `fk_pd_product` (`product_id`);
+
+--
+-- Indexes for table `Posts`
+--
+ALTER TABLE `Posts`
+  ADD PRIMARY KEY (`post_id`),
+  ADD KEY `fk_post_event` (`event_id`);
+
+--
+-- Indexes for table `PostsImages`
+--
+ALTER TABLE `PostsImages`
+  ADD PRIMARY KEY (`post_image_id`),
+  ADD KEY `fk_post_img` (`post_id`);
+
+--
+-- Indexes for table `PricingSettings`
+--
+ALTER TABLE `PricingSettings`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `Products`
+--
+ALTER TABLE `Products`
+  ADD PRIMARY KEY (`product_id`);
+
+--
+-- Indexes for table `ProductsImages`
+--
+ALTER TABLE `ProductsImages`
+  ADD PRIMARY KEY (`pro_image_id`),
+  ADD KEY `fk_prod_img` (`product_id`);
+
+--
+-- Indexes for table `Submissions`
+--
+ALTER TABLE `Submissions`
+  ADD PRIMARY KEY (`application_id`,`user_id`),
+  ADD KEY `fk_sub_user` (`user_id`);
+
+--
+-- Indexes for table `SystemSchedule`
+--
+ALTER TABLE `SystemSchedule`
+  ADD PRIMARY KEY (`ss_id`);
+
+--
+-- Indexes for table `UsefulInformationSections`
+--
+ALTER TABLE `UsefulInformationSections`
+  ADD PRIMARY KEY (`section_id`),
+  ADD UNIQUE KEY `uq_useful_information_section_key` (`section_key`);
+
+--
+-- Indexes for table `Users`
+--
+ALTER TABLE `Users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `AnnouncementAttachments`
+--
+ALTER TABLE `AnnouncementAttachments`
+  MODIFY `attachment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Announcements`
+--
+ALTER TABLE `Announcements`
+  MODIFY `announcement_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `AnnouncementsImages`
+--
+ALTER TABLE `AnnouncementsImages`
+  MODIFY `an_image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ApplicationAttachments`
+--
+ALTER TABLE `ApplicationAttachments`
+  MODIFY `attachment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Applications`
+--
+ALTER TABLE `Applications`
+  MODIFY `application_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ApplicationsDocuments`
+--
+ALTER TABLE `ApplicationsDocuments`
+  MODIFY `ap_document_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ApplicationsFormFields`
+--
+ALTER TABLE `ApplicationsFormFields`
+  MODIFY `field_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ApplicationSubmissions`
+--
+ALTER TABLE `ApplicationSubmissions`
+  MODIFY `submission_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ApplicationTemplates`
+--
+ALTER TABLE `ApplicationTemplates`
+  MODIFY `template_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Children`
+--
+ALTER TABLE `Children`
+  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `contact_messages`
+--
+ALTER TABLE `contact_messages`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `EpikoinoniaPageSections`
+--
+ALTER TABLE `EpikoinoniaPageSections`
+  MODIFY `section_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Events`
+--
+ALTER TABLE `Events`
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `EventsImages`
+--
+ALTER TABLE `EventsImages`
+  MODIFY `ev_image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `HomeBannerSlides`
+--
+ALTER TABLE `HomeBannerSlides`
+  MODIFY `slide_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `HomePageSections`
+--
+ALTER TABLE `HomePageSections`
+  MODIFY `section_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Logs`
+--
+ALTER TABLE `Logs`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Orders`
+--
+ALTER TABLE `Orders`
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ParentsPageGalleryImages`
+--
+ALTER TABLE `ParentsPageGalleryImages`
+  MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ParentsPageSections`
+--
+ALTER TABLE `ParentsPageSections`
+  MODIFY `section_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Payments`
+--
+ALTER TABLE `Payments`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `PaymentsDetails`
+--
+ALTER TABLE `PaymentsDetails`
+  MODIFY `payment_item_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Posts`
+--
+ALTER TABLE `Posts`
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `PostsImages`
+--
+ALTER TABLE `PostsImages`
+  MODIFY `post_image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `PricingSettings`
+--
+ALTER TABLE `PricingSettings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Products`
+--
+ALTER TABLE `Products`
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ProductsImages`
+--
+ALTER TABLE `ProductsImages`
+  MODIFY `pro_image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `SystemSchedule`
+--
+ALTER TABLE `SystemSchedule`
+  MODIFY `ss_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `UsefulInformationSections`
+--
+ALTER TABLE `UsefulInformationSections`
+  MODIFY `section_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `Users`
+--
+ALTER TABLE `Users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `AnnouncementAttachments`
+--
+ALTER TABLE `AnnouncementAttachments`
+  ADD CONSTRAINT `fk_announcement_attachment` FOREIGN KEY (`announcement_id`) REFERENCES `Announcements` (`announcement_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `AnnouncementsImages`
+--
+ALTER TABLE `AnnouncementsImages`
+  ADD CONSTRAINT `fk_an_img` FOREIGN KEY (`announcement_id`) REFERENCES `Announcements` (`announcement_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ApplicationAttachments`
+--
+ALTER TABLE `ApplicationAttachments`
+  ADD CONSTRAINT `fk_app_attachment_application` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Applications`
+--
+ALTER TABLE `Applications`
+  ADD CONSTRAINT `fk_applications_created_by` FOREIGN KEY (`created_by`) REFERENCES `Users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_applications_template` FOREIGN KEY (`template_id`) REFERENCES `ApplicationTemplates` (`template_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ApplicationsDocuments`
+--
+ALTER TABLE `ApplicationsDocuments`
+  ADD CONSTRAINT `fk_app_doc` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ApplicationsFormFields`
+--
+ALTER TABLE `ApplicationsFormFields`
+  ADD CONSTRAINT `fk_aff_app` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ApplicationSubmissions`
+--
+ALTER TABLE `ApplicationSubmissions`
+  ADD CONSTRAINT `fk_appsub_application` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_appsub_reviewed_by` FOREIGN KEY (`reviewed_by`) REFERENCES `Users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_appsub_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Children`
+--
+ALTER TABLE `Children`
+  ADD CONSTRAINT `fk_child_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `EventsImages`
+--
+ALTER TABLE `EventsImages`
+  ADD CONSTRAINT `fk_ev_img` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `InsurancePayments`
+--
+ALTER TABLE `InsurancePayments`
+  ADD CONSTRAINT `fk_ins_child` FOREIGN KEY (`child_id`) REFERENCES `Children` (`child_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_ins_payment` FOREIGN KEY (`payment_id`) REFERENCES `Payments` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Logs`
+--
+ALTER TABLE `Logs`
+  ADD CONSTRAINT `fk_logs_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `OrderItems`
+--
+ALTER TABLE `OrderItems`
+  ADD CONSTRAINT `fk_oi_order` FOREIGN KEY (`order_id`) REFERENCES `Orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_oi_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Orders`
+--
+ALTER TABLE `Orders`
+  ADD CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Payments`
+--
+ALTER TABLE `Payments`
+  ADD CONSTRAINT `fk_pay_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `PaymentsDetails`
+--
+ALTER TABLE `PaymentsDetails`
+  ADD CONSTRAINT `fk_pd_payment` FOREIGN KEY (`payment_id`) REFERENCES `Payments` (`payment_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pd_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Posts`
+--
+ALTER TABLE `Posts`
+  ADD CONSTRAINT `fk_post_event` FOREIGN KEY (`event_id`) REFERENCES `Events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `PostsImages`
+--
+ALTER TABLE `PostsImages`
+  ADD CONSTRAINT `fk_post_img` FOREIGN KEY (`post_id`) REFERENCES `Posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ProductsImages`
+--
+ALTER TABLE `ProductsImages`
+  ADD CONSTRAINT `fk_prod_img` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `Submissions`
+--
+ALTER TABLE `Submissions`
+  ADD CONSTRAINT `fk_sub_ap` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_sub_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
