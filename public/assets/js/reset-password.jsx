@@ -3,6 +3,7 @@
     const confirmButton = document.getElementById('confirm-button');
     const errorMessage = document.getElementById('error-message');
     const passwordRuleRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+    const whitespaceRegex = /\s/;
 
     function handleResetSubmit(event) {
         if (event) {
@@ -18,6 +19,11 @@
         }
         if (newPassword !== confirmPassword) {
             showError('Passwords do not match');
+            return;
+        }
+
+        if (whitespaceRegex.test(newPassword)) {
+            showError('Password cannot contain spaces');
             return;
         }
 

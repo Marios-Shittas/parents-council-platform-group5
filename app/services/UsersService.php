@@ -135,6 +135,10 @@ class UsersService
             return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να είναι κενός.'];
         }
 
+        if (preg_match('/\s/', $newPassword)) {
+            return ['success' => false, 'message' => 'Password cannot contain spaces.'];
+        }
+
         // At least 8 chars, with letters, numbers, and a special character.
         if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/', $newPassword)) {
             return [
