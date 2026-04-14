@@ -113,6 +113,20 @@
     opacity: 1;
 }
 
+#createModal .modal-footer .btn-secondary-custom,
+#editModal .modal-footer .btn-secondary-custom {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#createModal .modal-footer .btn-secondary-custom:hover,
+#createModal .modal-footer .btn-secondary-custom:focus,
+#editModal .modal-footer .btn-secondary-custom:hover,
+#editModal .modal-footer .btn-secondary-custom:focus {
+    background: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
+}
+
 /* Form styling for event forms */
 .event-form-group label {
     font-weight: 600;

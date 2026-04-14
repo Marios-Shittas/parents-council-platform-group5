@@ -43,6 +43,21 @@ function buildAnnouncementAttachmentWebPath($fileName) {
     return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
 }
 
+function ensureAnnouncementUploadDir($uploadDir, $permissions = 0777) {
+    if (!is_dir($uploadDir)) {
+        @mkdir($uploadDir, $permissions, true);
+    }
+
+    clearstatcache(true, $uploadDir);
+
+    if (is_dir($uploadDir) && !is_writable($uploadDir)) {
+        @chmod($uploadDir, $permissions);
+        clearstatcache(true, $uploadDir);
+    }
+
+    return is_dir($uploadDir) && is_writable($uploadDir);
+}
+
 function resolveAnnouncementAssetFilePath($filePath, $type = 'image') {
     $baseDir = $type === 'attachment' ? getAnnouncementAttachmentUploadDir() : getAnnouncementImageUploadDir();
     return $baseDir . basename((string)$filePath);
@@ -57,9 +72,7 @@ function uploadAnnouncementImages($announcementsService, $announcementId) {
     }
 
     $uploadDir = getAnnouncementImageUploadDir();
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
+    ensureAnnouncementUploadDir($uploadDir);
 
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -161,16 +174,7 @@ function uploadAnnouncementAttachments($announcementsService, $announcementId) {
     }
 
     $uploadDir = getAnnouncementAttachmentUploadDir();
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
-
-    clearstatcache(true, $uploadDir);
-
-    if (!is_writable($uploadDir)) {
-        @chmod($uploadDir, 0777);
-        clearstatcache(true, $uploadDir);
-    }
+    ensureAnnouncementUploadDir($uploadDir);
 
     $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
     $maxFileSize = 8 * 1024 * 1024;
@@ -603,6 +607,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <small class="text-muted d-block">
                             <i class="fas fa-lightbulb"></i> Οι νέες εικόνες θα προστεθούν στις υπάρχουσες. Αυτή τη στιγμή μπορείτε να προσθέσετε έως <?php echo max(0, ANNOUNCEMENT_IMAGE_LIMIT - count($editImages)); ?> ακόμη.
                         </small>
+                        <div id="editPreview" class="image-preview"></div>
                     </div>
 
                     <div class="form-group">
@@ -611,6 +616,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <small class="text-muted d-block mt-1">
                             <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: PDF, JPG, JPEG, PNG | Μέγιστο μέγεθος: 8MB ανά αρχείο
                         </small>
+                        <div id="editAttachmentPreview" class="attachment-preview"></div>
                     </div>
                     
                     <div class="d-flex gap-2" style="gap: 10px;">
@@ -776,6 +782,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <small class="text-muted d-block">
                             <i class="fas fa-paperclip"></i> Κάθε ανακοίνωση μπορεί να συνοδεύεται από την αντίστοιχη επιστολή ή σχετικό έγγραφο.
                         </small>
+                        <div id="attachmentPreview" class="attachment-preview"></div>
                     </div>
                 </div>
                 
@@ -965,103 +972,323 @@ function deleteAnnouncementAttachment(attachmentId, announcementId) {
     });
 }
 
-// Έλεγχος αρχείων και μικρή προεπισκόπηση εικόνων πριν το submit
-function validateAndPreviewImages(input, previewId) {
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-    
+function getAnnouncementImageLimit() {
+    return <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?>;
+}
+
+function getAnnouncementImageFileKey(file) {
+    return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function truncatePreviewFileName(fileName, maxLength) {
+    if (fileName.length <= maxLength) {
+        return fileName;
+    }
+
+    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
+}
+
+function validateAnnouncementImageFile(file) {
+    const warnings = [];
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-    const maxFileSize = 5 * 1024 * 1024; // Μέγιστο 5MB ανά αρχείο
-    const announcementImageLimit = <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?>;
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const availableSlots = Math.max(0, announcementImageLimit - existingCount);
-    let warnings = [];
-    let files = [...input.files];
+    const maxFileSize = 5 * 1024 * 1024;
+    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
 
-    if (availableSlots === 0) {
-        input.value = '';
-        warnings.push(`Η ανακοίνωση έχει ήδη ${announcementImageLimit} εικόνες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
-    } else if (files.length > availableSlots) {
-        warnings.push(`Μπορείτε να προσθέσετε μόνο ${availableSlots} ακόμη εικόνα/ες σε αυτή την ανακοίνωση. Θα κρατηθούν μόνο οι πρώτες ${availableSlots}.`);
-
-        files = files.slice(0, availableSlots);
-
-        if (typeof DataTransfer !== 'undefined') {
-            const dataTransfer = new DataTransfer();
-            files.forEach((file) => dataTransfer.items.add(file));
-            input.files = dataTransfer.files;
-        }
+    if (!allowedExtensions.includes(fileExt)) {
+        warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
     }
-    
-    files.forEach((file) => {
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        let hasWarning = false;
-        
-        // Έλεγχος επέκτασης αρχείου
-        if (!allowedExtensions.includes(fileExt)) {
-            warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-            hasWarning = true;
-        }
-        
-        // Έλεγχος μεγέθους αρχείου
-        if (file.size > maxFileSize) {
-            warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-            hasWarning = true;
-        }
-        
-        // Έλεγχος ότι είναι τύπος εικόνας
-        if (!file.type.startsWith('image/')) {
-            warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-            hasWarning = true;
-        }
-        
-        // Αν δεν έχει προειδοποίηση, δείχνουμε προεπισκόπηση
-        if (file.type.startsWith('image/') && !hasWarning) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-item';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <div class="preview-file-caption">${file.name.substring(0, 15)}...</div>
-                `;
-                preview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-    
-    if (warnings.length > 0) {
-        showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-            title: 'Έλεγχος αρχείων',
-            variant: 'warning'
+
+    if (file.size > maxFileSize) {
+        warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
+    }
+
+    if (!String(file.type || '').startsWith('image/')) {
+        warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
+    }
+
+    return warnings;
+}
+
+function syncAnnouncementImageInputFiles(input, stagedFiles) {
+    if (typeof DataTransfer === 'undefined') {
+        return;
+    }
+
+    const dataTransfer = new DataTransfer();
+    stagedFiles.forEach((file) => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+}
+
+function renderAnnouncementImagePreview(preview, stagedFiles, onRemove) {
+    if (!preview) {
+        return;
+    }
+
+    preview.innerHTML = '';
+
+    stagedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+
+        const image = document.createElement('img');
+        image.alt = file.name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.addEventListener('click', function () {
+            onRemove(index);
         });
-    }
-}
 
-// Σύνδεση ελέγχου με το input αρχείων στη φόρμα δημιουργίας
-document.getElementById('images').addEventListener('change', function(e) {
-    validateAndPreviewImages(this, 'imagePreview');
-});
+        const caption = document.createElement('div');
+        caption.className = 'preview-file-caption';
+        caption.textContent = truncatePreviewFileName(file.name, 18);
 
-// Σύνδεση ελέγχου με το input αρχείων στη φόρμα επεξεργασίας (αν υπάρχει)
-const editImagesInput = document.getElementById('edit_images');
-if (editImagesInput) {
-    editImagesInput.addEventListener('change', function(e) {
-        const preview = document.createElement('div');
-        preview.className = 'image-preview';
-        preview.id = 'editPreview';
-        
-        // Αν υπήρχε παλιά προεπισκόπηση, τη σβήνουμε
-        const oldPreview = document.getElementById('editPreview');
-        if (oldPreview && oldPreview !== preview) {
-            oldPreview.remove();
-        }
-        
-        this.parentElement.appendChild(preview);
-        validateAndPreviewImages(this, 'editPreview');
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            image.src = String(event.target && event.target.result ? event.target.result : '');
+        };
+        reader.readAsDataURL(file);
+
+        item.appendChild(image);
+        item.appendChild(deleteBtn);
+        item.appendChild(caption);
+        preview.appendChild(item);
     });
 }
+
+function setupAnnouncementImageInput(input, previewId) {
+    if (!input) {
+        return;
+    }
+
+    const preview = document.getElementById(previewId);
+    const announcementImageLimit = getAnnouncementImageLimit();
+    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
+    const stagedFiles = [];
+    const stagedKeys = new Set();
+
+    function updateInputState() {
+        if (existingCount + stagedFiles.length >= announcementImageLimit) {
+            input.disabled = true;
+        } else if (existingCount < announcementImageLimit) {
+            input.disabled = false;
+        }
+    }
+
+    function removeStagedFile(index) {
+        const removedFile = stagedFiles[index];
+        if (!removedFile) {
+            return;
+        }
+
+        stagedFiles.splice(index, 1);
+        stagedKeys.delete(getAnnouncementImageFileKey(removedFile));
+        syncAnnouncementImageInputFiles(input, stagedFiles);
+        renderAnnouncementImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+    }
+
+    input.addEventListener('change', function () {
+        const incomingFiles = Array.from(input.files || []);
+        const warnings = [];
+        let reachedLimit = false;
+
+        if (incomingFiles.length === 0) {
+            return;
+        }
+
+        if (existingCount >= announcementImageLimit) {
+            warnings.push(`Η ανακοίνωση έχει ήδη ${announcementImageLimit} εικόνες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+        } else {
+            incomingFiles.forEach((file) => {
+                const fileKey = getAnnouncementImageFileKey(file);
+                const validationWarnings = validateAnnouncementImageFile(file);
+
+                if (validationWarnings.length > 0) {
+                    warnings.push(...validationWarnings);
+                    return;
+                }
+
+                if (stagedKeys.has(fileKey)) {
+                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
+                    return;
+                }
+
+                if (existingCount + stagedFiles.length >= announcementImageLimit) {
+                    if (!reachedLimit) {
+                        const remainingSlots = Math.max(0, announcementImageLimit - existingCount - stagedFiles.length);
+                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες σε αυτή την ανακοίνωση.`);
+                        reachedLimit = true;
+                    }
+                    return;
+                }
+
+                stagedFiles.push(file);
+                stagedKeys.add(fileKey);
+            });
+        }
+
+        syncAnnouncementImageInputFiles(input, stagedFiles);
+        renderAnnouncementImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+
+        if (warnings.length > 0) {
+            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+                title: 'Έλεγχος αρχείων',
+                variant: 'warning'
+            });
+        }
+    });
+
+    updateInputState();
+}
+
+function getAnnouncementAttachmentFileKey(file) {
+    return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function validateAnnouncementAttachmentFile(file) {
+    const warnings = [];
+    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+    const maxFileSize = 8 * 1024 * 1024;
+    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+    const fileType = String(file.type || '');
+
+    if (!allowedExtensions.includes(fileExt)) {
+        warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
+    }
+
+    if (file.size > maxFileSize) {
+        warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
+    }
+
+    if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
+        warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
+    }
+
+    return warnings;
+}
+
+function renderAnnouncementAttachmentPreview(preview, stagedFiles, onRemove) {
+    if (!preview) {
+        return;
+    }
+
+    preview.innerHTML = '';
+
+    stagedFiles.forEach((file, index) => {
+        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+        const item = document.createElement('div');
+        item.className = 'attachment-preview-item';
+
+        const info = document.createElement('div');
+        info.className = 'attachment-preview-info';
+
+        const icon = document.createElement('i');
+        icon.className = fileExt === 'pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
+
+        const text = document.createElement('span');
+        text.className = 'attachment-preview-name';
+        text.textContent = truncatePreviewFileName(file.name, 40);
+
+        const size = document.createElement('span');
+        size.className = 'attachment-preview-size';
+        size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'attachment-remove-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.addEventListener('click', function () {
+            onRemove(index);
+        });
+
+        info.appendChild(icon);
+        info.appendChild(text);
+        info.appendChild(size);
+        item.appendChild(info);
+        item.appendChild(deleteBtn);
+        preview.appendChild(item);
+    });
+}
+
+function setupAnnouncementAttachmentInput(input, previewId) {
+    if (!input) {
+        return;
+    }
+
+    const preview = document.getElementById(previewId);
+    const stagedFiles = [];
+    const stagedKeys = new Set();
+
+    function syncFiles() {
+        if (typeof DataTransfer === 'undefined') {
+            return;
+        }
+
+        const dataTransfer = new DataTransfer();
+        stagedFiles.forEach((file) => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
+
+    function removeStagedFile(index) {
+        const removedFile = stagedFiles[index];
+        if (!removedFile) {
+            return;
+        }
+
+        stagedFiles.splice(index, 1);
+        stagedKeys.delete(getAnnouncementAttachmentFileKey(removedFile));
+        syncFiles();
+        renderAnnouncementAttachmentPreview(preview, stagedFiles, removeStagedFile);
+    }
+
+    input.addEventListener('change', function () {
+        const incomingFiles = Array.from(input.files || []);
+        const warnings = [];
+
+        if (incomingFiles.length === 0) {
+            return;
+        }
+
+        incomingFiles.forEach((file) => {
+            const fileKey = getAnnouncementAttachmentFileKey(file);
+            const validationWarnings = validateAnnouncementAttachmentFile(file);
+
+            if (validationWarnings.length > 0) {
+                warnings.push(...validationWarnings);
+                return;
+            }
+
+            if (stagedKeys.has(fileKey)) {
+                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
+                return;
+            }
+
+            stagedFiles.push(file);
+            stagedKeys.add(fileKey);
+        });
+
+        syncFiles();
+        renderAnnouncementAttachmentPreview(preview, stagedFiles, removeStagedFile);
+
+        if (warnings.length > 0) {
+            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+                title: 'Έλεγχος συνημμένων',
+                variant: 'warning'
+            });
+        }
+    });
+}
+
+setupAnnouncementImageInput(document.getElementById('images'), 'imagePreview');
+setupAnnouncementImageInput(document.getElementById('edit_images'), 'editPreview');
+setupAnnouncementAttachmentInput(document.getElementById('attachments'), 'attachmentPreview');
+setupAnnouncementAttachmentInput(document.getElementById('edit_attachments'), 'editAttachmentPreview');
 
 document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
     form.addEventListener('submit', function (event) {

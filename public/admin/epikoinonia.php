@@ -403,10 +403,10 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                 <div id="content-management" class="content-management">
                     <div class="content-management__intro">
                         <div>
-                            <h2><i class="fas fa-edit"></i> Διαχείριση Public Περιεχομένου</h2>
-                            <p>Από εδώ αλλάζεις το κοινό περιεχόμενο που εμφανίζεται και στο <code>public/epikoinonia.php</code> και στο <code>public/parent/epikoinonia.php</code>. Κάθε ενότητα αποθηκεύεται ξεχωριστά, όπως και στο <code>useful-information</code>.</p>
+                            <h2><i class="fas fa-edit"></i> Διαχείριση Δημόσιου Περιεχομένου</h2>
+                            <p>Από εδώ ενημερώνεις το περιεχόμενο που προβάλλεται δημόσια στη σελίδα επικοινωνίας, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να μπορείς να διαχειρίζεσαι στοιχεία επικοινωνίας, χάρτη και κείμενα με μεγαλύτερη ασφάλεια και συνέπεια.</p>
                         </div>
-                    </div>
+                    </div> 
 
                     <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
                         <?php foreach ($epikoinoniaContentTabs as $tabKey => $tab): ?>

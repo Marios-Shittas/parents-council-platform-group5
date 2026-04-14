@@ -568,7 +568,9 @@ $nav_items[] = [
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo" class="mr-2">
             <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">
-                <span class="brand-line">Σύνδεσμος Γονέων &amp; Κηδεμόνων</span>
+                <span class="brand-line">Σύνδεσμος Γονέων &amp;</span>
+                <span class="brand-line">Κηδεμόνων Γυμνασίου</span>
+                <span class="brand-line">Αγίου Αθανασίου</span>
             </span>
         </a>
 

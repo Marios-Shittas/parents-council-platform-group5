@@ -404,7 +404,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 <div class="users-toolbar">
                     <div>
                         <h4 class="mb-1"><i class="fas fa-table me-2"></i>Λίστα Χρηστών</h4>
-                        <p class="text-muted mb-0">Ο λογαριασμός `admin 1` είναι προστατευμένος. Επίσης δεν επιτρέπεται διαγραφή του τρέχοντος συνδεδεμένου admin.</p>
+                        <p class="text-muted mb-0">Ορισμένοι λογαριασμοί διαχειριστή προστατεύονται για λόγους ασφάλειας. Επίσης, δεν επιτρέπεται η διαγραφή του λογαριασμού που είναι αυτή τη στιγμή συνδεδεμένος.</p>
                     </div>
                     <div class="users-toolbar-actions">
                         <div class="users-search-wrap">

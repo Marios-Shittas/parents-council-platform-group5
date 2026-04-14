@@ -1,5 +1,30 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
+require_once __DIR__ . '/../../services/HomePageService.php';
+
+$homePageService = new HomePageService();
+$homeSections = $homePageService->getAllSections();
+
+$bannerSection = $homeSections['banner_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
+$heroSection = $homeSections['hero_section'] ?? [
+    'title' => 'Σύνδεσμος Γονέων & Κηδεμόνων Γυμνασίου Αγίου Αθανασίου',
+    'subtitle' => '',
+    'content' => [],
+];
+$calendarSection = $homeSections['calendar_section'] ?? ['title' => 'Ημερολόγιο', 'subtitle' => '', 'content' => []];
+$announcementsSection = $homeSections['announcements_section'] ?? ['title' => 'Τελευταίες Ανακοινώσεις', 'subtitle' => '', 'content' => []];
+$eventsSection = $homeSections['events_section'] ?? ['title' => 'Τελευταίες Εκδηλώσεις', 'subtitle' => '', 'content' => []];
+
+$heroKicker = (string)($heroSection['content']['kicker'] ?? 'Καλωσορίσατε στην επίσημη ιστοσελίδα');
+$heroTitle = (string)($heroSection['title'] ?? 'Σύνδεσμος Γονέων & Κηδεμόνων Γυμνασίου Αγίου Αθανασίου');
+$heroDescription = (string)($heroSection['subtitle'] ?? '');
+$heroAnnouncementsButtonLabel = (string)($heroSection['content']['announcements_button_label'] ?? 'Ανακοινώσεις');
+$heroEventsButtonLabel = (string)($heroSection['content']['events_button_label'] ?? 'Εκδηλώσεις');
+$calendarBlockTitle = (string)($calendarSection['title'] ?? 'Ημερολόγιο');
+$announcementsBlockTitle = (string)($announcementsSection['title'] ?? 'Τελευταίες Ανακοινώσεις');
+$announcementsBlockButton = (string)($announcementsSection['content']['button_label'] ?? 'Όλες οι Ανακοινώσεις');
+$eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Εκδηλώσεις');
+$eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -12,7 +37,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
         <link rel="stylesheet" href="<?php echo site_asset_url('css/home.css'); ?>">
-        <title>Αρχική - Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</title>
+        <title>Αρχική - <?php echo htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     </head>
 
     <body>
@@ -20,59 +45,71 @@ require_once __DIR__ . '/../../includes/site_context.php';
 
     <main class="home-page">
         <?php
-        $homeBannerSlides = [
-            [
-                'src' => site_asset_url('img/home-school-banner.png'),
-                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1',
-            ],
-            [
-                'src' => site_asset_url('img/home-school-banner-2.png'),
-                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2',
-            ],
-            [
-                'src' => site_asset_url('img/home-school-banner-3.png'),
-                'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3',
-            ],
+        $defaultHomeBannerSlides = [
+            ['src' => site_asset_url('img/home-school-banner.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1'],
+            ['src' => site_asset_url('img/home-school-banner-2.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2'],
+            ['src' => site_asset_url('img/home-school-banner-3.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3'],
         ];
+        $storedHomeBannerSlides = is_array($bannerSection['content']['slides'] ?? null) ? $bannerSection['content']['slides'] : [];
+        $homeBannerSlides = [];
+
+        foreach ($defaultHomeBannerSlides as $index => $defaultSlide) {
+            $storedSlide = is_array($storedHomeBannerSlides[$index] ?? null) ? $storedHomeBannerSlides[$index] : [];
+            if (!empty($storedSlide['hidden'])) {
+                continue;
+            }
+
+            $resolvedSrc = site_resolve_content_url((string)($storedSlide['src'] ?? $defaultSlide['src']));
+            if (trim($resolvedSrc) === '') {
+                continue;
+            }
+
+            $homeBannerSlides[] = [
+                'src' => $resolvedSrc,
+                'alt' => (string)($storedSlide['alt'] ?? $defaultSlide['alt']),
+            ];
+        }
         ?>
 
-        <section class="home-school-banner container-fluid px-0" aria-label="Banner σχολείου">
-            <div class="container">
-                <div class="home-school-banner__frame">
-                    <div class="home-school-banner__carousel" aria-live="polite" data-interval="15000">
-                        <?php foreach ($homeBannerSlides as $index => $slide): ?>
-                            <img
-                                src="<?php echo htmlspecialchars($slide['src'], ENT_QUOTES, 'UTF-8'); ?>"
-                                alt="<?php echo htmlspecialchars($slide['alt'], ENT_QUOTES, 'UTF-8'); ?>"
-                                class="home-school-banner__image<?php echo $index === 0 ? ' is-active' : ''; ?>"
-                            >
-                        <?php endforeach; ?>
+        <?php if (!empty($homeBannerSlides)): ?>
+            <section class="home-school-banner container-fluid px-0" aria-label="Banner σχολείου">
+                <div class="container">
+                    <div class="home-school-banner__frame">
+                        <div class="home-school-banner__carousel" aria-live="polite" data-interval="15000">
+                            <?php foreach ($homeBannerSlides as $index => $slide): ?>
+                                <img
+                                    src="<?php echo htmlspecialchars($slide['src'], ENT_QUOTES, 'UTF-8'); ?>"
+                                    alt="<?php echo htmlspecialchars($slide['alt'], ENT_QUOTES, 'UTF-8'); ?>"
+                                    class="home-school-banner__image<?php echo $index === 0 ? ' is-active' : ''; ?>"
+                                >
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        <?php endif; ?>
 
         <section class="home-hero container-fluid px-0">
             <div class="home-hero-inner container">
                 <div class="hero-copy">
-                    <p class="hero-kicker">Καλωσορίσατε στην επίσημη ιστοσελίδα</p>
-                    <h1>Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</h1>
-                    <p class="hero-description">Στην ιστοσελίδα μας μπορείτε να ενημερώνεστε για όλες τις ανακοινώσεις, δράσεις και εκδηλώσεις του Συνδέσμου Γονέων. Μπορείτε να βρείτε χρήσιμες πληροφορίες, αιτήσεις, φωτογραφικό υλικό και πρωτοβουλίες που συμβάλλουν στη δημιουργία ενός καλύτερου σχολικού περιβάλλοντος για τα παιδιά μας.</p>
+                    <p class="hero-kicker"><?php echo htmlspecialchars($heroKicker, ENT_QUOTES, 'UTF-8'); ?></p>
+                    <h1><?php echo htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
+                    <p class="hero-description"><?php echo htmlspecialchars($heroDescription, ENT_QUOTES, 'UTF-8'); ?></p>
                     <div class="hero-actions">
                         <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn hero-outline-btn">
                             <i class="fas fa-bullhorn"></i>
-                            Ανακοινώσεις
+                            <?php echo htmlspecialchars($heroAnnouncementsButtonLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">
                             <i class="fas fa-calendar-check"></i>
-                            Εκδηλώσεις
+                            <?php echo htmlspecialchars($heroEventsButtonLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                     </div>
                 </div>
                 <div class="hero-calendar">
                     <div class="block-content" id="calendar-block">
                         <div class="block-heading-wrap">
-                            <h5 class="block-title"><i class="fas fa-calendar-alt mr-2"></i>Ημερολόγιο</h5>
+                            <h5 class="block-title"><i class="fas fa-calendar-alt mr-2"></i><?php echo htmlspecialchars($calendarBlockTitle, ENT_QUOTES, 'UTF-8'); ?></h5>
                         </div>
                         <div id="calendar-root"></div>
                         <div id="event-detail-root"></div>
@@ -86,19 +123,19 @@ require_once __DIR__ . '/../../includes/site_context.php';
                 <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                     <div class="block-content" id="announcements-block">
                         <div class="block-heading-wrap">
-                            <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i>Τελευταίες Ανακοινώσεις</h5>
+                            <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i><?php echo htmlspecialchars($announcementsBlockTitle, ENT_QUOTES, 'UTF-8'); ?></h5>
                         </div>
                         <div id="announcements-root"></div>
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn">Όλες οι Ανακοινώσεις</a>
+                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($announcementsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
                     <div class="block-content" id="upcoming-events-block">
                         <div class="block-heading-wrap">
-                            <h5 class="block-title"><i class="fas fa-star mr-2"></i>Τελευταίες Εκδηλώσεις</h5>
+                            <h5 class="block-title"><i class="fas fa-star mr-2"></i><?php echo htmlspecialchars($eventsBlockTitle, ENT_QUOTES, 'UTF-8'); ?></h5>
                         </div>
                         <div id="upcoming-events-root"></div>
-                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn">Όλες οι Εκδηλώσεις</a>
+                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($eventsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
                     </div>
                 </div>
             </div>
