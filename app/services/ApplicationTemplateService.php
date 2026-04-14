@@ -31,7 +31,6 @@ class ApplicationTemplateService {
             }
 
             $this->templatesTableReady = true;
-            $this->seedDefaultTemplatesIfNeeded();
         } catch (Throwable $e) {
             $this->templatesTableReady = false;
             error_log('ApplicationTemplateService initialization failed: ' . $e->getMessage());

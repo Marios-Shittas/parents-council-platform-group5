@@ -8,6 +8,8 @@ require_once __DIR__ . '/../config/db.php';
 class AnnouncementsService {
     private $conn;
     private $lastOperationError = '';
+    private $announcementAttachmentsTableChecked = false;
+    private $announcementAttachmentsTableExists = false;
     
     public function __construct() {
         global $conn;
@@ -223,43 +225,77 @@ class AnnouncementsService {
     }
 
     public function getAttachments($announcementId) {
+        if (!$this->isAnnouncementAttachmentsTableAvailable()) {
+            return [];
+        }
+
         $sql = "SELECT * FROM AnnouncementAttachments WHERE announcement_id = ? ORDER BY attachment_id DESC";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $announcementId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        try {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $announcementId);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        return $result->fetch_all(MYSQLI_ASSOC);
+            return $result->fetch_all(MYSQLI_ASSOC);
+        } catch (mysqli_sql_exception $e) {
+            return [];
+        }
     }
 
     public function addAttachment($announcementId, $filePath, $originalName = null) {
+        if (!$this->isAnnouncementAttachmentsTableAvailable()) {
+            $this->lastOperationError = 'Ο πίνακας συνημμένων ανακοινώσεων δεν είναι διαθέσιμος.';
+            return false;
+        }
+
         $sql = "INSERT INTO AnnouncementAttachments (announcement_id, file_path, original_name) VALUES (?, ?, ?)";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("iss", $announcementId, $filePath, $originalName);
+        try {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("iss", $announcementId, $filePath, $originalName);
 
-        return $stmt->execute();
+            return $stmt->execute();
+        } catch (mysqli_sql_exception $e) {
+            $this->lastOperationError = 'Σφάλμα κατά την αποθήκευση του συνημμένου.';
+            return false;
+        }
     }
 
     public function getAttachmentById($attachmentId) {
+        if (!$this->isAnnouncementAttachmentsTableAvailable()) {
+            return null;
+        }
+
         $sql = "SELECT * FROM AnnouncementAttachments WHERE attachment_id = ?";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $attachmentId);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        try {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $attachmentId);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-        return $result->fetch_assoc();
+            return $result->fetch_assoc();
+        } catch (mysqli_sql_exception $e) {
+            return null;
+        }
     }
 
     public function deleteAttachment($attachmentId) {
+        if (!$this->isAnnouncementAttachmentsTableAvailable()) {
+            return false;
+        }
+
         $sql = "DELETE FROM AnnouncementAttachments WHERE attachment_id = ?";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $attachmentId);
+        try {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $attachmentId);
 
-        return $stmt->execute();
+            return $stmt->execute();
+        } catch (mysqli_sql_exception $e) {
+            return false;
+        }
     }
     
     /**
@@ -314,6 +350,10 @@ class AnnouncementsService {
     }
 
     private function getAttachmentsGroupedByAnnouncementIds(array $announcementIds) {
+        if (!$this->isAnnouncementAttachmentsTableAvailable()) {
+            return [];
+        }
+
         $announcementIds = array_values(array_filter(array_map('intval', $announcementIds), static function ($id) {
             return $id > 0;
         }));
@@ -325,15 +365,23 @@ class AnnouncementsService {
         $placeholders = implode(',', array_fill(0, count($announcementIds), '?'));
         $types = str_repeat('i', count($announcementIds));
         $sql = "SELECT * FROM AnnouncementAttachments WHERE announcement_id IN ({$placeholders}) ORDER BY attachment_id DESC";
-        $stmt = $this->conn->prepare($sql);
+        try {
+            $stmt = $this->conn->prepare($sql);
+        } catch (mysqli_sql_exception $e) {
+            return [];
+        }
 
         if ($stmt === false) {
             return [];
         }
 
-        $stmt->bind_param($types, ...$announcementIds);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        try {
+            $stmt->bind_param($types, ...$announcementIds);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } catch (mysqli_sql_exception $e) {
+            return [];
+        }
 
         $attachmentsByAnnouncement = [];
         while ($row = $result->fetch_assoc()) {
@@ -342,6 +390,23 @@ class AnnouncementsService {
         }
 
         return $attachmentsByAnnouncement;
+    }
+
+    private function isAnnouncementAttachmentsTableAvailable() {
+        if ($this->announcementAttachmentsTableChecked) {
+            return $this->announcementAttachmentsTableExists;
+        }
+
+        $this->announcementAttachmentsTableChecked = true;
+
+        try {
+            $result = $this->conn->query("SHOW TABLES LIKE 'AnnouncementAttachments'");
+            $this->announcementAttachmentsTableExists = $result && $result->num_rows > 0;
+        } catch (mysqli_sql_exception $e) {
+            $this->announcementAttachmentsTableExists = false;
+        }
+
+        return $this->announcementAttachmentsTableExists;
     }
 
     public function get5LatestAnnouncements() {
