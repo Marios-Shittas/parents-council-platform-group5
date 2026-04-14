@@ -9,7 +9,7 @@ header("Expires: 0");
 
 $successMessage = '';
 if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
-    $successMessage = 'Password reset successfully! Please log in with your new password.';
+    $successMessage = 'Η επαναφορά κωδικού ολοκληρώθηκε επιτυχώς! Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.';
 }
 ?>
 
@@ -50,20 +50,20 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>
             </a>
-            <h1 id="login-title">Login</h1>
+            <h1 id="login-title">Σύνδεση</h1>
             <span id="error-message"></span>
             <span id="success-message"><?php echo htmlspecialchars($successMessage); ?></span>
             <div class="login-container">
-                <p id="email-label">Please enter your email:</p>
+                <p id="email-label">Παρακαλώ εισάγετε το email σας:</p>
                 <input type="email" id="email-input" placeholder="Email">
-                <p id="password-label">Please enter your password:</p>
+                <p id="password-label">Παρακαλώ εισάγετε τον κωδικό σας:</p>
                 <div class="password-wrapper">
-                    <input type="password" id="password-input" placeholder="Password">
+                    <input type="password" id="password-input" placeholder="Κωδικός πρόσβασης">
                     <span id="password-toggle-root"></span>
                 </div>
-                <button id="login-button">Login</button>
+                <button id="login-button">Σύνδεση</button>
                 <p class="forgot-password">
-                    <a href="forgot-password.php" id="forgot-password-link">Forgot password?</a>
+                    <a href="forgot-password.php" id="forgot-password-link">Ξεχάσατε τον κωδικό;</a>
                 </p>
             </div>
             <div class="divider">
@@ -72,8 +72,8 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
                 <div class="line"></div>
             </div>
             <div class="register-container">
-                <p id="register-prompt">Don't have an account? 
-                    <a href="register.php" id="register-link">Register here</a>
+                <p id="register-prompt">Δεν έχετε λογαριασμό; 
+                    <a href="register.php" id="register-link">Εγγραφείτε εδώ</a>
                 </p>
             </div>
         </div>

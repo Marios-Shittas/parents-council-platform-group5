@@ -36,13 +36,13 @@ header("Expires: 0");
             <a href="login.php" id="back-to-login">
                 <button id="cancel-button"><i class="fas fa-arrow-left"></i></button>
             </a>
-            <h1 id="reset-password-title">Reset Password</h1>
+            <h1 id="reset-password-title">Επαναφορά Κωδικού</h1>
             <span id="error-message"></span>
             <div class="reset-password-container">
-                <p id="email-text">No worries! Enter your email address below, and we'll send you a code to reset your password.</p>
-                <p id="email-label">Please enter your email:</p>
+                <p id="email-text">Μην ανησυχείτε! Εισάγετε το email σας παρακάτω και θα σας στείλουμε κωδικό για επαναφορά του κωδικού σας.</p>
+                <p id="email-label">Παρακαλώ εισάγετε το email σας:</p>
                 <input type="email" id="email-input" placeholder="Email">
-                <button id="send-email-button">Send Email</button>
+                <button id="send-email-button">Αποστολή Email</button>
             </div>
         </div>
 

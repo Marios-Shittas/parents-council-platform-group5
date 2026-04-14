@@ -21,13 +21,13 @@ function TwoFactorForm() {
 
       const data = await response.json();
       if (data.success) {
-        setSuccessMessage('A new 2FA code was sent to your email.');
+        setSuccessMessage('Ένας νέος κωδικός 2FA στάλθηκε στο email σας.');
       } else {
-        setErrorMessage(data.message || 'Failed to resend code.');
+        setErrorMessage(data.message || 'Αποτυχία επαναποστολής κωδικού.');
       }
     } catch (error) {
       console.error('Error resending code:', error);
-      setErrorMessage('An error occurred while resending the code.');
+      setErrorMessage('Παρουσιάστηκε σφάλμα κατά την επαναποστολή του κωδικού.');
     } finally {
       setIsResending(false);
     }
@@ -39,7 +39,7 @@ function TwoFactorForm() {
     setSuccessMessage('');
 
     if (code.trim().length !== 8) {
-      setErrorMessage('Please enter the 8-character code.');
+      setErrorMessage('Παρακαλώ εισάγετε τον 8-ψήφιο κωδικό.');
       return;
     }
 
@@ -56,7 +56,7 @@ function TwoFactorForm() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccessMessage('Verification successful. Redirecting...');
+        setSuccessMessage('Η επαλήθευση ολοκληρώθηκε επιτυχώς. Μεταφορά...');
         setTimeout(() => {
           fetch('/parents-council-platform-group5/app/services/SessionCheck.php', {
             credentials: 'include'
@@ -74,11 +74,11 @@ function TwoFactorForm() {
             });
         }, 1000);
       } else {
-        setErrorMessage(data.message || 'Invalid code.');
+        setErrorMessage(data.message || 'Μη έγκυρος κωδικός.');
       }
     } catch (error) {
       console.error('Error verifying code:', error);
-      setErrorMessage('An error occurred. Please try again.');
+      setErrorMessage('Παρουσιάστηκε σφάλμα. Παρακαλώ προσπαθήστε ξανά.');
     } finally {
       setIsLoading(false);
     }
@@ -97,12 +97,12 @@ function TwoFactorForm() {
     <div className="two-factor-container">
       {errorMessage && <span id="error-message" className="two-factor-message">{errorMessage}</span>}
       {successMessage && <span id="success-message" className="two-factor-message">{successMessage}</span>}
-      <p id="two-factor-label">Please enter the code sent to your email:</p>
+      <p id="two-factor-label">Παρακαλώ εισάγετε τον κωδικό που στάλθηκε στο email σας:</p>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           id="code-input"
-          placeholder="Enter 8-character code"
+          placeholder="Εισάγετε 8-ψήφιο κωδικό"
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8))}
           onKeyDown={handleCodeKeyDown}
@@ -111,14 +111,14 @@ function TwoFactorForm() {
           required
         />
         <button id="confirm-button" type="submit" disabled={isLoading || code.length !== 8}>
-          {isLoading ? 'Verifying...' : 'Confirm'}
+          {isLoading ? 'Γίνεται επαλήθευση...' : 'Επιβεβαίωση'}
         </button>
       </form>
       <div className="resend-wrapper">
-        <span className="resend-hint">Didn't receive it?</span>
+        <span className="resend-hint">Δεν το λάβατε;</span>
         <button id="resend-button" type="button" onClick={sendCodeAgain} disabled={isResending || isLoading}>
           <i className="fas fa-rotate-right" aria-hidden="true"></i>
-          <span>{isResending ? 'Sending new code...' : 'Resend code'}</span>
+          <span>{isResending ? 'Αποστολή νέου κωδικού...' : 'Επαναποστολή κωδικού'}</span>
         </button>
       </div>
     </div>

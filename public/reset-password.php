@@ -78,22 +78,22 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
                 <a href="login.php" id="back-to-login">
                     <button id="back-button"><i class="fas fa-arrow-left"></i></button>
                 </a>
-                <h1 id="reset-password-title">Reset Password</h1>
+                <h1 id="reset-password-title">Επαναφορά Κωδικού</h1>
                 <span id="error-message"></span>
                 <form id="reset-password-form" class="password-container">
-                    <p id="password-label">Enter new password:</p>
+                    <p id="password-label">Εισάγετε νέο κωδικό:</p>
                     <div class="password-input-wrapper">
-                        <input type="password" id="new-password" placeholder="New Password" minlength="8" required>
+                        <input type="password" id="new-password" placeholder="Νέος κωδικός" minlength="8" required>
                         <span id="new-password-toggle"></span>
                     </div>
 
-                    <p id="confirm-password-label">Confirm new password:</p>
+                    <p id="confirm-password-label">Επιβεβαίωση νέου κωδικού:</p>
                     <div class="password-input-wrapper">
-                        <input type="password" id="confirm-password" placeholder="Confirm Password" minlength="8" required>
+                        <input type="password" id="confirm-password" placeholder="Επιβεβαίωση κωδικού" minlength="8" required>
                         <span id="confirm-password-toggle"></span>
                     </div>
                     
-                    <button id="confirm-button" type="submit">Reset Password</button>
+                    <button id="confirm-button" type="submit">Επαναφορά Κωδικού</button>
                 </form>
             </div>
         <?php endif; ?>
