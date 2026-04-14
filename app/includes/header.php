@@ -14,7 +14,7 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Σύνδεσμος Γονέων & Κηδεμόνων Γυμνασίου Αγίου Αθανασίου';
+$site_title = 'Σύνδεσμος Γονέων & Κηδεμόνων';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 
@@ -52,7 +52,7 @@ $nav_items = [
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => 'Χρήσιμες Πληροφορίες',
+        'label' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες',
         'href' => site_section_url('useful-information.php'),
         'icon' => 'fas fa-info-circle',
         'match' => ['useful-information.php'],

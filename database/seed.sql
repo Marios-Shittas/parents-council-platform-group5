@@ -10,6 +10,9 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
+USE `parents_council`;
+SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
+SET FOREIGN_KEY_CHECKS = 0;
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -21,33 +24,47 @@ SET time_zone = "+00:00";
 -- Database: `parents_council`
 --
 
+
+INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcement_date`, `publish_date`, `announcement_description`, `gdpr_notice`) VALUES
+(1, 'Πρόγραμμα Ενιαίων Τελικών Προαγωγικών & Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται το πρόγραμμα των Ενιαίων Τελικών Προαγωγικών και Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων, με αναλυτική καταγραφή των ημερομηνιών και των μαθημάτων.', ''),
+(2, 'Κλήρωση Πασχαλινού Λαχείου', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζονται πληροφορίες σχετικά με την κλήρωση του Πασχαλινού Λαχείου, συμπεριλαμβανομένων των αποτελεσμάτων και των σχετικών λεπτομερειών.', ''),
+(3, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
+
 --
 -- Dumping data for table `AnnouncementAttachments`
 --
 
 INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
-(4, 47, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de2f521560b8.13949445.pdf', 'Arxeio 1.pdf', '2026-04-14 12:13:06'),
-(5, 48, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de3157c4c3d0.96612284.pdf', 'Arxeio 2.pdf', '2026-04-14 12:21:43'),
-(6, 49, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
-
---
--- Dumping data for table `Announcements`
---
-
-INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcement_date`, `publish_date`, `announcement_description`, `gdpr_notice`) VALUES
-(47, 'Πρόγραμμα Ενιαίων Τελικών Προαγωγικών & Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται το πρόγραμμα των Ενιαίων Τελικών Προαγωγικών και Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων, με αναλυτική καταγραφή των ημερομηνιών και των μαθημάτων.', ''),
-(48, 'Κλήρωση Πασχαλινού Λαχείου', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζονται πληροφορίες σχετικά με την κλήρωση του Πασχαλινού Λαχείου, συμπεριλαμβανομένων των αποτελεσμάτων και των σχετικών λεπτομερειών.', ''),
-(49, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
+(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de2f521560b8.13949445.pdf', 'Arxeio 1.pdf', '2026-04-14 12:13:06'),
+(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de3157c4c3d0.96612284.pdf', 'Arxeio 2.pdf', '2026-04-14 12:21:43'),
+(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
 
 --
 -- Dumping data for table `AnnouncementsImages`
 --
 
 INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path`) VALUES
-(42, 47, '/parents-council-platform-group5/public/assets/Announcements_img/69de2fd660c6a_1776168918.jpg'),
-(44, 49, '/parents-council-platform-group5/public/assets/Announcements_img/69de32711d583_1776169585.png'),
-(45, 48, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639bd60_1776170851.png'),
-(46, 48, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639c39c_1776170851.png');
+(1, 1, '/parents-council-platform-group5/public/assets/Announcements_img/69de2fd660c6a_1776168918.jpg'),
+(2, 3, '/parents-council-platform-group5/public/assets/Announcements_img/69de32711d583_1776169585.png'),
+(3, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639bd60_1776170851.png'),
+(4, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639c39c_1776170851.png');
+
+--
+-- Dumping data for table `Users`
+--
+
+INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_number`, `number_of_children`, `role`, `account_status`, `token`, `token_expiry`, `created_at`) VALUES
+(1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '+35799123456', 0, 'admin', 'active', 'fdb9e92eb8dd2097f3b7d080f31834ff477ce5a7bf912b699730bcd93d20b09b', '2026-04-14 15:10:57', '2026-04-11 19:03:11'),
+(2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '+35799112233', 2, 'parent', 'active', NULL, NULL, '2026-04-11 19:03:11'),
+(3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '+35799445566', 1, 'parent', 'waiting_payment', NULL, NULL, '2026-04-11 19:03:11');
+
+--
+-- Dumping data for table `ApplicationTemplates`
+--
+
+INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `description`, `category`, `form_schema`, `is_system_template`, `created_at`, `updated_at`) VALUES
+(1, 'subscription-insurance', 'Συνδρομή / Ασφάλιση', 'Ετήσια συνδρομή και ασφαλιστική κάλυψη μαθητή', 'standard', '{\"sections\":[{\"title\":\"Στοιχεία Μαθητή\",\"fields\":[{\"name\":\"student_name\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_birthdate\",\"label\":\"Ημερομηνία Γέννησης\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class\",\"label\":\"Τμήμα \\/ Τάξη\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Στοιχεία Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_phone\",\"label\":\"Τηλέφωνο Επικοινωνίας\",\"type\":\"tel\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_email\",\"label\":\"Email Επικοινωνίας\",\"type\":\"email\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Εγγραφές\",\"fields\":[{\"name\":\"subscription_checkbox\",\"label\":\"Συνδρομή στο Σύνδεσμο\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι τη συνδρομή\"},{\"name\":\"insurance_checkbox\",\"label\":\"Ασφαλιστική Κάλυψη\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι την ασφαλιστική κάλυψη\"}]},{\"title\":\"Συναίνεση Επικοινωνίας\",\"fields\":[{\"name\":\"consent_communication\",\"label\":\"Λήψη Ειδοποιήσεων\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι να λαμβάνω ειδοποιήσεις\"},{\"name\":\"consent_viber\",\"label\":\"Viber Community\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι συμμετοχή στην ομάδα Viber\"}]},{\"title\":\"Επιβεβαίωση\",\"fields\":[{\"name\":\"signature\",\"label\":\"Υπογραφή Κηδεμόνα\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16'),
+(2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
 
 --
 -- Dumping data for table `Applications`
@@ -64,14 +81,6 @@ INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`
 INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
 (2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
-
---
--- Dumping data for table `ApplicationTemplates`
---
-
-INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `description`, `category`, `form_schema`, `is_system_template`, `created_at`, `updated_at`) VALUES
-(1, 'subscription-insurance', 'Συνδρομή / Ασφάλιση', 'Ετήσια συνδρομή και ασφαλιστική κάλυψη μαθητή', 'standard', '{\"sections\":[{\"title\":\"Στοιχεία Μαθητή\",\"fields\":[{\"name\":\"student_name\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_birthdate\",\"label\":\"Ημερομηνία Γέννησης\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class\",\"label\":\"Τμήμα \\/ Τάξη\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Στοιχεία Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_phone\",\"label\":\"Τηλέφωνο Επικοινωνίας\",\"type\":\"tel\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_email\",\"label\":\"Email Επικοινωνίας\",\"type\":\"email\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Εγγραφές\",\"fields\":[{\"name\":\"subscription_checkbox\",\"label\":\"Συνδρομή στο Σύνδεσμο\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι τη συνδρομή\"},{\"name\":\"insurance_checkbox\",\"label\":\"Ασφαλιστική Κάλυψη\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι την ασφαλιστική κάλυψη\"}]},{\"title\":\"Συναίνεση Επικοινωνίας\",\"fields\":[{\"name\":\"consent_communication\",\"label\":\"Λήψη Ειδοποιήσεων\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι να λαμβάνω ειδοποιήσεις\"},{\"name\":\"consent_viber\",\"label\":\"Viber Community\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι συμμετοχή στην ομάδα Viber\"}]},{\"title\":\"Επιβεβαίωση\",\"fields\":[{\"name\":\"signature\",\"label\":\"Υπογραφή Κηδεμόνα\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16'),
-(2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
 
 --
 -- Dumping data for table `Children`
@@ -92,33 +101,12 @@ INSERT INTO `EpikoinoniaPageSections` (`section_id`, `section_key`, `section_tit
 (3, 'map_section', 'Βρείτε μας στο Χάρτη', 'Η τοποθεσία της σχολικής μονάδας στο Google Maps.', '{\"embed_url\":\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3279.4575341666614!2d33.0611131!3d34.7188599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14e734bc13013dc9%3A0x9c01ea2ef75a5b4d!2zzpPPhc68zr3OrM-DzrnOvyDOkc6zzq_Ov8-FIM6RzrjOsc69zrHPg86vzr_PhQ!5e0!3m2!1sel!2s!4v1773496500123!5m2!1sel!2s\"}', '2026-04-11 19:03:11'),
 (4, 'form_section', 'Στείλτε μας Μήνυμα', 'Συμπληρώστε τη φόρμα και θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό.', '{\"description\":\"\",\"button_text\":\"Αποστολή Μηνύματος\",\"success_message\":\"Το μήνυμά σας λήφθηκε. Θα σας απαντήσουμε το συντομότερο δυνατό.\"}', '2026-04-11 19:03:11'),
 (5, 'social_section', 'Βρείτε μας στα social networks', 'Ακολουθήστε τις επίσημες σελίδες μας για νέα και ενημερώσεις.', '{\"items\":[{\"title\":\"Facebook\",\"url\":\"https://www.facebook.com/profile.php?id=100085835704152\",\"icon\":\"fab fa-facebook-f\"},{\"title\":\"X\",\"url\":\"https://x.com/cymoec\",\"icon\":\"fab fa-twitter\"},{\"title\":\"YouTube\",\"url\":\"https://www.youtube.com/cymoec\",\"icon\":\"fab fa-youtube\"}]}', '2026-04-11 19:03:11');
+INSERT INTO Events (event_id, event_title, event_description, gdpr_notice, event_date, publish_date) VALUES
+(1, 'Τόμπολα & Μουσική Βραδιά', 'Παρασκευή 15 Μαΐου 2026
+Ώρα: 20:00 - 23:00', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 20:00:00', '2026-04-14');
 
---
--- Dumping data for table `Events`
---
-
-INSERT INTO `Events` (`event_id`, `event_title`, `event_description`, `gdpr_notice`, `event_date`, `publish_date`) VALUES
-(12, 'Σχολική Γιορτή', 'Μια μικρή γιορτή με μουσική και δραστηριότητες για τους μαθητές\nΤοποθεσία: Σχολική αυλή\nΣυμμετοχή όλων των τάξεων', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-03-03 09:00:00', '2026-03-11'),
-(13, 'Διαγωνισμός Πληροφορικής', 'Μαθητές θα συμμετάσχουν σε βασικές δραστηριότητες προγραμματισμού.\nΤοποθεσία: Εργαστήριο Η/Υ\nΣυμμετοχή: Τάξεις Γυμνασίου', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-03-15 12:10:00', '2026-03-11'),
-(14, 'Τουρνουά Ποδοσφαίρου', 'Φιλικοί αγώνες ποδοσφαίρου μεταξύ τάξεων\nΤοποθεσία: Σχολικό γήπεδο\n\nΟμάδες ανά τάξη', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-01-24 11:00:00', '2026-03-11'),
-(15, 'Ημέρα Περιβάλλοντος', 'Δραστηριότητες καθαρισμού και ενημέρωσης για το περιβάλλον.\nΤοποθεσία: Σχολικός χώρος\n\nΣυμμετοχή μαθητών και καθηγητών', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-03-18 17:00:00', '2026-03-11'),
-(16, 'Έκθεση Τέχνης Μαθητών', 'Παρουσίαση έργων ζωγραφικής και κατασκευών των μαθητών.\nΗμερομηνία: 3 Μαΐου\n\nΤοποθεσία: Αίθουσα εκδηλώσεων\n\nΣυμμετοχή: Όλες οι τάξεις', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-03 10:00:00', '2026-03-11'),
-(17, 'Σεμινάριο Σταδιοδρομίας', 'Παρουσίαση επαγγελματικών επιλογών για τους μαθητές.\n\n15 Μαΐου\n\nΤοποθεσία: Αίθουσα πολλαπλών χρήσεων\n\nΟμιλητές: Επαγγελματίες από διάφορους κλάδους', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 16:00:00', '2026-03-11');
-
---
--- Dumping data for table `EventsImages`
---
-
-INSERT INTO `EventsImages` (`ev_image_id`, `event_id`, `image_path`) VALUES
-(14, 12, '/parents-council-platform-group5/public/assets/Events_img/69b16c93f0d2a_1773235347.jpeg'),
-(15, 13, '/parents-council-platform-group5/public/assets/Events_img/69b16ce5186ba_1773235429.jpg'),
-(16, 14, '/parents-council-platform-group5/public/assets/Events_img/69b16d57535a4_1773235543.jpeg'),
-(17, 14, '/parents-council-platform-group5/public/assets/Events_img/69b16d5753d6d_1773235543.jpeg'),
-(18, 15, '/parents-council-platform-group5/public/assets/Events_img/69b16d994fcd7_1773235609.png'),
-(19, 15, '/parents-council-platform-group5/public/assets/Events_img/69b16d99502c3_1773235609.jpg'),
-(20, 15, '/parents-council-platform-group5/public/assets/Events_img/69b16d995079d_1773235609.jpg'),
-(21, 16, '/parents-council-platform-group5/public/assets/Events_img/69b16e10d2fd6_1773235728.jpg'),
-(22, 17, '/parents-council-platform-group5/public/assets/Events_img/69b16e67cf009_1773235815.jpeg');
+INSERT INTO EventsImages (ev_image_id, event_id, image_path) VALUES
+(1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg');
 
 --
 -- Dumping data for table `HomeBannerSlides`
@@ -260,15 +248,8 @@ INSERT INTO `UsefulInformationSections` (`section_id`, `section_key`, `section_t
 (5, 'safety', 'Ασφάλεια Παιδιών & Χρήσιμα Έντυπα', 'Χρήσιμη ενημέρωση για ασφάλεια στο σχολείο και επίσημες λήψεις εντύπων.', '{\"bullets\":[\"Για θέματα πρόληψης, ασφάλειας και υγείας στο σχολείο, αρμόδιο είναι το Γραφείο Πολιτικής Άμυνας, Ασφάλειας και Υγείας του ΥΠΑΝ.\",\"Σε περίπτωση περιστατικού ή ατυχήματος, η ενημέρωση της σχολικής μονάδας πρέπει να γίνεται άμεσα, ώστε να ακολουθηθεί η προβλεπόμενη διαδικασία.\",\"Για επίσημα έντυπα καταγραφής ατυχημάτων και άλλα σχετικά έγγραφα, χρησιμοποιείτε τα έντυπα του ΥΠΑΝ.\",\"Για ετήσιες ανακοινώσεις σχετικά με πιθανή ασφαλιστική κάλυψη μαθητών, οι γονείς θα πρέπει να παρακολουθούν τις ανακοινώσεις του σχολείου και του Συνδέσμου Γονέων.\"],\"downloads\":[{\"title\":\"Έντυπα Ασφάλειας και Καταγραφής Ατυχημάτων\",\"url\":\"https://www.moec.gov.cy/politiki_amyna/ay_entypa.html\",\"icon\":\"fas fa-download\"},{\"title\":\"Επιμορφωτικό Υλικό Ασφάλειας και Υγείας\",\"url\":\"https://www.moec.gov.cy/politiki_amyna/ay_epimorfotiko_yliko.html\",\"icon\":\"fas fa-book-open\"},{\"title\":\"Έντυπα και ανακοινώσεις του σχολείου\",\"url\":\"https://gym-ag-athanasios-lem.schools.ac.cy/index.php?id=student-registrations\",\"icon\":\"fas fa-folder-open\"}]}', '2026-04-11 19:03:11'),
 (6, 'uniform', 'Μαθητική Στολή', 'Συνοπτική παρουσίαση με βάση τους εσωτερικούς κανονισμούς του σχολείου.', '{\"cards\":[{\"title\":\"Αγόρια\",\"items\":[\"Γκρίζο παντελόνι\",\"Άσπρο πουκάμισο, T-shirt ή polo\",\"Μπλε σκούρο πουλόβερ\",\"Δεν επιτρέπονται jeans ή αθλητικές φόρμες στην καθημερινή στολή\"]},{\"title\":\"Κορίτσια\",\"items\":[\"Γκρίζα φούστα ή γκρίζο παντελόνι\",\"Άσπρο πουκάμισο, T-shirt ή polo\",\"Μπλε σκούρο πουλόβερ\",\"Δεν επιτρέπονται jeans ή κολάν στην καθημερινή στολή\"]},{\"title\":\"Στολή Γυμναστικής\",\"items\":[\"Μαύρο ή μπλε παντελόνι φόρμας\",\"Άσπρη, γκρίζα ή σχολική φανέλα\",\"Αθλητικά παπούτσια\",\"Πρακτική και ασφαλής ενδυμασία για το μάθημα Φυσικής Αγωγής\"]}],\"note\":\"Για τις πλήρεις λεπτομέρειες της στολής και των κανονισμών, δείτε τους επίσημους εσωτερικούς κανονισμούς του σχολείου.\",\"button_text\":\"Προβολή Κανονισμών\",\"button_url\":\"https://gym-ag-athanasios-lem.schools.ac.cy/data/uploads/documents/2025-2026/september/esoterikoi-kanonismoi-2025-2026.pdf\"}', '2026-04-11 19:03:11');
 
---
--- Dumping data for table `Users`
---
-
-INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_number`, `number_of_children`, `role`, `account_status`, `token`, `token_expiry`, `created_at`) VALUES
-(1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '+35799123456', 0, 'admin', 'active', 'fdb9e92eb8dd2097f3b7d080f31834ff477ce5a7bf912b699730bcd93d20b09b', '2026-04-14 15:10:57', '2026-04-11 19:03:11'),
-(2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '+35799112233', 2, 'parent', 'active', NULL, NULL, '2026-04-11 19:03:11'),
-(3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '+35799445566', 1, 'parent', 'waiting_payment', NULL, NULL, '2026-04-11 19:03:11');
 COMMIT;
+SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
