@@ -65,6 +65,18 @@
     text-shadow: none !important;
 }
 
+#createProductModal .modal-footer .btn-secondary:hover,
+#createProductModal .modal-footer .btn-secondary:focus,
+#editProductModal .modal-footer .btn-secondary:hover,
+#editProductModal .modal-footer .btn-secondary:focus,
+#deleteConfirmModal .modal-footer .btn-secondary:hover,
+#deleteConfirmModal .modal-footer .btn-secondary:focus {
+    background: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
 @media (max-width: 767.98px) {
     .admin-table {
         min-width: 860px;

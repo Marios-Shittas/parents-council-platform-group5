@@ -1153,7 +1153,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
             <div class="content-management__intro">
                 <div>
                     <h2><i class="fas fa-images"></i> Φωτογραφικό Υλικό</h2>
-                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες αποθηκεύονται στο <code>public/assets/Parents_img</code> και εμφανίζονται αυτόματα στη σελίδα Συνδεσμος Γωνεων.</p>
+                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες εμφανίζονται αυτόματα στη δημόσια σελίδα του Συνδέσμου Γονέων.</p>
                 </div>
             </div>
 
