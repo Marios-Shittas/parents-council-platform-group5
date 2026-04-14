@@ -348,6 +348,16 @@
     border-top: 1px solid #e4e9f0;
 }
 
+#createApplicationModal .modal-footer .btn-secondary-custom:hover,
+#createApplicationModal .modal-footer .btn-secondary-custom:focus,
+#editApplicationModal .modal-footer .btn-secondary-custom:hover,
+#editApplicationModal .modal-footer .btn-secondary-custom:focus {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+    box-shadow: none;
+}
+
 #editApplicationModal .nav-tabs .nav-link {
     padding: 0.35rem 0.65rem;
     font-size: 0.86rem;

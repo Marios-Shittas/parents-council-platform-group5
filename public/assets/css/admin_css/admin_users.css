@@ -49,16 +49,42 @@
     font-weight: 700;
 }
 
+.modal-footer .modal-cancel-btn:hover,
+.modal-footer .modal-cancel-btn:focus {
+    color: #fff;
+    border-color: #dc3545;
+    background: #dc3545;
+    box-shadow: none;
+}
+
 .admin-page-header .btn-primary-custom {
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+    --bs-btn-focus-color: #fff;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-bg: var(--users-accent);
+    --bs-btn-hover-bg: var(--users-accent);
+    --bs-btn-active-bg: var(--users-accent);
+    --bs-btn-focus-bg: var(--users-accent);
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-focus-border-color: transparent;
     background: var(--users-accent);
+    color: #fff;
     border: none;
     box-shadow: none;
-    transition: background-color 0.16s ease;
+    transition: none;
 }
 
 .admin-page-header .btn-primary-custom:hover,
-.admin-page-header .btn-primary-custom:focus {
-    background: var(--users-accent-dark);
+.admin-page-header .btn-primary-custom:focus,
+.admin-page-header .btn-primary-custom:focus-visible,
+.admin-page-header .btn-primary-custom:active,
+.admin-page-header .btn-primary-custom.active {
+    background: var(--users-accent);
+    color: #fff;
     box-shadow: none;
 }
 

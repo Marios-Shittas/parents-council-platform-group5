@@ -809,7 +809,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Δημιουργία
                     </button>
@@ -886,7 +886,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Αποθήκευση
                     </button>
@@ -950,7 +950,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
             </div>
 
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-outline-secondary px-4 modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                 <button type="button" class="btn btn-danger px-4" id="deleteUserFinalConfirmButton">Ναι, οριστική διαγραφή</button>
             </div>
         </div>
@@ -996,7 +996,7 @@ $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                    <button type="button" class="btn btn-outline-secondary modal-cancel-btn" data-bs-dismiss="modal">Ακύρωση</button>
                     <button type="submit" class="btn btn-primary-custom">
                         <i class="fas fa-save me-1"></i>Αποθήκευση
                     </button>
