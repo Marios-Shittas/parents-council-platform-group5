@@ -234,7 +234,7 @@ INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_conte
 
 INSERT INTO `SystemSchedule` (`ss_id`, `feature`, `start_date`, `end_date`, `ss_status`) VALUES
 (1, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active'),
-(2, 'purchase', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active');
+(2, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active');
 
 --
 -- Dumping data for table `UsefulInformationSections`

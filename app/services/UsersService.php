@@ -116,8 +116,18 @@ class UsersService
 
     public function runScheduledMaintenance(): void
     {
-        $this->runScheduledUsersCleanup();
-        $this->runScheduledApplicationsCleanup();
+        $this->runScheduledMaintenanceWithReport();
+    }
+
+    public function runScheduledMaintenanceWithReport(): array
+    {
+        $deletedUsers = $this->runScheduledUsersCleanup();
+        $deletedSubmissions = $this->runScheduledSubmissionsCleanup();
+
+        return [
+            'deleted_users' => $deletedUsers,
+            'deleted_submissions' => $deletedSubmissions,
+        ];
     }
 
     private function runScheduledUsersCleanup(): int
@@ -153,30 +163,23 @@ class UsersService
         return $deletedCount;
     }
 
-    private function runScheduledApplicationsCleanup(): int
+    private function runScheduledSubmissionsCleanup(): int
     {
-        $gate = $this->isSystemFeatureOpen('cleanup_applications');
+        $gate = $this->isSystemFeatureOpen('cleanup_submissions');
         if (empty($gate['is_open'])) {
             return 0;
         }
 
-        require_once __DIR__ . '/ApplicationsService.php';
-        $applicationsService = new ApplicationsService();
-        $applications = $applicationsService->getAllApplications();
-        if (empty($applications)) {
-            return 0;
+        $deletedCount = 0;
+
+        $submissionsResult = $this->conn->query('DELETE FROM Submissions');
+        if ($submissionsResult) {
+            $deletedCount += max(0, (int)$this->conn->affected_rows);
         }
 
-        $deletedCount = 0;
-        foreach ($applications as $application) {
-            $applicationId = (int)($application['application_id'] ?? 0);
-            if ($applicationId <= 0) {
-                continue;
-            }
-
-            if ($applicationsService->deleteApplication($applicationId)) {
-                $deletedCount++;
-            }
+        $applicationSubmissionsResult = $this->conn->query('DELETE FROM ApplicationSubmissions');
+        if ($applicationSubmissionsResult) {
+            $deletedCount += max(0, (int)$this->conn->affected_rows);
         }
 
         return $deletedCount;
@@ -417,6 +420,11 @@ class UsersService
             $endTs = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : $startTs;
             if ($startTs === false || $endTs === false) {
                 continue;
+            }
+
+            if ($this->isSingleMomentScheduleFeature($normalizedFeature) && $endTs <= $startTs) {
+                // Keep single-moment tasks open for a short window so cron/page timing does not miss them.
+                $endTs = $startTs + 600;
             }
 
             $activePeriods[] = date('d/m/Y H:i', $startTs) . ' - ' . date('d/m/Y H:i', $endTs);
@@ -1593,7 +1601,19 @@ class UsersService
             return ['success' => false, 'message' => 'Μη έγκυρες ημερομηνίες προγράμματος εγγραφών.'];
         }
 
-        if (strtotime($normalizedStart) === false || strtotime($normalizedEnd) === false || strtotime($normalizedStart) > strtotime($normalizedEnd)) {
+        $startTs = strtotime($normalizedStart);
+        $endTs = strtotime($normalizedEnd);
+
+        if ($startTs === false || $endTs === false) {
+            return ['success' => false, 'message' => 'Μη έγκυρες ημερομηνίες προγράμματος εγγραφών.'];
+        }
+
+        if ($this->isSingleMomentScheduleFeature($normalizedFeature) && $endTs <= $startTs) {
+            $normalizedEnd = date('Y-m-d H:i:s', $startTs + 600);
+            $endTs = strtotime($normalizedEnd);
+        }
+
+        if ($startTs > $endTs) {
             return ['success' => false, 'message' => 'Η ημερομηνία έναρξης πρέπει να είναι πριν ή ίδια με την ημερομηνία λήξης.'];
         }
 
@@ -1608,8 +1628,18 @@ class UsersService
 
     private function normalizeScheduleFeature(string $feature): string
     {
-        $allowed = ['registration', 'delete_users', 'cleanup_applications'];
-        return in_array($feature, $allowed, true) ? $feature : '';
+        $normalized = trim((string)$feature);
+        if ($normalized === 'cleanup_applications' || $normalized === 'cleanuo_submissions') {
+            $normalized = 'cleanup_submissions';
+        }
+
+        $allowed = ['registration', 'delete_users', 'cleanup_submissions'];
+        return in_array($normalized, $allowed, true) ? $normalized : '';
+    }
+
+    private function isSingleMomentScheduleFeature(string $feature): bool
+    {
+        return in_array($feature, ['delete_users', 'cleanup_submissions'], true);
     }
 
     private function normalizeRole(string $role): string
