@@ -111,6 +111,108 @@ function parentsAdminRowsToTextarea($rows, array $keys)
     return implode("\n", $lines);
 }
 
+function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
+{
+    $mergedRows = is_array($rows) ? $rows : [];
+    $existingYears = [];
+
+    foreach ($mergedRows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year !== '') {
+            $existingYears[(string)preg_replace('/\s*-\s*/', '-', $year)] = true;
+        }
+    }
+
+    foreach ($referenceRows as $referenceRow) {
+        if (!is_array($referenceRow)) {
+            continue;
+        }
+
+        $year = trim((string)($referenceRow['year'] ?? ''));
+        $normalizedYear = (string)preg_replace('/\s*-\s*/', '-', $year);
+        if ($year === '' || isset($existingYears[$normalizedYear])) {
+            continue;
+        }
+
+        foreach ($referenceRows as $candidateRow) {
+            if (is_array($candidateRow) && trim((string)($candidateRow['year'] ?? '')) === $year) {
+                $mergedRows[] = $candidateRow;
+            }
+        }
+
+        $existingYears[$normalizedYear] = true;
+    }
+
+    return $mergedRows;
+}
+
+function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
+{
+    $groupedRows = [];
+
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year === '') {
+            continue;
+        }
+
+        if (!isset($groupedRows[$year])) {
+            $groupedRows[$year] = [];
+        }
+
+        $groupedRows[$year][] = [
+            'role' => trim((string)($row['role'] ?? '')),
+            'name' => trim((string)($row['name'] ?? '')),
+        ];
+    }
+
+    return $groupedRows;
+}
+
+function parentsAdminBoardArchiveGroupToTextarea(array $rows)
+{
+    return parentsAdminRowsToTextarea($rows, ['role', 'name']);
+}
+
+function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
+{
+    $archiveRows = [];
+    $years = is_array($years) ? $years : [];
+    $rowsPerYear = is_array($rowsPerYear) ? $rowsPerYear : [];
+
+    foreach ($years as $index => $yearValue) {
+        $year = trim((string)$yearValue);
+        $rowsText = (string)($rowsPerYear[$index] ?? '');
+
+        if ($year === '' && trim($rowsText) === '') {
+            continue;
+        }
+
+        if ($year === '') {
+            continue;
+        }
+
+        $parsedRows = parentsAdminTextareaToRows($rowsText, ['role', 'name']);
+        foreach ($parsedRows as $row) {
+            $archiveRows[] = [
+                'year' => $year,
+                'role' => trim((string)($row['role'] ?? '')),
+                'name' => trim((string)($row['name'] ?? '')),
+            ];
+        }
+    }
+
+    return $archiveRows;
+}
+
 function getParentsGalleryUploadDir()
 {
     return dirname(__DIR__) . '/assets/Parents_img/';
@@ -371,7 +473,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'year_label' => parentsAdminTrim($_POST['year_label'] ?? ''),
                         'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
                         'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
-                        'rows' => parentsAdminTextareaToRows($_POST['rows'] ?? '', ['year', 'role', 'name']),
+                        'rows' => parentsAdminBoardArchiveBlocksToRows($_POST['archive_years'] ?? [], $_POST['archive_rows'] ?? []),
                     ]
                 );
                 break;
@@ -453,6 +555,11 @@ $associationSection = $sections['association_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
+$boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
+    $boardArchiveSection['content']['rows'] ?? [],
+    $parentsPageService->getBoardArchiveReferenceRows()
+);
+$boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
 $gallerySection = $sections['gallery_section'];
 $parentsContentTabs = [
     'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
@@ -848,7 +955,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Συμβούλια ανά Σχολική Χρονιά</h3>
-                            <p>Αρχείο συνθέσεων ανά χρονιά. Μορφή γραμμής: <code>Σχολική Χρονιά | Θέση | Ονοματεπώνυμο</code>.</p>
+                            <p>Αρχείο συνθέσεων ανά χρονιά. Για κάθε block γράφεις γραμμές στη μορφή <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-archive"></i></span>
                     </div>
@@ -889,8 +996,32 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group full-width">
-                                <label for="board-archive-rows">Γραμμές αρχείου συμβουλίων</label>
-                                <textarea class="form-control content-textarea content-textarea--large" id="board-archive-rows" name="rows"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($boardArchiveSection['content']['rows'] ?? [], ['year', 'role', 'name'])); ?></textarea>
+                                <label>Συνθέσεις ανά σχολική χρονιά</label>
+                                <div class="board-archive-editor">
+                                    <?php foreach ($boardArchiveGroupsForEditor as $year => $rows): ?>
+                                        <div class="board-archive-editor__block">
+                                            <div class="form-group">
+                                                <label>Σχολική Χρονιά</label>
+                                                <input type="text" class="form-control" name="archive_years[]" value="<?php echo htmlspecialchars($year); ?>">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label>Μέλη για <?php echo htmlspecialchars($year); ?></label>
+                                                <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]"><?php echo htmlspecialchars(parentsAdminBoardArchiveGroupToTextarea($rows)); ?></textarea>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="board-archive-editor__block board-archive-editor__block--new">
+                                        <div class="form-group">
+                                            <label>Νέα Σχολική Χρονιά</label>
+                                            <input type="text" class="form-control" name="archive_years[]" value="" placeholder="π.χ. 2021-2022">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label>Μέλη νέας χρονιάς</label>
+                                            <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]" placeholder="ΠΡΟΕΔΡΟΣ | Όνομα Επώνυμο&#10;ΑΝΤΙΠΡΟΕΔΡΟΣ | Όνομα Επώνυμο"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

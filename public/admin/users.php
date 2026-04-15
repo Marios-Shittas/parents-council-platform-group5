@@ -208,6 +208,158 @@ function formatPaymentTypeLabel(string $type): string
     return $map[$type] ?? ucfirst($type);
 }
 
+function exportCellText(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+function formatExportDate(?string $value): string
+{
+    if (!is_string($value) || trim($value) === '') {
+        return '—';
+    }
+
+    $timestamp = strtotime($value);
+    return $timestamp ? date('d/m/Y H:i', $timestamp) : (string)$value;
+}
+
+function buildChildExportSummary(array $children): string
+{
+    if (empty($children)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($children as $child) {
+        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
+        $dob = !empty($child['date_of_birth']) ? date('d/m/Y', strtotime((string)$child['date_of_birth'])) : '—';
+        $schoolClass = trim((string)($child['school_class'] ?? ''));
+        $parts[] = trim($name) . ' | Γεν.: ' . $dob . ' | Τάξη: ' . ($schoolClass !== '' ? $schoolClass : '—');
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildInsuredChildrenSummary(array $children, array $insuredChildIds, bool $hasCompletedInsurance): string
+{
+    if (empty($children)) {
+        return '—';
+    }
+
+    $resolvedInsuredChildIds = $insuredChildIds;
+    if ($hasCompletedInsurance && empty($resolvedInsuredChildIds)) {
+        foreach ($children as $child) {
+            $childId = (int)($child['child_id'] ?? 0);
+            if ($childId > 0) {
+                $resolvedInsuredChildIds[] = $childId;
+            }
+        }
+    }
+
+    $insuredLookup = array_flip(array_map('intval', $resolvedInsuredChildIds));
+    $parts = [];
+
+    foreach ($children as $child) {
+        $childId = (int)($child['child_id'] ?? 0);
+        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
+        $parts[] = $name . ': ' . (isset($insuredLookup[$childId]) ? 'Ναι' : 'Όχι');
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildPaymentSummary(array $payments, string $paymentType): string
+{
+    $filtered = array_values(array_filter($payments, static function ($payment) use ($paymentType) {
+        return (string)($payment['payment_type'] ?? '') === $paymentType;
+    }));
+
+    if (empty($filtered)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($filtered as $payment) {
+        $parts[] = sprintf(
+            '#%d | %s | %s | %s | ποσό: %s | JCC: %s',
+            (int)($payment['payment_id'] ?? 0),
+            formatPaymentTypeLabel((string)($payment['payment_type'] ?? '')),
+            formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending')),
+            formatExportDate($payment['payment_date'] ?? null),
+            number_format((float)($payment['amount'] ?? 0), 2),
+            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
+        );
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildProductTransactionSummary(array $payments): string
+{
+    $filtered = array_values(array_filter($payments, static function ($payment) {
+        return (string)($payment['payment_type'] ?? '') === 'product'
+            && trim((string)($payment['transaction_id'] ?? '')) !== '';
+    }));
+
+    if (empty($filtered)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($filtered as $payment) {
+        $parts[] = sprintf(
+            '#%d: %s',
+            (int)($payment['payment_id'] ?? 0),
+            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
+        );
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildOrdersExportSummary(array $orders, array $orderItemsByOrderId): string
+{
+    if (empty($orders)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($orders as $order) {
+        $orderId = (int)($order['order_id'] ?? 0);
+        $items = $orderItemsByOrderId[$orderId] ?? [];
+        if (empty($items)) {
+            continue;
+        }
+
+        $itemParts = [];
+
+        foreach ($items as $item) {
+            $size = trim((string)($item['size'] ?? ''));
+            $itemParts[] = sprintf(
+                '%s x%d%s',
+                (string)($item['product_name'] ?? 'Προϊόν'),
+                (int)($item['quantity'] ?? 0),
+                $size !== '' ? ' [' . $size . ']' : ''
+            );
+        }
+
+        $parts[] = sprintf(
+            '#%d | %s | %s | σύνολο: %s | είδη: %s',
+            $orderId,
+            formatOrderStatusLabel((string)($order['order_status'] ?? 'pending')),
+            formatExportDate($order['created_at'] ?? null),
+            number_format((float)($order['total_price'] ?? 0), 2),
+            !empty($itemParts) ? implode(', ', $itemParts) : '—'
+        );
+    }
+
+    if (empty($parts)) {
+        return '—';
+    }
+
+    return implode(" \n", $parts);
+}
+
 $usersService = new UsersService();
 $currentAdminId = (int)($_SESSION['user_id'] ?? 0);
 $message = $_SESSION['flash_message'] ?? '';
@@ -423,6 +575,102 @@ $childrenByParentId = $usersService->getChildrenGroupedByUserIds($parentUserIds)
 $ordersByUserId = $usersService->getOrdersGroupedByUserIds($allUserIds);
 $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
 $registrationSchedules = $usersService->getSystemSchedules();
+
+$allOrderIds = [];
+foreach ($ordersByUserId as $userOrders) {
+    foreach ($userOrders as $order) {
+        $orderId = (int)($order['order_id'] ?? 0);
+        if ($orderId > 0) {
+            $allOrderIds[] = $orderId;
+        }
+    }
+}
+$orderItemsByOrderId = $usersService->getOrderItemsGroupedByOrderIds($allOrderIds);
+$parentUsersForExport = array_values(array_filter($users, static function ($user) {
+    return (string)($user['role'] ?? '') === 'parent';
+}));
+
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="users-export-' . date('Y-m-d-H-i') . '.xls"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo "\xEF\xBB\xBF";
+    ?>
+    <html lang="el">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; text-align: left; }
+            th { background: #eaf3ff; font-weight: 700; }
+            td { white-space: pre-line; }
+        </style>
+    </head>
+    <body>
+    <table>
+        <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Όνομα</th>
+            <th>Επώνυμο</th>
+            <th>Email</th>
+            <th>Τηλέφωνο</th>
+            <th>Ρόλος</th>
+            <th>Κατάσταση</th>
+            <th>Ημ. Δημιουργίας</th>
+            <th>Αριθμός Παιδιών</th>
+            <th>Στοιχεία Παιδιών</th>
+            <th>Ασφάλεια Παιδιών</th>
+            <th>Υπάρχει Ολοκληρωμένη Ασφάλεια</th>
+            <th>Πληρωμές Ασφάλειας</th>
+            <th>Πληρωμές Συνδρομής</th>
+            <th>Αγορές E-shop</th>
+            <th>JCC IDs E-shop</th>
+            <th>Όλες οι Πληρωμές</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($parentUsersForExport as $user): ?>
+            <?php
+            $userId = (int)($user['user_id'] ?? 0);
+            $userChildren = $childrenByParentId[$userId] ?? [];
+            $userOrders = $ordersByUserId[$userId] ?? [];
+            $userPayments = $paymentsByUserId[$userId] ?? [];
+            $insuredChildIds = $usersService->getCompletedInsuredChildIdsByUserId($userId);
+            $hasCompletedInsurance = !empty(array_filter($userPayments, static function ($payment) {
+                return (string)($payment['payment_type'] ?? '') === 'insurance'
+                    && (string)($payment['payment_status'] ?? '') === 'completed';
+            }));
+            ?>
+            <tr>
+                <td><?php echo exportCellText((string)$userId); ?></td>
+                <td><?php echo exportCellText((string)($user['name'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['surname'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['email'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['phone_number'] ?? '')); ?></td>
+                <td><?php echo exportCellText(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?></td>
+                <td><?php echo exportCellText(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?></td>
+                <td><?php echo exportCellText(formatExportDate($user['created_at'] ?? null)); ?></td>
+                <td><?php echo exportCellText((string)count($userChildren)); ?></td>
+                <td><?php echo exportCellText(buildChildExportSummary($userChildren)); ?></td>
+                <td><?php echo exportCellText(buildInsuredChildrenSummary($userChildren, $insuredChildIds, $hasCompletedInsurance)); ?></td>
+                <td><?php echo exportCellText($hasCompletedInsurance ? 'Ναι' : 'Όχι'); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance')); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'membership')); ?></td>
+                <td><?php echo exportCellText(buildOrdersExportSummary($userOrders, $orderItemsByOrderId)); ?></td>
+                <td><?php echo exportCellText(buildProductTransactionSummary($userPayments)); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance') . " \n" . buildPaymentSummary($userPayments, 'membership') . " \n" . buildPaymentSummary($userPayments, 'product')); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    </body>
+    </html>
+    <?php
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -505,15 +753,32 @@ $registrationSchedules = $usersService->getSystemSchedules();
             </div>
         </div>
 
-        <div class="card card-custom mb-4 registration-schedule-card">
+        <div class="card card-custom mb-4 registration-schedule-card registration-schedule-card--collapsed" id="registrationScheduleCard">
             <div class="card-body">
-                <div class="users-toolbar mb-3">
-                    <div>
+                <div class="users-toolbar mb-3 registration-schedule-toolbar">
+                    <button
+                        type="button"
+                        class="registration-schedule-toggle"
+                        id="registrationScheduleToggle"
+                        aria-expanded="false"
+                        aria-controls="registrationScheduleContent"
+                    >
+                        <div>
+                            <span class="registration-schedule-toggle-label">Προγραμματισμός Συστήματος</span>
+                            <h4 class="mb-1"><i class="fas fa-calendar-alt me-2"></i>Προγραμματισμός Λειτουργιών</h4>
+                            <p class="text-muted mb-0">Διαχείριση χρονικών περιόδων για τις βασικές λειτουργίες του συστήματος.</p>
+                        </div>
+                        <span class="registration-schedule-toggle-icon" aria-hidden="true">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </button>
+                    <div class="registration-schedule-toolbar-actions">
                         <h4 class="mb-1"><i class="fas fa-calendar-alt me-2"></i>Προγραμματισμός Λειτουργιών</h4>
-                        <p class="text-muted mb-0">Διαχείριση χρονικών περιόδων για τις βασικές λειτουργίες του συστήματος.</p>
+                        <p class="text-muted mb-0 d-none">Διαχείριση χρονικών περιόδων για τις βασικές λειτουργίες του συστήματος.</p>
                     </div>
                 </div>
 
+                <div class="registration-schedule-content d-none" id="registrationScheduleContent">
                 <div class="table-responsive">
                     <table class="table align-middle admin-dashboard-table registration-schedule-table mb-0">
                         <thead>
@@ -643,6 +908,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                 <form id="registration-schedule-form-new" method="POST" class="registration-schedule-form">
                     <input type="hidden" name="action" value="add_registration_schedule">
                 </form>
+                </div>
             </div>
         </div>
 
@@ -654,6 +920,9 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <p class="text-muted mb-0">Ορισμένοι λογαριασμοί διαχειριστή προστατεύονται για λόγους ασφάλειας. Επίσης, δεν επιτρέπεται η διαγραφή του λογαριασμού που είναι αυτή τη στιγμή συνδεδεμένος.</p>
                     </div>
                     <div class="users-toolbar-actions">
+                        <a href="users.php?sort=<?php echo urlencode($selectedSort); ?>&export=excel" class="btn btn-success users-export-btn">
+                            <i class="fas fa-file-excel me-1"></i>Export to Excel
+                        </a>
                         <div class="users-search-wrap">
                             <i class="fas fa-search"></i>
                             <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο ή κατάσταση">
@@ -1311,6 +1580,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
     var managedParentId = urlParams.get('manage_children');
     var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
+    var registrationScheduleCard = document.getElementById('registrationScheduleCard');
+    var registrationScheduleToggle = document.getElementById('registrationScheduleToggle');
+    var registrationScheduleContent = document.getElementById('registrationScheduleContent');
 
     function formatDateTimeLocal(dateObj) {
         var year = String(dateObj.getFullYear());
@@ -1324,6 +1596,25 @@ document.addEventListener('DOMContentLoaded', function () {
     function isSingleMomentFeature(featureValue) {
         return featureValue === 'delete_users' || featureValue === 'cleanup_submissions';
     }
+
+    function setRegistrationScheduleExpanded(shouldExpand) {
+        if (!registrationScheduleCard || !registrationScheduleToggle || !registrationScheduleContent) {
+            return;
+        }
+
+        registrationScheduleCard.classList.toggle('registration-schedule-card--collapsed', !shouldExpand);
+        registrationScheduleContent.classList.toggle('d-none', !shouldExpand);
+        registrationScheduleToggle.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+    }
+
+    if (registrationScheduleToggle) {
+        registrationScheduleToggle.addEventListener('click', function () {
+            var isExpanded = registrationScheduleToggle.getAttribute('aria-expanded') === 'true';
+            setRegistrationScheduleExpanded(!isExpanded);
+        });
+    }
+
+    setRegistrationScheduleExpanded(false);
 
     function syncScheduleRowInputs(formId) {
         if (!formId) {

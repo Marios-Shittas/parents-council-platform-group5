@@ -156,6 +156,46 @@
     transform: translateY(-1px);
 }
 
+.eshop-coming-soon {
+    padding: 2rem 1rem 4rem;
+}
+
+.eshop-coming-soon__card {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(58, 124, 165, 0.16);
+    background:
+        radial-gradient(circle at top right, rgba(250, 126, 97, 0.20), transparent 34%),
+        linear-gradient(145deg, #ffffff, #f4f8fb);
+    box-shadow: 0 24px 60px rgba(26, 55, 77, 0.08);
+    text-align: center;
+}
+
+.eshop-coming-soon__eyebrow {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #3A7CA5;
+}
+
+.eshop-coming-soon__card h2 {
+    margin-bottom: 0.75rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    color: #1A374D;
+}
+
+.eshop-coming-soon__card p {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #51606d;
+}
+
 /* ============================================
    PRODUCT CARDS STYLING
    ============================================ */
@@ -598,6 +638,11 @@
     .eshop-feedback-banner {
         margin: 0 0 1.25rem;
         padding: 0.95rem 1rem;
+    }
+
+    .eshop-coming-soon__card {
+        padding: 2.25rem 1.25rem;
+        border-radius: 22px;
     }
 
     .wholecart {

@@ -100,6 +100,37 @@ function parentsPageGroupArchiveRowsByYear($rows)
     return $grouped;
 }
 
+function parentsPageMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
+{
+    $mergedRows = parentsPageSanitizeRows($rows);
+    $existingYears = [];
+
+    foreach ($mergedRows as $row) {
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year !== '') {
+            $existingYears[(string)preg_replace('/\s*-\s*/', '-', $year)] = true;
+        }
+    }
+
+    foreach (parentsPageSanitizeRows($referenceRows) as $referenceRow) {
+        $year = trim((string)($referenceRow['year'] ?? ''));
+        $normalizedYear = (string)preg_replace('/\s*-\s*/', '-', $year);
+        if ($year === '' || isset($existingYears[$normalizedYear])) {
+            continue;
+        }
+
+        foreach (parentsPageSanitizeRows($referenceRows) as $candidateRow) {
+            if (trim((string)($candidateRow['year'] ?? '')) === $year) {
+                $mergedRows[] = $candidateRow;
+            }
+        }
+
+        $existingYears[$normalizedYear] = true;
+    }
+
+    return $mergedRows;
+}
+
 $parentsPageService = new ParentsPageService();
 $sections = $parentsPageService->getAllSections();
 $galleryImages = $parentsPageService->getGalleryImages();
@@ -118,7 +149,12 @@ $historyItems = parentsPageSanitizeList($historySection['content']['items'] ?? [
 $scheduleBlocks = parentsPageSanitizeScheduleBlocks($scheduleSection['content']['blocks'] ?? []);
 $boardMembers = parentsPageSanitizeRows($boardSection['content']['board_members'] ?? []);
 $committeeMembers = parentsPageSanitizeList($boardSection['content']['committee_members'] ?? []);
-$boardArchiveRows = parentsPageGroupArchiveRowsByYear($boardArchiveSection['content']['rows'] ?? []);
+$boardArchiveRows = parentsPageGroupArchiveRowsByYear(
+    parentsPageMergeBoardArchiveReferenceRows(
+        $boardArchiveSection['content']['rows'] ?? [],
+        $parentsPageService->getBoardArchiveReferenceRows()
+    )
+);
 $classResponsibles = parentsPageSanitizeRows($classResponsiblesSection['content']['rows'] ?? []);
 $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content']['registration_steps'] ?? []);
 $loginSteps = parentsPageSanitizeList($electronicAdminSection['content']['login_steps'] ?? []);
@@ -334,28 +370,38 @@ $pageHeaderEyebrow = site_is_parent()
                     <?php if (empty($boardArchiveRows)): ?>
                         <p class="mb-0">Δεν έχουν προστεθεί ακόμη συμβούλια ανά σχολική χρονιά.</p>
                     <?php else: ?>
+                        <?php $archiveIndex = 0; ?>
                         <?php foreach ($boardArchiveRows as $schoolYear => $rows): ?>
-                            <article class="parents-timetable-block mb-3">
-                                <h3><?php echo htmlspecialchars($schoolYear); ?></h3>
-                                <div class="table-responsive">
-                                    <table class="table parents-table parents-table--compact mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th><?php echo htmlspecialchars($boardArchiveSection['content']['position_label'] ?? 'Θέση'); ?></th>
-                                                <th><?php echo htmlspecialchars($boardArchiveSection['content']['name_label'] ?? 'Ονοματεπώνυμο'); ?></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($rows as $row): ?>
+                            <details class="parents-archive-year mb-3" <?php echo $archiveIndex === 0 ? 'open' : ''; ?>>
+                                <summary class="parents-archive-year__summary">
+                                    <span class="parents-archive-year__title">Συμβούλιο σχολικής χρονιάς <?php echo htmlspecialchars($schoolYear); ?></span>
+                                    <span class="parents-archive-year__icon" aria-hidden="true">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                </summary>
+
+                                <div class="parents-archive-year__content">
+                                    <div class="table-responsive">
+                                        <table class="table parents-table parents-table--compact mb-0">
+                                            <thead>
                                                 <tr>
-                                                    <td><?php echo htmlspecialchars($row['role'] ?? ''); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['name'] ?? ''); ?></td>
+                                                    <th><?php echo htmlspecialchars($boardArchiveSection['content']['position_label'] ?? 'Θέση'); ?></th>
+                                                    <th><?php echo htmlspecialchars($boardArchiveSection['content']['name_label'] ?? 'Ονοματεπώνυμο'); ?></th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($rows as $row): ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($row['role'] ?? ''); ?></td>
+                                                        <td><?php echo htmlspecialchars($row['name'] ?? ''); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </article>
+                            </details>
+                            <?php $archiveIndex++; ?>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
