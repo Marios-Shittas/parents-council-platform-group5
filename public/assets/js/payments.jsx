@@ -336,10 +336,10 @@ function Payments() {
                         </div>
                     )}
 
-                    <div className="row">
+                    <div className="row eshop-products-row">
                         {products.map(product => (
-                            <div className="col-md-4" key={product.product_id}>
-                                <div className="card m-4 mb-4">
+                            <div className="col-md-4 eshop-product-col" key={product.product_id}>
+                                <div className="card product-card">
                                     <div className="card-body">
                                         <h5 className="product-title">{product.product_name}</h5>
                                         <p className="product-text">{product.product_description}</p>
@@ -416,7 +416,7 @@ function Payments() {
                         ))}
                     </div>
 
-                    <div className="wholecart m-4 mt-3">
+                    <div className="wholecart">
                         <div className="cart-header">
                             <div>
                                 <span className="cart-eyebrow">Οι επιλογές σας</span>
