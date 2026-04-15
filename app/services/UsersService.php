@@ -57,15 +57,15 @@ class UsersService
         $user = $this->getUserByEmail($email);
 
         if (!$user) {
-            return ['success' => false, 'message' => 'Invalid email or password.'];
+            return ['success' => false, 'message' => 'Μη έγκυρο email ή κωδικός πρόσβασης.'];
         }
 
         if ((string)($user['account_status'] ?? '') !== 'active') {
-            return ['success' => false, 'message' => 'Your account is not active yet.'];
+            return ['success' => false, 'message' => 'Ο λογαριασμός σας δεν είναι ακόμα ενεργός.'];
         }
 
         if (!password_verify($inputPassword, $user['password'])) {
-            return ['success' => false, 'message' => 'Invalid email or password.'];
+            return ['success' => false, 'message' => 'Μη έγκυρο email ή κωδικός πρόσβασης.'];
         }
 
         $token = bin2hex(random_bytes(32));
@@ -77,7 +77,7 @@ class UsersService
             WHERE user_id = ?
         ");
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Failed to create token.'];
+            return ['success' => false, 'message' => 'Αποτυχία δημιουργίας διακριτικού.'];
         }
         $stmt->bind_param("ssi", $token, $expiresAt, $user['user_id']);
         $stmt->execute();
@@ -88,7 +88,7 @@ class UsersService
             'user' => $user,
             'role' => $user['role'],
             'token' => $token,
-            'message' => 'Login successful.'
+            'message' => 'Η σύνδεση ολοκληρώθηκε επιτυχώς.'
         ];
     }
 
@@ -190,14 +190,14 @@ class UsersService
         $email = trim((string)$email);
         $user = $this->getUserByEmail($email);
         if (!$user || $email !== $user['email']) {
-            return ['success' => false, 'message' => 'Invalid email.'];
+            return ['success' => false, 'message' => 'Μη έγκυρο email.'];
         }
 
         if ((string)($user['account_status'] ?? '') !== 'active') {
             return ['success' => false, 'message' => 'Ο λογαριασμός δεν είναι ενεργός.'];
         }
 
-        return ['success' => true, 'message' => 'Link Sent.'];
+        return ['success' => true, 'message' => 'Ο σύνδεσμος στάλθηκε.'];
     }
 
     public function resetPassword($email, $newPassword) 
@@ -206,11 +206,15 @@ class UsersService
             return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να είναι κενός.'];
         }
 
+        if (preg_match('/\s/', $newPassword)) {
+            return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να περιέχει κενά.'];
+        }
+
         // At least 8 chars, with letters, numbers, and a special character.
         if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/', $newPassword)) {
             return [
                 'success' => false,
-                'message' => 'Password must be at least 8 characters and include letters, numbers, and 1 special character.'
+                'message' => 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες και να περιλαμβάνει γράμματα, αριθμούς και 1 ειδικό χαρακτήρα.'
             ];
         }
         

@@ -3,6 +3,7 @@
     const confirmButton = document.getElementById('confirm-button');
     const errorMessage = document.getElementById('error-message');
     const passwordRuleRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+    const whitespaceRegex = /\s/;
 
     function handleResetSubmit(event) {
         if (event) {
@@ -13,16 +14,21 @@
         const confirmPassword = document.getElementById('confirm-password').value;
 
         if (!newPassword || !confirmPassword) {
-            showError('Please enter and confirm your new password');
+            showError('Παρακαλώ εισάγετε και επιβεβαιώστε τον νέο σας κωδικό');
             return;
         }
         if (newPassword !== confirmPassword) {
-            showError('Passwords do not match');
+            showError('Οι κωδικοί δεν ταιριάζουν');
+            return;
+        }
+
+        if (whitespaceRegex.test(newPassword)) {
+            showError('Ο κωδικός δεν μπορεί να περιέχει κενά');
             return;
         }
 
         if (!passwordRuleRegex.test(newPassword)) {
-            showError('Password must be at least 8 characters and include letters, numbers, and 1 special character');
+            showError('Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες και να περιλαμβάνει γράμματα, αριθμούς και 1 ειδικό χαρακτήρα');
             return;
         }
 
@@ -53,20 +59,20 @@
         .then(data => {
             if (data.success) {
                 errorMessage.style.color = 'green';
-                errorMessage.textContent = data.message || 'Password reset successful';
+                errorMessage.textContent = data.message || 'Η επαναφορά κωδικού ολοκληρώθηκε επιτυχώς';
                 errorMessage.style.display = 'block';
                 setTimeout(() => {
                     window.location.href = 'login.php';
                 }, 1000);
             } else {
                 errorMessage.style.color = 'red';
-                errorMessage.textContent = data.message || 'Password reset failed';
+                errorMessage.textContent = data.message || 'Η επαναφορά κωδικού απέτυχε';
                 errorMessage.style.display = 'block';
             }
         })
         .catch(error => {
             errorMessage.style.color = 'red';
-            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.textContent = 'Παρουσιάστηκε σφάλμα. Παρακαλώ προσπαθήστε ξανά.';
             errorMessage.style.display = 'block';
             console.error('Error:', error);
         });

@@ -31,11 +31,11 @@ function handleLogin() {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!email || !password) {
-    errorMessage.textContent = "Please enter both email and password.";
+    errorMessage.textContent = "Παρακαλώ συμπληρώστε email και κωδικό πρόσβασης.";
   return;
   }
   else if(!emailPattern.test(email)) {
-    errorMessage.textContent = "Please enter a valid email address.";
+    errorMessage.textContent = "Παρακαλώ εισάγετε έγκυρη διεύθυνση email.";
     return;
   }
   fetch ('/parents-council-platform-group5/app/services/LoginService.php', {

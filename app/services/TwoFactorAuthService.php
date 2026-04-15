@@ -22,11 +22,11 @@ class TwoFactorAuthService
         $token = trim($token);
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Invalid email address.'];
+            return ['success' => false, 'message' => 'Μη έγκυρη διεύθυνση email.'];
         }
 
         if ($token === '') {
-            return ['success' => false, 'message' => 'Invalid token for 2FA code generation.'];
+            return ['success' => false, 'message' => 'Μη έγκυρο διακριτικό για δημιουργία κωδικού 2FA.'];
         }
 
         $code = $this->derive8CharCodeFromToken($token);
@@ -34,14 +34,14 @@ class TwoFactorAuthService
 
         $stmt = $this->conn->prepare('UPDATE Users SET token = ?, token_expiry = ? WHERE email = ?');
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Unable to save 2FA token.'];
+            return ['success' => false, 'message' => 'Αδυναμία αποθήκευσης διακριτικού 2FA.'];
         }
 
         $stmt->bind_param('sss', $token, $expiresAt, $email);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Unable to save 2FA token.'];
+            return ['success' => false, 'message' => 'Αδυναμία αποθήκευσης διακριτικού 2FA.'];
         }
 
         $stmt->close();
@@ -57,14 +57,14 @@ class TwoFactorAuthService
                 'from_name' => SMTP_FROM_NAME,
             ]);
 
-            $safeName = $name !== '' ? $name : 'User';
-            $body = "Hi {$safeName},<br><br>Your two-factor authentication code is: <strong>{$code}</strong><br><br>This code expires in {$this->tokenExpirationMinutes} minutes.";
-            $mailer->sendHtmlEmail($email, 'Two-Factor Authentication Code', $body);
+            $safeName = $name !== '' ? $name : 'Χρήστη';
+            $body = "Γεια σας {$safeName},<br><br>Ο κωδικός ελέγχου ταυτότητας δύο παραγόντων είναι: <strong>{$code}</strong><br><br>Ο κωδικός λήγει σε {$this->tokenExpirationMinutes} λεπτά.";
+            $mailer->sendHtmlEmail($email, 'Κωδικός Ελέγχου Ταυτότητας Δύο Παραγόντων', $body);
 
-            return ['success' => true, 'message' => '2FA code sent successfully.'];
+            return ['success' => true, 'message' => 'Ο κωδικός 2FA στάλθηκε επιτυχώς.'];
         } catch (Throwable $e) {
             error_log('2FA email send failed: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Failed to send 2FA code.'];
+            return ['success' => false, 'message' => 'Αποτυχία αποστολής κωδικού 2FA.'];
         }
     }
 
@@ -72,7 +72,7 @@ class TwoFactorAuthService
     {
         $stmt = $this->conn->prepare('SELECT token, token_expiry FROM Users WHERE email = ? LIMIT 1');
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Unable to verify 2FA code.'];
+            return ['success' => false, 'message' => 'Αδυναμία επαλήθευσης κωδικού 2FA.'];
         }
 
         $stmt->bind_param('s', $email);
@@ -82,21 +82,21 @@ class TwoFactorAuthService
         $stmt->close();
 
         if (!$user || empty($user['token']) || empty($user['token_expiry'])) {
-            return ['success' => false, 'message' => 'No 2FA code found.'];
+            return ['success' => false, 'message' => 'Δεν βρέθηκε κωδικός 2FA.'];
         }
 
         if (strtotime((string) $user['token_expiry']) < time()) {
             $this->clear2FAData($email);
-            return ['success' => false, 'message' => '2FA code has expired.'];
+            return ['success' => false, 'message' => 'Ο κωδικός 2FA έχει λήξει.'];
         }
 
         $expectedCode = $this->derive8CharCodeFromToken((string) $user['token']);
         if (strtolower(trim($code)) !== strtolower($expectedCode)) {
-            return ['success' => false, 'message' => 'Invalid 2FA code.'];
+            return ['success' => false, 'message' => 'Μη έγκυρος κωδικός 2FA.'];
         }
 
         $this->clear2FAData($email);
-        return ['success' => true, 'message' => '2FA verification successful.'];
+        return ['success' => true, 'message' => 'Η επαλήθευση 2FA ολοκληρώθηκε επιτυχώς.'];
     }
 
     private function clear2FAData(string $email): void
@@ -156,7 +156,7 @@ if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
 
     if ($method === 'POST') {
         if (!isset($_SESSION['temp_user_id'], $_SESSION['temp_email'], $_SESSION['temp_role'], $_SESSION['temp_token'], $_SESSION['pending_2fa'])) {
-            echo json_encode(['success' => false, 'message' => 'Login required before 2FA.']);
+            echo json_encode(['success' => false, 'message' => 'Απαιτείται σύνδεση πριν από το 2FA.']);
             exit;
         }
 
@@ -172,12 +172,12 @@ if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
         $code = trim((string) ($data['code'] ?? ''));
 
         if ($code === '') {
-            echo json_encode(['success' => false, 'message' => 'Code is required.']);
+            echo json_encode(['success' => false, 'message' => 'Ο κωδικός είναι υποχρεωτικός.']);
             exit;
         }
 
         if (!isset($_SESSION['temp_user_id'], $_SESSION['temp_email'], $_SESSION['temp_role'], $_SESSION['pending_2fa'])) {
-            echo json_encode(['success' => false, 'message' => '2FA session not found.']);
+            echo json_encode(['success' => false, 'message' => 'Η συνεδρία 2FA δεν βρέθηκε.']);
             exit;
         }
 
@@ -197,5 +197,5 @@ if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
         exit;
     }
 
-    echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
+    echo json_encode(['success' => false, 'message' => 'Η μέθοδος δεν επιτρέπεται.']);
 }

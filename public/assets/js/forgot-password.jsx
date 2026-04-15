@@ -7,11 +7,11 @@ function handleForgotPassword() {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!email) {
-    errorMessage.textContent = "Please enter your email.";
+    errorMessage.textContent = "Παρακαλώ εισάγετε το email σας.";
     return;
   }
   else if(!emailPattern.test(email)) {
-    errorMessage.textContent = "Please enter a valid email address.";
+    errorMessage.textContent = "Παρακαλώ εισάγετε έγκυρη διεύθυνση email.";
     return;
   }
   fetch (serviceUrl, {

@@ -58,7 +58,7 @@ class ResetPasswordService {
         if (!$this->validatePasswordResetToken($token, $email)) {
             return [
                 'success' => false,
-                'message' => 'Invalid or expired reset token'
+                'message' => 'Μη έγκυρο ή ληγμένο διακριτικό επαναφοράς'
             ];
         }
 

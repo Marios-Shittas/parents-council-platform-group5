@@ -15,7 +15,7 @@ if (!isset($_SESSION['pending_2fa']) || !isset($_SESSION['temp_email'])) {
 
 $successMessage = '';
 if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
-    $successMessage = 'Password reset successfully! Please log in with your new password.';
+    $successMessage = 'Η επαναφορά κωδικού ολοκληρώθηκε επιτυχώς! Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.';
 }
 ?>
 
@@ -46,7 +46,7 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>
             </a>
-            <h1 id="two-factor-title">Two-Factor Authentication</h1>
+            <h1 id="two-factor-title">Έλεγχος Ταυτότητας Δύο Παραγόντων</h1>
             <div id="two-factor-root"></div>
         </div>
 
