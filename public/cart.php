@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../app/services/CartService.php';
+require_once __DIR__ . '/../app/services/EshopSettingsService.php';
 require_once __DIR__ . '/../app/includes/auth.php';
 
 auth_require_role('parent', [
@@ -14,8 +15,18 @@ auth_require_role('parent', [
 
 $userId = (int)$_SESSION['user_id'];
 $cartService = new CartService();
+$eshopSettingsService = new EshopSettingsService();
 
 $action = $_POST['action'] ?? $_GET['action'] ?? 'get';
+
+if (!$eshopSettingsService->isShopVisible()) {
+    http_response_code(403);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Το κατάστημα είναι προσωρινά μη διαθέσιμο. Coming soon.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 switch ($action) {
     case 'get':
