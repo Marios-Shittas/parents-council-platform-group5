@@ -376,44 +376,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 break;
 
-            case 'class_responsibles_section':
-                $saved = $parentsPageService->updateSection(
-                    'class_responsibles_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTrim($_POST['subtitle'] ?? ''),
-                    [
-                        'modal_title' => parentsAdminTrim($_POST['modal_title'] ?? ''),
-                        'class_label' => parentsAdminTrim($_POST['class_label'] ?? ''),
-                        'responsible_label' => parentsAdminTrim($_POST['responsible_label'] ?? ''),
-                        'assistant_label' => parentsAdminTrim($_POST['assistant_label'] ?? ''),
-                        'room_label' => parentsAdminTrim($_POST['room_label'] ?? ''),
-                        'rows' => parentsAdminTextareaToRows($_POST['rows'] ?? '', ['class', 'responsible', 'assistant', 'room']),
-                    ]
-                );
-                break;
-
-            case 'electronic_admin_section':
-                $saved = $parentsPageService->updateSection(
-                    'electronic_admin_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTrim($_POST['subtitle'] ?? ''),
-                    [
-                        'modal_title' => parentsAdminTrim($_POST['modal_title'] ?? ''),
-                        'registration_heading' => parentsAdminTrim($_POST['registration_heading'] ?? ''),
-                        'registration_intro' => parentsAdminTextarea($_POST['registration_intro'] ?? ''),
-                        'registration_steps' => parentsAdminTextareaToList($_POST['registration_steps'] ?? ''),
-                        'login_heading' => parentsAdminTrim($_POST['login_heading'] ?? ''),
-                        'login_steps' => parentsAdminTextareaToList($_POST['login_steps'] ?? ''),
-                        'edge_heading' => parentsAdminTrim($_POST['edge_heading'] ?? ''),
-                        'edge_steps' => parentsAdminTextareaToList($_POST['edge_steps'] ?? ''),
-                        'chrome_heading' => parentsAdminTrim($_POST['chrome_heading'] ?? ''),
-                        'chrome_steps' => parentsAdminTextareaToList($_POST['chrome_steps'] ?? ''),
-                        'link_label' => parentsAdminTrim($_POST['link_label'] ?? ''),
-                        'link_url' => parentsAdminTrim($_POST['link_url'] ?? ''),
-                    ]
-                );
-                break;
-
             case 'gallery_section':
                 $saved = $parentsPageService->updateSection(
                     'gallery_section',
@@ -491,8 +453,6 @@ $associationSection = $sections['association_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
-$classResponsiblesSection = $sections['class_responsibles_section'];
-$electronicAdminSection = $sections['electronic_admin_section'];
 $gallerySection = $sections['gallery_section'];
 $parentsContentTabs = [
     'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
@@ -501,8 +461,6 @@ $parentsContentTabs = [
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
-    'class_responsibles_section' => ['label' => 'Τμήματα', 'icon' => 'fas fa-table'],
-    'electronic_admin_section' => ['label' => 'Ηλεκτρονική Διοίκηση', 'icon' => 'fas fa-laptop-house'],
     'gallery_section' => ['label' => 'Gallery Texts', 'icon' => 'fas fa-camera'],
     'gallery_management' => ['label' => 'Φωτογραφίες', 'icon' => 'fas fa-images'],
 ];
