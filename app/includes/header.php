@@ -79,6 +79,16 @@ $nav_items[] = [
     'icon' => 'fas fa-envelope',
     'match' => ['epikoinonia.php'],
 ];
+
+if (site_is_parent()) {
+    $nav_items[] = [
+        'label' => 'Φωτογραφίες',
+        'href' => site_section_url('photos.php'),
+        'icon' => 'fas fa-camera',
+        'match' => ['photos.php'],
+        'icon_only' => true,
+    ];
+}
 ?>
 <style>
         /* Βασικά χρώματα για ενιαίο design. */
@@ -194,6 +204,7 @@ $nav_items[] = [
         /* Λίγο κενό ανάμεσα στα menu items. */
         .navbar-nav .nav-item {
             margin: 0 .18rem;
+            flex: 0 0 auto;
         }
 
         /* Βασικό στυλ links menu. */
@@ -216,6 +227,22 @@ $nav_items[] = [
             width: 1rem;
             text-align: center;
             margin-right: .5rem;
+        }
+
+        .navbar-nav .nav-link--icon-only {
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+        }
+
+        .navbar-nav .nav-link--icon-only i {
+            width: auto;
+            margin-right: 0;
+            font-size: 1rem;
         }
 
         /* Hover κατάσταση για πιο καθαρό feedback στον χρήστη. */
@@ -423,6 +450,31 @@ $nav_items[] = [
             gap: .35rem;
         }
 
+        .navbar-parent .navbar-collapse {
+            gap: .7rem;
+        }
+
+        .navbar-parent .navbar-nav {
+            justify-content: flex-start;
+            gap: .12rem;
+            padding-right: .35rem;
+        }
+
+        .navbar-parent .navbar-nav .nav-item {
+            margin: 0 .08rem;
+        }
+
+        .navbar-parent .navbar-nav .nav-link {
+            padding: .46rem .72rem;
+            font-size: .91rem;
+        }
+
+        .navbar-parent .navbar-nav .nav-link--icon-only {
+            width: 2.55rem;
+            height: 2.55rem;
+            min-width: 2.55rem;
+        }
+
         .navbar-public .navbar-nav .nav-item {
             margin: 0 .35rem;
         }
@@ -439,6 +491,12 @@ $nav_items[] = [
             min-width: auto;
             padding: .2rem 0 .2rem .9rem;
             border-left: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .navbar-parent .navbar-tools {
+            gap: .55rem;
+            margin-left: .55rem;
+            padding-left: .7rem;
         }
 
         .navbar .container {
@@ -598,8 +656,17 @@ $nav_items[] = [
                     <?php $is_active = in_array($current_page, $item['match'], true); ?>
                     <li class="nav-item<?php echo $is_active ? ' active' : ''; ?>">
                         <!-- aria-current βοηθάει accessibility (screen readers). -->
-                        <a class="nav-link" href="<?php echo $item['href']; ?>" <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
-                            <i class="<?php echo $item['icon']; ?> mr-1"></i> <?php echo $item['label']; ?>
+                        <a class="nav-link<?php echo !empty($item['icon_only']) ? ' nav-link--icon-only' : ''; ?>"
+                           href="<?php echo $item['href']; ?>"
+                           aria-label="<?php echo htmlspecialchars($item['label']); ?>"
+                           title="<?php echo htmlspecialchars($item['label']); ?>"
+                           <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
+                            <i class="<?php echo $item['icon']; ?>" aria-hidden="true"></i>
+                            <?php if (empty($item['icon_only'])): ?>
+                                <?php echo $item['label']; ?>
+                            <?php else: ?>
+                                <span class="sr-only"><?php echo htmlspecialchars($item['label']); ?></span>
+                            <?php endif; ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
