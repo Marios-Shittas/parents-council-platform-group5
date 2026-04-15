@@ -361,155 +361,39 @@ $pageHeaderEyebrow = site_is_parent()
                 </div>
             </section>
 
-            <aside class="parents-sidebar">
-                <div class="parents-widget">
-                    <h3><i class="fas fa-users-cog"></i> <?php echo htmlspecialchars($classResponsiblesSection['title']); ?></h3>
-                    <button type="button" class="btn btn-outline-primary parents-modal-trigger w-100" data-toggle="modal" data-target="#classResponsiblesModal">
-                        <?php echo htmlspecialchars($classResponsiblesSection['subtitle']); ?>
-                    </button>
-                </div>
-
-                <div class="parents-widget">
-                    <h3><i class="fas fa-laptop-house"></i> <?php echo htmlspecialchars($electronicAdminSection['title']); ?></h3>
-                    <button type="button" class="btn btn-outline-primary parents-modal-trigger w-100" data-toggle="modal" data-target="#electronicAdminModal">
-                        <?php echo htmlspecialchars($electronicAdminSection['subtitle']); ?>
-                    </button>
-                </div>
-
-                <?php if ($showParentsGallery): ?>
-                    <div class="parents-widget">
-                        <h3><i class="fas fa-camera"></i> <?php echo htmlspecialchars($gallerySection['title']); ?></h3>
-                        <p class="parents-widget-note">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
-                        <?php if (!empty($galleryImages)): ?>
-                            <div class="parents-gallery">
-                                <?php foreach ($galleryImages as $image): ?>
-                                    <?php
-                                    $fullImage = $image['full_image_path'] ?? '';
-                                    $thumbImage = $image['thumb_image_path'] ?: $fullImage;
-                                    $altText = trim((string)($image['alt_text'] ?? '')) !== '' ? $image['alt_text'] : 'Φωτογραφικό υλικό σχολείου';
-                                    ?>
-                                    <a href="<?php echo htmlspecialchars($fullImage); ?>" target="_blank" rel="noopener noreferrer">
-                                        <img src="<?php echo htmlspecialchars($thumbImage); ?>" alt="<?php echo htmlspecialchars($altText); ?>" loading="lazy">
-                                    </a>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <p class="mb-0"><?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη φωτογραφίες.'); ?></p>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
-            </aside>
         </div>
+
+        <?php if ($showParentsGallery): ?>
+            <section class="parents-card parents-card--gallery mt-4">
+                <div class="parents-section-heading">
+                    <span class="parents-section-heading__icon"><i class="fas fa-camera"></i></span>
+                    <div>
+                        <p class="parents-section-heading__eyebrow"><?php echo htmlspecialchars($gallerySection['content']['eyebrow'] ?? ''); ?></p>
+                        <h2><?php echo htmlspecialchars($gallerySection['title']); ?></h2>
+                    </div>
+                </div>
+
+                <p class="parents-widget-note">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
+
+                <?php if (!empty($galleryImages)): ?>
+                    <div class="parents-gallery">
+                        <?php foreach ($galleryImages as $image): ?>
+                            <?php
+                            $fullImage = $image['full_image_path'] ?? '';
+                            $thumbImage = $image['thumb_image_path'] ?: $fullImage;
+                            $altText = trim((string)($image['alt_text'] ?? '')) !== '' ? $image['alt_text'] : 'Φωτογραφικό υλικό σχολείου';
+                            ?>
+                            <a href="<?php echo htmlspecialchars($fullImage); ?>" target="_blank" rel="noopener noreferrer">
+                                <img src="<?php echo htmlspecialchars($thumbImage); ?>" alt="<?php echo htmlspecialchars($altText); ?>" loading="lazy">
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p class="mb-0"><?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη φωτογραφίες.'); ?></p>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
     </div>
 </main>
-
-<div class="modal fade" id="classResponsiblesModal" tabindex="-1" role="dialog" aria-labelledby="classResponsiblesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="classResponsiblesModalLabel"><?php echo htmlspecialchars($classResponsiblesSection['content']['modal_title'] ?? ''); ?></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table parents-table parents-table--compact parents-modal-table mb-0">
-                        <thead>
-                            <tr>
-                                <th><?php echo htmlspecialchars($classResponsiblesSection['content']['class_label'] ?? 'ΤΜΗΜΑ'); ?></th>
-                                <th><?php echo htmlspecialchars($classResponsiblesSection['content']['responsible_label'] ?? 'ΥΠΕΥΘΥΝΟΣ ΤΜΗΜΑΤΟΣ'); ?></th>
-                                <th><?php echo htmlspecialchars($classResponsiblesSection['content']['assistant_label'] ?? 'ΥΠΕΥΘΥΝΟΣ ΒΟΗΘΟΣ ΔΙΕΥΘΥΝΤΗΣ'); ?></th>
-                                <th><?php echo htmlspecialchars($classResponsiblesSection['content']['room_label'] ?? 'ΑΙΘΟΥΣΑ'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($classResponsibles as $row): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['class'] ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($row['responsible'] ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($row['assistant'] ?? ''); ?></td>
-                                    <td><?php echo htmlspecialchars($row['room'] ?? ''); ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="electronicAdminModal" tabindex="-1" role="dialog" aria-labelledby="electronicAdminModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="electronicAdminModalLabel"><?php echo htmlspecialchars($electronicAdminSection['content']['modal_title'] ?? ''); ?></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body parents-info-modal-body">
-                <?php if (trim((string)($electronicAdminSection['content']['registration_heading'] ?? '')) !== ''): ?>
-                    <h6><?php echo htmlspecialchars($electronicAdminSection['content']['registration_heading']); ?></h6>
-                <?php endif; ?>
-
-                <?php if (trim((string)($electronicAdminSection['content']['registration_intro'] ?? '')) !== ''): ?>
-                    <p><?php echo parentsPageRenderMultiline($electronicAdminSection['content']['registration_intro']); ?></p>
-                <?php endif; ?>
-
-                <?php if (!empty($registrationSteps)): ?>
-                    <ol>
-                        <?php foreach ($registrationSteps as $step): ?>
-                            <li><?php echo htmlspecialchars($step); ?></li>
-                        <?php endforeach; ?>
-                    </ol>
-                <?php endif; ?>
-
-                <?php if (trim((string)($electronicAdminSection['content']['login_heading'] ?? '')) !== ''): ?>
-                    <h6><?php echo htmlspecialchars($electronicAdminSection['content']['login_heading']); ?></h6>
-                <?php endif; ?>
-
-                <?php if (!empty($loginSteps)): ?>
-                    <ol>
-                        <?php foreach ($loginSteps as $step): ?>
-                            <li><?php echo htmlspecialchars($step); ?></li>
-                        <?php endforeach; ?>
-                    </ol>
-                <?php endif; ?>
-
-                <?php if (trim((string)($electronicAdminSection['content']['edge_heading'] ?? '')) !== ''): ?>
-                    <h6><?php echo htmlspecialchars($electronicAdminSection['content']['edge_heading']); ?></h6>
-                <?php endif; ?>
-
-                <?php if (!empty($edgeSteps)): ?>
-                    <ol>
-                        <?php foreach ($edgeSteps as $step): ?>
-                            <li><?php echo htmlspecialchars($step); ?></li>
-                        <?php endforeach; ?>
-                    </ol>
-                <?php endif; ?>
-
-                <?php if (trim((string)($electronicAdminSection['content']['chrome_heading'] ?? '')) !== ''): ?>
-                    <h6><?php echo htmlspecialchars($electronicAdminSection['content']['chrome_heading']); ?></h6>
-                <?php endif; ?>
-
-                <?php if (!empty($chromeSteps)): ?>
-                    <ol>
-                        <?php foreach ($chromeSteps as $step): ?>
-                            <li><?php echo htmlspecialchars($step); ?></li>
-                        <?php endforeach; ?>
-                    </ol>
-                <?php endif; ?>
-
-                <?php if (trim((string)($electronicAdminSection['content']['link_url'] ?? '')) !== ''): ?>
-                    <a class="parents-info-system-link" href="<?php echo htmlspecialchars($electronicAdminSection['content']['link_url']); ?>" target="_blank" rel="noopener noreferrer">
-                        <?php echo htmlspecialchars($electronicAdminSection['content']['link_label'] ?? 'Μετάβαση στο Σύστημα Ηλεκτρονικής Διοίκησης'); ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>
