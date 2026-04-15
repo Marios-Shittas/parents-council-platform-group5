@@ -117,6 +117,12 @@ if ($pendingUserRegistrations > 0) {
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'photos.php' ? 'active' : ''; ?>" href="photos.php">
+                <i class="fas fa-camera"></i> Φωτογραφίες
+            </a>
+        </li>
+
     </ul>
 
     <div class="admin-sidebar-footer">
