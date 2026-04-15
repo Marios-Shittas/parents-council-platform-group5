@@ -133,8 +133,6 @@ function parentsPageMergeBoardArchiveReferenceRows(array $rows, array $reference
 
 $parentsPageService = new ParentsPageService();
 $sections = $parentsPageService->getAllSections();
-$galleryImages = $parentsPageService->getGalleryImages();
-
 $pageHeaderSection = $sections['page_header'] ?? ['title' => 'Σύνδεσμος Γονέων', 'subtitle' => '', 'content' => []];
 $historySection = $sections['history_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $associationSection = $sections['association_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
@@ -143,7 +141,6 @@ $boardSection = $sections['board_section'] ?? ['title' => '', 'subtitle' => '', 
 $boardArchiveSection = $sections['board_archive_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $classResponsiblesSection = $sections['class_responsibles_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $electronicAdminSection = $sections['electronic_admin_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
-$gallerySection = $sections['gallery_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
 $historyItems = parentsPageSanitizeList($historySection['content']['items'] ?? []);
 $scheduleBlocks = parentsPageSanitizeScheduleBlocks($scheduleSection['content']['blocks'] ?? []);
@@ -160,7 +157,6 @@ $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content'][
 $loginSteps = parentsPageSanitizeList($electronicAdminSection['content']['login_steps'] ?? []);
 $edgeSteps = parentsPageSanitizeList($electronicAdminSection['content']['edge_steps'] ?? []);
 $chromeSteps = parentsPageSanitizeList($electronicAdminSection['content']['chrome_steps'] ?? []);
-$showParentsGallery = site_is_parent() && (($_SESSION['role'] ?? '') === 'parent');
 
 $pageHeaderTitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['title'] ?? ''));
 $pageHeaderSubtitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['subtitle'] ?? ''));
@@ -243,18 +239,6 @@ $pageHeaderEyebrow = site_is_parent()
                             </article>
                         </div>
                     </div>
-
-                    <?php if (trim((string)($associationSection['content']['contact_value'] ?? '')) !== ''): ?>
-                        <div class="note-card mt-2">
-                            <i class="fas fa-envelope"></i>
-                            <p class="mb-0">
-                                <strong><?php echo htmlspecialchars($associationSection['content']['contact_label'] ?? 'Επικοινωνία'); ?>:</strong>
-                                <a href="mailto:<?php echo htmlspecialchars($associationSection['content']['contact_value']); ?>">
-                                    <?php echo htmlspecialchars($associationSection['content']['contact_value']); ?>
-                                </a>
-                            </p>
-                        </div>
-                    <?php endif; ?>
                 </div>
 
                 <div class="parents-card parents-card--schedule">
@@ -340,18 +324,6 @@ $pageHeaderEyebrow = site_is_parent()
                             </tbody>
                         </table>
                     </div>
-
-                    <?php if (trim((string)($boardSection['content']['contact_email_value'] ?? '')) !== ''): ?>
-                        <div class="note-card mt-3">
-                            <i class="fas fa-envelope-open-text"></i>
-                            <p class="mb-0">
-                                <strong><?php echo htmlspecialchars($boardSection['content']['contact_email_label'] ?? 'Email'); ?>:</strong>
-                                <a href="mailto:<?php echo htmlspecialchars($boardSection['content']['contact_email_value']); ?>">
-                                    <?php echo htmlspecialchars($boardSection['content']['contact_email_value']); ?>
-                                </a>
-                            </p>
-                        </div>
-                    <?php endif; ?>
                 </div>
 
                 <div class="parents-card parents-card--board-archive">
@@ -408,37 +380,6 @@ $pageHeaderEyebrow = site_is_parent()
             </section>
 
         </div>
-
-        <?php if ($showParentsGallery): ?>
-            <section class="parents-card parents-card--gallery mt-4">
-                <div class="parents-section-heading">
-                    <span class="parents-section-heading__icon"><i class="fas fa-camera"></i></span>
-                    <div>
-                        <p class="parents-section-heading__eyebrow"><?php echo htmlspecialchars($gallerySection['content']['eyebrow'] ?? ''); ?></p>
-                        <h2><?php echo htmlspecialchars($gallerySection['title']); ?></h2>
-                    </div>
-                </div>
-
-                <p class="parents-widget-note">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
-
-                <?php if (!empty($galleryImages)): ?>
-                    <div class="parents-gallery">
-                        <?php foreach ($galleryImages as $image): ?>
-                            <?php
-                            $fullImage = $image['full_image_path'] ?? '';
-                            $thumbImage = $image['thumb_image_path'] ?: $fullImage;
-                            $altText = trim((string)($image['alt_text'] ?? '')) !== '' ? $image['alt_text'] : 'Φωτογραφικό υλικό σχολείου';
-                            ?>
-                            <a href="<?php echo htmlspecialchars($fullImage); ?>" target="_blank" rel="noopener noreferrer">
-                                <img src="<?php echo htmlspecialchars($thumbImage); ?>" alt="<?php echo htmlspecialchars($altText); ?>" loading="lazy">
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
-                <?php else: ?>
-                    <p class="mb-0"><?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη φωτογραφίες.'); ?></p>
-                <?php endif; ?>
-            </section>
-        <?php endif; ?>
     </div>
 </main>
 
