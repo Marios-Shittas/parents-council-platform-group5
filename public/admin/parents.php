@@ -271,6 +271,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 break;
 
+            case 'attendance_portal_section':
+                $saved = $parentsPageService->updateSection(
+                    'attendance_portal_section',
+                    parentsAdminTrim($_POST['title'] ?? ''),
+                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    [
+                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
+                        'link_label' => parentsAdminTrim($_POST['link_label'] ?? ''),
+                        'link_url' => parentsAdminTrim($_POST['link_url'] ?? ''),
+                    ]
+                );
+                break;
+
             case 'schedule_section':
                 $blocks = [];
                 for ($index = 1; $index <= 2; $index++) {
@@ -345,6 +358,7 @@ $sections = $parentsPageService->getAllSections();
 $pageHeaderSection = $sections['page_header'];
 $historySection = $sections['history_section'];
 $associationSection = $sections['association_section'];
+$attendancePortalSection = $sections['attendance_portal_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
@@ -357,6 +371,7 @@ $parentsContentTabs = [
     'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
+    'attendance_portal_section' => ['label' => 'Πύλη Απουσιολογίου', 'icon' => 'fas fa-user-check'],
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
@@ -434,7 +449,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Page Header</h3>
-                            <p>Τίτλος, υπότιτλος και διαφορετικό eyebrow για public και parent view.</p>
+                            <p>Τίτλος, υπότιτλος και διαφορετικός μικρός τίτλος για δημόσια και γονική προβολή.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
                     </div>
@@ -455,12 +470,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="page-header-public-eyebrow">Eyebrow για public</label>
+                                <label for="page-header-public-eyebrow">Μικρός τίτλος για δημόσια προβολή</label>
                                 <input type="text" class="form-control" id="page-header-public-eyebrow" name="public_eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['public_eyebrow'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group">
-                                <label for="page-header-parent-eyebrow">Eyebrow για parent</label>
+                                <label for="page-header-parent-eyebrow">Μικρός τίτλος για γονική προβολή</label>
                                 <input type="text" class="form-control" id="page-header-parent-eyebrow" name="parent_eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['parent_eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -482,7 +497,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Ιστορικό Σχολείου</h3>
-                            <p>Τίτλος ενότητας, eyebrow και bullets της πρώτης κάρτας.</p>
+                            <p>Τίτλος ενότητας, μικρός τίτλος και bullets της πρώτης κάρτας.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-landmark"></i></span>
                     </div>
@@ -498,7 +513,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="history-eyebrow">Eyebrow</label>
+                                <label for="history-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="history-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($historySection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -536,7 +551,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="association-eyebrow">Eyebrow</label>
+                                <label for="association-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="association-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($associationSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -600,6 +615,54 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     </form>
                 </section>
 
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'attendance_portal_section' ? 'show active' : ''; ?>" id="tab-attendance_portal_section" role="tabpanel" aria-labelledby="tab-attendance_portal_section-link">
+                    <div class="content-editor-card__header">
+                        <div>
+                            <h3>Πύλη Απουσιολογίου</h3>
+                            <p>Περιεχόμενο για το νέο κουτί σύνδεσης που εμφανίζεται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
+                        </div>
+                        <span class="content-editor-card__icon"><i class="fas fa-user-check"></i></span>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_content_section">
+                        <input type="hidden" name="section_key" value="attendance_portal_section">
+
+                        <div class="content-form-grid">
+                            <div class="form-group">
+                                <label for="attendance-portal-title">Τίτλος</label>
+                                <input type="text" class="form-control" id="attendance-portal-title" name="title" value="<?php echo htmlspecialchars($attendancePortalSection['title'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-eyebrow">Μικρός τίτλος ενότητας</label>
+                                <input type="text" class="form-control" id="attendance-portal-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($attendancePortalSection['content']['eyebrow'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="attendance-portal-subtitle">Περιγραφή</label>
+                                <textarea class="form-control content-textarea" id="attendance-portal-subtitle" name="subtitle"><?php echo htmlspecialchars($attendancePortalSection['subtitle'] ?? ''); ?></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-link-label">Κείμενο κουμπιού</label>
+                                <input type="text" class="form-control" id="attendance-portal-link-label" name="link_label" value="<?php echo htmlspecialchars($attendancePortalSection['content']['link_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-link-url">URL συνδέσμου</label>
+                                <input type="text" class="form-control" id="attendance-portal-link-url" name="link_url" value="<?php echo htmlspecialchars($attendancePortalSection['content']['link_url'] ?? ''); ?>">
+                            </div>
+                        </div>
+
+                        <div class="content-editor-card__actions">
+                            <button type="submit" class="btn-save-section">
+                                <i class="fas fa-save"></i> Αποθήκευση Πύλης Απουσιολογίου
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'schedule_section' ? 'show active' : ''; ?>" id="tab-schedule_section" role="tabpanel" aria-labelledby="tab-schedule_section-link">
                     <div class="content-editor-card__header">
                         <div>
@@ -620,7 +683,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="schedule-eyebrow">Eyebrow</label>
+                                <label for="schedule-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="schedule-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($scheduleSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -683,7 +746,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="board-eyebrow">Eyebrow</label>
+                                <label for="board-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="board-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($boardSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -761,7 +824,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="board-archive-eyebrow">Eyebrow</label>
+                                <label for="board-archive-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="board-archive-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($boardArchiveSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
