@@ -413,7 +413,7 @@ class AnnouncementsService {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
 
-        $announcementsQuery = "SELECT announcement_title, announcement_description, COALESCE(announcement_date, publish_date) AS announcement_date FROM Announcements ORDER BY COALESCE(announcement_date, publish_date) DESC, publish_date DESC LIMIT 5";
+        $announcementsQuery = "SELECT announcement_id, announcement_title, announcement_description, COALESCE(announcement_date, publish_date) AS announcement_date FROM Announcements ORDER BY COALESCE(announcement_date, publish_date) DESC, publish_date DESC LIMIT 5";
         $result = $this->conn->query($announcementsQuery);
 
         if (!$result) {

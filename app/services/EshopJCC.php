@@ -8,14 +8,17 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/EshopSettingsService.php';
 
 class EshopJccService
 {
     private mysqli $conn;
+    private EshopSettingsService $eshopSettingsService;
 
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
+        $this->eshopSettingsService = new EshopSettingsService($conn);
     }
 
     public function handleRequest(): void
@@ -50,6 +53,11 @@ class EshopJccService
             'mode' => $respondWithJson ? 'json' : 'redirect',
             'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
         ]);
+
+        if (!$this->eshopSettingsService->isShopVisible()) {
+            $this->respondCheckoutError($respondWithJson, 'Το κατάστημα είναι προσωρινά μη διαθέσιμο. Coming soon.', 403);
+            return;
+        }
 
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         $transactionStarted = false;

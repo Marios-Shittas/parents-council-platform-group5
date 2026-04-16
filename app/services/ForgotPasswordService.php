@@ -88,7 +88,7 @@ class ForgotPasswordService {
 
     private function sendResetEmail($name, $email, $token) {
         try {
-            $subject = 'Password Reset Request';
+            $subject = $this->resetEmailSubject();
             $resetLink = $this->buildResetLink($email, $token);
             $body = $this->buildResetEmailBody($name, $resetLink);
 
@@ -124,7 +124,7 @@ class ForgotPasswordService {
                 $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
                 $mail->addAddress($email, $name);
                 $mail->isHTML(true);
-                $mail->Subject = 'Password Reset Request';
+                $mail->Subject = $this->resetEmailSubject();
                 $mail->Body = $this->buildResetEmailBody($name, $this->buildResetLink($email, $token));
                 $mail->send();
 
@@ -134,7 +134,7 @@ class ForgotPasswordService {
             }
         }
 
-        $subject = 'Password Reset Request';
+        $subject = $this->resetEmailSubject();
         $message = $this->buildResetEmailBody($name, $this->buildResetLink($email, $token));
         $headers =
             'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
@@ -152,6 +152,11 @@ class ForgotPasswordService {
     private function buildResetLink(string $email, string $token): string
     {
         return rtrim(APP_BASE_URL, '/') . '/public/reset-password.php?email=' . urlencode($email) . '&token=' . urlencode($token);
+    }
+
+    private function resetEmailSubject(): string
+    {
+        return 'Ξεχασα τον κωδικο';
     }
 
     private function buildResetEmailBody(string $name, string $resetLink): string

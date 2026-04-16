@@ -43,14 +43,21 @@ function Announcements() {
     return (
         <div className="home-list announcements-header">
             {announcements.map((item, index) => (
-                <article key={index} className="home-feed-item announcement-item">
-                    <div className="home-feed-meta">
-                        <span className="home-feed-badge">Ανακοίνωση</span>
-                        <span className="home-feed-date">{formatDate(item.announcement_date)}</span>
-                    </div>
-                    <p className="announcement-title home-feed-title">{item.announcement_title}</p>
-                    <p className="announcement-description home-feed-description">{item.announcement_description}</p>
-                </article>
+                <a
+                    key={item.announcement_id || index}
+                    href={`/parents-council-platform-group5/public/announcements.php?open=${encodeURIComponent(item.announcement_id)}`}
+                    className="home-feed-link"
+                    aria-label={`Άνοιγμα ανακοίνωσης: ${item.announcement_title || 'Ανακοίνωση'}`}
+                >
+                    <article className="home-feed-item announcement-item">
+                        <div className="home-feed-meta">
+                            <span className="home-feed-badge">Ανακοίνωση</span>
+                            <span className="home-feed-date">{formatDate(item.announcement_date)}</span>
+                        </div>
+                        <p className="announcement-title home-feed-title">{item.announcement_title}</p>
+                        <p className="announcement-description home-feed-description">{item.announcement_description}</p>
+                    </article>
+                </a>
             ))}
         </div>
     );

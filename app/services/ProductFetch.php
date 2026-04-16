@@ -5,6 +5,15 @@ ini_set('display_errors', 1);
 header("Access-Control-Allow-Origin: *");
 
 include "../config/db.php";
+require_once __DIR__ . '/EshopSettingsService.php';
+
+$eshopSettingsService = new EshopSettingsService($conn);
+
+if (!$eshopSettingsService->isShopVisible()) {
+    echo json_encode([]);
+    $conn->close();
+    exit;
+}
 
 function getDefaultProductImagePath(): string
 {

@@ -111,155 +111,106 @@ function parentsAdminRowsToTextarea($rows, array $keys)
     return implode("\n", $lines);
 }
 
-function getParentsGalleryUploadDir()
+function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
-    return dirname(__DIR__) . '/assets/Parents_img/';
-}
+    $mergedRows = is_array($rows) ? $rows : [];
+    $existingYears = [];
 
-function buildParentsGalleryWebPath($fileName)
-{
-    return '/parents-council-platform-group5/public/assets/Parents_img/' . $fileName;
-}
-
-function isLocalParentsGalleryPath($imagePath)
-{
-    return str_starts_with((string)$imagePath, '/parents-council-platform-group5/public/assets/Parents_img/');
-}
-
-function resolveParentsGalleryFilePath($imagePath)
-{
-    return getParentsGalleryUploadDir() . basename((string)$imagePath);
-}
-
-function deleteParentsGalleryFileIfExists($imagePath)
-{
-    if (!isLocalParentsGalleryPath($imagePath)) {
-        return;
-    }
-
-    $filePath = resolveParentsGalleryFilePath($imagePath);
-    if (file_exists($filePath)) {
-        unlink($filePath);
-    }
-}
-
-function uploadParentsGalleryImages($service)
-{
-    $uploadedCount = 0;
-    $uploadErrors = [];
-
-    if (empty($_FILES['gallery_images']['name'][0])) {
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $uploadDir = getParentsGalleryUploadDir();
-    if (!is_dir($uploadDir)) {
-        if (!mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
-            $uploadErrors[] = "Αδυναμία δημιουργίας του φακέλου ανεβάσματος: {$uploadDir}";
-            return [$uploadedCount, $uploadErrors];
-        }
-    }
-
-    @chmod($uploadDir, 0777);
-    clearstatcache(true, $uploadDir);
-
-    $probeFile = rtrim($uploadDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '.parents_upload_probe_' . uniqid('', true);
-    $probeHandle = @fopen($probeFile, 'wb');
-    if ($probeHandle !== false) {
-        fclose($probeHandle);
-        @unlink($probeFile);
-    }
-
-    if (!is_writable($uploadDir) && $probeHandle === false) {
-        $uploadErrors[] = "Ο φάκελος ανεβάσματος δεν είναι εγγράψιμος: {$uploadDir}";
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    $maxFileSize = 5 * 1024 * 1024;
-
-    foreach ($_FILES['gallery_images']['tmp_name'] as $key => $tmpName) {
-        $fileName = basename($_FILES['gallery_images']['name'][$key] ?? '');
-        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-        $uploadError = $_FILES['gallery_images']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
-
-        if ($uploadError !== UPLOAD_ERR_OK) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$uploadError})";
+    foreach ($mergedRows as $row) {
+        if (!is_array($row)) {
             continue;
         }
 
-        $fileSize = $_FILES['gallery_images']['size'][$key] ?? 0;
-        $fileMime = mime_content_type($tmpName);
-        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year !== '') {
+            $existingYears[(string)preg_replace('/\s*-\s*/', '-', $year)] = true;
+        }
+    }
 
-        if (!in_array($fileExt, $allowedExtensions, true)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
+    foreach ($referenceRows as $referenceRow) {
+        if (!is_array($referenceRow)) {
             continue;
         }
 
-        if ($fileSize > $maxFileSize) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο. Μέγιστο: 5MB";
+        $year = trim((string)($referenceRow['year'] ?? ''));
+        $normalizedYear = (string)preg_replace('/\s*-\s*/', '-', $year);
+        if ($year === '' || isset($existingYears[$normalizedYear])) {
             continue;
         }
 
-        if (!getimagesize($tmpName)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα.";
-            continue;
-        }
-
-        if (!in_array($fileMime, $allowedTypes, true) && !str_starts_with((string)$fileMime, 'image/')) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο MIME type ({$fileMime}).";
-            continue;
-        }
-
-        $newFileName = uniqid('parents_', true) . '.' . $fileExt;
-        $targetPath = $uploadDir . $newFileName;
-
-        if (!move_uploaded_file($tmpName, $targetPath)) {
-            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του '{$safeFileName}'.";
-            continue;
-        }
-
-        $imagePath = buildParentsGalleryWebPath($newFileName);
-        if ($service->addGalleryImage($imagePath, $imagePath, 'Φωτογραφικό υλικό σχολείου')) {
-            $uploadedCount++;
-        } else {
-            if (file_exists($targetPath)) {
-                unlink($targetPath);
+        foreach ($referenceRows as $candidateRow) {
+            if (is_array($candidateRow) && trim((string)($candidateRow['year'] ?? '')) === $year) {
+                $mergedRows[] = $candidateRow;
             }
-            $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων.";
+        }
+
+        $existingYears[$normalizedYear] = true;
+    }
+
+    return $mergedRows;
+}
+
+function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
+{
+    $groupedRows = [];
+
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+
+        $year = trim((string)($row['year'] ?? ''));
+        if ($year === '') {
+            continue;
+        }
+
+        if (!isset($groupedRows[$year])) {
+            $groupedRows[$year] = [];
+        }
+
+        $groupedRows[$year][] = [
+            'role' => trim((string)($row['role'] ?? '')),
+            'name' => trim((string)($row['name'] ?? '')),
+        ];
+    }
+
+    return $groupedRows;
+}
+
+function parentsAdminBoardArchiveGroupToTextarea(array $rows)
+{
+    return parentsAdminRowsToTextarea($rows, ['role', 'name']);
+}
+
+function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
+{
+    $archiveRows = [];
+    $years = is_array($years) ? $years : [];
+    $rowsPerYear = is_array($rowsPerYear) ? $rowsPerYear : [];
+
+    foreach ($years as $index => $yearValue) {
+        $year = trim((string)$yearValue);
+        $rowsText = (string)($rowsPerYear[$index] ?? '');
+
+        if ($year === '' && trim($rowsText) === '') {
+            continue;
+        }
+
+        if ($year === '') {
+            continue;
+        }
+
+        $parsedRows = parentsAdminTextareaToRows($rowsText, ['role', 'name']);
+        foreach ($parsedRows as $row) {
+            $archiveRows[] = [
+                'year' => $year,
+                'role' => trim((string)($row['role'] ?? '')),
+                'name' => trim((string)($row['name'] ?? '')),
+            ];
         }
     }
 
-    return [$uploadedCount, $uploadErrors];
-}
-
-function addParentsGalleryImageFromUrl($service)
-{
-    $imageUrl = parentsAdminUrl($_POST['image_url'] ?? '');
-
-    if ($imageUrl === '') {
-        return [false, 'Δώστε το URL της εικόνας.'];
-    }
-
-    if (filter_var($imageUrl, FILTER_VALIDATE_URL) === false) {
-        return [false, 'Το URL της εικόνας δεν είναι έγκυρο.'];
-    }
-
-    $imagePath = parse_url($imageUrl, PHP_URL_PATH) ?? '';
-    $imageExt = strtolower(pathinfo((string)$imagePath, PATHINFO_EXTENSION));
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-    if (!in_array($imageExt, $allowedExtensions, true)) {
-        return [false, 'Βάλτε direct URL εικόνας που να οδηγεί κατευθείαν σε αρχείο JPG, JPEG, PNG, GIF ή WEBP.'];
-    }
-
-    if ($service->addGalleryImage($imageUrl, $imageUrl, 'Φωτογραφικό υλικό σχολείου')) {
-        return [true, 'Η φωτογραφία από εξωτερικό σύνδεσμο προστέθηκε επιτυχώς.'];
-    }
-
-    return [false, 'Αποτυχία αποθήκευσης της φωτογραφίας. ' . $service->getLastError()];
+    return $archiveRows;
 }
 
 $parentsPageService = new ParentsPageService();
@@ -320,6 +271,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 break;
 
+            case 'attendance_portal_section':
+                $saved = $parentsPageService->updateSection(
+                    'attendance_portal_section',
+                    parentsAdminTrim($_POST['title'] ?? ''),
+                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    [
+                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
+                        'link_label' => parentsAdminTrim($_POST['link_label'] ?? ''),
+                        'link_url' => parentsAdminTrim($_POST['link_url'] ?? ''),
+                    ]
+                );
+                break;
+
             case 'schedule_section':
                 $blocks = [];
                 for ($index = 1; $index <= 2; $index++) {
@@ -371,21 +335,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'year_label' => parentsAdminTrim($_POST['year_label'] ?? ''),
                         'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
                         'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
-                        'rows' => parentsAdminTextareaToRows($_POST['rows'] ?? '', ['year', 'role', 'name']),
+                        'rows' => parentsAdminBoardArchiveBlocksToRows($_POST['archive_years'] ?? [], $_POST['archive_rows'] ?? []),
                     ]
                 );
                 break;
 
-            case 'gallery_section':
-                $saved = $parentsPageService->updateSection(
-                    'gallery_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    '',
-                    [
-                        'empty_message' => parentsAdminTrim($_POST['empty_message'] ?? ''),
-                    ]
-                );
-                break;
         }
 
         $_SESSION['flash_message'] = $saved
@@ -394,50 +348,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
         $redirectUrl .= '?active_tab=' . urlencode($redirectTab) . '#content-management';
-    } elseif ($action === 'upload_gallery_images') {
-        [$uploadedCount, $uploadErrors] = uploadParentsGalleryImages($parentsPageService);
-
-        if ($uploadedCount > 0) {
-            $message = "Ανέβηκαν επιτυχώς {$uploadedCount} φωτογραφία/ες.";
-            $type = empty($uploadErrors) ? 'success' : 'warning';
-        } else {
-            $message = 'Δεν ανέβηκε καμία φωτογραφία.';
-            $type = 'danger';
-        }
-
-        if (!empty($uploadErrors)) {
-            $message .= '<br><strong>Προβλήματα:</strong><ul><li>' . implode('</li><li>', $uploadErrors) . '</li></ul>';
-        }
-
-        $_SESSION['flash_message'] = $message;
-        $_SESSION['flash_type'] = $type;
-        $redirectUrl .= '?active_tab=gallery_management#content-management';
-    } elseif ($action === 'add_gallery_image_url') {
-        [$saved, $message] = addParentsGalleryImageFromUrl($parentsPageService);
-
-        $_SESSION['flash_message'] = $message;
-        $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
-        $redirectUrl .= '?active_tab=gallery_management#content-management';
-    } elseif ($action === 'delete_gallery_image') {
-        $imageId = (int)($_POST['image_id'] ?? 0);
-        $image = $parentsPageService->getGalleryImageById($imageId);
-
-        if ($image && $parentsPageService->deleteGalleryImage($imageId)) {
-            deleteParentsGalleryFileIfExists($image['full_image_path'] ?? '');
-
-            $thumbImagePath = $image['thumb_image_path'] ?? '';
-            if ($thumbImagePath !== ($image['full_image_path'] ?? '')) {
-                deleteParentsGalleryFileIfExists($thumbImagePath);
-            }
-
-            $_SESSION['flash_message'] = 'Η φωτογραφία διαγράφηκε επιτυχώς.';
-            $_SESSION['flash_type'] = 'success';
-        } else {
-            $_SESSION['flash_message'] = 'Αποτυχία διαγραφής της φωτογραφίας. ' . $parentsPageService->getLastError();
-            $_SESSION['flash_type'] = 'danger';
-        }
-
-        $redirectUrl .= '?active_tab=gallery_management#content-management';
     }
 
     header('Location: ' . $redirectUrl);
@@ -445,24 +355,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $sections = $parentsPageService->getAllSections();
-$galleryImages = $parentsPageService->getGalleryImages();
-
 $pageHeaderSection = $sections['page_header'];
 $historySection = $sections['history_section'];
 $associationSection = $sections['association_section'];
+$attendancePortalSection = $sections['attendance_portal_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
-$gallerySection = $sections['gallery_section'];
+$boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
+    $boardArchiveSection['content']['rows'] ?? [],
+    $parentsPageService->getBoardArchiveReferenceRows()
+);
+$boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
 $parentsContentTabs = [
     'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
+    'attendance_portal_section' => ['label' => 'Πύλη Απουσιολογίου', 'icon' => 'fas fa-user-check'],
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
-    'gallery_section' => ['label' => 'Gallery Texts', 'icon' => 'fas fa-camera'],
-    'gallery_management' => ['label' => 'Φωτογραφίες', 'icon' => 'fas fa-images'],
 ];
 $activeParentsTab = (string)($_GET['active_tab'] ?? 'page_header');
 if (!isset($parentsContentTabs[$activeParentsTab])) {
@@ -537,7 +449,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Page Header</h3>
-                            <p>Τίτλος, υπότιτλος και διαφορετικό eyebrow για public και parent view.</p>
+                            <p>Τίτλος, υπότιτλος και διαφορετικός μικρός τίτλος για δημόσια και γονική προβολή.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
                     </div>
@@ -558,12 +470,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="page-header-public-eyebrow">Eyebrow για public</label>
+                                <label for="page-header-public-eyebrow">Μικρός τίτλος για δημόσια προβολή</label>
                                 <input type="text" class="form-control" id="page-header-public-eyebrow" name="public_eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['public_eyebrow'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group">
-                                <label for="page-header-parent-eyebrow">Eyebrow για parent</label>
+                                <label for="page-header-parent-eyebrow">Μικρός τίτλος για γονική προβολή</label>
                                 <input type="text" class="form-control" id="page-header-parent-eyebrow" name="parent_eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['parent_eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -585,7 +497,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Ιστορικό Σχολείου</h3>
-                            <p>Τίτλος ενότητας, eyebrow και bullets της πρώτης κάρτας.</p>
+                            <p>Τίτλος ενότητας, μικρός τίτλος και bullets της πρώτης κάρτας.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-landmark"></i></span>
                     </div>
@@ -601,7 +513,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="history-eyebrow">Eyebrow</label>
+                                <label for="history-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="history-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($historySection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -639,7 +551,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="association-eyebrow">Eyebrow</label>
+                                <label for="association-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="association-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($associationSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -703,6 +615,54 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     </form>
                 </section>
 
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'attendance_portal_section' ? 'show active' : ''; ?>" id="tab-attendance_portal_section" role="tabpanel" aria-labelledby="tab-attendance_portal_section-link">
+                    <div class="content-editor-card__header">
+                        <div>
+                            <h3>Πύλη Απουσιολογίου</h3>
+                            <p>Περιεχόμενο για το νέο κουτί σύνδεσης που εμφανίζεται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
+                        </div>
+                        <span class="content-editor-card__icon"><i class="fas fa-user-check"></i></span>
+                    </div>
+
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_content_section">
+                        <input type="hidden" name="section_key" value="attendance_portal_section">
+
+                        <div class="content-form-grid">
+                            <div class="form-group">
+                                <label for="attendance-portal-title">Τίτλος</label>
+                                <input type="text" class="form-control" id="attendance-portal-title" name="title" value="<?php echo htmlspecialchars($attendancePortalSection['title'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-eyebrow">Μικρός τίτλος ενότητας</label>
+                                <input type="text" class="form-control" id="attendance-portal-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($attendancePortalSection['content']['eyebrow'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="attendance-portal-subtitle">Περιγραφή</label>
+                                <textarea class="form-control content-textarea" id="attendance-portal-subtitle" name="subtitle"><?php echo htmlspecialchars($attendancePortalSection['subtitle'] ?? ''); ?></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-link-label">Κείμενο κουμπιού</label>
+                                <input type="text" class="form-control" id="attendance-portal-link-label" name="link_label" value="<?php echo htmlspecialchars($attendancePortalSection['content']['link_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendance-portal-link-url">URL συνδέσμου</label>
+                                <input type="text" class="form-control" id="attendance-portal-link-url" name="link_url" value="<?php echo htmlspecialchars($attendancePortalSection['content']['link_url'] ?? ''); ?>">
+                            </div>
+                        </div>
+
+                        <div class="content-editor-card__actions">
+                            <button type="submit" class="btn-save-section">
+                                <i class="fas fa-save"></i> Αποθήκευση Πύλης Απουσιολογίου
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'schedule_section' ? 'show active' : ''; ?>" id="tab-schedule_section" role="tabpanel" aria-labelledby="tab-schedule_section-link">
                     <div class="content-editor-card__header">
                         <div>
@@ -723,7 +683,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="schedule-eyebrow">Eyebrow</label>
+                                <label for="schedule-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="schedule-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($scheduleSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -786,7 +746,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="board-eyebrow">Eyebrow</label>
+                                <label for="board-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="board-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($boardSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -848,7 +808,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     <div class="content-editor-card__header">
                         <div>
                             <h3>Συμβούλια ανά Σχολική Χρονιά</h3>
-                            <p>Αρχείο συνθέσεων ανά χρονιά. Μορφή γραμμής: <code>Σχολική Χρονιά | Θέση | Ονοματεπώνυμο</code>.</p>
+                            <p>Αρχείο συνθέσεων ανά χρονιά. Για κάθε block γράφεις γραμμές στη μορφή <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-archive"></i></span>
                     </div>
@@ -864,7 +824,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group">
-                                <label for="board-archive-eyebrow">Eyebrow</label>
+                                <label for="board-archive-eyebrow">Μικρός τίτλος ενότητας</label>
                                 <input type="text" class="form-control" id="board-archive-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($boardArchiveSection['content']['eyebrow'] ?? ''); ?>">
                             </div>
 
@@ -889,8 +849,32 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="form-group full-width">
-                                <label for="board-archive-rows">Γραμμές αρχείου συμβουλίων</label>
-                                <textarea class="form-control content-textarea content-textarea--large" id="board-archive-rows" name="rows"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($boardArchiveSection['content']['rows'] ?? [], ['year', 'role', 'name'])); ?></textarea>
+                                <label>Συνθέσεις ανά σχολική χρονιά</label>
+                                <div class="board-archive-editor">
+                                    <?php foreach ($boardArchiveGroupsForEditor as $year => $rows): ?>
+                                        <div class="board-archive-editor__block">
+                                            <div class="form-group">
+                                                <label>Σχολική Χρονιά</label>
+                                                <input type="text" class="form-control" name="archive_years[]" value="<?php echo htmlspecialchars($year); ?>">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label>Μέλη για <?php echo htmlspecialchars($year); ?></label>
+                                                <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]"><?php echo htmlspecialchars(parentsAdminBoardArchiveGroupToTextarea($rows)); ?></textarea>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="board-archive-editor__block board-archive-editor__block--new">
+                                        <div class="form-group">
+                                            <label>Νέα Σχολική Χρονιά</label>
+                                            <input type="text" class="form-control" name="archive_years[]" value="" placeholder="π.χ. 2021-2022">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label>Μέλη νέας χρονιάς</label>
+                                            <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]" placeholder="ΠΡΟΕΔΡΟΣ | Όνομα Επώνυμο&#10;ΑΝΤΙΠΡΟΕΔΡΟΣ | Όνομα Επώνυμο"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1074,313 +1058,11 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                     </form>
                 </section>
 
-                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'gallery_section' ? 'show active' : ''; ?>" id="tab-gallery_section" role="tabpanel" aria-labelledby="tab-gallery_section-link">
-                    <div class="content-editor-card__header">
-                        <div>
-                            <h3>Gallery Texts</h3>
-                            <p>Ο τίτλος του widget και το μήνυμα που φαίνεται όταν δεν υπάρχουν φωτογραφίες.</p>
-                        </div>
-                        <span class="content-editor-card__icon"><i class="fas fa-camera"></i></span>
-                    </div>
-
-                    <form method="POST">
-                        <input type="hidden" name="action" value="update_content_section">
-                        <input type="hidden" name="section_key" value="gallery_section">
-
-                        <div class="content-form-grid">
-                            <div class="form-group">
-                                <label for="gallery-title">Τίτλος widget</label>
-                                <input type="text" class="form-control" id="gallery-title" name="title" value="<?php echo htmlspecialchars($gallerySection['title']); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="gallery-empty-message">Μήνυμα χωρίς φωτογραφίες</label>
-                                <input type="text" class="form-control" id="gallery-empty-message" name="empty_message" value="<?php echo htmlspecialchars($gallerySection['content']['empty_message'] ?? ''); ?>">
-                            </div>
-                        </div>
-
-                        <div class="content-editor-card__actions">
-                            <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Gallery Texts
-                            </button>
-                        </div>
-                    </form>
-                </section>
-
-                <section id="tab-gallery_management" class="content-management tab-pane fade <?php echo $activeParentsTab === 'gallery_management' ? 'show active' : ''; ?>" role="tabpanel" aria-labelledby="tab-gallery_management-link">
-            <div class="content-management__intro">
-                <div>
-                    <h2><i class="fas fa-images"></i> Φωτογραφικό Υλικό</h2>
-                    <p>Ανέβασε νέες φωτογραφίες όπως στα events. Οι εικόνες εμφανίζονται αυτόματα στη δημόσια σελίδα του Συνδέσμου Γονέων.</p>
-                </div>
-            </div>
-
-            <div class="content-editor-card">
-                <div class="content-editor-card__header">
-                    <div>
-                        <h3>Ανέβασμα Φωτογραφιών</h3>
-                        <p>Υποστηρίζονται αρχεία JPG, PNG, GIF και WEBP έως 5MB το καθένα.</p>
-                    </div>
-                    <span class="content-editor-card__icon"><i class="fas fa-upload"></i></span>
-                </div>
-
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="upload_gallery_images">
-
-                    <div class="parents-upload-panel">
-                        <label for="gallery-images" class="parents-upload-dropzone" id="parents-upload-dropzone">
-                            <span class="parents-upload-dropzone__icon"><i class="fas fa-cloud-upload-alt"></i></span>
-                            <span class="parents-upload-dropzone__title">Σύρε φωτογραφίες εδώ ή πάτησε για επιλογή</span>
-                            <span class="parents-upload-dropzone__subtitle">JPG, PNG, GIF, WEBP έως 5MB η καθεμία</span>
-                            <span class="parents-upload-dropzone__helper">Πολλαπλή επιλογή: <code>Command</code> σε Mac ή <code>Ctrl</code> σε Windows</span>
-                        </label>
-
-                        <input type="file" class="parents-upload-input" id="gallery-images" name="gallery_images[]" accept="image/*" multiple>
-
-                        <div class="parents-upload-status" id="parents-upload-status">
-                            Δεν έχουν επιλεγεί ακόμη αρχεία.
-                        </div>
-
-                        <div class="parents-upload-preview" id="parents-upload-preview" aria-live="polite"></div>
-                    </div>
-
-                    <div class="content-editor-card__actions">
-                        <button type="submit" class="btn-save-section parents-upload-submit">
-                            <i class="fas fa-cloud-upload-alt"></i> Ανέβασμα Φωτογραφιών
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="content-editor-card">
-                <div class="content-editor-card__header">
-                    <div>
-                        <h3>Προσθήκη Από Εξωτερικό Σύνδεσμο</h3>
-                        <p>Βάλε μόνο direct URL εικόνας από άλλο site, όπως γίνεται ήδη με τις αρχικές φωτογραφίες της gallery.</p>
-                    </div>
-                    <span class="content-editor-card__icon"><i class="fas fa-link"></i></span>
-                </div>
-
-                <form method="POST">
-                    <input type="hidden" name="action" value="add_gallery_image_url">
-
-                    <div class="form-group">
-                        <label for="gallery-image-url">URL εικόνας</label>
-                        <input type="url" class="form-control" id="gallery-image-url" name="image_url" placeholder="https://example.com/image.jpg" required>
-                        <small class="form-text text-muted">Βάλε link που να ανοίγει κατευθείαν την εικόνα, όχι link σε σελίδα.</small>
-                    </div>
-
-                    <div class="content-editor-card__actions">
-                        <button type="submit" class="btn-save-section">
-                            <i class="fas fa-plus-circle"></i> Προσθήκη Από URL
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="content-editor-card">
-                <div class="content-editor-card__header">
-                    <div>
-                        <h3>Τρέχουσες Φωτογραφίες</h3>
-                        <p>Εδώ βλέπεις όλες τις φωτογραφίες που εμφανίζονται στο public gallery και μπορείς να τις αφαιρέσεις.</p>
-                    </div>
-                    <span class="content-editor-card__icon"><i class="fas fa-photo-video"></i></span>
-                </div>
-
-                <?php if (empty($galleryImages)): ?>
-                    <p class="mb-0">Δεν υπάρχουν φωτογραφίες στη gallery.</p>
-                <?php else: ?>
-                    <div class="parents-gallery-admin-grid">
-                        <?php foreach ($galleryImages as $image): ?>
-                            <?php
-                            $thumbPath = $image['thumb_image_path'] ?: $image['full_image_path'];
-                            $fullPath = $image['full_image_path'] ?? '';
-                            ?>
-                            <article class="parents-gallery-admin-card">
-                                <a href="<?php echo htmlspecialchars($fullPath); ?>" target="_blank" rel="noopener noreferrer" class="parents-gallery-admin-card__image-link">
-                                    <img src="<?php echo htmlspecialchars($thumbPath); ?>" alt="<?php echo htmlspecialchars($image['alt_text'] ?? ''); ?>" class="parents-gallery-admin-card__image">
-                                </a>
-
-                                <div class="parents-gallery-admin-card__body">
-                                    <div class="parents-gallery-admin-card__meta">
-                                        <span class="parents-gallery-admin-card__badge">#<?php echo (int)$image['image_id']; ?></span>
-                                        <span class="parents-gallery-admin-card__badge">
-                                            <?php echo isLocalParentsGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'; ?>
-                                        </span>
-                                    </div>
-
-                                    <p class="parents-gallery-admin-card__path"><?php echo htmlspecialchars($fullPath); ?></p>
-
-                                    <div class="parents-gallery-admin-card__actions">
-                                        <a href="<?php echo htmlspecialchars($fullPath); ?>" target="_blank" rel="noopener noreferrer" class="parents-gallery-action parents-gallery-action--view">
-                                            <i class="fas fa-eye"></i> Προβολή
-                                        </a>
-
-                                        <form
-                                            method="POST"
-                                            class="parents-gallery-delete-form"
-                                            data-image-label="<?php echo htmlspecialchars('Φωτογραφία #' . (int)$image['image_id']); ?>"
-                                            data-image-path="<?php echo htmlspecialchars($fullPath); ?>"
-                                            data-image-thumb="<?php echo htmlspecialchars($thumbPath); ?>"
-                                            data-image-source="<?php echo htmlspecialchars(isLocalParentsGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'); ?>"
-                                        >
-                                            <input type="hidden" name="action" value="delete_gallery_image">
-                                            <input type="hidden" name="image_id" value="<?php echo (int)$image['image_id']; ?>">
-                                            <button type="submit" class="parents-gallery-action parents-gallery-action--delete">
-                                                <i class="fas fa-trash"></i> Διαγραφή
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-                </section>
             </div>
         </div>
     </main>
 </div>
-<div class="modal fade parents-confirm-modal" id="deleteGalleryImageConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteGalleryImageConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h5 class="modal-title" id="deleteGalleryImageConfirmModalLabel">Οριστική Διαγραφή</h5>
-                    <p class="parents-confirm-modal__subtitle mb-0">Η φωτογραφία θα αφαιρεθεί αμέσως από το public gallery.</p>
-                </div>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Κλείσιμο">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="parents-confirm-modal__preview">
-                    <div class="parents-confirm-modal__thumb-wrap">
-                        <img src="" alt="" class="parents-confirm-modal__thumb" id="deleteGalleryImageThumb">
-                    </div>
-                    <div class="parents-confirm-modal__details">
-                        <span class="parents-confirm-modal__eyebrow">Επιλεγμένη Φωτογραφία</span>
-                        <strong class="parents-confirm-modal__name" id="deleteGalleryImageLabel">φωτογραφία</strong>
-                        <span class="parents-confirm-modal__meta-badge" id="deleteGalleryImageSource">Τοπικό αρχείο</span>
-                        <p class="parents-confirm-modal__path mb-0" id="deleteGalleryImagePath"></p>
-                    </div>
-                </div>
-                <div class="parents-confirm-modal__warning">
-                    <span class="parents-confirm-modal__icon"><i class="fas fa-exclamation-triangle"></i></span>
-                    <div>
-                        <p class="mb-2">Θέλεις σίγουρα να προχωρήσεις στη διαγραφή;</p>
-                        <p class="mb-0">Η ενέργεια δεν αναιρείται. Αν είναι τοπικό αρχείο, θα αφαιρεθεί και από τον server.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="parents-modal-btn parents-modal-btn--secondary" data-dismiss="modal">Ακύρωση</button>
-                <button type="button" class="parents-modal-btn parents-modal-btn--danger" id="confirmDeleteGalleryImageButton">
-                    <i class="fas fa-trash"></i> Ναι, διαγραφή
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('gallery-images');
-    var preview = document.getElementById('parents-upload-preview');
-    var status = document.getElementById('parents-upload-status');
-    var dropzone = document.getElementById('parents-upload-dropzone');
-
-    if (input && preview && status && dropzone) {
-        function renderPreview(files) {
-            preview.innerHTML = '';
-
-            if (!files || files.length === 0) {
-                status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
-                dropzone.classList.remove('is-active');
-                return;
-            }
-
-            status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
-            dropzone.classList.add('is-active');
-
-            Array.prototype.forEach.call(files, function (file) {
-                var item = document.createElement('div');
-                item.className = 'parents-upload-preview__item';
-
-                var thumb = document.createElement('img');
-                thumb.className = 'parents-upload-preview__thumb';
-                thumb.alt = file.name;
-                thumb.src = URL.createObjectURL(file);
-                thumb.onload = function () {
-                    URL.revokeObjectURL(thumb.src);
-                };
-
-                var meta = document.createElement('div');
-                meta.className = 'parents-upload-preview__meta';
-
-                var name = document.createElement('strong');
-                name.textContent = file.name;
-
-                var size = document.createElement('span');
-                size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-
-                meta.appendChild(name);
-                meta.appendChild(size);
-                item.appendChild(thumb);
-                item.appendChild(meta);
-                preview.appendChild(item);
-            });
-        }
-
-        input.addEventListener('change', function () {
-            renderPreview(input.files);
-        });
-    }
-
-    var galleryDeleteForms = document.querySelectorAll('.parents-gallery-delete-form');
-    var galleryDeleteLabel = document.getElementById('deleteGalleryImageLabel');
-    var galleryDeletePath = document.getElementById('deleteGalleryImagePath');
-    var galleryDeleteThumb = document.getElementById('deleteGalleryImageThumb');
-    var galleryDeleteSource = document.getElementById('deleteGalleryImageSource');
-    var galleryDeleteConfirmButton = document.getElementById('confirmDeleteGalleryImageButton');
-    var pendingGalleryDeleteForm = null;
-
-    if (galleryDeleteForms.length > 0 && galleryDeleteLabel && galleryDeletePath && galleryDeleteThumb && galleryDeleteSource && galleryDeleteConfirmButton && window.jQuery) {
-        Array.prototype.forEach.call(galleryDeleteForms, function (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                pendingGalleryDeleteForm = form;
-                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeletePath.textContent = form.getAttribute('data-image-path') || '';
-                galleryDeleteThumb.src = form.getAttribute('data-image-thumb') || '';
-                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeleteSource.textContent = form.getAttribute('data-image-source') || '';
-                jQuery('#deleteGalleryImageConfirmModal').modal('show');
-            });
-        });
-
-        galleryDeleteConfirmButton.addEventListener('click', function () {
-            if (!pendingGalleryDeleteForm) {
-                return;
-            }
-
-            var formToSubmit = pendingGalleryDeleteForm;
-            pendingGalleryDeleteForm = null;
-            jQuery('#deleteGalleryImageConfirmModal').modal('hide');
-            formToSubmit.submit();
-        });
-
-        jQuery('#deleteGalleryImageConfirmModal').on('hidden.bs.modal', function () {
-            pendingGalleryDeleteForm = null;
-            galleryDeletePath.textContent = '';
-            galleryDeleteThumb.src = '';
-            galleryDeleteThumb.alt = '';
-            galleryDeleteSource.textContent = '';
-        });
-    }
-});
-</script>
 </body>
 </html>

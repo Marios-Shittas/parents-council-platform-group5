@@ -754,6 +754,72 @@
     border: 1px solid var(--users-border);
 }
 
+.registration-schedule-toolbar {
+    margin-bottom: 0 !important;
+}
+
+.registration-schedule-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: inherit;
+}
+
+.registration-schedule-toggle-label {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--users-accent);
+}
+
+.registration-schedule-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--users-border);
+    border-radius: 999px;
+    background: var(--users-surface-soft);
+    color: var(--users-text);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.registration-schedule-toggle:hover .registration-schedule-toggle-icon,
+.registration-schedule-toggle:focus-visible .registration-schedule-toggle-icon {
+    background: var(--users-accent-soft);
+    border-color: #b9d3f8;
+}
+
+.registration-schedule-toggle:focus-visible {
+    outline: none;
+}
+
+.registration-schedule-toggle:focus-visible .registration-schedule-toggle-icon {
+    box-shadow: 0 0 0 0.2rem rgba(31, 122, 236, 0.12);
+}
+
+.registration-schedule-content {
+    margin-top: 1rem;
+}
+
+.registration-schedule-card:not(.registration-schedule-card--collapsed) .registration-schedule-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.registration-schedule-toolbar-actions {
+    display: none;
+}
+
 .registration-schedule-table thead th {
     background: var(--users-surface-soft);
     color: var(--users-text);

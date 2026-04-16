@@ -139,6 +139,36 @@
     line-height: 1.7;
 }
 
+.parents-link-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.parents-link-card__content {
+    flex: 1 1 auto;
+}
+
+.parents-link-card__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.3rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1a3a5c, #2f6ea0);
+    color: #ffffff;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.parents-link-card__button:hover,
+.parents-link-card__button:focus {
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 12px 24px rgba(26, 58, 92, 0.18);
+}
+
 .parents-card .note-card {
     display: flex;
     align-items: flex-start;
@@ -167,6 +197,17 @@
     gap: 18px;
 }
 
+@media (max-width: 767.98px) {
+    .parents-link-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .parents-link-card__button {
+        width: 100%;
+    }
+}
+
 .parents-timetable-block {
     background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
     border: 1px solid #d6e4f2;
@@ -179,6 +220,65 @@
     color: #173957;
     font-size: 1rem;
     font-family: 'Montserrat', sans-serif;
+}
+
+.parents-archive-year {
+    background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+    border: 1px solid #d6e4f2;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.parents-archive-year__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 18px 20px;
+    cursor: pointer;
+    color: #173957;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.parents-archive-year__summary::-webkit-details-marker {
+    display: none;
+}
+
+.parents-archive-year__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.parents-archive-year__title::before {
+    content: "\f0c1";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #2f6ea0;
+}
+
+.parents-archive-year__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid #c9d9ea;
+    background: #ffffff;
+    color: #173957;
+    transition: transform .2s ease;
+}
+
+.parents-archive-year[open] .parents-archive-year__icon {
+    transform: rotate(180deg);
+}
+
+.parents-archive-year__content {
+    padding: 0 16px 16px;
 }
 
 .parents-table--compact td,
