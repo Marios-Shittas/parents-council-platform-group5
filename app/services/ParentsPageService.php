@@ -340,6 +340,15 @@ class ParentsPageService
                     'contact_value' => 'sg-gym-ag-athanasios-lem@schools.ac.cy',
                 ],
             ],
+            'attendance_portal_section' => [
+                'title' => 'Πύλη Απουσιολογίου',
+                'subtitle' => 'Η πύλη απουσιολογίου προσφέρει άμεση πρόσβαση στην ηλεκτρονική ενημέρωση για τις απουσίες των μαθητών και σε σχετικές πληροφορίες φοίτησης.',
+                'content' => [
+                    'eyebrow' => 'Ηλεκτρονική Ενημέρωση',
+                    'link_label' => 'Μετάβαση στην Πύλη',
+                    'link_url' => 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/',
+                ],
+            ],
             'schedule_section' => [
                 'title' => 'Εσωτερικοί Κανονισμοί - Ωράριο',
                 'subtitle' => '',

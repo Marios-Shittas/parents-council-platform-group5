@@ -326,7 +326,7 @@ $photosCount = count($galleryImages);
                 <button type="button" class="photos-admin-action-card" data-toggle="modal" data-target="#photosSettingsModal">
                     <span class="photos-admin-action-card__icon"><i class="fas fa-sliders-h"></i></span>
                     <span class="photos-admin-action-card__title">Ρυθμίσεις Σελίδας</span>
-                    <span class="photos-admin-action-card__text">Τίτλος, eyebrow και μήνυμα όταν η gallery είναι άδεια.</span>
+                    <span class="photos-admin-action-card__text">Τίτλος, μικρός τίτλος ενότητας και μήνυμα όταν η gallery είναι άδεια.</span>
                 </button>
 
                 <button type="button" class="photos-admin-action-card" data-toggle="modal" data-target="#externalUrlModal">
@@ -447,7 +447,7 @@ $photosCount = count($galleryImages);
                         </div>
 
                         <div class="form-group">
-                            <label for="photos-page-eyebrow">Eyebrow</label>
+                            <label for="photos-page-eyebrow">Μικρός τίτλος ενότητας</label>
                             <input type="text" class="form-control" id="photos-page-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($gallerySection['content']['eyebrow'] ?? 'Φωτογραφικό Υλικό'); ?>">
                         </div>
 

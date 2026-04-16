@@ -136,6 +136,7 @@ $sections = $parentsPageService->getAllSections();
 $pageHeaderSection = $sections['page_header'] ?? ['title' => 'Σύνδεσμος Γονέων', 'subtitle' => '', 'content' => []];
 $historySection = $sections['history_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $associationSection = $sections['association_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
+$attendancePortalSection = $sections['attendance_portal_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $scheduleSection = $sections['schedule_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $boardSection = $sections['board_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $boardArchiveSection = $sections['board_archive_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
@@ -236,6 +237,28 @@ $pageHeaderEyebrow = site_is_parent()
                             <article class="content-card h-100">
                                 <h3><?php echo htmlspecialchars($associationSection['content']['history_title'] ?? 'Ιστορικό'); ?></h3>
                                 <p class="mb-0"><?php echo parentsPageRenderMultiline($associationSection['content']['history_body'] ?? ''); ?></p>
+                            </article>
+                        </div>
+                        <div class="col-12">
+                            <article class="content-card parents-link-card h-100">
+                                <div class="parents-link-card__content">
+                                    <?php if (trim((string)($attendancePortalSection['content']['eyebrow'] ?? '')) !== ''): ?>
+                                        <p class="parents-section-heading__eyebrow mb-2"><?php echo htmlspecialchars($attendancePortalSection['content']['eyebrow'] ?? ''); ?></p>
+                                    <?php endif; ?>
+                                    <h3><?php echo htmlspecialchars($attendancePortalSection['title'] ?? 'Πύλη Απουσιολογίου'); ?></h3>
+                                    <?php if (trim((string)($attendancePortalSection['subtitle'] ?? '')) !== ''): ?>
+                                        <p class="mb-0"><?php echo parentsPageRenderMultiline($attendancePortalSection['subtitle'] ?? ''); ?></p>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php if (trim((string)($attendancePortalSection['content']['link_url'] ?? '')) !== ''): ?>
+                                    <a class="btn parents-link-card__button"
+                                       href="<?php echo htmlspecialchars($attendancePortalSection['content']['link_url'] ?? ''); ?>"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <i class="fas fa-external-link-alt mr-2"></i><?php echo htmlspecialchars($attendancePortalSection['content']['link_label'] ?? 'Μετάβαση στην Πύλη'); ?>
+                                    </a>
+                                <?php endif; ?>
                             </article>
                         </div>
                     </div>
