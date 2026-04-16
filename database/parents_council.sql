@@ -426,6 +426,7 @@ CREATE TABLE `Submissions` (
   `text_content` text DEFAULT NULL,
   `submission_data` longtext DEFAULT NULL,
   `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `admin_seen_at` datetime DEFAULT NULL,
   `sub_status` enum('waiting','approved','rejected') DEFAULT 'waiting',
   PRIMARY KEY (`application_id`,`user_id`),
   KEY `fk_sub_user` (`user_id`),

@@ -198,6 +198,48 @@
     color: #ffffff;
 }
 
+.application-new-submission-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    will-change: opacity, transform;
+}
+
+.submission-new-label {
+    min-width: auto;
+    padding: 0 7px;
+    transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+}
+
+.admin-dashboard-table tbody tr.submission-row-new:hover .submission-new-label {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-1px) scale(0.92);
+}
+
+.admin-notification-badge {
+    transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    will-change: opacity, transform;
+}
+
+.notification-badge-fade-out {
+    opacity: 0 !important;
+    transform: translateY(-1px) scale(0.9) !important;
+    filter: blur(0.35px);
+    pointer-events: none;
+}
+
 /* Card λεπτομερειών (πάνω blocks με label/value) */
 .detail-card {
     height: 100%;

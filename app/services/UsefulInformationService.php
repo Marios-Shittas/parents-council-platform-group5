@@ -20,6 +20,7 @@ class UsefulInformationService
 
         $this->ensureTable();
         $this->ensureDefaultSections();
+        $this->applyLegacyContentAdjustments();
     }
 
     public function getAllSections()
@@ -181,12 +182,84 @@ class UsefulInformationService
         }
     }
 
+    private function applyLegacyContentAdjustments()
+    {
+        $legacyPageHeaderSubtitle = 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.';
+        $currentSymbolSubtitle = 'Χρήσιμοι Συνδέσμοι & Πληροφορίες/ Ενημερωτικό Υλικό/ Έντυπα & Ενημερώσεις';
+        $oldSpacedSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.';
+        $newPageHeaderTitle = 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι';
+        $newPageHeaderSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες,ενημερωτικό υλικό,έντυπα και ενημερώσεις.';
+
+        $pageHeader = $this->getSection('page_header');
+        if (is_array($pageHeader)) {
+            $currentTitle = (string)($pageHeader['title'] ?? '');
+            $currentSubtitle = (string)($pageHeader['subtitle'] ?? '');
+            $shouldUpdatePageHeader = (
+                $currentSubtitle === $legacyPageHeaderSubtitle
+                || $currentSubtitle === $currentSymbolSubtitle
+                || $currentSubtitle === $oldSpacedSubtitle
+                || $currentTitle === 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες'
+                || $currentTitle === 'Χρήσιμοι Σύνδεσμοι και Πληροφορίες'
+            );
+
+            if ($shouldUpdatePageHeader) {
+                $this->updateSection(
+                    'page_header',
+                    $newPageHeaderTitle,
+                    $newPageHeaderSubtitle,
+                    is_array($pageHeader['content'] ?? null) ? $pageHeader['content'] : []
+                );
+            }
+        }
+
+        $quickLinks = $this->getSection('quick_links');
+        if (!is_array($quickLinks)) {
+            return;
+        }
+
+        $content = is_array($quickLinks['content'] ?? null) ? $quickLinks['content'] : [];
+        $items = $content['items'] ?? [];
+        if (!is_array($items)) {
+            return;
+        }
+
+        $changed = false;
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $itemTitle = trim((string)($item['title'] ?? ''));
+            if ($itemTitle !== 'Εκπαιδευτικοί Σύνδεσμοι' && $itemTitle !== 'Έντυπα Ασφάλειας') {
+                continue;
+            }
+
+            $items[$index]['title'] = 'Πύλη Απουσιολογίου';
+            $items[$index]['description'] = 'Άμεση πρόσβαση στην πύλη απουσιολογίου του σχολείου.';
+            $items[$index]['url'] = 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/';
+            $changed = true;
+        }
+
+        if (!$changed) {
+            return;
+        }
+
+        $content['items'] = $items;
+
+        $this->updateSection(
+            'quick_links',
+            (string)($quickLinks['title'] ?? ''),
+            (string)($quickLinks['subtitle'] ?? ''),
+            $content
+        );
+    }
+
     private function buildDefaultSections()
     {
         return [
             'page_header' => [
-                'title' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες',
-                'subtitle' => 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.',
+                'title' => 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι',
+                'subtitle' => 'Χρήσιμοι σύνδεσμοι και πληροφορίες,ενημερωτικό υλικό,έντυπα και ενημερώσεις.',
                 'content' => [
                     'eyebrow' => 'Οδηγός Γονέων Και Μαθητών',
                 ],
@@ -209,9 +282,9 @@ class UsefulInformationService
                             'icon' => 'fas fa-file-download',
                         ],
                         [
-                            'title' => 'Εκπαιδευτικοί Σύνδεσμοι',
-                            'description' => 'Επίσημα έντυπα του ΥΠΑΝ για θέματα ασφάλειας και καταγραφής ατυχημάτων.',
-                            'url' => 'https://www.moec.gov.cy/politiki_amyna/ay_entypa.html',
+                            'title' => 'Πύλη Απουσιολογίου',
+                            'description' => 'Άμεση πρόσβαση στην πύλη απουσιολογίου του σχολείου.',
+                            'url' => 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/',
                             'icon' => 'fas fa-shield-alt',
                         ],
                     ],
