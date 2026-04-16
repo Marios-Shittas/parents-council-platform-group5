@@ -7,10 +7,38 @@ require_once __DIR__ . '/../config/db.php';
 
 class ApplicationsService {
     private $conn;
+    private $hasAdminSeenAtColumn = null;
     
     public function __construct() {
         global $conn;
         $this->conn = $conn;
+        $this->ensureSubmissionSeenColumn();
+    }
+
+    /**
+     * Ensure submissions table supports persistent admin read state.
+     * @return bool True when admin_seen_at exists
+     */
+    private function ensureSubmissionSeenColumn() {
+        if ($this->hasAdminSeenAtColumn !== null) {
+            return (bool)$this->hasAdminSeenAtColumn;
+        }
+
+        $check = $this->conn->query("SHOW COLUMNS FROM Submissions LIKE 'admin_seen_at'");
+        if ($check && (int)$check->num_rows > 0) {
+            $this->hasAdminSeenAtColumn = true;
+            return true;
+        }
+
+        $alterSql = "ALTER TABLE Submissions ADD COLUMN admin_seen_at DATETIME NULL DEFAULT NULL AFTER submitted_at";
+        if (!$this->conn->query($alterSql)) {
+            $this->hasAdminSeenAtColumn = false;
+            return false;
+        }
+
+        $recheck = $this->conn->query("SHOW COLUMNS FROM Submissions LIKE 'admin_seen_at'");
+        $this->hasAdminSeenAtColumn = $recheck && (int)$recheck->num_rows > 0;
+        return (bool)$this->hasAdminSeenAtColumn;
     }
     
     // ============================================
@@ -315,6 +343,8 @@ class ApplicationsService {
      * @return array Array of submissions
      */
     public function getAllSubmissions() {
+        $hasSeenColumn = $this->ensureSubmissionSeenColumn();
+        $adminSeenSelect = $hasSeenColumn ? 's.admin_seen_at' : 'NULL AS admin_seen_at';
         $sql = "SELECT 
                     s.application_id,
                     s.user_id,
@@ -322,6 +352,7 @@ class ApplicationsService {
                     s.sub_status,
                     s.submission_data,
                     s.submitted_at,
+                    {$adminSeenSelect},
                     a.application_title,
                     u.name,
                     u.surname,
@@ -333,6 +364,88 @@ class ApplicationsService {
         
         $result = $this->conn->query($sql);
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Get count of submissions that are still waiting review.
+     * @return int Total waiting submissions
+     */
+    public function getWaitingSubmissionCount() {
+        if ($this->ensureSubmissionSeenColumn()) {
+            $sql = "SELECT COUNT(*) AS count FROM Submissions WHERE sub_status = 'waiting' AND admin_seen_at IS NULL";
+        } else {
+            $sql = "SELECT COUNT(*) AS count FROM Submissions WHERE sub_status = 'waiting'";
+        }
+
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            return 0;
+        }
+
+        $row = $result->fetch_assoc();
+        return (int)($row['count'] ?? 0);
+    }
+
+    /**
+     * Get unread waiting submissions count for a specific application.
+     * @param int $applicationId Application ID
+     * @return int Total waiting unread submissions for application
+     */
+    public function getWaitingSubmissionCountByApplication($applicationId) {
+        if ($this->ensureSubmissionSeenColumn()) {
+            $sql = "SELECT COUNT(*) AS count
+                    FROM Submissions
+                    WHERE application_id = ?
+                      AND sub_status = 'waiting'
+                      AND admin_seen_at IS NULL";
+        } else {
+            $sql = "SELECT COUNT(*) AS count
+                    FROM Submissions
+                    WHERE application_id = ?
+                      AND sub_status = 'waiting'";
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->bind_param("i", $applicationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if (!$result) {
+            return 0;
+        }
+
+        $row = $result->fetch_assoc();
+        return (int)($row['count'] ?? 0);
+    }
+
+    /**
+     * Mark a waiting submission as seen by admin.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @return bool True when query executes successfully
+     */
+    public function markSubmissionAsSeen($applicationId, $userId) {
+        if (!$this->ensureSubmissionSeenColumn()) {
+            return false;
+        }
+
+        $sql = "UPDATE Submissions
+                SET admin_seen_at = NOW()
+                WHERE application_id = ?
+                  AND user_id = ?
+                  AND sub_status = 'waiting'
+                  AND admin_seen_at IS NULL";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("ii", $applicationId, $userId);
+        return $stmt->execute();
     }
     
     /**

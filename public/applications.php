@@ -1,3 +1,3 @@
 <?php
-header('Location: /parents-council-platform-group5/public/login.php');
-exit;
+$siteContext = 'public';
+require __DIR__ . '/../app/views/pages/applications.php';

@@ -222,8 +222,12 @@ class ApplicationTemplateService {
             $formSchemaJson,
             $isSystemTemplate
         );
-        
-        return $stmt->execute();
+
+        if (!$stmt->execute()) {
+            return false;
+        }
+
+        return (int)$this->conn->insert_id;
     }
     
     /**

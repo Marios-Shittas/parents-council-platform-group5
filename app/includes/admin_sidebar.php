@@ -20,6 +20,15 @@ try {
     $pendingUserRegistrations = 0;
 }
 
+$pendingApplicationSubmissions = 0;
+try {
+    require_once __DIR__ . '/../services/ApplicationsService.php';
+    $applicationsService = new ApplicationsService();
+    $pendingApplicationSubmissions = max(0, (int)$applicationsService->getWaitingSubmissionCount());
+} catch (Throwable $exception) {
+    $pendingApplicationSubmissions = 0;
+}
+
 $epikoinoniaBadgeText = '';
 if ($unreadContactMessages > 0) {
     $epikoinoniaBadgeText = $unreadContactMessages > 10 ? '10+' : (string)$unreadContactMessages;
@@ -28,6 +37,11 @@ if ($unreadContactMessages > 0) {
 $usersBadgeText = '';
 if ($pendingUserRegistrations > 0) {
     $usersBadgeText = $pendingUserRegistrations > 10 ? '10+' : (string)$pendingUserRegistrations;
+}
+
+$applicationsBadgeText = '';
+if ($pendingApplicationSubmissions > 0) {
+    $applicationsBadgeText = $pendingApplicationSubmissions > 10 ? '10+' : (string)$pendingApplicationSubmissions;
 }
 ?>
 
@@ -91,7 +105,11 @@ if ($pendingUserRegistrations > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'applications.php' ? 'active' : ''; ?>" href="applications.php">
-                <i class="fas fa-file-alt"></i> Αιτήσεις
+                <i class="fas fa-file-alt"></i>
+                <span class="admin-nav-label">Αιτήσεις</span>
+                <?php if ($applicationsBadgeText !== ''): ?>
+                    <span class="admin-notification-badge" aria-label="Νέες αιτήσεις προς έλεγχο: <?php echo htmlspecialchars($applicationsBadgeText); ?>"><?php echo htmlspecialchars($applicationsBadgeText); ?></span>
+                <?php endif; ?>
             </a>
         </li>
 

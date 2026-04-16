@@ -7,10 +7,10 @@ $footer_links = [
     ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
     ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
     ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')],
+    ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')],
 ];
 
 if (site_is_parent()) {
-    $footer_links[] = ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')];
     $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
 }
 
