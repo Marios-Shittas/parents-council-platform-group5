@@ -33,7 +33,7 @@ $nav_items = [
         'match' => ['home.php', 'index.php', ''],
     ],
     [
-        'label' => 'Σύνδεσμος Γονέων',
+        'label' => site_is_parent() ? 'Συνδεσμος Γωνεων' : 'Σύνδεσμος Γονέων',
         'href' => site_section_url('parents.php'),
         'icon' => 'fas fa-users',
         'match' => ['parents.php'],
@@ -51,7 +51,7 @@ $nav_items = [
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => 'Χρήσιμες Πληροφορίες',
+        'label' => site_is_parent() ? 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες' : 'Χρήσιμες Πληροφορίες',
         'href' => site_section_url('useful-information.php'),
         'icon' => 'fas fa-info-circle',
         'match' => ['useful-information.php'],

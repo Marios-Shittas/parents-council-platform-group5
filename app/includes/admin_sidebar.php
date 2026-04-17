@@ -57,7 +57,7 @@ if ($pendingApplicationSubmissions > 0) {
     <div class="admin-sidebar-top">
         <div class="brand">
             <i class="fas fa-school"></i>
-            Admin Panel
+            Πίνακας Διαχείρισης
         </div>
 
         <button class="admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Κλείσιμο admin menu">
@@ -69,7 +69,13 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'home.php' ? 'active' : ''; ?>" href="home.php">
-                <i class="fas fa-home"></i> Dashboard
+                <i class="fas fa-home"></i> Αρχική
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
+                <i class="fas fa-users"></i> Συνδεσμος Γωνεων
             </a>
         </li>
 
@@ -92,12 +98,6 @@ if ($pendingApplicationSubmissions > 0) {
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
-                <i class="fas fa-users"></i> Συνδεσμος Γωνεων
-            </a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
                 <i class="fas fa-users"></i> Χρήστες
             </a>
@@ -115,13 +115,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'eshop.php' ? 'active' : ''; ?>" href="eshop.php">
-                <i class="fas fa-shopping-cart"></i> E-shop
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
-                <i class="fas fa-receipt"></i> Παραγγελίες
+                <i class="fas fa-shopping-cart"></i> Κατάστημα
             </a>
         </li>
 
@@ -138,6 +132,18 @@ if ($pendingApplicationSubmissions > 0) {
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'photos.php' ? 'active' : ''; ?>" href="photos.php">
                 <i class="fas fa-camera"></i> Φωτογραφίες
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
+                <i class="fas fa-users"></i> Χρήστες
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
+                <i class="fas fa-receipt"></i> Παραγγελίες
             </a>
         </li>
 
