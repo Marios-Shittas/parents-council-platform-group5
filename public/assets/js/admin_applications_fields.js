@@ -26,7 +26,26 @@
     const publishApplicationBtn = document.getElementById('publish_application_btn');
     const createApplicationTitle = document.getElementById('create_application_title');
     const createApplicationDescription = document.getElementById('create_application_description');
+    const createApplicationOpenDate = document.getElementById('create_application_open_date');
+    const createApplicationCloseDate = document.getElementById('create_application_close_date');
     const createInstructionFiles = document.getElementById('create_instruction_files');
+
+    function syncCreateCloseDateMin() {
+        if (!createApplicationOpenDate || !createApplicationCloseDate) {
+            return;
+        }
+
+        const openDate = (createApplicationOpenDate.value || '').trim();
+        createApplicationCloseDate.min = openDate;
+        if (openDate !== '' && createApplicationCloseDate.value && createApplicationCloseDate.value < openDate) {
+            createApplicationCloseDate.value = '';
+        }
+    }
+
+    if (createApplicationOpenDate && createApplicationCloseDate) {
+        createApplicationOpenDate.addEventListener('change', syncCreateCloseDateMin);
+        syncCreateCloseDateMin();
+    }
 
     // Λειτουργία προσθήκης νέου πεδίου
     if (addFormFieldBtn) {
@@ -161,10 +180,24 @@
     function publishApplication() {
         const title = (createApplicationTitle?.value || '').trim();
         const description = (createApplicationDescription?.value || '').trim();
+        const openDate = (createApplicationOpenDate?.value || '').trim();
+        const closeDate = (createApplicationCloseDate?.value || '').trim();
 
         if (!title) {
             alert('Ο τίτλος της αίτησης είναι υποχρεωτικός.');
             createApplicationTitle?.focus();
+            return;
+        }
+
+        if (!openDate) {
+            alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
+            createApplicationOpenDate?.focus();
+            return;
+        }
+
+        if (closeDate && closeDate < openDate) {
+            alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+            createApplicationCloseDate?.focus();
             return;
         }
 
@@ -178,6 +211,8 @@
             <input type="hidden" name="action" value="create">
             <input type="hidden" name="application_title" value="${escapeHtml(title)}">
             <input type="hidden" name="application_description" value="${escapeHtml(description)}">
+            <input type="hidden" name="application_open_date_ui" value="${escapeHtml(openDate)}">
+            <input type="hidden" name="application_close_date_ui" value="${escapeHtml(closeDate)}">
             <input type="hidden" name="form_fields_json" value="${escapeHtml(JSON.stringify(formFields))}">
         `;
 

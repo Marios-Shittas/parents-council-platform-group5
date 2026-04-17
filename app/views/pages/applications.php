@@ -232,57 +232,43 @@ function ensurePublicGuestSubmissionIdentity(): array {
         return ['user_id' => 0, 'email' => ''];
     }
 
-    $existingUserId = (int)($_SESSION['public_guest_user_id'] ?? 0);
-    $existingEmail = trim((string)($_SESSION['public_guest_email'] ?? ''));
-
-    if ($existingUserId > 0) {
-        $lookupStmt = $conn->prepare('SELECT user_id, email FROM Users WHERE user_id = ? LIMIT 1');
-        if ($lookupStmt) {
-            $lookupStmt->bind_param('i', $existingUserId);
-            if ($lookupStmt->execute()) {
-                $result = $lookupStmt->get_result();
-                if ($result && $result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    $resolvedEmail = trim((string)($row['email'] ?? $existingEmail));
-                    $_SESSION['public_guest_email'] = $resolvedEmail;
-                    return ['user_id' => (int)($row['user_id'] ?? 0), 'email' => $resolvedEmail];
-                }
+    $sharedGuestEmail = 'public_guest@guest.local';
+    $selectStmt = $conn->prepare('SELECT user_id FROM Users WHERE email = ? LIMIT 1');
+    if ($selectStmt) {
+        $selectStmt->bind_param('s', $sharedGuestEmail);
+        if ($selectStmt->execute()) {
+            $existingResult = $selectStmt->get_result();
+            if ($existingResult && $existingResult->num_rows > 0) {
+                $existingRow = $existingResult->fetch_assoc();
+                return ['user_id' => (int)($existingRow['user_id'] ?? 0), 'email' => ''];
             }
         }
-
-        unset($_SESSION['public_guest_user_id'], $_SESSION['public_guest_email']);
     }
 
-    for ($attempt = 0; $attempt < 3; $attempt++) {
-        try {
-            $guestToken = bin2hex(random_bytes(6));
-        } catch (Throwable $e) {
-            $guestToken = dechex(time()) . dechex(random_int(1000, 9999));
-        }
+    try {
+        $guestPasswordSeed = bin2hex(random_bytes(16));
+    } catch (Throwable $e) {
+        $guestPasswordSeed = hash('sha256', microtime(true) . (string)mt_rand());
+    }
+    $guestPassword = password_hash($guestPasswordSeed, PASSWORD_DEFAULT);
+    $guestName = 'Public';
+    $guestSurname = 'Guest';
+    $guestPhone = '';
+    $guestChildren = 0;
+    $guestRole = 'parent';
+    $guestStatus = 'approved';
 
-        $guestEmail = 'public_guest_' . $guestToken . '@guest.local';
-        $guestPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
-        $guestName = 'Public';
-        $guestSurname = 'Guest';
-        $guestPhone = '';
-        $guestChildren = 0;
-        $guestRole = 'parent';
-        $guestStatus = 'approved';
+    $insertStmt = $conn->prepare(
+        'INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
 
-        $insertStmt = $conn->prepare(
-            'INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
-
-        if (!$insertStmt) {
-            continue;
-        }
-
+    if ($insertStmt) {
         $insertStmt->bind_param(
             'sssssiss',
             $guestName,
             $guestSurname,
-            $guestEmail,
+            $sharedGuestEmail,
             $guestPassword,
             $guestPhone,
             $guestChildren,
@@ -291,15 +277,21 @@ function ensurePublicGuestSubmissionIdentity(): array {
         );
 
         if ($insertStmt->execute()) {
-            $newGuestUserId = (int)$conn->insert_id;
-            $_SESSION['public_guest_user_id'] = $newGuestUserId;
-            $_SESSION['public_guest_email'] = $guestEmail;
-
-            return ['user_id' => $newGuestUserId, 'email' => $guestEmail];
+            return ['user_id' => (int)$conn->insert_id, 'email' => ''];
         }
 
-        if ((int)$conn->errno !== 1062) {
-            break;
+        if ((int)$conn->errno === 1062) {
+            $retrySelectStmt = $conn->prepare('SELECT user_id FROM Users WHERE email = ? LIMIT 1');
+            if ($retrySelectStmt) {
+                $retrySelectStmt->bind_param('s', $sharedGuestEmail);
+                if ($retrySelectStmt->execute()) {
+                    $retryResult = $retrySelectStmt->get_result();
+                    if ($retryResult && $retryResult->num_rows > 0) {
+                        $retryRow = $retryResult->fetch_assoc();
+                        return ['user_id' => (int)($retryRow['user_id'] ?? 0), 'email' => ''];
+                    }
+                }
+            }
         }
     }
 
@@ -317,10 +309,11 @@ if (!$isAuthenticatedParent) {
 
 $user_id = $isAuthenticatedParent ? (int)$_SESSION['user_id'] : (int)($guestIdentity['user_id'] ?? 0);
 $canSubmitApplications = $user_id > 0;
-$canShowSubmissions = $user_id > 0;
+$canShowSubmissions = $isAuthenticatedParent && $user_id > 0;
 $currentUserEmail = $isAuthenticatedParent
     ? trim((string)($_SESSION['email'] ?? ''))
     : trim((string)($guestIdentity['email'] ?? ''));
+$showGuestRegistrationReminder = !$isAuthenticatedParent;
 $loginUrl = site_login_url();
 $message = '';
 $messageType = 'info';
@@ -410,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             }
         }
 
-        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+        if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
@@ -629,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
             exit;
         }
 
-        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+        if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
@@ -714,7 +707,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
             $messageType = 'warning';
         } else {
             // Check if user already submitted this application
-            if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+            if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
                 $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
                 $messageType = 'warning';
             } else {
@@ -1171,6 +1164,22 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             color: #2b76cc;
         }
 
+        .application-registration-reminder {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #f2d7a1;
+            background: #fff7e6;
+            color: #7a4f00;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .application-registration-reminder i {
+            color: #c47b00;
+            margin-right: 6px;
+        }
+
         #submitModal .modal-dialog {
             margin: 0.75rem auto;
         }
@@ -1355,8 +1364,8 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                 $appId = (int)$application['application_id'];
                                 $isDbApplied = in_array($appId, $appliedIds);
                                 $appMeta = $applicationUiMeta[(string)$appId] ?? [];
-                                $openDateRaw = (string)($appMeta['open_date'] ?? '');
-                                $closeDateRaw = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ''));
+                                $openDateRaw = (string)($appMeta['open_date'] ?? ($application['open_date'] ?? ''));
+                                $closeDateRaw = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ($application['due_date'] ?? '')));
                                 $openDateFormatted = formatUiDatePublic($openDateRaw);
                                 $closeDateFormatted = formatUiDatePublic($closeDateRaw);
                                 $fullDescription = (string)($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.');
@@ -1405,7 +1414,15 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     $primaryMappedName = trim((string)($applicationDocumentDisplayNamesByPath[$primaryInstructionPath] ?? ''));
                                     $primaryInstructionName = $primaryMappedName !== '' ? $primaryMappedName : basename($primaryInstructionPath);
                                 }
-                                $applicationDateDisplay = $openDateFormatted !== '' ? $openDateFormatted : '—';
+                                if ($openDateFormatted !== '' && $closeDateFormatted !== '') {
+                                    $applicationDateDisplay = $openDateFormatted . ' - ' . $closeDateFormatted;
+                                } elseif ($openDateFormatted !== '') {
+                                    $applicationDateDisplay = $openDateFormatted;
+                                } elseif ($closeDateFormatted !== '') {
+                                    $applicationDateDisplay = $closeDateFormatted;
+                                } else {
+                                    $applicationDateDisplay = '—';
+                                }
                             ?>
                                 <div class="col-12 mb-4">
                                     <article class="application-item h-100 app-card-wrapper post-card post-open-trigger"
@@ -1482,8 +1499,12 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
                     <?php if (!$canShowSubmissions): ?>
                         <div class="alert alert-light border mb-0" role="alert">
-                            Δεν ήταν δυνατή η φόρτωση στοιχείων υποβολών. Παρακαλούμε δοκιμάστε ξανά από
-                            <a href="<?php echo htmlspecialchars($loginUrl); ?>" class="alert-link">τη σελίδα εισόδου</a>.
+                            <?php if ($isAuthenticatedParent): ?>
+                                Δεν ήταν δυνατή η φόρτωση στοιχείων υποβολών. Παρακαλούμε δοκιμάστε ξανά από
+                                <a href="<?php echo htmlspecialchars($loginUrl); ?>" class="alert-link">τη σελίδα εισόδου</a>.
+                            <?php else: ?>
+                                Οι υποβολές μου είναι διαθέσιμες μόνο μετά από είσοδο με λογαριασμό γονέα.
+                            <?php endif; ?>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' style="display:none"' : ''; ?>>
@@ -1634,6 +1655,13 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     <ul id="application-view-selected-files"></ul>
                 </div>
                 </div>
+
+                <?php if ($showGuestRegistrationReminder): ?>
+                    <div class="application-registration-reminder" role="note">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        Αφού συμπληρώσετε την αίτηση, θα χρειαστεί να κάνετε εγγραφή.
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>
