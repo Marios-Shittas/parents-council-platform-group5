@@ -556,6 +556,37 @@ if (site_is_parent()) {
                 padding: .65rem 0;
             }
 
+            .navbar-collapse.collapse {
+                display: block;
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transform: translateY(-6px);
+                pointer-events: none;
+                margin-top: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                transition: max-height .32s ease, opacity .26s ease, transform .26s ease, margin-top .26s ease, padding-top .26s ease, padding-bottom .26s ease;
+            }
+
+            .navbar-collapse.collapse.show {
+                max-height: 84vh;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+                margin-top: .7rem;
+                padding-top: .85rem;
+                padding-bottom: .85rem;
+            }
+
+            .navbar-collapse.collapsing {
+                display: block;
+                overflow: hidden;
+                opacity: .45;
+                transform: translateY(-2px);
+                transition: height .32s ease, opacity .2s ease;
+            }
+
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;
@@ -705,42 +736,59 @@ if (site_is_parent()) {
 </header>
 
 <script>
-    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
+    // Ενιαίος χειρισμός toggle για σταθερό άνοιγμα/κλείσιμο του mobile menu.
     (function () {
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
         }
 
-        function bindFallbackNavbarToggle() {
-            if (hasBootstrapCollapse()) return;
-
-            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+        function bindNavbarToggle() {
             var toggler = document.querySelector('[data-target="#mainNavbar"]');
             var menu = document.getElementById('mainNavbar');
-            if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
+            if (!toggler || !menu || toggler.dataset.toggleBound === 'true') return;
 
-            toggler.dataset.fallbackBound = 'true';
+            toggler.dataset.toggleBound = 'true';
 
-            // Εναλλαγή open/close όταν πατάμε το hamburger.
-            toggler.addEventListener('click', function (event) {
-                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
-                if (hasBootstrapCollapse()) return;
+            function setExpandedState(isOpen) {
+                toggler.classList.toggle('collapsed', !isOpen);
+                toggler.setAttribute('aria-expanded', String(isOpen));
+            }
 
-                event.preventDefault();
+            function toggleMenu() {
+                if (hasBootstrapCollapse()) {
+                    window.jQuery(menu).collapse(menu.classList.contains('show') ? 'hide' : 'show');
+                    return;
+                }
 
                 var isOpen = menu.classList.contains('show');
                 menu.classList.toggle('show', !isOpen);
-                toggler.classList.toggle('collapsed', isOpen);
-                // Ενημέρωση του aria-expanded για accessibility.
-                toggler.setAttribute('aria-expanded', String(!isOpen));
+                setExpandedState(!isOpen);
+            }
+
+            if (hasBootstrapCollapse()) {
+                window.jQuery(menu).on('shown.bs.collapse', function () {
+                    setExpandedState(true);
+                });
+
+                window.jQuery(menu).on('hidden.bs.collapse', function () {
+                    setExpandedState(false);
+                });
+            }
+
+            toggler.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleMenu();
             });
+
+            setExpandedState(menu.classList.contains('show'));
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bindFallbackNavbarToggle);
+            document.addEventListener('DOMContentLoaded', bindNavbarToggle);
             return;
         }
 
-        bindFallbackNavbarToggle();
+        bindNavbarToggle();
     })();
 </script>
