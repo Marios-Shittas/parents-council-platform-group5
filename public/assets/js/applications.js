@@ -1071,7 +1071,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.post-open-trigger').forEach(function (card) {
         card.addEventListener('click', function (e) {
             var submitButton = e.target.closest('.submit-btn');
-            if (submitButton) return;
+            if (submitButton) {
+                if (submitButton.disabled || submitButton.dataset.unavailableReason) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showUnavailableBox(submitButton.dataset.unavailableReason || 'Η αίτηση δεν είναι διαθέσιμη.');
+                }
+                return;
+            }
             if (e.target.closest('.application-instruction-link')) return;
             openApplicationViewModal(card);
         });

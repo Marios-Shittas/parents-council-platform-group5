@@ -330,6 +330,7 @@ class UsersService
                 FROM Payments
                 GROUP BY user_id
             ) payments ON payments.user_id = u.user_id
+            WHERE u.email NOT LIKE 'public_guest%@guest.local'
             ORDER BY {$orderBy}
         ";
 
