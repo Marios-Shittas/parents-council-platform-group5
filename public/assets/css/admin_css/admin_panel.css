@@ -628,10 +628,40 @@ body {
     .admin-content {
         margin-left: 0;
         padding: 86px 18px 24px;
+        min-width: 0;
     }
 
     .admin-wrapper.sidebar-collapsed .admin-content {
         padding-left: 18px;
+    }
+
+    .admin-content > * {
+        min-width: 0;
+    }
+
+    .admin-content .card,
+    .admin-content .card-custom,
+    .admin-content section,
+    .admin-content article,
+    .admin-content .row,
+    .admin-content [class*="col-"] {
+        min-width: 0;
+    }
+
+    .admin-section-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+    }
+
+    .admin-section-tabs .nav-item {
+        flex: 0 0 auto;
+    }
+
+    .admin-section-tabs .nav-link {
+        white-space: nowrap;
     }
 
     .admin-header {
@@ -684,6 +714,8 @@ body {
 
     .admin-content {
         padding: 82px 14px 20px;
+        min-width: 0;
+        overflow-x: hidden;
     }
 
     .admin-wrapper.sidebar-collapsed .admin-content {
@@ -716,7 +748,7 @@ body {
 
     .admin-content .table-responsive > .table,
     .admin-content .table-responsive > .admin-table {
-        min-width: 720px;
+        min-width: 640px;
     }
 
     .admin-table th,
@@ -738,6 +770,53 @@ body {
     }
 
     .modal-dialog {
-        margin: 0.75rem;
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem;
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .modal-body,
+    .alert,
+    .admin-content p,
+    .admin-content h1,
+    .admin-content h2,
+    .admin-content h3,
+    .admin-content h4,
+    .admin-content td,
+    .admin-content th {
+        overflow-wrap: anywhere;
+    }
+
+    .modal-footer {
+        gap: 0.65rem;
+    }
+
+    .modal-footer .btn,
+    .modal-footer .btn-primary-custom,
+    .modal-footer .btn-secondary-custom {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-row > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+
+    .form-row > [class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+
+    .admin-content .btn {
+        white-space: normal;
     }
 }
