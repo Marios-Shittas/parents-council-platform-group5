@@ -694,7 +694,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
     <main class="admin-content">
         <a href="home.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+            <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
         </a>
 
         <div class="admin-header admin-page-header">

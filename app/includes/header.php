@@ -51,7 +51,7 @@ $nav_items = [
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => site_is_parent() ? 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες' : 'Χρήσιμες Πληροφορίες',
+        'label' => 'Χρήσιμες Πληροφορίες',
         'href' => site_section_url('useful-information.php'),
         'icon' => 'fas fa-info-circle',
         'match' => ['useful-information.php'],
@@ -574,6 +574,7 @@ if (site_is_parent()) {
                 opacity: 1;
                 transform: translateY(0);
                 pointer-events: auto;
+                overflow-y: auto;
                 margin-top: .7rem;
                 padding-top: .85rem;
                 padding-bottom: .85rem;
@@ -615,12 +616,13 @@ if (site_is_parent()) {
             }
 
             .brand-line {
-                display: inline;
-                width: auto;
+                display: block;
+                width: 100%;
             }
 
             .brand-line + .brand-line {
                 margin-left: 0;
+                margin-top: .1rem;
             }
 
             .navbar-collapse {
@@ -634,6 +636,11 @@ if (site_is_parent()) {
                 justify-content: flex-start;
                 gap: .1rem;
                 overflow: visible;
+            }
+
+            .navbar-nav .nav-link {
+                white-space: normal;
+                word-break: break-word;
             }
 
             .navbar-nav .nav-item {
@@ -650,6 +657,16 @@ if (site_is_parent()) {
                 gap: .5rem;
                 min-width: 100%;
                 justify-content: flex-start;
+            }
+
+            .navbar-tools .btn {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .navbar-tools .utility-icon-link {
+                align-self: flex-start;
             }
         }
     </style>
@@ -709,12 +726,12 @@ if (site_is_parent()) {
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('logout.php'); ?>"
                        class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn logout-btn">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Log out
+                        <i class="fas fa-sign-out-alt mr-1"></i> Αποσύνδεση
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
                        class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn login-btn-green">
-                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                        <i class="fas fa-sign-in-alt mr-1"></i> Σύνδεση
                     </a>
                 <?php endif; ?>
 

@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $targetPath = $uploadDir . $newFileName;
 
                     if ($fileError !== 0) {
-                        $_SESSION['flash_message'] = 'Upload error code: ' . $fileError;
+                        $_SESSION['flash_message'] = 'Κωδικός σφάλματος μεταφόρτωσης: ' . $fileError;
                         $_SESSION['flash_message_type'] = 'warning';
                     } elseif (!in_array($fileExt, $allowedExtensions)) {
                         $_SESSION['flash_message'] = 'Μη επιτρεπτός τύπος αρχείου: ' . $fileExt;
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $targetPath = $uploadDir . $newFileName;
 
                     if ($fileError !== 0) {
-                        $_SESSION['flash_message'] = 'Upload error code: ' . $fileError;
+                        $_SESSION['flash_message'] = 'Κωδικός σφάλματος μεταφόρτωσης: ' . $fileError;
                         $_SESSION['flash_message_type'] = 'warning';
                     } elseif (!in_array($fileExt, $allowedExtensions)) {
                         $_SESSION['flash_message'] = 'Μη επιτρεπτός τύπος αρχείου: ' . $fileExt;
@@ -226,11 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($updated) {
             $_SESSION['flash_message'] = $isVisible
-                ? 'Το e-shop είναι ξανά διαθέσιμο στους γονείς.'
-                : 'Το e-shop τέθηκε σε κατάσταση Coming soon και τα προϊόντα κρύφτηκαν.';
+                ? 'Το κατάστημα είναι ξανά διαθέσιμο στους γονείς.'
+                : 'Το κατάστημα τέθηκε σε κατάσταση "Έρχεται Σύντομα" και τα προϊόντα κρύφτηκαν.';
             $_SESSION['flash_message_type'] = 'success';
         } else {
-            $_SESSION['flash_message'] = 'Δεν ήταν δυνατή η ενημέρωση της κατάστασης του e-shop.';
+            $_SESSION['flash_message'] = 'Δεν ήταν δυνατή η ενημέρωση της κατάστασης του καταστήματος.';
             $_SESSION['flash_message_type'] = 'danger';
         }
 
@@ -262,7 +262,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Διαχείριση E-shop - Admin</title>
+    <title>Διαχείριση Καταστήματος - Διαχείριση</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -277,11 +277,11 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
 
         <main class="admin-content">
             <a href="home.php" class="back-link">
-                <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+                <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
             </a>
 
             <div class="admin-header">
-                <h1><i class="fas fa-shopping-cart mr-2"></i>Διαχείριση E-shop</h1>
+                <h1><i class="fas fa-shopping-cart mr-2"></i>Διαχείριση Καταστήματος</h1>
                 <button class="btn btn-primary-custom" data-toggle="modal" data-target="#createProductModal">
                     <i class="fas fa-plus mr-1"></i>Νέο Προϊόν
                 </button>
@@ -290,11 +290,11 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
             <div class="eshop-visibility-panel">
                 <div class="eshop-visibility-copy">
                     <span class="eshop-visibility-label">Ορατότητα καταστήματος</span>
-                    <h2><?php echo $isShopVisible ? 'Το κατάστημα είναι ενεργό' : 'Το κατάστημα δείχνει Coming soon'; ?></h2>
+                    <h2><?php echo $isShopVisible ? 'Το κατάστημα είναι ενεργό' : 'Το κατάστημα εμφανίζει μήνυμα "Έρχεται Σύντομα"'; ?></h2>
                     <p>
                         <?php echo $isShopVisible
                             ? 'Οι γονείς βλέπουν κανονικά τα προϊόντα και μπορούν να πραγματοποιήσουν αγορές.'
-                            : 'Οι γονείς δεν βλέπουν προϊόντα και εμφανίζεται μόνο μήνυμα Coming soon.'; ?>
+                            : 'Οι γονείς δεν βλέπουν προϊόντα και εμφανίζεται μόνο μήνυμα "Έρχεται Σύντομα".'; ?>
                     </p>
                 </div>
 
@@ -306,7 +306,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                         class="btn <?php echo $isShopVisible ? 'btn-warning' : 'btn-success'; ?> eshop-visibility-btn"
                     >
                         <i class="fas <?php echo $isShopVisible ? 'fa-eye-slash' : 'fa-eye'; ?> mr-1"></i>
-                        <?php echo $isShopVisible ? 'Coming soon' : 'Επαναφορά καταστήματος'; ?>
+                        <?php echo $isShopVisible ? 'Έρχεται Σύντομα' : 'Επαναφορά καταστήματος'; ?>
                     </button>
                 </form>
             </div>
@@ -348,7 +348,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                                     <?php if (!empty($product['product_image'])): ?>
                                                         <img
                                                             src="<?php echo htmlspecialchars($product['product_image']); ?>"
-                                                            alt="Product Image"
+                                                            alt="Εικόνα προϊόντος"
                                                             class="img-fluid product-thumb-img"
                                                         >
                                                     <?php else: ?>
@@ -532,7 +532,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                 <div>
                                     <img
                                         src="<?php echo htmlspecialchars($editProduct['product_image']); ?>"
-                                        alt="Current Product Image"
+                                        alt="Τρέχουσα εικόνα προϊόντος"
                                         style="max-width: 120px; border-radius: 8px; border:1px solid #ddd;"
                                     >
                                 </div>

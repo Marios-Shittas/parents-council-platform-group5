@@ -47,7 +47,7 @@ if ($pendingApplicationSubmissions > 0) {
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>
-    <span>Menu</span>
+    <span>Μενού</span>
 </button>
 
 <div class="admin-sidebar-backdrop" data-admin-sidebar-backdrop></div>
@@ -93,7 +93,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
-                <i class="fas fa-info-circle"></i> Χρήσιμοι Σύνδεσμοι & Πληροφορίες
+                <i class="fas fa-info-circle"></i> Χρήσιμες Πληροφορίες
             </a>
         </li>
 
@@ -151,7 +151,7 @@ if ($pendingApplicationSubmissions > 0) {
 
     <div class="admin-sidebar-footer">
         <a class="nav-link admin-logout-link" href="../logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
+            <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
         </a>
     </div>
 

@@ -3,6 +3,11 @@ body {
     background: #f5f7fb;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+}
+
+html {
+    overflow-x: hidden;
 }
 
 .admin-wrapper {
@@ -224,7 +229,12 @@ body {
     padding: 35px 40px;
     background: #f5f7fb;
     min-height: 100vh;
+    max-width: 100%;
     transition: margin-left 0.24s ease, padding-left 0.24s ease;
+}
+
+.admin-content > * {
+    max-width: 100%;
 }
 
 .admin-wrapper.sidebar-collapsed .admin-sidebar {
@@ -511,6 +521,22 @@ body {
         padding: 86px 18px 24px;
     }
 
+    .admin-content .row > [class*="col-"] {
+        min-width: 0;
+    }
+
+    .admin-content .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-content .table-responsive > .table,
+    .admin-content .table-responsive > .admin-table,
+    .admin-content .table,
+    .admin-content .admin-table {
+        min-width: 680px;
+    }
+
     .admin-wrapper.sidebar-collapsed .admin-content {
         padding-left: 18px;
     }
@@ -564,6 +590,7 @@ body {
 
     .admin-content {
         padding: 82px 14px 20px;
+        overflow-x: hidden;
     }
 
     .admin-wrapper.sidebar-collapsed .admin-content {
@@ -597,6 +624,25 @@ body {
     .admin-content .table-responsive > .table,
     .admin-content .table-responsive > .admin-table {
         min-width: 720px;
+    }
+
+    .admin-content .table,
+    .admin-content .admin-table {
+        min-width: 620px;
+    }
+
+    .admin-content .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-content .table-responsive > table,
+    .admin-content .table-responsive > .table,
+    .admin-content .table-responsive > .admin-table {
+        display: table !important;
+        overflow: visible !important;
     }
 
     .admin-table th,

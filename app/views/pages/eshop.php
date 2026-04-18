@@ -40,8 +40,8 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <?php else: ?>
         <section class="eshop-coming-soon">
             <div class="eshop-coming-soon__card">
-                <span class="eshop-coming-soon__eyebrow">E-shop</span>
-                <h2>Coming soon</h2>
+                <span class="eshop-coming-soon__eyebrow">Κατάστημα</span>
+                <h2>Έρχεται Σύντομα</h2>
                 <p>Το κατάστημα δεν είναι διαθέσιμο αυτή τη στιγμή. Δοκιμάστε ξανά σύντομα.</p>
             </div>
         </section>

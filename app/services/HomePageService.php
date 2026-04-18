@@ -165,21 +165,21 @@ class HomePageService
     {
         return [
             'banner_section' => [
-                'title' => 'Banner Αρχικής',
+                'title' => 'Κεντρικές Εικόνες Αρχικής',
                 'subtitle' => '',
                 'content' => [
                     'slides' => [
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3',
                         ],
                     ],
                 ],

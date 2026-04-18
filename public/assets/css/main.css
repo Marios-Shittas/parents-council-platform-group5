@@ -15,6 +15,7 @@ body {
     background-color: #f5f7fa;
     color: #333;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 a {
@@ -449,6 +450,25 @@ table tbody tr:hover {
     .container {
         padding: 0 10px;
     }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive > table,
+    .table-responsive > .table,
+    .table-responsive > .admin-table {
+        display: table;
+        width: 100%;
+        overflow: visible;
+        white-space: normal;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+        max-width: calc(100% - 1.5rem);
+    }
 }
 
 @media (max-width: 576px) {
@@ -467,5 +487,13 @@ table tbody tr:hover {
     .btn {
         padding: 8px 16px;
         font-size: 0.85rem;
+    }
+
+    img,
+    video,
+    canvas,
+    svg {
+        max-width: 100%;
+        height: auto;
     }
 }

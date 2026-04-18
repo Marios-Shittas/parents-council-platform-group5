@@ -155,7 +155,7 @@
 
 /* Admin announcements table tuning */
 .admin-table {
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .admin-table th {
@@ -173,35 +173,49 @@
 
 .admin-table th:nth-child(1),
 .admin-table td:nth-child(1) {
-    width: 120px;
+    width: 110px;
     text-align: center;
 }
 
 .admin-table th:nth-child(2),
 .admin-table td:nth-child(2) {
-    width: 170px;
+    width: 300px;
 }
 
 .admin-table th:nth-child(3),
 .admin-table td:nth-child(3) {
-    width: 210px;
+    width: 130px;
     text-align: center;
 }
 
 .admin-table th:nth-child(4),
 .admin-table td:nth-child(4) {
-    width: 170px;
+    width: 130px;
     text-align: center;
 }
 
-.admin-table th:nth-child(5) {
-    text-align: left;
+.admin-table th:nth-child(5),
+.admin-table td:nth-child(5) {
+    width: 120px;
+    text-align: center;
 }
 
 .admin-table th:nth-child(6),
 .admin-table td:nth-child(6) {
-    width: 150px;
+    width: 290px;
+    text-align: left;
+}
+
+.admin-table th:nth-child(7),
+.admin-table td:nth-child(7) {
+    width: 120px;
     text-align: center;
+}
+
+.admin-table td:nth-child(2),
+.admin-table td:nth-child(6) {
+    white-space: normal;
+    word-break: break-word;
 }
 
 .page-notice-overlay,
@@ -306,8 +320,19 @@
 }
 
 @media (max-width: 767.98px) {
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive > .admin-table {
+        display: table !important;
+        overflow: visible !important;
+    }
+
     .admin-table {
-        min-width: 920px;
+        min-width: 1200px;
     }
 
     .thumbnail {

@@ -31,6 +31,11 @@ function parentsAdminUrl($value)
     return trim((string)$value);
 }
 
+function parentsAdminFixedPageHeaderIcon()
+{
+    return 'fas fa-users';
+}
+
 function parentsAdminTextareaToList($value)
 {
     $lines = explode("\n", parentsAdminTextarea($value));
@@ -235,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     [
                         'public_eyebrow' => parentsAdminTrim($_POST['public_eyebrow'] ?? ''),
                         'parent_eyebrow' => parentsAdminTrim($_POST['parent_eyebrow'] ?? ''),
-                        'icon' => parentsAdminTrim($_POST['icon'] ?? ''),
+                        'icon' => parentsAdminFixedPageHeaderIcon(),
                     ]
                 );
                 break;
@@ -368,7 +373,7 @@ $boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
 );
 $boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
 $parentsContentTabs = [
-    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
     'attendance_portal_section' => ['label' => 'Πύλη Απουσιολογίου', 'icon' => 'fas fa-user-check'],
@@ -402,7 +407,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i>
-            Πίσω στο Dashboard
+            Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
@@ -448,7 +453,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Page Header</h3>
+                            <h3>Κεφαλίδα Σελίδας</h3>
                             <p>Τίτλος, υπότιτλος και διαφορετικός μικρός τίτλος για δημόσια και γονική προβολή.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
@@ -462,11 +467,6 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             <div class="form-group">
                                 <label for="page-header-title">Τίτλος</label>
                                 <input type="text" class="form-control" id="page-header-title" name="title" value="<?php echo htmlspecialchars($pageHeaderSection['title']); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="page-header-icon">Icon class</label>
-                                <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-users'); ?>">
                             </div>
 
                             <div class="form-group">
@@ -487,7 +487,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Header
+                                <i class="fas fa-save"></i> Αποθήκευση Κεφαλίδας
                             </button>
                         </div>
                     </form>

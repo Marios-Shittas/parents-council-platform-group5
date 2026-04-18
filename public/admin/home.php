@@ -544,7 +544,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'src' => '',
                             'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
                                 ? (string)$existingSlide['alt']
-                                : 'Banner αρχικής σελίδας ' . $i,
+                                : 'Εικόνα αρχικής σελίδας ' . $i,
                             'hidden' => false,
                         ];
                         continue;
@@ -554,7 +554,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'src' => $uploadedPath,
                         'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
                             ? (string)$existingSlide['alt']
-                            : 'Banner αρχικής σελίδας ' . $i,
+                            : 'Εικόνα αρχικής σελίδας ' . $i,
                         'hidden' => $hideSlide,
                     ];
                 }
@@ -738,7 +738,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $homeContentTabs = [
-    'banner_section' => ['label' => 'Banner', 'icon' => 'fas fa-images'],
+    'banner_section' => ['label' => 'Κεντρικές Εικόνες', 'icon' => 'fas fa-images'],
     'hero_section' => ['label' => 'Κεντρικό Μήνυμα', 'icon' => 'fas fa-home'],
     'calendar_section' => ['label' => 'Ημερολόγιο', 'icon' => 'fas fa-calendar-alt'],
     'announcements_section' => ['label' => 'Ανακοινώσεις', 'icon' => 'fas fa-bullhorn'],
@@ -757,9 +757,9 @@ $announcementsContentSection = $homeSections['announcements_section'] ?? ['title
 $eventsContentSection = $homeSections['events_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
 $defaultBannerSlides = [
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3'],
 ];
 $bannerSlidesForEditor = [];
 for ($i = 0; $i < 3; $i++) {
@@ -801,7 +801,7 @@ $calendarPayload = [
     <link rel="stylesheet" href="../assets/css/admin_css/admin_useful_information.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_home.css">
 
-    <title>Dashboard Ημερολογίου - Admin</title>
+    <title>Πίνακας Ημερολογίου - Διαχείριση</title>
 </head>
 <body>
 
@@ -811,11 +811,11 @@ $calendarPayload = [
     <main class="admin-content">
         <section class="dashboard-hero card-custom">
             <div>
-                <p class="dashboard-kicker">Admin Dashboard</p>
+                <p class="dashboard-kicker">Πίνακας Διαχείρισης</p>
                 <h1><i class="fas fa-calendar-check mr-2"></i>Κεντρικό Ημερολόγιο Διαχείρισης</h1>
                 <p class="dashboard-subtitle">
-                    Εδώ ο admin βλέπει συγκεντρωμένα τι υπάρχει σε κάθε ημερομηνία και μπορεί να καταχωρεί
-                    νέα εκδήλωση, ανακοίνωση ή αργία χωρίς να φεύγει από το dashboard.
+                    Εδώ ο διαχειριστής βλέπει συγκεντρωμένα τι υπάρχει σε κάθε ημερομηνία και μπορεί να καταχωρεί
+                    νέα εκδήλωση, ανακοίνωση ή αργία χωρίς να φεύγει από τον πίνακα διαχείρισης.
                 </p>
             </div>
             <div class="dashboard-hero-actions">
@@ -860,7 +860,7 @@ $calendarPayload = [
         <section class="home-content-management" id="home-content-management">
             <div class="card card-custom page-intro">
                 <p class="mb-2"><strong>Διαχείριση δημόσιου περιεχομένου αρχικής σελίδας</strong></p>
-                <p>Από εδώ ενημερώνεις τα βασικά κείμενα και τους τίτλους που προβάλλονται στην αρχική σελίδα, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να επεξεργάζεσαι με έλεγχο το Hero, το block του ημερολογίου και τις ενότητες ανακοινώσεων και εκδηλώσεων.</p>
+                <p>Από εδώ ενημερώνεις τα βασικά κείμενα και τους τίτλους που προβάλλονται στην αρχική σελίδα, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να επεξεργάζεσαι με έλεγχο το κεντρικό μήνυμα, την ενότητα του ημερολογίου και τις ενότητες ανακοινώσεων και εκδηλώσεων.</p>
             </div>
 
             <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
@@ -884,8 +884,8 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'banner_section' ? 'show active' : ''; ?>" id="tab-banner_section" role="tabpanel" aria-labelledby="tab-banner_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Banner Αρχικής Σελίδας</h2>
-                            <p>Από εδώ μπορείς να αλλάζεις τις 3 εικόνες που εμφανίζονται στο επάνω slider της αρχικής σελίδας.</p>
+                            <h2>Κεντρικές Εικόνες Αρχικής Σελίδας</h2>
+                            <p>Από εδώ μπορείς να αλλάζεις τις 3 εικόνες που εμφανίζονται στο επάνω καρουζέλ της αρχικής σελίδας.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-images"></i></span>
                     </div>
@@ -895,12 +895,12 @@ $calendarPayload = [
                         <input type="hidden" name="section_key" value="banner_section">
                         <input type="hidden" name="home_tab" value="banner_section">
                         <input type="hidden" name="redirect_date" value="<?php echo htmlspecialchars($selectedDate); ?>">
-                        <input type="hidden" name="title" value="<?php echo htmlspecialchars($bannerContentSection['title'] ?? 'Banner Αρχικής'); ?>">
+                        <input type="hidden" name="title" value="<?php echo htmlspecialchars($bannerContentSection['title'] ?? 'Κεντρικές Εικόνες Αρχικής'); ?>">
 
                         <div class="section-form-grid">
                             <?php foreach ($bannerSlidesForEditor as $index => $slide): ?>
                                 <div class="editor-subcard">
-                                    <h3>Slide <?php echo $index + 1; ?></h3>
+                                    <h3>Διαφάνεια <?php echo $index + 1; ?></h3>
                                     <input type="hidden" name="current_banner_<?php echo $index + 1; ?>_src" value="<?php echo htmlspecialchars($slide['src']); ?>">
 
                                     <div class="home-banner-admin-preview">
@@ -910,7 +910,7 @@ $calendarPayload = [
                                     <div class="form-group mb-3">
                                         <div class="form-check home-banner-remove-check">
                                             <label class="form-check-label" for="banner_<?php echo $index + 1; ?>_hide">
-                                                Απόκρυψη από την αρχική σελίδα (Hide)
+                                                Απόκρυψη από την αρχική σελίδα
                                             </label>
                                             <input class="form-check-input" type="checkbox" name="banner_<?php echo $index + 1; ?>_hide" value="1" id="banner_<?php echo $index + 1; ?>_hide" <?php echo !empty($slide['hidden']) ? 'checked' : ''; ?>>
                                         </div>
@@ -935,7 +935,7 @@ $calendarPayload = [
                         </div>
 
                         <div class="section-actions">
-                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Banner</button>
+                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Εικόνων</button>
                         </div>
                     </form>
                 </section>
@@ -943,7 +943,7 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'hero_section' ? 'show active' : ''; ?>" id="tab-hero_section" role="tabpanel" aria-labelledby="tab-hero_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Hero Ενότητα</h2>
+                            <h2>Ενότητα Κεντρικού Μηνύματος</h2>
                             <p>Το βασικό μήνυμα καλωσορίσματος, ο μεγάλος τίτλος και τα δύο κουμπιά πλοήγησης.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-home"></i></span>
@@ -979,7 +979,7 @@ $calendarPayload = [
                         </div>
 
                         <div class="section-actions">
-                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Hero</button>
+                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Κεντρικού Μηνύματος</button>
                         </div>
                     </form>
                 </section>
@@ -987,7 +987,7 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'calendar_section' ? 'show active' : ''; ?>" id="tab-calendar_section" role="tabpanel" aria-labelledby="tab-calendar_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Block Ημερολογίου</h2>
+                            <h2>Ενότητα Ημερολογίου</h2>
                             <p>Ο τίτλος που εμφανίζεται στο πλαίσιο του ημερολογίου στην αρχική σελίδα.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-calendar-alt"></i></span>
@@ -1001,7 +1001,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div class="full-width">
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($calendarContentSection['title'] ?? ''); ?>">
                             </div>
                         </div>
@@ -1016,7 +1016,7 @@ $calendarPayload = [
                     <div class="section-editor__header">
                         <div>
                             <h2>Ενότητα Ανακοινώσεων</h2>
-                            <p>Ο τίτλος του block και το κείμενο του κουμπιού που οδηγεί σε όλες τις ανακοινώσεις.</p>
+                            <p>Ο τίτλος της ενότητας και το κείμενο του κουμπιού που οδηγεί σε όλες τις ανακοινώσεις.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-bullhorn"></i></span>
                     </div>
@@ -1029,7 +1029,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div>
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($announcementsContentSection['title'] ?? ''); ?>">
                             </div>
                             <div>
@@ -1048,7 +1048,7 @@ $calendarPayload = [
                     <div class="section-editor__header">
                         <div>
                             <h2>Ενότητα Εκδηλώσεων</h2>
-                            <p>Ο τίτλος του block και το κείμενο του κουμπιού που οδηγεί σε όλες τις εκδηλώσεις.</p>
+                            <p>Ο τίτλος της ενότητας και το κείμενο του κουμπιού που οδηγεί σε όλες τις εκδηλώσεις.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-star"></i></span>
                     </div>
@@ -1061,7 +1061,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div>
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($eventsContentSection['title'] ?? ''); ?>">
                             </div>
                             <div>

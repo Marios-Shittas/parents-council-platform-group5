@@ -483,7 +483,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 
     <main class="admin-content">
         <a href="home.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+            <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
