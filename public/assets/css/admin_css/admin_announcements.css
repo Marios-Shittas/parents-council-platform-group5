@@ -345,6 +345,29 @@
         height: 84px;
     }
 
+    .attachment-preview-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .attachment-preview-info {
+        width: 100%;
+    }
+
+    .attachment-preview-name {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .attachment-remove-btn {
+        align-self: flex-end;
+    }
+
+    #createModal .modal-dialog,
+    #editModal .modal-dialog {
+        margin: 0.5rem;
+    }
+
     .page-notice-actions,
     .page-confirm-actions {
         flex-direction: column;

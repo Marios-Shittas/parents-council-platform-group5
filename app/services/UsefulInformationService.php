@@ -444,9 +444,9 @@ class UsefulInformationService
 
         foreach ($this->getHolidayRows() as $holiday) {
             $title = trim((string)($holiday['name'] ?? ''));
-            $isoDate = $this->convertHolidayDisplayDateToIso((string)($holiday['date'] ?? ''));
+            $isoDate = $this->buildHolidaySortKey((string)($holiday['date'] ?? ''));
 
-            if ($title === '' || $isoDate === null) {
+            if ($title === '' || $isoDate === '9999-99-99') {
                 continue;
             }
 
@@ -460,6 +460,54 @@ class UsefulInformationService
 
         usort($items, static function ($left, $right) {
             return strcmp((string)($left['date'] ?? ''), (string)($right['date'] ?? ''));
+        });
+
+        return $items;
+    }
+
+    public function getSchoolYearCalendarItems()
+    {
+        $section = $this->getSection('school_year');
+        if (!is_array($section)) {
+            return [];
+        }
+
+        $rawItems = $section['content']['items'] ?? [];
+        if (!is_array($rawItems)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($rawItems as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $title = trim((string)($item['label'] ?? ''));
+            $description = trim((string)($item['description'] ?? ''));
+            $isoDate = $this->convertSchoolYearDisplayDateToIso((string)($item['date'] ?? ''));
+
+            if ($title === '' || $isoDate === null) {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $title,
+                'description' => $description,
+                'date' => $isoDate,
+                'type' => 'event',
+            ];
+        }
+
+        usort($items, static function ($left, $right) {
+            $leftDate = (string)($left['date'] ?? '');
+            $rightDate = (string)($right['date'] ?? '');
+
+            if ($leftDate !== $rightDate) {
+                return strcmp($leftDate, $rightDate);
+            }
+
+            return strcmp((string)($left['title'] ?? ''), (string)($right['title'] ?? ''));
         });
 
         return $items;
@@ -565,42 +613,52 @@ class UsefulInformationService
     private function convertHolidayDisplayDateToIso($dateText)
     {
         $dateText = trim((string)$dateText);
-        if ($dateText === '' || strpos($dateText, ' - ') !== false) {
+        if ($dateText === '') {
             return null;
         }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateText) === 1) {
+            return $dateText;
+        }
+
+        if (strpos($dateText, '-') !== false) {
+            return null;
+        }
+
+        $dateText = preg_replace('/\s+/u', ' ', $dateText);
 
         $greekMonths = [
-            'Ιανουαρίου' => '01',
-            'Φεβρουαρίου' => '02',
-            'Μαρτίου' => '03',
-            'Απριλίου' => '04',
-            'Μαΐου' => '05',
-            'Ιουνίου' => '06',
-            'Ιουλίου' => '07',
-            'Αυγούστου' => '08',
-            'Σεπτεμβρίου' => '09',
-            'Οκτωβρίου' => '10',
-            'Νοεμβρίου' => '11',
-            'Δεκεμβρίου' => '12',
+            'ιανουαρίου' => '01',
+            'φεβρουαρίου' => '02',
+            'μαρτίου' => '03',
+            'απριλίου' => '04',
+            'μαΐου' => '05',
+            'ιουνίου' => '06',
+            'ιουλίου' => '07',
+            'αυγούστου' => '08',
+            'σεπτεμβρίου' => '09',
+            'οκτωβρίου' => '10',
+            'νοεμβρίου' => '11',
+            'δεκεμβρίου' => '12',
         ];
 
-        foreach ($greekMonths as $greek => $numeric) {
-            $dateText = str_replace($greek, $numeric, $dateText);
-        }
-
-        $parts = preg_split('/\s+/', $dateText);
-        if (count($parts) !== 3) {
+        if (preg_match('/^(\d{1,2})\s*([^\d\s]+)\s*(\d{4})$/u', $dateText, $matches) !== 1) {
             return null;
         }
 
-        [$day, $month, $year] = $parts;
-        $day = str_pad((string)(int)$day, 2, '0', STR_PAD_LEFT);
+        $day = str_pad((string)(int)$matches[1], 2, '0', STR_PAD_LEFT);
+        $monthText = mb_strtolower(trim((string)$matches[2]), 'UTF-8');
+        $year = trim((string)$matches[3]);
 
-        if (!preg_match('/^\d{2}$/', (string)$month) || !preg_match('/^\d{4}$/', (string)$year)) {
+        if (!isset($greekMonths[$monthText])) {
             return null;
         }
 
-        return $year . '-' . $month . '-' . $day;
+        if (!preg_match('/^\d{4}$/', $year)) {
+            return null;
+        }
+
+        return $year . '-' . $greekMonths[$monthText] . '-' . $day;
     }
 
     private function convertHolidayDisplayDateToIsoWithFallbackYear($startText, $endText)
@@ -617,7 +675,7 @@ class UsefulInformationService
             return null;
         }
 
-        if (preg_match('/^\d{1,2}\s+\S+$/u', $startText) !== 1) {
+        if (preg_match('/^\d{1,2}\s*\S+$/u', $startText) !== 1) {
             return null;
         }
 
@@ -626,6 +684,20 @@ class UsefulInformationService
         }
 
         return $this->convertHolidayDisplayDateToIso($startText . ' ' . $matches[1]);
+    }
+
+    private function convertSchoolYearDisplayDateToIso($dateText)
+    {
+        $dateText = trim((string)$dateText);
+        if ($dateText === '') {
+            return null;
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateText) === 1) {
+            return $dateText;
+        }
+
+        return $this->convertHolidayDisplayDateToIso($dateText);
     }
 
     private function convertIsoDateToHolidayDisplayDate($isoDate)

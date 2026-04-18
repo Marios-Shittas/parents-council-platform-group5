@@ -823,6 +823,8 @@ body {
 
     .dashboard-hero-actions {
         width: 100%;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .dashboard-link-btn {
@@ -835,6 +837,15 @@ body {
 
     .calendar-panel-header {
         flex-direction: column;
+    }
+
+    .day-item-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .day-item-link {
+        align-self: flex-start;
     }
 
     .calendar-legend {

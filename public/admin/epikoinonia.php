@@ -27,6 +27,11 @@ function epikoinoniaAdminTextarea($value)
     return trim($value);
 }
 
+function epikoinoniaAdminFixedPageHeaderIcon()
+{
+    return 'fas fa-envelope';
+}
+
 $service = new EpikoinoniaService();
 $pageService = new EpikoinoniaPageService();
 
@@ -46,18 +51,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
                     [
                         'eyebrow' => epikoinoniaAdminTrim($_POST['eyebrow'] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST['icon'] ?? ''),
+                        'icon' => epikoinoniaAdminFixedPageHeaderIcon(),
                     ]
                 );
                 break;
 
             case 'contact_info':
+                $existingContactInfoSection = $pageService->getSection('contact_info');
+                $existingCards = is_array($existingContactInfoSection['content']['cards'] ?? null)
+                    ? $existingContactInfoSection['content']['cards']
+                    : [];
                 $cards = [];
                 for ($i = 1; $i <= 4; $i++) {
+                    $existingCard = is_array($existingCards[$i - 1] ?? null) ? $existingCards[$i - 1] : [];
                     $cards[] = [
                         'title' => epikoinoniaAdminTrim($_POST["card_{$i}_title"] ?? ''),
                         'text' => epikoinoniaAdminTextarea($_POST["card_{$i}_text"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST["card_{$i}_icon"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($existingCard['icon'] ?? ''),
                         'link_label' => epikoinoniaAdminTrim($_POST["card_{$i}_link_label"] ?? ''),
                         'link_url' => epikoinoniaAdminTrim($_POST["card_{$i}_link_url"] ?? ''),
                     ];
@@ -96,12 +106,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'social_section':
+                $existingSocialSection = $pageService->getSection('social_section');
+                $existingSocialItems = is_array($existingSocialSection['content']['items'] ?? null)
+                    ? $existingSocialSection['content']['items']
+                    : [];
                 $items = [];
                 for ($i = 1; $i <= 3; $i++) {
+                    $existingSocialItem = is_array($existingSocialItems[$i - 1] ?? null) ? $existingSocialItems[$i - 1] : [];
                     $items[] = [
                         'title' => epikoinoniaAdminTrim($_POST["social_{$i}_title"] ?? ''),
                         'url' => epikoinoniaAdminTrim($_POST["social_{$i}_url"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST["social_{$i}_icon"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($existingSocialItem['icon'] ?? ''),
                     ];
                 }
 
@@ -457,11 +472,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                         <label for="page-header-subtitle">Υπότιτλος</label>
                                         <textarea class="form-control content-textarea" id="page-header-subtitle" name="subtitle"><?php echo htmlspecialchars($pageHeaderSection['subtitle']); ?></textarea>
                                     </div>
-
-                                    <div class="form-group">
-                                        <label for="page-header-icon">Κλάση εικονιδίου</label>
-                                        <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-envelope'); ?>">
-                                    </div>
                                 </div>
 
                                 <div class="content-editor-card__actions">
@@ -507,11 +517,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                             <div class="form-group">
                                                 <label for="card-<?php echo $cardNumber; ?>-title">Τίτλος</label>
                                                 <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-title" name="card_<?php echo $cardNumber; ?>_title" value="<?php echo htmlspecialchars($card['title'] ?? ''); ?>">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="card-<?php echo $cardNumber; ?>-icon">Κλάση εικονιδίου</label>
-                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-icon" name="card_<?php echo $cardNumber; ?>_icon" value="<?php echo htmlspecialchars($card['icon'] ?? ''); ?>">
                                             </div>
 
                                             <div class="form-group">
@@ -662,11 +667,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                             <div class="form-group">
                                                 <label for="social-<?php echo $socialNumber; ?>-title">Τίτλος</label>
                                                 <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-title" name="social_<?php echo $socialNumber; ?>_title" value="<?php echo htmlspecialchars($item['title'] ?? ''); ?>">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="social-<?php echo $socialNumber; ?>-icon">Κλάση εικονιδίου</label>
-                                                <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-icon" name="social_<?php echo $socialNumber; ?>_icon" value="<?php echo htmlspecialchars($item['icon'] ?? ''); ?>">
                                             </div>
 
                                             <div class="form-group">

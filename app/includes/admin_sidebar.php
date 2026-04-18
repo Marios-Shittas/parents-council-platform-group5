@@ -136,14 +136,8 @@ if ($pendingApplicationSubmissions > 0) {
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
-                <i class="fas fa-users"></i> Χρήστες
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
-                <i class="fas fa-receipt"></i> Παραγγελίες
+            <a class="nav-link <?php echo $currentPage === 'programatismo-litourgion.php' ? 'active' : ''; ?>" href="programatismo-litourgion.php">
+                <i class="fas fa-cogs"></i> Ενέργειες Συστήματος
             </a>
         </li>
 

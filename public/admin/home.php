@@ -418,6 +418,20 @@ function adminCalendarBuildItems($eventsService, $announcementsService, $usefulI
         ];
     }
 
+    foreach ($usefulInformationService->getSchoolYearCalendarItems() as $schoolYearItem) {
+        $items[] = [
+            'id' => null,
+            'type' => 'event',
+            'title' => (string)($schoolYearItem['title'] ?? ''),
+            'description' => (string)($schoolYearItem['description'] ?? ''),
+            'date' => (string)($schoolYearItem['date'] ?? ''),
+            'time' => null,
+            'sort_key' => (string)($schoolYearItem['date'] ?? '') . ' 00:00:00',
+            'source_url' => 'useful-information.php?active_tab=school_year',
+            'source_label' => 'Χρήσιμες Πληροφορίες',
+        ];
+    }
+
     usort($items, static function ($left, $right) use ($typeOrder) {
         $leftDate = (string)($left['sort_key'] ?? '');
         $rightDate = (string)($right['sort_key'] ?? '');

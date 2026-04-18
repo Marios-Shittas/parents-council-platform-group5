@@ -75,11 +75,22 @@ body {
     border: none;
     border-radius: 10px;
     padding: 25px;
-    margin: 15px;
-    margin-bottom: 15px;
+    margin: 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
+}
+
+.contact-cards-grid {
+    row-gap: 18px;
+}
+
+.contact-cards-grid > [class*='col-'] {
+    display: flex;
+}
+
+.contact-cards-grid .contact-card {
+    width: 100%;
 }
 
 .contact-card:hover {

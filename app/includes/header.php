@@ -86,7 +86,6 @@ if (site_is_parent()) {
         'href' => site_section_url('photos.php'),
         'icon' => 'fas fa-camera',
         'match' => ['photos.php'],
-        'icon_only' => true,
     ];
 }
 ?>
