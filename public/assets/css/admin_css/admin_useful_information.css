@@ -114,4 +114,19 @@
     .section-editor__header {
         flex-direction: column;
     }
+
+    .section-editor__icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+    }
+
+    .section-actions {
+        justify-content: stretch;
+    }
+
+    .section-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

@@ -130,6 +130,11 @@
     .eshop-visibility-panel {
         flex-direction: column;
         align-items: stretch;
+        padding: 18px 16px;
+    }
+
+    .eshop-visibility-copy h2 {
+        font-size: 1.2rem;
     }
 
     .eshop-visibility-btn {
@@ -138,11 +143,17 @@
     }
 
     .admin-table {
-        min-width: 860px;
+        min-width: 760px;
     }
 
     .thumbnail {
         width: 56px;
         height: 56px;
+    }
+
+    #createProductModal .modal-dialog,
+    #editProductModal .modal-dialog,
+    #deleteConfirmModal .modal-dialog {
+        margin: 0.5rem;
     }
 }
