@@ -141,6 +141,12 @@ if ($pendingApplicationSubmissions > 0) {
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'programatismo-litourgion.php' ? 'active' : ''; ?>" href="programatismo-litourgion.php">
+                <i class="fas fa-cogs"></i> Ενέργειες Συστήματος
+            </a>
+        </li>
+
     </ul>
 
     <div class="admin-sidebar-footer">
