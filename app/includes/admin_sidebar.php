@@ -206,7 +206,7 @@ if ($pendingApplicationSubmissions > 0) {
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
-                : wrapper.classList.contains('sidebar-collapsed');
+                : true;
             toggleButton.hidden = !shouldShowToggle;
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }
