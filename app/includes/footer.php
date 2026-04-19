@@ -14,7 +14,7 @@ if (site_is_parent()) {
 }
 
 $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
-$footer_links[] = ['label' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες', 'href' => site_section_url('useful-information.php')];
+$footer_links[] = ['label' => 'Χρήσιμοι Σύνδεσμοι', 'href' => site_section_url('useful-information.php')];
 ?>
 <style>
    /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */

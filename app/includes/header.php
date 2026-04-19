@@ -52,7 +52,7 @@ $nav_items = [
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες',
+        'label' => 'Χρήσιμοι Σύνδεσμοι',
         'href' => site_section_url('useful-information.php'),
         'icon' => 'fas fa-info-circle',
         'match' => ['useful-information.php'],

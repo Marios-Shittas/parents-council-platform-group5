@@ -185,8 +185,8 @@ class UsefulInformationService
     {
         return [
             'page_header' => [
-                'title' => 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες',
-                'subtitle' => 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.',
+                'title' => 'Χρήσιμοι Σύνδεσμοι',
+                'subtitle' => 'Χρήσιμοι Συνδέσμοι & Πληροφορίες/ Ενημερωτικό Υλικό/ Έντυπα & Ενημερώσεις',
                 'content' => [
                     'eyebrow' => 'Οδηγός Γονέων Και Μαθητών',
                 ],
@@ -209,10 +209,10 @@ class UsefulInformationService
                             'icon' => 'fas fa-file-download',
                         ],
                         [
-                            'title' => 'Εκπαιδευτικοί Σύνδεσμοι',
-                            'description' => 'Επίσημα έντυπα του ΥΠΑΝ για θέματα ασφάλειας και καταγραφής ατυχημάτων.',
-                            'url' => 'https://www.moec.gov.cy/politiki_amyna/ay_entypa.html',
-                            'icon' => 'fas fa-shield-alt',
+                            'title' => 'Πύλη Απουσιολογίου',
+                            'description' => 'Άμεση πρόσβαση στην Πύλη Απουσιολογίου του σχολείου.',
+                            'url' => 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/',
+                            'icon' => 'fas fa-calendar-check',
                         ],
                     ],
                 ],
