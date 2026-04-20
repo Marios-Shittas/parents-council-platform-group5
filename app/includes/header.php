@@ -139,6 +139,7 @@ if (site_is_parent()) {
             border-bottom: 1px solid var(--header-border);
             padding: .95rem 0 .7rem;
             font-family: 'Lato', sans-serif;
+            overflow: visible;
         }
 
         /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
@@ -420,7 +421,8 @@ if (site_is_parent()) {
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
         .navbar-collapse {
             width: 100%;
-            justify-content: space-between;
+            min-width: max-content;
+            justify-content: center;
             align-items: center;
             gap: 1rem;
             margin-top: .05rem;
@@ -432,16 +434,15 @@ if (site_is_parent()) {
         }
 
         .navbar-nav {
-            flex: 1 1 auto;
+            flex: 0 0 auto;
             display: flex;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
             margin: 0;
             gap: .25rem;
-            min-width: 0;
-            overflow-x: auto;
-            scrollbar-width: thin;
+            min-width: max-content;
+            overflow: visible;
         }
 
         .navbar-public .navbar-nav {
@@ -504,6 +505,7 @@ if (site_is_parent()) {
             flex-wrap: wrap;
             align-items: center;
             max-width: 1560px;
+            overflow: visible;
             position: relative;
             z-index: 1;
         }
@@ -595,13 +597,16 @@ if (site_is_parent()) {
             .navbar-collapse {
                 margin-top: .7rem;
                 padding: .85rem 1rem;
+                min-width: 0;
             }
 
             .navbar-nav {
                 margin-top: .75rem;
+                flex: 1 1 auto;
                 flex-wrap: wrap;
                 justify-content: flex-start;
                 gap: .1rem;
+                min-width: 0;
                 overflow: visible;
             }
 

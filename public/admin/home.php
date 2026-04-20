@@ -65,6 +65,27 @@ function adminHomeDeleteManagedBannerImage($path)
     }
 }
 
+function adminHomePublicContentUrlExists($url)
+{
+    $path = (string)parse_url((string)$url, PHP_URL_PATH);
+    if ($path === '') {
+        return true;
+    }
+
+    $publicPrefix = '/parents-council-platform-group5/public/';
+    if (strpos($path, $publicPrefix) !== 0) {
+        return true;
+    }
+
+    $relativePath = urldecode(substr($path, strlen($publicPrefix)));
+    if ($relativePath === '' || strpos(str_replace('\\', '/', $relativePath), '..') !== false) {
+        return false;
+    }
+
+    $filePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+    return is_file($filePath);
+}
+
 function adminHomeUploadBannerImage($fileField, $existingPath)
 {
     $upload = $_FILES[$fileField] ?? null;
@@ -765,8 +786,13 @@ $bannerSlidesForEditor = [];
 for ($i = 0; $i < 3; $i++) {
     $storedSlide = is_array($bannerContentSection['content']['slides'][$i] ?? null) ? $bannerContentSection['content']['slides'][$i] : [];
     $defaultSlide = $defaultBannerSlides[$i];
+    $slideSrc = trim((string)($storedSlide['src'] ?? $defaultSlide['src']));
+    if ($slideSrc === '' || !adminHomePublicContentUrlExists($slideSrc)) {
+        $slideSrc = $defaultSlide['src'];
+    }
+
     $bannerSlidesForEditor[] = [
-        'src' => trim((string)($storedSlide['src'] ?? $defaultSlide['src'])),
+        'src' => $slideSrc,
         'alt' => trim((string)($storedSlide['alt'] ?? $defaultSlide['alt'])),
         'hidden' => !empty($storedSlide['hidden']),
     ];
