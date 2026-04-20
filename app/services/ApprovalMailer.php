@@ -42,7 +42,7 @@ class ApprovalMailer
         }
 
         $subject = self::approvalEmailSubject();
-        $body = self::approvalEmailHtmlBody($link);
+        $body = self::approvalEmailTextBody($link);
 
         $socket = $this->openConnection();
 
@@ -72,7 +72,7 @@ class ApprovalMailer
             $this->command($socket, 'MAIL FROM:<' . $this->fromEmail . '>', [250]);
             $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
             $this->command($socket, 'DATA', [354]);
-            $this->write($socket, $this->buildHtmlMessage($toEmail, $subject, $body) . "\r\n.\r\n");
+            $this->write($socket, $this->buildMessage($toEmail, $subject, $body) . "\r\n.\r\n");
             $this->expect($socket, [250]);
             $this->command($socket, 'QUIT', [221]);
         } finally {
@@ -123,6 +123,56 @@ class ApprovalMailer
             $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
             $this->command($socket, 'DATA', [354]);
             $this->write($socket, $this->buildHtmlMessage($toEmail, $subject, $htmlBody) . "\r\n.\r\n");
+            $this->expect($socket, [250]);
+            $this->command($socket, 'QUIT', [221]);
+        } finally {
+            fclose($socket);
+        }
+    }
+
+    public function sendTextEmail(string $toEmail, string $subject, string $textBody): void
+    {
+        if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Recipient email is invalid.');
+        }
+
+        if ($subject === '') {
+            throw new InvalidArgumentException('Email subject is missing.');
+        }
+
+        if ($textBody === '') {
+            throw new InvalidArgumentException('Email body is missing.');
+        }
+
+        $socket = $this->openConnection();
+
+        try {
+            $this->expect($socket, [220]);
+            $this->command($socket, 'EHLO localhost', [250]);
+
+            if ($this->encryption === 'tls' || $this->encryption === 'starttls' || $this->port === 587) {
+                $this->command($socket, 'STARTTLS', [220]);
+
+                $cryptoEnabled = @stream_socket_enable_crypto(
+                    $socket,
+                    true,
+                    STREAM_CRYPTO_METHOD_TLS_CLIENT
+                );
+
+                if ($cryptoEnabled !== true) {
+                    throw new RuntimeException('SMTP STARTTLS handshake failed.');
+                }
+
+                $this->command($socket, 'EHLO localhost', [250]);
+            }
+
+            $this->command($socket, 'AUTH LOGIN', [334]);
+            $this->command($socket, base64_encode($this->username), [334]);
+            $this->command($socket, base64_encode($this->password), [235]);
+            $this->command($socket, 'MAIL FROM:<' . $this->fromEmail . '>', [250]);
+            $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
+            $this->command($socket, 'DATA', [354]);
+            $this->write($socket, $this->buildMessage($toEmail, $subject, $textBody) . "\r\n.\r\n");
             $this->expect($socket, [250]);
             $this->command($socket, 'QUIT', [221]);
         } finally {
@@ -191,21 +241,15 @@ class ApprovalMailer
 
     public static function approvalEmailHtmlBody(string $link): string
     {
-        $safeLink = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-
-        return
-            '<p>Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.</p>' .
-            '<p>Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.</p>' .
-            '<p><a href="' . $safeLink . '"><strong>Σύνδεσμος Συνδρομής</strong></a></p>' .
-            '<p>Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.</p>';
+        return self::approvalEmailTextBody($link);
     }
 
-    public static function approvalEmailTextBody(): string
+    public static function approvalEmailTextBody(string $link): string
     {
         return
             "Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.\n\n" .
             "Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.\n\n" .
-            "Χρησιμοποίησε τον σύνδεσμο συνδρομής από το HTML email.\n\n" .
+            "Σύνδεσμος συνδρομής: {$link}\n\n" .
             "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
     }
 
@@ -213,7 +257,7 @@ class ApprovalMailer
     {
         return
             "Η πληρωμή της συνδρομής σας ολοκληρώθηκε επιτυχώς και πλέον είστε ενεργό μέλος.\r\n\r\n" .
-            "Αυτός είναι ο κωδικός πρόσβασής σας για είσοδο: {$temporaryPassword}\r\n\r\n" .
+            "ΚΩΔΙΚΟΣ ΠΡΟΣΒΑΣΗΣ: **{$temporaryPassword}**\r\n\r\n" .
             "Μπορείτε να τον αλλάξετε οποιαδήποτε στιγμή από τη σελίδα Ξέχασα κωδικό (Forgot Password).";
     }
 
