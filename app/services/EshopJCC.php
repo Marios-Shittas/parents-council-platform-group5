@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/EshopSettingsService.php';
+require_once __DIR__ . '/PaymentReceiptService.php';
 
 class EshopJccService
 {
@@ -207,6 +208,25 @@ class EshopJccService
 
             $this->conn->commit();
             $this->clearStoredCheckoutContext($gatewayOrderId);
+
+            if ($paymentStatus === 'completed') {
+                try {
+                    $receiptSummary = (new PaymentReceiptService($this->conn))
+                        ->sendReceiptForPayments($userId, [$paymentId], 'JCC e-shop');
+
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_SENT',
+                        'Receipt email sent for payment ID: ' . $paymentId . ' to ' . $receiptSummary['email']
+                    );
+                } catch (Throwable $receiptError) {
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_FAILED',
+                        'Receipt email failed for payment ID: ' . $paymentId . '. Error: ' . $receiptError->getMessage()
+                    );
+                }
+            }
 
             $message = $this->buildRedirectMessage($paymentStatus);
             $this->redirectToEshop($paymentStatus, $message);

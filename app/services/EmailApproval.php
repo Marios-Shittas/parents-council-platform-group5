@@ -76,7 +76,7 @@ class EmailApproval
                 $this->mailer->isHTML(true);
                 $this->mailer->Subject = \ApprovalMailer::approvalEmailSubject();
                 $this->mailer->Body = \ApprovalMailer::approvalEmailHtmlBody($link);
-                $this->mailer->AltBody = \ApprovalMailer::approvalEmailTextBody();
+                $this->mailer->AltBody = \ApprovalMailer::approvalEmailTextBody($link);
 
                 $this->mailer->send();
                 return;

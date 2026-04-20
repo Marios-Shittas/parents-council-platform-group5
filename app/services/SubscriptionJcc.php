@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/TokenValidator.php';
 require_once __DIR__ . '/ApprovalMailer.php';
+require_once __DIR__ . '/PaymentReceiptService.php';
 
 class SubscriptionJccService
 {
@@ -83,6 +84,33 @@ class SubscriptionJccService
 
             $this->conn->commit();
 
+            $receiptEmailSent = false;
+            $receiptEmailMessage = null;
+            if ($paymentStatus === 'completed') {
+                $receiptPaymentIds = [$membershipPaymentId];
+                if ($insurancePaymentId > 0) {
+                    $receiptPaymentIds[] = $insurancePaymentId;
+                }
+
+                try {
+                    $receiptSummary = (new PaymentReceiptService($this->conn))
+                        ->sendReceiptForPayments($userId, $receiptPaymentIds, 'JCC subscription');
+                    $receiptEmailSent = true;
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_SENT',
+                        'Receipt email sent for payment IDs: ' . implode(', ', $receiptPaymentIds) . ' to ' . $receiptSummary['email']
+                    );
+                } catch (Throwable $receiptError) {
+                    $receiptEmailMessage = 'Payment completed, but failed to send receipt email.';
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_FAILED',
+                        'Receipt email failed for payment IDs: ' . implode(', ', $receiptPaymentIds) . '. Error: ' . $receiptError->getMessage()
+                    );
+                }
+            }
+
             $credentialsEmailSent = false;
             $credentialsEmailMessage = null;
             if ($paymentStatus === 'completed' && is_array($activationCredentials)) {
@@ -114,6 +142,13 @@ class SubscriptionJccService
                 $response['credentials_email_sent'] = $credentialsEmailSent;
                 if ($credentialsEmailMessage !== null) {
                     $response['credentials_email_message'] = $credentialsEmailMessage;
+                }
+            }
+
+            if ($paymentStatus === 'completed') {
+                $response['receipt_email_sent'] = $receiptEmailSent;
+                if ($receiptEmailMessage !== null) {
+                    $response['receipt_email_message'] = $receiptEmailMessage;
                 }
             }
 
