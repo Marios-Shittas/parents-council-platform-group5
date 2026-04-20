@@ -8,6 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/PaymentReceiptService.php';
 
 class InsuranceJccService
 {
@@ -152,6 +153,25 @@ class InsuranceJccService
 
             $this->conn->commit();
             $this->clearStoredCheckoutContext($gatewayOrderId);
+
+            if ($finalStatus === 'completed') {
+                try {
+                    $receiptSummary = (new PaymentReceiptService($this->conn))
+                        ->sendReceiptForPayments($userId, [$paymentId], 'JCC insurance');
+
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_SENT',
+                        'Receipt email sent for payment ID: ' . $paymentId . ' to ' . $receiptSummary['email']
+                    );
+                } catch (Throwable $receiptError) {
+                    $this->insertLog(
+                        $userId,
+                        'PAYMENT_RECEIPT_FAILED',
+                        'Receipt email failed for payment ID: ' . $paymentId . '. Error: ' . $receiptError->getMessage()
+                    );
+                }
+            }
 
             $this->redirectToProfile($finalStatus, $this->buildRedirectMessage($finalStatus));
         } catch (Throwable $e) {
