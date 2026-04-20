@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../../app/services/ProductsService.php';
+require_once __DIR__ . '/../../app/services/EshopSettingsService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -19,6 +20,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 $productsService = new ProductsService();
+$eshopSettingsService = new EshopSettingsService();
 $message = '';
 $messageType = '';
 $editProduct = null;
@@ -217,6 +219,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: eshop.php");
         exit;
     }
+
+    if ($action === 'toggle_shop_visibility') {
+        $isVisible = isset($_POST['shop_visible']) && $_POST['shop_visible'] === '1';
+        $updated = $eshopSettingsService->setShopVisibility($isVisible);
+
+        if ($updated) {
+            $_SESSION['flash_message'] = $isVisible
+                ? 'Το e-shop είναι ξανά διαθέσιμο στους γονείς.'
+                : 'Το e-shop τέθηκε σε κατάσταση Coming soon και τα προϊόντα κρύφτηκαν.';
+            $_SESSION['flash_message_type'] = 'success';
+        } else {
+            $_SESSION['flash_message'] = 'Δεν ήταν δυνατή η ενημέρωση της κατάστασης του e-shop.';
+            $_SESSION['flash_message_type'] = 'danger';
+        }
+
+        header("Location: eshop.php");
+        exit;
+    }
 }
 
 if (isset($_SESSION['flash_message'])) {
@@ -234,6 +254,7 @@ if (isset($_GET['edit'])) {
 }
 
 $products = $productsService->getAllProducts();
+$isShopVisible = $eshopSettingsService->isShopVisible();
 ?>
 
 <!DOCTYPE html>
@@ -264,6 +285,30 @@ $products = $productsService->getAllProducts();
                 <button class="btn btn-primary-custom" data-toggle="modal" data-target="#createProductModal">
                     <i class="fas fa-plus mr-1"></i>Νέο Προϊόν
                 </button>
+            </div>
+
+            <div class="eshop-visibility-panel">
+                <div class="eshop-visibility-copy">
+                    <span class="eshop-visibility-label">Ορατότητα καταστήματος</span>
+                    <h2><?php echo $isShopVisible ? 'Το κατάστημα είναι ενεργό' : 'Το κατάστημα δείχνει Coming soon'; ?></h2>
+                    <p>
+                        <?php echo $isShopVisible
+                            ? 'Οι γονείς βλέπουν κανονικά τα προϊόντα και μπορούν να πραγματοποιήσουν αγορές.'
+                            : 'Οι γονείς δεν βλέπουν προϊόντα και εμφανίζεται μόνο μήνυμα Coming soon.'; ?>
+                    </p>
+                </div>
+
+                <form method="POST" class="eshop-visibility-form">
+                    <input type="hidden" name="action" value="toggle_shop_visibility">
+                    <input type="hidden" name="shop_visible" value="<?php echo $isShopVisible ? '0' : '1'; ?>">
+                    <button
+                        type="submit"
+                        class="btn <?php echo $isShopVisible ? 'btn-warning' : 'btn-success'; ?> eshop-visibility-btn"
+                    >
+                        <i class="fas <?php echo $isShopVisible ? 'fa-eye-slash' : 'fa-eye'; ?> mr-1"></i>
+                        <?php echo $isShopVisible ? 'Coming soon' : 'Επαναφορά καταστήματος'; ?>
+                    </button>
+                </form>
             </div>
 
             <?php if (!empty($message)): ?>

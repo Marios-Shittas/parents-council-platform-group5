@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
+require_once __DIR__ . '/../../services/EshopSettingsService.php';
 
 $paymentsScriptPath = __DIR__ . '/../../../public/assets/js/payments.jsx';
 $paymentsScriptVersion = file_exists($paymentsScriptPath) ? (string) filemtime($paymentsScriptPath) : (string) time();
 $paymentsCssPath = __DIR__ . '/../../../public/assets/css/user_css/payments.css';
 $paymentsCssVersion = file_exists($paymentsCssPath) ? (string) filemtime($paymentsCssPath) : (string) time();
+$eshopSettingsService = new EshopSettingsService();
+$isShopVisible = $eshopSettingsService->isShopVisible();
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -32,7 +35,17 @@ $paymentsCssVersion = file_exists($paymentsCssPath) ? (string) filemtime($paymen
     include __DIR__ . '/../../includes/public_page_header.php';
     ?>
 
-    <div id="payments"></div>
+    <?php if ($isShopVisible): ?>
+        <div id="payments"></div>
+    <?php else: ?>
+        <section class="eshop-coming-soon">
+            <div class="eshop-coming-soon__card">
+                <span class="eshop-coming-soon__eyebrow">E-shop</span>
+                <h2>Coming soon</h2>
+                <p>Το κατάστημα δεν είναι διαθέσιμο αυτή τη στιγμή. Δοκιμάστε ξανά σύντομα.</p>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
@@ -40,6 +53,8 @@ $paymentsCssVersion = file_exists($paymentsCssPath) ? (string) filemtime($paymen
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/payments.jsx'); ?>?v=<?php echo urlencode($paymentsScriptVersion); ?>"></script>
+    <?php if ($isShopVisible): ?>
+        <script type="text/babel" src="<?php echo site_asset_url('js/payments.jsx'); ?>?v=<?php echo urlencode($paymentsScriptVersion); ?>"></script>
+    <?php endif; ?>
 </body>
 </html>

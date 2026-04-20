@@ -330,6 +330,7 @@ class UsersService
                 FROM Payments
                 GROUP BY user_id
             ) payments ON payments.user_id = u.user_id
+            WHERE u.email NOT LIKE 'public_guest%@guest.local'
             ORDER BY {$orderBy}
         ";
 
@@ -373,6 +374,77 @@ class UsersService
         }
 
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getParentLogsByEmail(string $email): array
+    {
+        $normalizedEmail = trim($email);
+        if ($normalizedEmail === '') {
+            return [
+                'found' => false,
+                'parent' => null,
+                'logs' => [],
+            ];
+        }
+
+        $parentStmt = $this->conn->prepare(
+            "SELECT user_id, name, surname, email, phone_number, account_status, created_at
+             FROM Users
+             WHERE email = ?
+               AND role = 'parent'
+             LIMIT 1"
+        );
+
+        if (!$parentStmt) {
+            return [
+                'found' => false,
+                'parent' => null,
+                'logs' => [],
+            ];
+        }
+
+        $parentStmt->bind_param('s', $normalizedEmail);
+        $parentStmt->execute();
+        $parentResult = $parentStmt->get_result();
+        $parent = $parentResult ? $parentResult->fetch_assoc() : null;
+        $parentStmt->close();
+
+        if (!$parent) {
+            return [
+                'found' => false,
+                'parent' => null,
+                'logs' => [],
+            ];
+        }
+
+        $logsStmt = $this->conn->prepare(
+            "SELECT log_id, action, description, created_at
+             FROM Logs
+             WHERE user_id = ?
+             ORDER BY created_at DESC, log_id DESC
+             LIMIT 200"
+        );
+
+        if (!$logsStmt) {
+            return [
+                'found' => true,
+                'parent' => $parent,
+                'logs' => [],
+            ];
+        }
+
+        $parentUserId = (int)($parent['user_id'] ?? 0);
+        $logsStmt->bind_param('i', $parentUserId);
+        $logsStmt->execute();
+        $logsResult = $logsStmt->get_result();
+        $logs = $logsResult ? $logsResult->fetch_all(MYSQLI_ASSOC) : [];
+        $logsStmt->close();
+
+        return [
+            'found' => true,
+            'parent' => $parent,
+            'logs' => $logs,
+        ];
     }
 
     public function isSystemFeatureOpen(string $feature): array

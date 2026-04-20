@@ -20,6 +20,15 @@ try {
     $pendingUserRegistrations = 0;
 }
 
+$pendingApplicationSubmissions = 0;
+try {
+    require_once __DIR__ . '/../services/ApplicationsService.php';
+    $applicationsService = new ApplicationsService();
+    $pendingApplicationSubmissions = max(0, (int)$applicationsService->getWaitingSubmissionCount());
+} catch (Throwable $exception) {
+    $pendingApplicationSubmissions = 0;
+}
+
 $epikoinoniaBadgeText = '';
 if ($unreadContactMessages > 0) {
     $epikoinoniaBadgeText = $unreadContactMessages > 10 ? '10+' : (string)$unreadContactMessages;
@@ -28,6 +37,11 @@ if ($unreadContactMessages > 0) {
 $usersBadgeText = '';
 if ($pendingUserRegistrations > 0) {
     $usersBadgeText = $pendingUserRegistrations > 10 ? '10+' : (string)$pendingUserRegistrations;
+}
+
+$applicationsBadgeText = '';
+if ($pendingApplicationSubmissions > 0) {
+    $applicationsBadgeText = $pendingApplicationSubmissions > 10 ? '10+' : (string)$pendingApplicationSubmissions;
 }
 ?>
 
@@ -91,7 +105,11 @@ if ($pendingUserRegistrations > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'applications.php' ? 'active' : ''; ?>" href="applications.php">
-                <i class="fas fa-file-alt"></i> Αιτήσεις
+                <i class="fas fa-file-alt"></i>
+                <span class="admin-nav-label">Αιτήσεις</span>
+                <?php if ($applicationsBadgeText !== ''): ?>
+                    <span class="admin-notification-badge" aria-label="Νέες αιτήσεις προς έλεγχο: <?php echo htmlspecialchars($applicationsBadgeText); ?>"><?php echo htmlspecialchars($applicationsBadgeText); ?></span>
+                <?php endif; ?>
             </a>
         </li>
 
@@ -114,6 +132,18 @@ if ($pendingUserRegistrations > 0) {
                 <?php if ($epikoinoniaBadgeText !== ''): ?>
                     <span class="admin-notification-badge" aria-label="Νέα μηνύματα επικοινωνίας: <?php echo htmlspecialchars($epikoinoniaBadgeText); ?>"><?php echo htmlspecialchars($epikoinoniaBadgeText); ?></span>
                 <?php endif; ?>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'photos.php' ? 'active' : ''; ?>" href="photos.php">
+                <i class="fas fa-camera"></i> Φωτογραφίες
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'programatismo-litourgion.php' ? 'active' : ''; ?>" href="programatismo-litourgion.php">
+                <i class="fas fa-cogs"></i> Ενέργειες Συστήματος
             </a>
         </li>
 
@@ -176,7 +206,7 @@ if ($pendingUserRegistrations > 0) {
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
-                : wrapper.classList.contains('sidebar-collapsed');
+                : true;
             toggleButton.hidden = !shouldShowToggle;
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }

@@ -262,6 +262,15 @@
     color: #721c24;
 }
 
+/* Keep the page header card aligned with the main applications cards on desktop. */
+@media (min-width: 1200px) {
+    body[data-applications-can-submit] .public-page-header__card {
+        width: 91.666667%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
 /* ===== ENHANCED SUBMISSIONS TABLE ===== */
 #submissions-table {
     margin-bottom: 0;

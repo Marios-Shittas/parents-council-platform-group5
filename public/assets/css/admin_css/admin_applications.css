@@ -198,6 +198,48 @@
     color: #ffffff;
 }
 
+.application-new-submission-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    will-change: opacity, transform;
+}
+
+.submission-new-label {
+    min-width: auto;
+    padding: 0 7px;
+    transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+}
+
+.admin-dashboard-table tbody tr.submission-row-new:hover .submission-new-label {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-1px) scale(0.92);
+}
+
+.admin-notification-badge {
+    transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    will-change: opacity, transform;
+}
+
+.notification-badge-fade-out {
+    opacity: 0 !important;
+    transform: translateY(-1px) scale(0.9) !important;
+    filter: blur(0.35px);
+    pointer-events: none;
+}
+
 /* Card λεπτομερειών (πάνω blocks με label/value) */
 .detail-card {
     height: 100%;
@@ -475,6 +517,23 @@
 
 /* Mobile breakpoint: μικρότερο stat value + stacked actions */
 @media (max-width: 767.98px) {
+    .stats-grid {
+        row-gap: 0.85rem;
+    }
+
+    .stat-card .card-body {
+        padding: 1rem;
+    }
+
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .admin-dashboard-table {
+        min-width: 860px;
+    }
+
     .admin-page-header .btn-primary-custom {
         width: 100%;
         justify-content: center;
@@ -487,6 +546,12 @@
 
     .section-toolbar > * {
         width: 100%;
+    }
+
+    .application-table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .stat-value {
@@ -505,5 +570,33 @@
 
     .detail-fields-grid {
         grid-template-columns: 1fr;
+    }
+
+    #createApplicationModal .modal-dialog,
+    #editApplicationModal .modal-dialog,
+    #submissionDetailModal .modal-dialog {
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem auto;
+    }
+
+    #editApplicationModal .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+    }
+
+    #editApplicationModal .nav-tabs .nav-link {
+        white-space: nowrap;
+    }
+
+    .delete-submission-modal-footer {
+        padding: 0.4rem 1rem 1rem;
+    }
+
+    .delete-submission-confirm-btn,
+    .delete-submission-cancel-btn {
+        width: 100%;
+        min-width: 0;
     }
 }

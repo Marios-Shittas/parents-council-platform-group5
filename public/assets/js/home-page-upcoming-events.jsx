@@ -43,14 +43,21 @@ function UpcomingEvents() {
     return (
         <div className="home-list events-header">
             {events.map((item, index) => (
-                <article key={index} className="home-feed-item event-item">
-                    <div className="home-feed-meta">
-                        <span className="home-feed-badge event-badge">Εκδήλωση</span>
-                        <span className="home-feed-date">{formatDate(item.event_date)}</span>
-                    </div>
-                    <p className="event-title home-feed-title">{item.event_title}</p>
-                    <p className="event-description home-feed-description">{item.event_description}</p>
-                </article>
+                <a
+                    key={item.event_id || index}
+                    href={`/parents-council-platform-group5/public/events.php?open=${encodeURIComponent(item.event_id)}`}
+                    className="home-feed-link"
+                    aria-label={`Άνοιγμα εκδήλωσης: ${item.event_title || 'Εκδήλωση'}`}
+                >
+                    <article className="home-feed-item event-item">
+                        <div className="home-feed-meta">
+                            <span className="home-feed-badge event-badge">Εκδήλωση</span>
+                            <span className="home-feed-date">{formatDate(item.event_date)}</span>
+                        </div>
+                        <p className="event-title home-feed-title">{item.event_title}</p>
+                        <p className="event-description home-feed-description">{item.event_description}</p>
+                    </article>
+                </a>
             ))}
         </div>
     );

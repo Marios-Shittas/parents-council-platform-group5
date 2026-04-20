@@ -208,6 +208,158 @@ function formatPaymentTypeLabel(string $type): string
     return $map[$type] ?? ucfirst($type);
 }
 
+function exportCellText(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
+function formatExportDate(?string $value): string
+{
+    if (!is_string($value) || trim($value) === '') {
+        return '—';
+    }
+
+    $timestamp = strtotime($value);
+    return $timestamp ? date('d/m/Y H:i', $timestamp) : (string)$value;
+}
+
+function buildChildExportSummary(array $children): string
+{
+    if (empty($children)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($children as $child) {
+        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
+        $dob = !empty($child['date_of_birth']) ? date('d/m/Y', strtotime((string)$child['date_of_birth'])) : '—';
+        $schoolClass = trim((string)($child['school_class'] ?? ''));
+        $parts[] = trim($name) . ' | Γεν.: ' . $dob . ' | Τάξη: ' . ($schoolClass !== '' ? $schoolClass : '—');
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildInsuredChildrenSummary(array $children, array $insuredChildIds, bool $hasCompletedInsurance): string
+{
+    if (empty($children)) {
+        return '—';
+    }
+
+    $resolvedInsuredChildIds = $insuredChildIds;
+    if ($hasCompletedInsurance && empty($resolvedInsuredChildIds)) {
+        foreach ($children as $child) {
+            $childId = (int)($child['child_id'] ?? 0);
+            if ($childId > 0) {
+                $resolvedInsuredChildIds[] = $childId;
+            }
+        }
+    }
+
+    $insuredLookup = array_flip(array_map('intval', $resolvedInsuredChildIds));
+    $parts = [];
+
+    foreach ($children as $child) {
+        $childId = (int)($child['child_id'] ?? 0);
+        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
+        $parts[] = $name . ': ' . (isset($insuredLookup[$childId]) ? 'Ναι' : 'Όχι');
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildPaymentSummary(array $payments, string $paymentType): string
+{
+    $filtered = array_values(array_filter($payments, static function ($payment) use ($paymentType) {
+        return (string)($payment['payment_type'] ?? '') === $paymentType;
+    }));
+
+    if (empty($filtered)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($filtered as $payment) {
+        $parts[] = sprintf(
+            '#%d | %s | %s | %s | ποσό: %s | JCC: %s',
+            (int)($payment['payment_id'] ?? 0),
+            formatPaymentTypeLabel((string)($payment['payment_type'] ?? '')),
+            formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending')),
+            formatExportDate($payment['payment_date'] ?? null),
+            number_format((float)($payment['amount'] ?? 0), 2),
+            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
+        );
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildProductTransactionSummary(array $payments): string
+{
+    $filtered = array_values(array_filter($payments, static function ($payment) {
+        return (string)($payment['payment_type'] ?? '') === 'product'
+            && trim((string)($payment['transaction_id'] ?? '')) !== '';
+    }));
+
+    if (empty($filtered)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($filtered as $payment) {
+        $parts[] = sprintf(
+            '#%d: %s',
+            (int)($payment['payment_id'] ?? 0),
+            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
+        );
+    }
+
+    return implode(" \n", $parts);
+}
+
+function buildOrdersExportSummary(array $orders, array $orderItemsByOrderId): string
+{
+    if (empty($orders)) {
+        return '—';
+    }
+
+    $parts = [];
+    foreach ($orders as $order) {
+        $orderId = (int)($order['order_id'] ?? 0);
+        $items = $orderItemsByOrderId[$orderId] ?? [];
+        if (empty($items)) {
+            continue;
+        }
+
+        $itemParts = [];
+
+        foreach ($items as $item) {
+            $size = trim((string)($item['size'] ?? ''));
+            $itemParts[] = sprintf(
+                '%s x%d%s',
+                (string)($item['product_name'] ?? 'Προϊόν'),
+                (int)($item['quantity'] ?? 0),
+                $size !== '' ? ' [' . $size . ']' : ''
+            );
+        }
+
+        $parts[] = sprintf(
+            '#%d | %s | %s | σύνολο: %s | είδη: %s',
+            $orderId,
+            formatOrderStatusLabel((string)($order['order_status'] ?? 'pending')),
+            formatExportDate($order['created_at'] ?? null),
+            number_format((float)($order['total_price'] ?? 0), 2),
+            !empty($itemParts) ? implode(', ', $itemParts) : '—'
+        );
+    }
+
+    if (empty($parts)) {
+        return '—';
+    }
+
+    return implode(" \n", $parts);
+}
+
 $usersService = new UsersService();
 $currentAdminId = (int)($_SESSION['user_id'] ?? 0);
 $message = $_SESSION['flash_message'] ?? '';
@@ -423,6 +575,102 @@ $childrenByParentId = $usersService->getChildrenGroupedByUserIds($parentUserIds)
 $ordersByUserId = $usersService->getOrdersGroupedByUserIds($allUserIds);
 $paymentsByUserId = $usersService->getPaymentsGroupedByUserIds($allUserIds);
 $registrationSchedules = $usersService->getSystemSchedules();
+
+$allOrderIds = [];
+foreach ($ordersByUserId as $userOrders) {
+    foreach ($userOrders as $order) {
+        $orderId = (int)($order['order_id'] ?? 0);
+        if ($orderId > 0) {
+            $allOrderIds[] = $orderId;
+        }
+    }
+}
+$orderItemsByOrderId = $usersService->getOrderItemsGroupedByOrderIds($allOrderIds);
+$parentUsersForExport = array_values(array_filter($users, static function ($user) {
+    return (string)($user['role'] ?? '') === 'parent';
+}));
+
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="users-export-' . date('Y-m-d-H-i') . '.xls"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo "\xEF\xBB\xBF";
+    ?>
+    <html lang="el">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; text-align: left; }
+            th { background: #eaf3ff; font-weight: 700; }
+            td { white-space: pre-line; }
+        </style>
+    </head>
+    <body>
+    <table>
+        <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Όνομα</th>
+            <th>Επώνυμο</th>
+            <th>Email</th>
+            <th>Τηλέφωνο</th>
+            <th>Ρόλος</th>
+            <th>Κατάσταση</th>
+            <th>Ημ. Δημιουργίας</th>
+            <th>Αριθμός Παιδιών</th>
+            <th>Στοιχεία Παιδιών</th>
+            <th>Ασφάλεια Παιδιών</th>
+            <th>Υπάρχει Ολοκληρωμένη Ασφάλεια</th>
+            <th>Πληρωμές Ασφάλειας</th>
+            <th>Πληρωμές Συνδρομής</th>
+            <th>Αγορές E-shop</th>
+            <th>JCC IDs E-shop</th>
+            <th>Όλες οι Πληρωμές</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($parentUsersForExport as $user): ?>
+            <?php
+            $userId = (int)($user['user_id'] ?? 0);
+            $userChildren = $childrenByParentId[$userId] ?? [];
+            $userOrders = $ordersByUserId[$userId] ?? [];
+            $userPayments = $paymentsByUserId[$userId] ?? [];
+            $insuredChildIds = $usersService->getCompletedInsuredChildIdsByUserId($userId);
+            $hasCompletedInsurance = !empty(array_filter($userPayments, static function ($payment) {
+                return (string)($payment['payment_type'] ?? '') === 'insurance'
+                    && (string)($payment['payment_status'] ?? '') === 'completed';
+            }));
+            ?>
+            <tr>
+                <td><?php echo exportCellText((string)$userId); ?></td>
+                <td><?php echo exportCellText((string)($user['name'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['surname'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['email'] ?? '')); ?></td>
+                <td><?php echo exportCellText((string)($user['phone_number'] ?? '')); ?></td>
+                <td><?php echo exportCellText(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?></td>
+                <td><?php echo exportCellText(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?></td>
+                <td><?php echo exportCellText(formatExportDate($user['created_at'] ?? null)); ?></td>
+                <td><?php echo exportCellText((string)count($userChildren)); ?></td>
+                <td><?php echo exportCellText(buildChildExportSummary($userChildren)); ?></td>
+                <td><?php echo exportCellText(buildInsuredChildrenSummary($userChildren, $insuredChildIds, $hasCompletedInsurance)); ?></td>
+                <td><?php echo exportCellText($hasCompletedInsurance ? 'Ναι' : 'Όχι'); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance')); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'membership')); ?></td>
+                <td><?php echo exportCellText(buildOrdersExportSummary($userOrders, $orderItemsByOrderId)); ?></td>
+                <td><?php echo exportCellText(buildProductTransactionSummary($userPayments)); ?></td>
+                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance') . " \n" . buildPaymentSummary($userPayments, 'membership') . " \n" . buildPaymentSummary($userPayments, 'product')); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    </body>
+    </html>
+    <?php
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -505,147 +753,6 @@ $registrationSchedules = $usersService->getSystemSchedules();
             </div>
         </div>
 
-        <div class="card card-custom mb-4 registration-schedule-card">
-            <div class="card-body">
-                <div class="users-toolbar mb-3">
-                    <div>
-                        <h4 class="mb-1"><i class="fas fa-calendar-alt me-2"></i>Προγραμματισμός Λειτουργιών</h4>
-                        <p class="text-muted mb-0">Διαχείριση χρονικών περιόδων για τις βασικές λειτουργίες του συστήματος.</p>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table align-middle admin-dashboard-table registration-schedule-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Λειτουργία</th>
-                                <th>Έναρξη</th>
-                                <th>Λήξη</th>
-                                <th>Κατάσταση</th>
-                                <th class="text-end">Ενέργεια</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($registrationSchedules)): ?>
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">Δεν υπάρχουν περίοδοι εγγραφών ακόμα.</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($registrationSchedules as $schedule): ?>
-                                    <?php
-                                        $scheduleId = (int)($schedule['ss_id'] ?? 0);
-                                        $scheduleFormId = 'registration-schedule-form-' . $scheduleId;
-                                        $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
-                                    ?>
-                                    <tr>
-                                        <td>
-                                            <?php $rowFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration')); ?>
-                                            <select name="schedule_feature" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
-                                                <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
-                                                <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                                <option value="cleanup_submissions" <?php echo $rowFeature === 'cleanup_submissions' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                                <input
-                                                    type="datetime-local"
-                                                name="registration_start_date"
-                                                class="form-control"
-                                                value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['start_date'] ?? null)); ?>"
-                                                form="<?php echo htmlspecialchars($scheduleFormId); ?>"
-                                                required
-                                            >
-                                        </td>
-                                        <td>
-                                                <input
-                                                    type="datetime-local"
-                                                name="registration_end_date"
-                                                class="form-control"
-                                                value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['end_date'] ?? null)); ?>"
-                                                form="<?php echo htmlspecialchars($scheduleFormId); ?>"
-                                                required
-                                            >
-                                        </td>
-                                        <td>
-                                            <?php $rowStatus = normalizeScheduleStatus((string)($schedule['ss_status'] ?? 'inactive')); ?>
-                                            <select name="registration_status" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
-                                                <option value="active" <?php echo $rowStatus === 'active' ? 'selected' : ''; ?>>Ενεργό</option>
-                                                <option value="inactive" <?php echo $rowStatus === 'inactive' ? 'selected' : ''; ?>>Ανενεργό</option>
-                                            </select>
-                                        </td>
-                                        <td class="text-end">
-                                            <button type="submit" class="btn btn-primary-custom" form="<?php echo htmlspecialchars($scheduleFormId); ?>">
-                                                <i class="fas fa-save me-1"></i>Αποθήκευση
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="btn btn-outline-danger ms-2"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteScheduleModal"
-                                                data-schedule-id="<?php echo $scheduleId; ?>"
-                                                data-schedule-feature="<?php echo htmlspecialchars(scheduleFeatureLabel($rowFeature), ENT_QUOTES, 'UTF-8'); ?>"
-                                                data-schedule-start="<?php echo htmlspecialchars((string)($schedule['start_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-                                                data-schedule-end="<?php echo htmlspecialchars((string)($schedule['end_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
-                                                data-schedule-delete-form-id="<?php echo htmlspecialchars($scheduleDeleteFormId, ENT_QUOTES, 'UTF-8'); ?>"
-                                            >
-                                                <i class="fas fa-trash-alt me-1"></i>Διαγραφή
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-
-                            <tr class="registration-schedule-new-row">
-                                <?php $newScheduleFormId = 'registration-schedule-form-new'; ?>
-                                <td>
-                                    <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
-                                        <option value="registration" selected><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
-                                        <option value="delete_users"><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                        <option value="cleanup_submissions"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="datetime-local" name="registration_start_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
-                                </td>
-                                <td>
-                                    <input type="datetime-local" name="registration_end_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
-                                </td>
-                                <td>
-                                    <select name="registration_status" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
-                                        <option value="active" selected>Ενεργό</option>
-                                        <option value="inactive">Ανενεργό</option>
-                                    </select>
-                                </td>
-                                <td class="text-end">
-                                    <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>">
-                                        <i class="fas fa-plus me-1"></i>Προσθήκη
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <?php foreach ($registrationSchedules as $schedule): ?>
-                    <?php
-                        $scheduleId = (int)($schedule['ss_id'] ?? 0);
-                        $scheduleFormId = 'registration-schedule-form-' . $scheduleId;
-                        $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
-                    ?>
-                    <form id="<?php echo htmlspecialchars($scheduleFormId); ?>" method="POST" class="registration-schedule-form">
-                        <input type="hidden" name="action" value="update_registration_schedule">
-                        <input type="hidden" name="registration_schedule_id" value="<?php echo $scheduleId; ?>">
-                    </form>
-                    <form id="<?php echo htmlspecialchars($scheduleDeleteFormId); ?>" method="POST" class="registration-schedule-form">
-                        <input type="hidden" name="action" value="delete_registration_schedule">
-                        <input type="hidden" name="registration_schedule_id" value="<?php echo $scheduleId; ?>">
-                    </form>
-                <?php endforeach; ?>
-                <form id="registration-schedule-form-new" method="POST" class="registration-schedule-form">
-                    <input type="hidden" name="action" value="add_registration_schedule">
-                </form>
-            </div>
-        </div>
-
         <div class="card card-custom mb-4">
             <div class="card-body">
                 <div class="users-toolbar">
@@ -654,6 +761,9 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <p class="text-muted mb-0">Ορισμένοι λογαριασμοί διαχειριστή προστατεύονται για λόγους ασφάλειας. Επίσης, δεν επιτρέπεται η διαγραφή του λογαριασμού που είναι αυτή τη στιγμή συνδεδεμένος.</p>
                     </div>
                     <div class="users-toolbar-actions">
+                        <a href="users.php?sort=<?php echo urlencode($selectedSort); ?>&export=excel" class="btn btn-success users-export-btn">
+                            <i class="fas fa-file-excel me-1"></i>Export to Excel
+                        </a>
                         <div class="users-search-wrap">
                             <i class="fas fa-search"></i>
                             <input type="text" id="usersSearchInput" class="form-control" placeholder="Αναζήτηση με όνομα, email, ρόλο ή κατάσταση">
@@ -1311,6 +1421,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var urlParams = new URLSearchParams(window.location.search);
     var managedParentId = urlParams.get('manage_children');
     var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
+    var registrationScheduleCard = document.getElementById('registrationScheduleCard');
+    var registrationScheduleToggle = document.getElementById('registrationScheduleToggle');
+    var registrationScheduleContent = document.getElementById('registrationScheduleContent');
 
     function formatDateTimeLocal(dateObj) {
         var year = String(dateObj.getFullYear());
@@ -1324,6 +1437,25 @@ document.addEventListener('DOMContentLoaded', function () {
     function isSingleMomentFeature(featureValue) {
         return featureValue === 'delete_users' || featureValue === 'cleanup_submissions';
     }
+
+    function setRegistrationScheduleExpanded(shouldExpand) {
+        if (!registrationScheduleCard || !registrationScheduleToggle || !registrationScheduleContent) {
+            return;
+        }
+
+        registrationScheduleCard.classList.toggle('registration-schedule-card--collapsed', !shouldExpand);
+        registrationScheduleContent.classList.toggle('d-none', !shouldExpand);
+        registrationScheduleToggle.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+    }
+
+    if (registrationScheduleToggle) {
+        registrationScheduleToggle.addEventListener('click', function () {
+            var isExpanded = registrationScheduleToggle.getAttribute('aria-expanded') === 'true';
+            setRegistrationScheduleExpanded(!isExpanded);
+        });
+    }
+
+    setRegistrationScheduleExpanded(false);
 
     function syncScheduleRowInputs(formId) {
         if (!formId) {

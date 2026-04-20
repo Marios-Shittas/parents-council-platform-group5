@@ -225,9 +225,98 @@ function validateManualSubmissionPayload(array $payload, array $applicationField
     return '';
 }
 
-// Προσωρινό parent id μέχρι να συνδεθεί το πραγματικό auth flow.
-$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
-$currentUserEmail = trim((string)($_SESSION['email'] ?? ''));
+function ensurePublicGuestSubmissionIdentity(): array {
+    global $conn;
+
+    if (!($conn instanceof mysqli)) {
+        return ['user_id' => 0, 'email' => ''];
+    }
+
+    $sharedGuestEmail = 'public_guest@guest.local';
+    $selectStmt = $conn->prepare('SELECT user_id FROM Users WHERE email = ? LIMIT 1');
+    if ($selectStmt) {
+        $selectStmt->bind_param('s', $sharedGuestEmail);
+        if ($selectStmt->execute()) {
+            $existingResult = $selectStmt->get_result();
+            if ($existingResult && $existingResult->num_rows > 0) {
+                $existingRow = $existingResult->fetch_assoc();
+                return ['user_id' => (int)($existingRow['user_id'] ?? 0), 'email' => ''];
+            }
+        }
+    }
+
+    try {
+        $guestPasswordSeed = bin2hex(random_bytes(16));
+    } catch (Throwable $e) {
+        $guestPasswordSeed = hash('sha256', microtime(true) . (string)mt_rand());
+    }
+    $guestPassword = password_hash($guestPasswordSeed, PASSWORD_DEFAULT);
+    $guestName = 'Public';
+    $guestSurname = 'Guest';
+    $guestPhone = '';
+    $guestChildren = 0;
+    $guestRole = 'parent';
+    $guestStatus = 'approved';
+
+    $insertStmt = $conn->prepare(
+        'INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    if ($insertStmt) {
+        $insertStmt->bind_param(
+            'sssssiss',
+            $guestName,
+            $guestSurname,
+            $sharedGuestEmail,
+            $guestPassword,
+            $guestPhone,
+            $guestChildren,
+            $guestRole,
+            $guestStatus
+        );
+
+        if ($insertStmt->execute()) {
+            return ['user_id' => (int)$conn->insert_id, 'email' => ''];
+        }
+
+        if ((int)$conn->errno === 1062) {
+            $retrySelectStmt = $conn->prepare('SELECT user_id FROM Users WHERE email = ? LIMIT 1');
+            if ($retrySelectStmt) {
+                $retrySelectStmt->bind_param('s', $sharedGuestEmail);
+                if ($retrySelectStmt->execute()) {
+                    $retryResult = $retrySelectStmt->get_result();
+                    if ($retryResult && $retryResult->num_rows > 0) {
+                        $retryRow = $retryResult->fetch_assoc();
+                        return ['user_id' => (int)($retryRow['user_id'] ?? 0), 'email' => ''];
+                    }
+                }
+            }
+        }
+    }
+
+    return ['user_id' => 0, 'email' => ''];
+}
+
+$isAuthenticatedParent = isset($_SESSION['user_id'], $_SESSION['role'])
+    && (int)$_SESSION['user_id'] > 0
+    && (string)$_SESSION['role'] === 'parent';
+
+$guestIdentity = ['user_id' => 0, 'email' => ''];
+if (!$isAuthenticatedParent) {
+    $guestIdentity = ensurePublicGuestSubmissionIdentity();
+}
+
+$user_id = $isAuthenticatedParent ? (int)$_SESSION['user_id'] : (int)($guestIdentity['user_id'] ?? 0);
+$canSubmitApplications = $user_id > 0;
+$canShowSubmissions = $isAuthenticatedParent && $user_id > 0;
+$currentUserEmail = $isAuthenticatedParent
+    ? trim((string)($_SESSION['email'] ?? ''))
+    : trim((string)($guestIdentity['email'] ?? ''));
+$showGuestRegistrationReminder = !$isAuthenticatedParent;
+$loginUrl = site_login_url();
+$message = '';
+$messageType = 'info';
 
 $uploadDir = __DIR__ . '/../../../storage/uploads/submissions/';
 if (!is_dir($uploadDir)) {
@@ -280,6 +369,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['ajax_get_form_fields'])
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
     ob_start();
     try {
+        if (!$canSubmitApplications) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Δεν είναι δυνατή η προετοιμασία προφίλ υποβολής αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.',
+            ]);
+            exit;
+        }
+
         $application_id = (int)($_POST['application_id'] ?? 0);
         $raw = $_POST['submission_data'] ?? '';
 
@@ -304,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
             }
         }
 
-        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+        if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
@@ -495,6 +594,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
     ob_start();                                          // suppress any stray output
     try {
+        if (!$canSubmitApplications) {
+            ob_end_clean();
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Δεν είναι δυνατή η προετοιμασία προφίλ υποβολής αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.',
+            ]);
+            exit;
+        }
+
         $application_id = (int)($_POST['application_id'] ?? 0);
         $raw            = $_POST['submission_data'] ?? '';
 
@@ -513,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
             exit;
         }
 
-        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
+        if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
             ob_end_clean();
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'Έχετε ήδη υποβάλει αυτή την αίτηση.']);
@@ -587,51 +696,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
  |------------------------------------------------------------
 */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])) {
-    $application_id = (int) ($_POST['application_id'] ?? 0);
-
-    if ($application_id <= 0) {
-        $message = 'Μη έγκυρη αίτηση.';
-        $messageType = 'danger';
+    if (!$canSubmitApplications) {
+        $message = 'Δεν είναι δυνατή η προετοιμασία προφίλ υποβολής αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.';
+        $messageType = 'warning';
     } else {
-        // Check if user already submitted this application
-        if ($applicationsService->hasUserSubmitted($application_id, $user_id)) {
-            $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
+        $application_id = (int) ($_POST['application_id'] ?? 0);
+
+        if ($application_id <= 0) {
+            $message = 'Μη έγκυρη αίτηση.';
             $messageType = 'warning';
         } else {
-            if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
-                $message = 'Παρακαλούμε ανεβάστε ένα έγκυρο αρχείο.';
-                $messageType = 'danger';
+            // Check if user already submitted this application
+            if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
+                $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
+                $messageType = 'warning';
             } else {
-                $file = $_FILES['submission_file'];
-                $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
-                $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-                if (!in_array($extension, $allowedExtensions, true)) {
-                    $message = 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+                if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
+                    $message = 'Παρακαλούμε ανεβάστε ένα έγκυρο αρχείο.';
                     $messageType = 'danger';
                 } else {
-                    $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '.' . $extension;
-                    $targetPath = $uploadDir . $newFileName;
-                    $dbPath = 'storage/uploads/submissions/' . $newFileName;
-                    $uploadedDisplayName = getUploadedSubmissionDisplayName((string)$file['name']);
+                    $file = $_FILES['submission_file'];
+                    $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+                    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
-                    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                        if ($applicationsService->createSubmission($application_id, $user_id, $dbPath)) {
-                            if ($uploadedDisplayName !== '') {
-                                $submissionDisplayNames = loadSubmissionFileDisplayNamesPublic();
-                                $submissionDisplayNames[$dbPath] = $uploadedDisplayName;
-                                saveSubmissionFileDisplayNamesPublic($submissionDisplayNames);
+                    if (!in_array($extension, $allowedExtensions, true)) {
+                        $message = 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+                        $messageType = 'danger';
+                    } else {
+                        $newFileName = 'submission_' . $user_id . '_' . $application_id . '_' . time() . '.' . $extension;
+                        $targetPath = $uploadDir . $newFileName;
+                        $dbPath = 'storage/uploads/submissions/' . $newFileName;
+                        $uploadedDisplayName = getUploadedSubmissionDisplayName((string)$file['name']);
+
+                        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                            if ($applicationsService->createSubmission($application_id, $user_id, $dbPath)) {
+                                if ($uploadedDisplayName !== '') {
+                                    $submissionDisplayNames = loadSubmissionFileDisplayNamesPublic();
+                                    $submissionDisplayNames[$dbPath] = $uploadedDisplayName;
+                                    saveSubmissionFileDisplayNamesPublic($submissionDisplayNames);
+                                }
+
+                                $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
+                                $messageType = 'success';
+                            } else {
+                                $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
+                                $messageType = 'danger';
                             }
-
-                            $message = 'Η αίτηση υποβλήθηκε με επιτυχία.';
-                            $messageType = 'success';
                         } else {
-                            $message = 'Σφάλμα βάσης δεδομένων κατά την αποθήκευση της υποβολής.';
+                            $message = 'Η μεταφόρτωση του αρχείου απέτυχε.';
                             $messageType = 'danger';
                         }
-                    } else {
-                        $message = 'Η μεταφόρτωση του αρχείου απέτυχε.';
-                        $messageType = 'danger';
                     }
                 }
             }
@@ -660,7 +774,7 @@ $applicationDocumentDisplayNamesByPath = loadApplicationDocumentDisplayNamesPubl
  | My submissions
  |------------------------------------------------------------
 */
-$mySubmissions = $applicationsService->getUserSubmissions($user_id);
+$mySubmissions = $canShowSubmissions ? $applicationsService->getUserSubmissions($user_id) : [];
 $submissionFileDisplayNamesByPath = loadSubmissionFileDisplayNamesPublic();
 $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id'));
 ?>
@@ -1050,6 +1164,22 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
             color: #2b76cc;
         }
 
+        .application-registration-reminder {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #f2d7a1;
+            background: #fff7e6;
+            color: #7a4f00;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .application-registration-reminder i {
+            color: #c47b00;
+            margin-right: 6px;
+        }
+
         #submitModal .modal-dialog {
             margin: 0.75rem auto;
         }
@@ -1198,7 +1328,7 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
 
     <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
-<body>
+<body data-applications-can-submit="<?php echo $canSubmitApplications ? '1' : '0'; ?>" data-applications-login-url="<?php echo htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8'); ?>">
 
 <?php include __DIR__ . '/../../includes/header.php'; ?>
 
@@ -1234,8 +1364,8 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                 $appId = (int)$application['application_id'];
                                 $isDbApplied = in_array($appId, $appliedIds);
                                 $appMeta = $applicationUiMeta[(string)$appId] ?? [];
-                                $openDateRaw = (string)($appMeta['open_date'] ?? '');
-                                $closeDateRaw = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ''));
+                                $openDateRaw = (string)($appMeta['open_date'] ?? ($application['open_date'] ?? ''));
+                                $closeDateRaw = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ($application['due_date'] ?? '')));
                                 $openDateFormatted = formatUiDatePublic($openDateRaw);
                                 $closeDateFormatted = formatUiDatePublic($closeDateRaw);
                                 $fullDescription = (string)($application['application_description'] ?? 'Δεν υπάρχει διαθέσιμη περιγραφή.');
@@ -1284,7 +1414,15 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     $primaryMappedName = trim((string)($applicationDocumentDisplayNamesByPath[$primaryInstructionPath] ?? ''));
                                     $primaryInstructionName = $primaryMappedName !== '' ? $primaryMappedName : basename($primaryInstructionPath);
                                 }
-                                $applicationDateDisplay = $openDateFormatted !== '' ? $openDateFormatted : '—';
+                                if ($openDateFormatted !== '' && $closeDateFormatted !== '') {
+                                    $applicationDateDisplay = $openDateFormatted . ' - ' . $closeDateFormatted;
+                                } elseif ($openDateFormatted !== '') {
+                                    $applicationDateDisplay = $openDateFormatted;
+                                } elseif ($closeDateFormatted !== '') {
+                                    $applicationDateDisplay = $closeDateFormatted;
+                                } else {
+                                    $applicationDateDisplay = '—';
+                                }
                             ?>
                                 <div class="col-12 mb-4">
                                     <article class="application-item h-100 app-card-wrapper post-card post-open-trigger"
@@ -1359,85 +1497,96 @@ include __DIR__ . '/../../includes/public_page_header.php';
                 <div class="card-body p-4">
                     <h3 class="section-title">Οι Υποβολές Μου</h3>
 
-                    <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' style="display:none"' : ''; ?>>
-                        <i class="fas fa-inbox mr-2"></i>Δεν έχετε υποβάλει ακόμη καμία αίτηση.
-                    </div>
+                    <?php if (!$canShowSubmissions): ?>
+                        <div class="alert alert-light border mb-0" role="alert">
+                            <?php if ($isAuthenticatedParent): ?>
+                                Δεν ήταν δυνατή η φόρτωση στοιχείων υποβολών. Παρακαλούμε δοκιμάστε ξανά από
+                                <a href="<?php echo htmlspecialchars($loginUrl); ?>" class="alert-link">τη σελίδα εισόδου</a>.
+                            <?php else: ?>
+                                Οι υποβολές μου είναι διαθέσιμες μόνο μετά από είσοδο με λογαριασμό γονέα.
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' style="display:none"' : ''; ?>>
+                            <i class="fas fa-inbox mr-2"></i>Δεν έχετε υποβάλει ακόμη καμία αίτηση.
+                        </div>
 
-                    <div class="table-responsive">
-                        <table class="table submissions-table" id="submissions-table"<?php echo empty($mySubmissions) ? ' style="display:none"' : ''; ?>>
-                            <thead>
-                                <tr>
-                                    <th>Αίτηση</th>
-                                    <th>Ημ. Υποβολής</th>
-                                </tr>
-                            </thead>
-                            <tbody id="submissions-tbody">
-                                <?php foreach ($mySubmissions as $submission):
-                                    $formData = json_decode($submission['submission_data'] ?? '{}', true);
-                                    if (!is_array($formData)) {
-                                        $formData = [];
-                                    }
-
-                                    $submissionFiles = [];
-                                    $uploadedFileNames = [];
-                                    if (!empty($formData['_uploaded_file_names']) && is_array($formData['_uploaded_file_names'])) {
-                                        foreach ($formData['_uploaded_file_names'] as $storedPath => $displayName) {
-                                            $storedPath = (string)$storedPath;
-                                            $displayName = getUploadedSubmissionDisplayName((string)$displayName);
-                                            if ($storedPath !== '' && $displayName !== '') {
-                                                $uploadedFileNames[$storedPath] = $displayName;
-                                            }
-                                        }
-                                    }
-                                    $legacyFilePath = (string)($submission['file_path'] ?? '');
-                                    if ($legacyFilePath !== '') {
-                                        $submissionFiles[] = $legacyFilePath;
-                                    }
-
-                                    if (!empty($formData['_uploaded_files']) && is_array($formData['_uploaded_files'])) {
-                                        foreach ($formData['_uploaded_files'] as $uploadedPath) {
-                                            $uploadedPath = (string)$uploadedPath;
-                                            if ($uploadedPath !== '') {
-                                                $submissionFiles[] = $uploadedPath;
-                                            }
-                                        }
-                                    }
-
-                                    $submissionFiles = array_values(array_unique($submissionFiles));
-                                    $submissionMode = ($formData['_submission_mode'] ?? 'upload') === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
-                                    $submittedDate = !empty($submission['submitted_at'])
-                                        ? date('d/m/Y', strtotime($submission['submitted_at']))
-                                        : '—';
-                                ?>
-                                    <tr data-db-row="1">
-                                        <td>
-                                            <strong><?php echo htmlspecialchars((string)$submission['application_title']); ?></strong>
-                                            <div class="small text-muted mt-1"><?php echo htmlspecialchars($submissionMode); ?></div>
-                                            <?php if (!empty($submissionFiles)): ?>
-                                                <div class="mt-2">
-                                                    <?php foreach ($submissionFiles as $submissionFilePath): ?>
-                                                        <?php
-                                                            $linkDisplayName = trim((string)($uploadedFileNames[$submissionFilePath] ?? ''));
-                                                            if ($linkDisplayName === '') {
-                                                                $linkDisplayName = trim((string)($submissionFileDisplayNamesByPath[$submissionFilePath] ?? ''));
-                                                            }
-                                                            if ($linkDisplayName === '') {
-                                                                $linkDisplayName = basename($submissionFilePath);
-                                                            }
-                                                        ?>
-                                                        <a href="<?php echo htmlspecialchars(site_resolve_content_url($submissionFilePath)); ?>" target="_blank" rel="noopener noreferrer" class="submission-file-link d-block small mb-1">
-                                                            <i class="fas fa-download mr-1"></i><?php echo htmlspecialchars($linkDisplayName); ?>
-                                                        </a>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars((string)$submittedDate); ?></td>
+                        <div class="table-responsive">
+                            <table class="table submissions-table" id="submissions-table"<?php echo empty($mySubmissions) ? ' style="display:none"' : ''; ?>>
+                                <thead>
+                                    <tr>
+                                        <th>Αίτηση</th>
+                                        <th>Ημ. Υποβολής</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody id="submissions-tbody">
+                                    <?php foreach ($mySubmissions as $submission):
+                                        $formData = json_decode($submission['submission_data'] ?? '{}', true);
+                                        if (!is_array($formData)) {
+                                            $formData = [];
+                                        }
+
+                                        $submissionFiles = [];
+                                        $uploadedFileNames = [];
+                                        if (!empty($formData['_uploaded_file_names']) && is_array($formData['_uploaded_file_names'])) {
+                                            foreach ($formData['_uploaded_file_names'] as $storedPath => $displayName) {
+                                                $storedPath = (string)$storedPath;
+                                                $displayName = getUploadedSubmissionDisplayName((string)$displayName);
+                                                if ($storedPath !== '' && $displayName !== '') {
+                                                    $uploadedFileNames[$storedPath] = $displayName;
+                                                }
+                                            }
+                                        }
+                                        $legacyFilePath = (string)($submission['file_path'] ?? '');
+                                        if ($legacyFilePath !== '') {
+                                            $submissionFiles[] = $legacyFilePath;
+                                        }
+
+                                        if (!empty($formData['_uploaded_files']) && is_array($formData['_uploaded_files'])) {
+                                            foreach ($formData['_uploaded_files'] as $uploadedPath) {
+                                                $uploadedPath = (string)$uploadedPath;
+                                                if ($uploadedPath !== '') {
+                                                    $submissionFiles[] = $uploadedPath;
+                                                }
+                                            }
+                                        }
+
+                                        $submissionFiles = array_values(array_unique($submissionFiles));
+                                        $submissionMode = ($formData['_submission_mode'] ?? 'upload') === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
+                                        $submittedDate = !empty($submission['submitted_at'])
+                                            ? date('d/m/Y', strtotime($submission['submitted_at']))
+                                            : '—';
+                                    ?>
+                                        <tr data-db-row="1">
+                                            <td>
+                                                <strong><?php echo htmlspecialchars((string)$submission['application_title']); ?></strong>
+                                                <div class="small text-muted mt-1"><?php echo htmlspecialchars($submissionMode); ?></div>
+                                                <?php if (!empty($submissionFiles)): ?>
+                                                    <div class="mt-2">
+                                                        <?php foreach ($submissionFiles as $submissionFilePath): ?>
+                                                            <?php
+                                                                $linkDisplayName = trim((string)($uploadedFileNames[$submissionFilePath] ?? ''));
+                                                                if ($linkDisplayName === '') {
+                                                                    $linkDisplayName = trim((string)($submissionFileDisplayNamesByPath[$submissionFilePath] ?? ''));
+                                                                }
+                                                                if ($linkDisplayName === '') {
+                                                                    $linkDisplayName = basename($submissionFilePath);
+                                                                }
+                                                            ?>
+                                                            <a href="<?php echo htmlspecialchars(site_resolve_content_url($submissionFilePath)); ?>" target="_blank" rel="noopener noreferrer" class="submission-file-link d-block small mb-1">
+                                                                <i class="fas fa-download mr-1"></i><?php echo htmlspecialchars($linkDisplayName); ?>
+                                                            </a>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?php echo htmlspecialchars((string)$submittedDate); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -1506,6 +1655,13 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     <ul id="application-view-selected-files"></ul>
                 </div>
                 </div>
+
+                <?php if ($showGuestRegistrationReminder): ?>
+                    <div class="application-registration-reminder" role="note">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        Αφού συμπληρώσετε την αίτηση, θα χρειαστεί να κάνετε εγγραφή.
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Κλείσιμο</button>

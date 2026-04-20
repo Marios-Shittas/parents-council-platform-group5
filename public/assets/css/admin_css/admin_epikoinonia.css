@@ -1138,6 +1138,10 @@ textarea.form-control {
         padding: 20px;
     }
 
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
     .message-detail-card {
         padding: 20px;
     }

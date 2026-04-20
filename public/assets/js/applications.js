@@ -569,6 +569,12 @@ var _viewAppId = 0;
    DOM READY
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 document.addEventListener('DOMContentLoaded', function () {
+    var canSubmitApplications = document.body && document.body.dataset
+        ? document.body.dataset.applicationsCanSubmit === '1'
+        : true;
+    var applicationsLoginUrl = document.body && document.body.dataset
+        ? String(document.body.dataset.applicationsLoginUrl || '')
+        : '';
     var bodyScrollLockCount = 0;
 
     function cleanupModalArtifacts() {
@@ -919,6 +925,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        if (!canSubmitApplications) {
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Προσωρινά μη διαθέσιμη';
+            return;
+        }
+
         var normalizedMode = normalizeSubmissionMode(mode);
         viewModalSubmitBtn.innerHTML = normalizedMode === 'manual'
             ? '<i class="fas fa-keyboard mr-1"></i>Υποβολή Online Αίτησης'
@@ -1060,7 +1071,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.post-open-trigger').forEach(function (card) {
         card.addEventListener('click', function (e) {
             var submitButton = e.target.closest('.submit-btn');
-            if (submitButton) return;
+            if (submitButton) {
+                if (submitButton.disabled || submitButton.dataset.unavailableReason) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showUnavailableBox(submitButton.dataset.unavailableReason || 'Η αίτηση δεν είναι διαθέσιμη.');
+                }
+                return;
+            }
             if (e.target.closest('.application-instruction-link')) return;
             openApplicationViewModal(card);
         });
@@ -1124,6 +1142,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (viewModalSubmitBtn) {
         viewModalSubmitBtn.addEventListener('click', function () {
             if (!_modal.appId) return;
+
+            if (!canSubmitApplications) {
+                showCenterNotice('Η υποβολή δεν είναι διαθέσιμη αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.');
+                return;
+            }
 
             var selectedMode = normalizeSubmissionMode(_modal.submitMode);
             var files = viewModalFileInput ? Array.from(viewModalFileInput.files || []) : [];
@@ -1347,6 +1370,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* â”€â”€ Submit button: POST to PHP via fetch() â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     document.getElementById('modal-submit-btn').addEventListener('click', function () {
+        if (!canSubmitApplications) {
+            showCenterNotice('Η υποβολή δεν είναι διαθέσιμη αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.');
+            return;
+        }
+
         var form = document.getElementById('application-form');
         if (!form) return;
 

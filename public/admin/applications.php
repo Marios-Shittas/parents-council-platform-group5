@@ -259,6 +259,376 @@ function normalizeUploadedDocumentDisplayName(string $fileName): string {
     return basename(str_replace('\\', '/', $fileName));
 }
 
+function getTemplateInstructionFilesMetaPath(): string {
+    return __DIR__ . '/../../storage/template_instruction_files.json';
+}
+
+function loadTemplateInstructionFilesMeta(): array {
+    $path = getTemplateInstructionFilesMetaPath();
+    if (!is_file($path)) {
+        return [];
+    }
+
+    $raw = file_get_contents($path);
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function saveTemplateInstructionFilesMeta(array $meta): bool {
+    $path = getTemplateInstructionFilesMetaPath();
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+
+    return file_put_contents($path, json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) !== false;
+}
+
+function uploadTemplateInstructionFiles(int $templateId, string $uploadDir): array {
+    $result = [
+        'uploaded_count' => 0,
+        'errors' => [],
+    ];
+
+    if ($templateId <= 0 || !isset($_FILES['instruction_file'])) {
+        return $result;
+    }
+
+    $files = normalizeUploadedFiles($_FILES['instruction_file']);
+    if (count($files) === 0) {
+        return $result;
+    }
+
+    $metadata = loadTemplateInstructionFilesMeta();
+    $templateKey = (string)$templateId;
+    $existingEntries = isset($metadata[$templateKey]) && is_array($metadata[$templateKey])
+        ? $metadata[$templateKey]
+        : [];
+
+    $normalizedExistingEntries = [];
+    foreach ($existingEntries as $entry) {
+        if (!is_array($entry)) {
+            continue;
+        }
+
+        $entryPath = trim((string)($entry['path'] ?? ''));
+        if ($entryPath === '') {
+            continue;
+        }
+
+        $normalizedExistingEntries[] = [
+            'path' => $entryPath,
+            'name' => normalizeUploadedDocumentDisplayName((string)($entry['name'] ?? basename($entryPath))),
+        ];
+    }
+    $existingEntries = $normalizedExistingEntries;
+
+    $remainingSlots = max(0, 4 - count($existingEntries));
+    if ($remainingSlots <= 0) {
+        $result['errors'][] = 'Υπάρχουν ήδη 4 αρχεία οδηγιών αποθηκευμένα για αυτό το πρότυπο.';
+        return $result;
+    }
+
+    if (count($files) > $remainingSlots) {
+        $result['errors'][] = 'Μπορείτε να ανεβάσετε μέχρι ' . $remainingSlots . ' ακόμη αρχεία οδηγιών.';
+        $files = array_slice($files, 0, $remainingSlots);
+    }
+
+    $metadataChanged = false;
+    $allowedExtensions = ['pdf', 'doc', 'docx'];
+
+    foreach ($files as $file) {
+        if ((int)($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $result['errors'][] = 'Αποτυχία ανεβάσματος αρχείου οδηγιών.';
+            continue;
+        }
+
+        $extension = strtolower(pathinfo((string)($file['name'] ?? ''), PATHINFO_EXTENSION));
+        if (!in_array($extension, $allowedExtensions, true)) {
+            $result['errors'][] = 'Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.';
+            continue;
+        }
+
+        $newFileName = 'template_' . $templateId . '_instruction_file_' . uniqid('', true) . '.' . $extension;
+        $targetPath = $uploadDir . $newFileName;
+        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+
+        if (!move_uploaded_file((string)($file['tmp_name'] ?? ''), $targetPath)) {
+            $result['errors'][] = 'Δεν ήταν δυνατή η αποθήκευση του αρχείου οδηγιών.';
+            continue;
+        }
+
+        $existingEntries[] = [
+            'path' => $dbPath,
+            'name' => normalizeUploadedDocumentDisplayName((string)($file['name'] ?? basename($dbPath))),
+        ];
+        $result['uploaded_count']++;
+        $metadataChanged = true;
+    }
+
+    if ($metadataChanged) {
+        $metadata[$templateKey] = $existingEntries;
+        if (!saveTemplateInstructionFilesMeta($metadata)) {
+            $result['errors'][] = 'Τα αρχεία οδηγιών αποθηκεύτηκαν αλλά δεν ήταν δυνατή η ενημέρωση μεταδεδομένων προτύπου.';
+        }
+    }
+
+    return $result;
+}
+
+function normalizeTemplateInstructionEntries(array $entries): array {
+    $normalized = [];
+
+    foreach ($entries as $entry) {
+        if (!is_array($entry)) {
+            continue;
+        }
+
+        $entryPath = trim((string)($entry['path'] ?? ''));
+        if ($entryPath === '') {
+            continue;
+        }
+
+        $entryName = normalizeUploadedDocumentDisplayName((string)($entry['name'] ?? basename($entryPath)));
+        if ($entryName === '') {
+            $entryName = basename($entryPath);
+        }
+
+        $normalized[] = [
+            'path' => $entryPath,
+            'name' => $entryName,
+        ];
+    }
+
+    return $normalized;
+}
+
+function getTemplateInstructionFilesByTemplateId(int $templateId): array {
+    if ($templateId <= 0) {
+        return [];
+    }
+
+    $metadata = loadTemplateInstructionFilesMeta();
+    $templateKey = (string)$templateId;
+    $entries = isset($metadata[$templateKey]) && is_array($metadata[$templateKey])
+        ? $metadata[$templateKey]
+        : [];
+    $normalizedEntries = normalizeTemplateInstructionEntries($entries);
+
+    $files = [];
+    foreach ($normalizedEntries as $entry) {
+        $entryPath = (string)($entry['path'] ?? '');
+        $files[] = [
+            'path' => $entryPath,
+            'name' => (string)($entry['name'] ?? basename($entryPath)),
+            'url' => getDocumentPublicUrl($entryPath),
+        ];
+    }
+
+    return $files;
+}
+
+function removeTemplateInstructionFilesByPaths(int $templateId, array $pathsToRemove): array {
+    $result = [
+        'removed_count' => 0,
+        'errors' => [],
+    ];
+
+    if ($templateId <= 0 || empty($pathsToRemove)) {
+        return $result;
+    }
+
+    $normalizedPaths = [];
+    foreach ($pathsToRemove as $rawPath) {
+        if (!is_string($rawPath)) {
+            continue;
+        }
+
+        $path = trim($rawPath);
+        if ($path === '') {
+            continue;
+        }
+
+        $normalizedPaths[$path] = true;
+    }
+
+    if (empty($normalizedPaths)) {
+        return $result;
+    }
+
+    $metadata = loadTemplateInstructionFilesMeta();
+    $templateKey = (string)$templateId;
+    $entries = isset($metadata[$templateKey]) && is_array($metadata[$templateKey])
+        ? $metadata[$templateKey]
+        : [];
+    if (count($entries) === 0) {
+        return $result;
+    }
+
+    $normalizedEntries = normalizeTemplateInstructionEntries($entries);
+    $remainingEntries = [];
+    $metadataChanged = false;
+
+    foreach ($normalizedEntries as $entry) {
+        $entryPath = (string)($entry['path'] ?? '');
+        if ($entryPath !== '' && isset($normalizedPaths[$entryPath])) {
+            $absolutePath = getDocumentAbsolutePath($entryPath);
+            if ($absolutePath !== '' && is_file($absolutePath) && !@unlink($absolutePath)) {
+                $result['errors'][] = 'Δεν ήταν δυνατή η διαγραφή ενός αρχείου οδηγιών από τον δίσκο.';
+            }
+
+            $result['removed_count']++;
+            $metadataChanged = true;
+            continue;
+        }
+
+        $remainingEntries[] = [
+            'path' => $entryPath,
+            'name' => (string)($entry['name'] ?? basename($entryPath)),
+        ];
+    }
+
+    if ($metadataChanged) {
+        if (empty($remainingEntries)) {
+            unset($metadata[$templateKey]);
+        } else {
+            $metadata[$templateKey] = $remainingEntries;
+        }
+
+        if (!saveTemplateInstructionFilesMeta($metadata)) {
+            $result['errors'][] = 'Δεν ήταν δυνατή η αποθήκευση των αλλαγών στα αρχεία οδηγιών του προτύπου.';
+        }
+    }
+
+    return $result;
+}
+
+function cloneTemplateInstructionFilesToApplication(
+    ApplicationsService $applicationsService,
+    int $templateId,
+    int $applicationId,
+    string $uploadDir
+): array {
+    $result = [
+        'uploaded_count' => 0,
+        'errors' => [],
+        'uploaded_files' => [],
+    ];
+
+    if ($templateId <= 0 || $applicationId <= 0 || $uploadDir === '') {
+        return $result;
+    }
+
+    $metadata = loadTemplateInstructionFilesMeta();
+    $templateKey = (string)$templateId;
+    $entries = isset($metadata[$templateKey]) && is_array($metadata[$templateKey])
+        ? $metadata[$templateKey]
+        : [];
+
+    if (count($entries) === 0) {
+        return $result;
+    }
+
+    $allowedExtensions = ['pdf', 'doc', 'docx'];
+    $documentDisplayNames = loadApplicationDocumentDisplayNames();
+    $displayNamesChanged = false;
+
+    foreach ($entries as $entry) {
+        if (!is_array($entry)) {
+            continue;
+        }
+
+        $sourcePath = trim((string)($entry['path'] ?? ''));
+        if ($sourcePath === '') {
+            continue;
+        }
+
+        $sourceAbsolutePath = getDocumentAbsolutePath($sourcePath);
+        if ($sourceAbsolutePath === '' || !is_file($sourceAbsolutePath)) {
+            $result['errors'][] = 'Ένα αποθηκευμένο αρχείο οδηγιών προτύπου δεν βρέθηκε στον δίσκο.';
+            continue;
+        }
+
+        $extension = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
+        if (!in_array($extension, $allowedExtensions, true)) {
+            $result['errors'][] = 'Παραλείφθηκε μη έγκυρο αποθηκευμένο αρχείο οδηγιών προτύπου.';
+            continue;
+        }
+
+        $newFileName = 'application_' . $applicationId . '_instruction_file_' . uniqid('', true) . '.' . $extension;
+        $targetPath = $uploadDir . $newFileName;
+        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+
+        if (!copy($sourceAbsolutePath, $targetPath)) {
+            $result['errors'][] = 'Δεν ήταν δυνατή η αντιγραφή αποθηκευμένου αρχείου οδηγιών προτύπου.';
+            continue;
+        }
+
+        if (!$applicationsService->addDocument($applicationId, $dbPath)) {
+            if (is_file($targetPath)) {
+                unlink($targetPath);
+            }
+            $result['errors'][] = 'Το αρχείο οδηγιών αντιγράφηκε αλλά δεν συνδέθηκε με τη νέα αίτηση.';
+            continue;
+        }
+
+        $displayName = normalizeUploadedDocumentDisplayName((string)($entry['name'] ?? basename($sourcePath)));
+        if ($displayName !== '') {
+            $documentDisplayNames[$dbPath] = $displayName;
+            $displayNamesChanged = true;
+        }
+
+        $result['uploaded_files'][] = [
+            'path' => $dbPath,
+            'name' => $displayName !== '' ? $displayName : basename($dbPath),
+        ];
+        $result['uploaded_count']++;
+    }
+
+    if ($displayNamesChanged) {
+        saveApplicationDocumentDisplayNames($documentDisplayNames);
+    }
+
+    return $result;
+}
+
+function deleteTemplateInstructionFiles(int $templateId): void {
+    if ($templateId <= 0) {
+        return;
+    }
+
+    $metadata = loadTemplateInstructionFilesMeta();
+    $templateKey = (string)$templateId;
+    $entries = isset($metadata[$templateKey]) && is_array($metadata[$templateKey])
+        ? $metadata[$templateKey]
+        : [];
+
+    foreach ($entries as $entry) {
+        if (!is_array($entry)) {
+            continue;
+        }
+
+        $storedPath = trim((string)($entry['path'] ?? ''));
+        if ($storedPath === '') {
+            continue;
+        }
+
+        $absolutePath = getDocumentAbsolutePath($storedPath);
+        if ($absolutePath !== '' && is_file($absolutePath)) {
+            unlink($absolutePath);
+        }
+    }
+
+    if (isset($metadata[$templateKey])) {
+        unset($metadata[$templateKey]);
+        saveTemplateInstructionFilesMeta($metadata);
+    }
+}
+
 function normalizeSubmissionMode(string $mode): string {
     return in_array($mode, ['manual', 'upload'], true) ? $mode : '';
 }
@@ -299,6 +669,199 @@ function getSubmissionModeUi(string $mode): array {
     ];
 }
 
+function normalizeSubmissionExportValue($value): string {
+    if (is_array($value)) {
+        $parts = [];
+        foreach ($value as $item) {
+            $normalizedItem = normalizeSubmissionExportValue($item);
+            if ($normalizedItem !== '') {
+                $parts[] = $normalizedItem;
+            }
+        }
+
+        return implode(', ', $parts);
+    }
+
+    if (is_bool($value)) {
+        return $value ? 'Ναι' : 'Όχι';
+    }
+
+    if ($value === null) {
+        return '';
+    }
+
+    return trim((string)$value);
+}
+
+function normalizeCheckboxExportValue($value): string {
+    if (is_array($value)) {
+        foreach ($value as $item) {
+            if (normalizeCheckboxExportValue($item) === 'Ναι') {
+                return 'Ναι';
+            }
+        }
+
+        return 'Όχι';
+    }
+
+    if (is_bool($value)) {
+        return $value ? 'Ναι' : 'Όχι';
+    }
+
+    if ($value === null) {
+        return 'Όχι';
+    }
+
+    $normalized = strtolower(trim((string)$value));
+    if (in_array($normalized, ['1', 'true', 'on', 'yes', 'checked', 'ναι'], true)) {
+        return 'Ναι';
+    }
+
+    return 'Όχι';
+}
+
+function sanitizeExcelCellValue(string $value): string {
+    $value = str_replace(["\r\n", "\r"], "\n", $value);
+    if ($value !== '' && preg_match('/^[=+\-@]/', $value)) {
+        return "'" . $value;
+    }
+
+    return $value;
+}
+
+function exportApplicationSubmissionsExcel(ApplicationsService $applicationsService, int $applicationId, string $sort = 'newest'): void {
+    if ($applicationId <= 0) {
+        http_response_code(400);
+        echo 'Μη έγκυρη αίτηση για export.';
+        exit;
+    }
+
+    $application = $applicationsService->getApplicationById($applicationId);
+    if (!$application) {
+        http_response_code(404);
+        echo 'Η αίτηση δεν βρέθηκε.';
+        exit;
+    }
+
+    $selectedSort = normalizeSubmissionSort($sort);
+    $allSubmissions = $applicationsService->getAllSubmissions();
+    $selectedSubmissions = [];
+    foreach ($allSubmissions as $submission) {
+        if ((int)($submission['application_id'] ?? 0) === $applicationId) {
+            $selectedSubmissions[] = $submission;
+        }
+    }
+
+    usort($selectedSubmissions, static function (array $a, array $b) use ($selectedSort): int {
+        $aTime = strtotime((string)($a['submitted_at'] ?? ''));
+        $bTime = strtotime((string)($b['submitted_at'] ?? ''));
+        $aTs = $aTime !== false ? $aTime : 0;
+        $bTs = $bTime !== false ? $bTime : 0;
+
+        if ($aTs === $bTs) {
+            $aUser = (int)($a['user_id'] ?? 0);
+            $bUser = (int)($b['user_id'] ?? 0);
+            return $selectedSort === 'oldest' ? ($aUser <=> $bUser) : ($bUser <=> $aUser);
+        }
+
+        return $selectedSort === 'oldest' ? ($aTs <=> $bTs) : ($bTs <=> $aTs);
+    });
+
+    $fieldDefinitions = [];
+    foreach ($applicationsService->getApplicationFormFields($applicationId) as $fieldIndex => $field) {
+        $fieldLabel = trim((string)($field['field_name'] ?? ''));
+        if ($fieldLabel === '') {
+            continue;
+        }
+
+        $fieldType = normalizeEditableApplicationFieldType((string)($field['field_type'] ?? 'text'));
+        if ($fieldType === 'file_upload') {
+            continue;
+        }
+
+        $fieldDefinitions[] = [
+            'key' => normalizeSubmissionFieldKey($fieldLabel, (int)$fieldIndex),
+            'label' => $fieldLabel,
+            'type' => $fieldType,
+        ];
+    }
+
+    $headers = ['Γονέας', 'Email', 'Ημ. Υποβολής'];
+    foreach ($fieldDefinitions as $fieldDefinition) {
+        $headers[] = (string)$fieldDefinition['label'];
+    }
+
+    $rows = [];
+    foreach ($selectedSubmissions as $submission) {
+        $formData = json_decode((string)($submission['submission_data'] ?? '{}'), true);
+        if (!is_array($formData)) {
+            $formData = [];
+        }
+
+        $parentName = trim((string)($formData['parent_name'] ?? (trim((string)($submission['name'] ?? '') . ' ' . (string)($submission['surname'] ?? '')))));
+        $parentEmail = trim((string)($submission['email'] ?? ''));
+        $submittedAt = trim((string)($submission['submitted_at'] ?? ''));
+        $submittedAtDisplay = $submittedAt !== '' ? date('d/m/Y H:i', strtotime($submittedAt)) : '';
+
+        $row = [
+            sanitizeExcelCellValue($parentName),
+            sanitizeExcelCellValue($parentEmail),
+            sanitizeExcelCellValue($submittedAtDisplay),
+        ];
+
+        foreach ($fieldDefinitions as $fieldDefinition) {
+            $fieldKey = (string)($fieldDefinition['key'] ?? '');
+            $fieldValue = $fieldKey !== '' ? ($formData[$fieldKey] ?? '') : '';
+            $fieldType = (string)($fieldDefinition['type'] ?? 'text');
+            if ($fieldType === 'checkbox') {
+                $row[] = sanitizeExcelCellValue(normalizeCheckboxExportValue($fieldValue));
+            } else {
+                $row[] = sanitizeExcelCellValue(normalizeSubmissionExportValue($fieldValue));
+            }
+        }
+
+        $rows[] = $row;
+    }
+
+    $applicationTitleForFile = preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)($application['application_title'] ?? 'application'));
+    $applicationTitleForFile = trim((string)$applicationTitleForFile, '_');
+    if ($applicationTitleForFile === '') {
+        $applicationTitleForFile = 'application_' . $applicationId;
+    }
+
+    $fileName = 'submissions_' . $applicationTitleForFile . '_' . date('Ymd_His') . '.xls';
+
+    header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+    header('Cache-Control: max-age=0, no-cache, no-store, must-revalidate');
+    header('Pragma: public');
+    echo "\xEF\xBB\xBF";
+
+    echo '<!DOCTYPE html><html lang="el"><head><meta charset="UTF-8"><title>Export Υποβολών</title></head><body>';
+    echo '<table border="1">';
+    echo '<thead><tr>';
+    foreach ($headers as $headerCell) {
+        echo '<th>' . htmlspecialchars($headerCell, ENT_QUOTES, 'UTF-8') . '</th>';
+    }
+    echo '</tr></thead><tbody>';
+
+    if (empty($rows)) {
+        echo '<tr><td colspan="' . count($headers) . '">Δεν υπάρχουν υποβολές για export.</td></tr>';
+    } else {
+        foreach ($rows as $row) {
+            echo '<tr>';
+            foreach ($row as $cell) {
+                echo '<td>' . nl2br(htmlspecialchars((string)$cell, ENT_QUOTES, 'UTF-8')) . '</td>';
+            }
+            echo '</tr>';
+        }
+    }
+
+    echo '</tbody></table>';
+    echo '</body></html>';
+    exit;
+}
+
 
 function getApplicationUiMetaPath(): string {
     return __DIR__ . '/../../storage/application_ui_meta.json';
@@ -329,8 +892,42 @@ function saveApplicationUiMeta(array $meta): bool {
     return file_put_contents($path, json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) !== false;
 }
 
+function getTemplateUiMetaPath(): string {
+    return __DIR__ . '/../../storage/template_ui_meta.json';
+}
+
+function loadTemplateUiMeta(): array {
+    $path = getTemplateUiMetaPath();
+    if (!is_file($path)) {
+        return [];
+    }
+
+    $raw = file_get_contents($path);
+    if (!is_string($raw) || $raw === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function saveTemplateUiMeta(array $meta): bool {
+    $path = getTemplateUiMetaPath();
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+
+    return file_put_contents($path, json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) !== false;
+}
+
 function normalizeApplicationStatus(string $status): string {
     return in_array($status, ['active', 'inactive'], true) ? $status : 'active';
+}
+
+function normalizeSubmissionSort(string $sort): string {
+    $sort = strtolower(trim($sort));
+    return in_array($sort, ['newest', 'oldest'], true) ? $sort : 'newest';
 }
 
 function normalizeEditModalTab(string $tab): string {
@@ -494,10 +1091,42 @@ function publishTemplateAsApplication(
     }
 
     if ($uploadDir !== '') {
-        $uploadResult = uploadApplicationFiles($applicationsService, (int)$newApplicationId, $uploadDir);
+        $requestUploadResult = uploadApplicationFiles($applicationsService, (int)$newApplicationId, $uploadDir);
+        $storedTemplateFilesResult = cloneTemplateInstructionFilesToApplication(
+            $applicationsService,
+            $templateId,
+            (int)$newApplicationId,
+            $uploadDir
+        );
+
+        $uploadResult = [
+            'uploaded_count' => (int)($requestUploadResult['uploaded_count'] ?? 0) + (int)($storedTemplateFilesResult['uploaded_count'] ?? 0),
+            'errors' => array_values(array_filter(array_merge(
+                (array)($requestUploadResult['errors'] ?? []),
+                (array)($storedTemplateFilesResult['errors'] ?? [])
+            ))),
+            'uploaded_files' => array_merge(
+                (array)($requestUploadResult['uploaded_files'] ?? []),
+                (array)($storedTemplateFilesResult['uploaded_files'] ?? [])
+            ),
+        ];
     }
 
     return (int)$newApplicationId;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['export_submissions_excel'])) {
+    $applicationIdForExport = (int)($_GET['view_submissions'] ?? $_GET['application_id'] ?? 0);
+    $submissionSortForExport = normalizeSubmissionSort((string)($_GET['submissions_sort'] ?? 'newest'));
+
+    if ($applicationIdForExport <= 0) {
+        $_SESSION['flash_message'] = 'Επιλέξτε αίτηση για export υποβολών.';
+        $_SESSION['flash_message_type'] = 'warning';
+        header('Location: applications.php');
+        exit;
+    }
+
+    exportApplicationSubmissionsExcel($applicationsService, $applicationIdForExport, $submissionSortForExport);
 }
 
 /*
@@ -508,7 +1137,9 @@ function publishTemplateAsApplication(
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $applicationUiMeta = loadApplicationUiMeta();
+    $templateUiMeta = loadTemplateUiMeta();
     $returnViewSubmissions = (int)($_POST['return_view_submissions'] ?? 0);
+    $returnSubmissionSort = normalizeSubmissionSort((string)($_POST['return_submission_sort'] ?? 'newest'));
     $returnScrollY = max(0, (int)($_POST['return_scroll_y'] ?? 0));
     $returnEditApplicationId = (int)($_POST['return_edit_application_id'] ?? 0);
     $returnEditTab = normalizeEditModalTab((string)($_POST['return_edit_tab'] ?? 'info'));
@@ -518,7 +1149,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['application_title'] ?? '');
         $description = trim($_POST['application_description'] ?? '');
-        $openDateUi = getTodayUiDate();
+        $openDateUi = normalizeUiDate((string)($_POST['application_open_date_ui'] ?? ''));
+        if ($openDateUi === '') {
+            $openDateUi = getTodayUiDate();
+        }
         $closeDateUi = normalizeUiDate((string)($_POST['application_close_date_ui'] ?? ''));
         $statusUi = normalizeApplicationStatus((string)($_POST['application_status_ui'] ?? 'active'));
         $formFieldsJson = $_POST['form_fields_json'] ?? '[]';
@@ -593,7 +1227,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($application_id > 0 && $title !== '') {
             $existingMeta = $applicationUiMeta[(string)$application_id] ?? [];
-            $openDateUi = (string)($existingMeta['open_date'] ?? '');
+            $openDateUi = array_key_exists('application_open_date_ui', $_POST)
+                ? normalizeUiDate((string)($_POST['application_open_date_ui'] ?? ''))
+                : (string)($existingMeta['open_date'] ?? '');
+            if ($openDateUi === '') {
+                $openDateUi = (string)($existingMeta['open_date'] ?? getTodayUiDate());
+            }
             $closeDateUi = array_key_exists('application_close_date_ui', $_POST)
                 ? normalizeUiDate((string)($_POST['application_close_date_ui'] ?? ''))
                 : (string)($existingMeta['close_date'] ?? ($existingMeta['deadline'] ?? ''));
@@ -931,20 +1570,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'mark_submission_seen') {
+        $application_id = (int)($_POST['application_id'] ?? 0);
+        $user_id = (int)($_POST['user_id'] ?? 0);
+        $success = false;
+
+        if ($application_id > 0 && $user_id > 0) {
+            $success = $applicationsService->markSubmissionAsSeen($application_id, $user_id);
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $success,
+            'application_id' => $application_id,
+            'application_waiting_count' => $application_id > 0 ? (int)$applicationsService->getWaitingSubmissionCountByApplication($application_id) : 0,
+            'global_waiting_count' => (int)$applicationsService->getWaitingSubmissionCount(),
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     // Handle creating application from template (NEW)
     if ($action === 'create_app_from_template') {
         $template_id = !empty($_POST['template_id']) && $_POST['template_id'] !== 'blank' ? (int)$_POST['template_id'] : null;
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $academic_year = trim($_POST['academic_year'] ?? '');
-        $open_date = getTodayUiDate();
-        $due_date = trim($_POST['due_date'] ?? null);
+        $openDateUi = normalizeUiDate((string)($_POST['application_open_date_ui'] ?? $_POST['open_date'] ?? ''));
+        if ($openDateUi === '') {
+            $openDateUi = getTodayUiDate();
+        }
+        $closeDateUi = normalizeUiDate((string)($_POST['application_close_date_ui'] ?? $_POST['due_date'] ?? ''));
         $allow_online = isset($_POST['allow_online']) ? 1 : 0;
         $allow_file = isset($_POST['allow_file']) ? 1 : 0;
         $require_signature = isset($_POST['require_signature']) ? 1 : 0;
 
         if (empty($title)) {
             $message = 'Ο τίτλος της αίτησης είναι υποχρεωτικός';
+            $messageType = 'danger';
+        } elseif ($closeDateUi !== '' && $openDateUi > $closeDateUi) {
+            $message = 'Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.';
             $messageType = 'danger';
         } else {
             // Also add to legacy field names
@@ -953,8 +1617,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $title,
                 $description,
                 $academic_year,
-                $open_date,
-                $due_date,
+                $openDateUi,
+                $closeDateUi,
                 $allow_online,
                 $allow_file,
                 $require_signature,
@@ -962,6 +1626,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             if ($app_id) {
+                $existingAppMeta = $applicationUiMeta[(string)$app_id] ?? [];
+                $existingAppMeta['open_date'] = $openDateUi;
+                $existingAppMeta['close_date'] = $closeDateUi;
+                if (!isset($existingAppMeta['status'])) {
+                    $existingAppMeta['status'] = 'active';
+                }
+                $applicationUiMeta[(string)$app_id] = $existingAppMeta;
+                saveApplicationUiMeta($applicationUiMeta);
+
                 $message = 'Η αίτηση δημιουργήθηκε επιτυχώς!';
                 $messageType = 'success';
             } else {
@@ -998,6 +1671,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $template_name = trim($_POST['template_name'] ?? '');
         $template_category = 'standard';
         $template_description = trim($_POST['description'] ?? '');
+        $templateOpenDateUi = normalizeUiDate((string)($_POST['template_open_date_ui'] ?? ''));
+        if ($templateOpenDateUi === '') {
+            $templateOpenDateUi = getTodayUiDate();
+        }
+        $templateCloseDateUi = normalizeUiDate((string)($_POST['template_close_date_ui'] ?? ''));
         $form_schema_raw = $_POST['form_schema'] ?? '[]';
 
         $form_schema = json_decode((string)$form_schema_raw, true);
@@ -1009,6 +1687,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Το όνομα του προτύπου είναι υποχρεωτικό';
             $messageType = 'danger';
             $activeTab = 'templates';
+        } elseif ($templateCloseDateUi !== '' && $templateOpenDateUi > $templateCloseDateUi) {
+            $message = 'Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.';
+            $messageType = 'danger';
+            $activeTab = 'templates';
         } else {
             // Auto-generate template key from name (lowercase, replace spaces with underscores)
             $template_key = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $template_name));
@@ -1017,11 +1699,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $template_key = 'template';
             }
             $template_key .= '_' . time(); // Add timestamp to ensure uniqueness
-            
-            if ($templateService->createTemplate($template_key, $template_name, $template_description, $template_category, $form_schema, 0)) {
+
+            $createdTemplateId = $templateService->createTemplate(
+                $template_key,
+                $template_name,
+                $template_description,
+                $template_category,
+                $form_schema,
+                0
+            );
+
+            if ($createdTemplateId) {
+                $templateUploadResult = uploadTemplateInstructionFiles((int)$createdTemplateId, $documentsUploadDir);
+                $templateUiMeta[(string)$createdTemplateId] = [
+                    'open_date' => $templateOpenDateUi,
+                    'close_date' => $templateCloseDateUi,
+                ];
+                saveTemplateUiMeta($templateUiMeta);
+
                 $message = 'Το πρότυπο δημιουργήθηκε επιτυχώς!';
+                if ((int)($templateUploadResult['uploaded_count'] ?? 0) > 0) {
+                    $message .= ' Προστέθηκαν ' . (int)$templateUploadResult['uploaded_count'] . ' αρχεία οδηγιών.';
+                }
+                if (!empty($templateUploadResult['errors'])) {
+                    $message .= ' ' . implode(' ', (array)$templateUploadResult['errors']);
+                }
                 $messageType = 'success';
                 $activeTab = 'templates';
+                $activeTemplateId = (int)$createdTemplateId;
             } else {
                 $message = 'Σφάλμα κατά τη δημιουργία του προτύπου';
                 $messageType = 'danger';
@@ -1035,6 +1740,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $template_id = (int)($_POST['template_id'] ?? 0);
         if ($template_id > 0) {
             if ($templateService->deleteTemplate($template_id)) {
+                deleteTemplateInstructionFiles($template_id);
+                if (isset($templateUiMeta[(string)$template_id])) {
+                    unset($templateUiMeta[(string)$template_id]);
+                    saveTemplateUiMeta($templateUiMeta);
+                }
                 $message = 'Το πρότυπο διαγράφηκε επιτυχώς!';
                 $messageType = 'success';
                 $activeTab = 'templates';
@@ -1055,6 +1765,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $template_id = (int)($_POST['template_id'] ?? 0);
         $template_name = trim($_POST['template_name'] ?? '');
         $template_description = trim($_POST['description'] ?? '');
+        $templateOpenDateUi = normalizeUiDate((string)($_POST['template_open_date_ui'] ?? ''));
+        $templateCloseDateUi = normalizeUiDate((string)($_POST['template_close_date_ui'] ?? ''));
+        $removedTemplateInstructionFilesRaw = $_POST['removed_instruction_files'] ?? '[]';
+        $removedTemplateInstructionFiles = json_decode((string)$removedTemplateInstructionFilesRaw, true);
+        if (!is_array($removedTemplateInstructionFiles)) {
+            $removedTemplateInstructionFiles = [];
+        }
+        $normalizedRemovedTemplateInstructionFiles = [];
+        foreach ($removedTemplateInstructionFiles as $rawTemplatePathToRemove) {
+            if (!is_string($rawTemplatePathToRemove)) {
+                continue;
+            }
+
+            $normalizedTemplatePathToRemove = trim($rawTemplatePathToRemove);
+            if ($normalizedTemplatePathToRemove === '') {
+                continue;
+            }
+
+            $normalizedRemovedTemplateInstructionFiles[] = $normalizedTemplatePathToRemove;
+        }
         $shouldPublishTemplate = isset($_POST['publish']) && (string)$_POST['publish'] === '1';
         $existingTemplate = $template_id > 0 ? $templateService->getTemplateById($template_id) : null;
         $template_category = $existingTemplate['category'] ?? 'standard';
@@ -1072,8 +1802,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $activeTemplateId = $template_id;
 
-        if ($template_id > 0 && !empty($template_name)) {
+        if ($template_id <= 0 || empty($template_name)) {
+            $message = 'Σφάλμα: Απαιτείται έγκυρο πρότυπο και όνομα.';
+            $messageType = 'danger';
+            $activeTab = 'templates';
+        } elseif ($templateOpenDateUi === '') {
+            $message = 'Η ημερομηνία ανοίγματος είναι υποχρεωτική.';
+            $messageType = 'danger';
+            $activeTab = 'templates';
+        } elseif ($templateCloseDateUi !== '' && $templateOpenDateUi > $templateCloseDateUi) {
+            $message = 'Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.';
+            $messageType = 'danger';
+            $activeTab = 'templates';
+        } else {
             if ($templateService->updateTemplate($template_id, $template_name, $template_description, $template_category, $form_schema_json)) {
+                $templateUiMeta[(string)$template_id] = [
+                    'open_date' => $templateOpenDateUi,
+                    'close_date' => $templateCloseDateUi,
+                ];
+                saveTemplateUiMeta($templateUiMeta);
+
+                $removedTemplateFilesResult = removeTemplateInstructionFilesByPaths($template_id, $normalizedRemovedTemplateInstructionFiles);
+                $templateUploadResult = uploadTemplateInstructionFiles($template_id, $documentsUploadDir);
+
+                $templateInstructionChanges = [];
+                if ((int)($removedTemplateFilesResult['removed_count'] ?? 0) > 0) {
+                    $templateInstructionChanges[] = 'Αφαιρέθηκαν ' . (int)$removedTemplateFilesResult['removed_count'] . ' αρχεία οδηγιών από το πρότυπο.';
+                }
+                if ((int)($templateUploadResult['uploaded_count'] ?? 0) > 0) {
+                    $templateInstructionChanges[] = 'Προστέθηκαν ' . (int)$templateUploadResult['uploaded_count'] . ' νέα αρχεία οδηγιών στο πρότυπο.';
+                }
+                $templateInstructionErrors = array_values(array_filter(array_merge(
+                    (array)($removedTemplateFilesResult['errors'] ?? []),
+                    (array)($templateUploadResult['errors'] ?? [])
+                )));
+
                 if ($shouldPublishTemplate) {
                     $publishUploadResult = null;
                     $publishedApplicationId = publishTemplateAsApplication(
@@ -1085,28 +1848,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                     if ($publishedApplicationId) {
                         $publishedAppMeta = $applicationUiMeta[(string)$publishedApplicationId] ?? [];
-                        $publishedAppMeta['open_date'] = getTodayUiDate();
-                        if (!isset($publishedAppMeta['close_date'])) {
-                            $publishedAppMeta['close_date'] = '';
-                        }
+                        $publishedAppMeta['open_date'] = $templateOpenDateUi;
+                        $publishedAppMeta['close_date'] = $templateCloseDateUi;
                         $publishedAppMeta['status'] = 'active';
                         $applicationUiMeta[(string)$publishedApplicationId] = $publishedAppMeta;
                         saveApplicationUiMeta($applicationUiMeta);
 
-                        $message = 'Το πρότυπο δημοσιεύθηκε ως αίτηση επιτυχώς!';
+                        $message = 'Το πρότυπο ενημερώθηκε και δημοσιεύθηκε ως αίτηση επιτυχώς!';
+                        if (!empty($templateInstructionChanges)) {
+                            $message .= ' ' . implode(' ', $templateInstructionChanges);
+                        }
                         if (is_array($publishUploadResult) && (int)($publishUploadResult['uploaded_count'] ?? 0) > 0) {
                             $message .= ' Ανέβηκαν ' . (int)$publishUploadResult['uploaded_count'] . ' αρχεία οδηγιών.';
                         }
                         if (is_array($publishUploadResult) && !empty($publishUploadResult['errors'])) {
                             $message .= ' ' . implode(' ', (array)$publishUploadResult['errors']);
                         }
+                        if (!empty($templateInstructionErrors)) {
+                            $message .= ' ' . implode(' ', $templateInstructionErrors);
+                        }
                         $messageType = 'success';
                     } else {
                         $message = 'Το πρότυπο ενημερώθηκε, αλλά απέτυχε η δημοσίευση ως αίτηση.';
+                        if (!empty($templateInstructionChanges)) {
+                            $message .= ' ' . implode(' ', $templateInstructionChanges);
+                        }
+                        if (!empty($templateInstructionErrors)) {
+                            $message .= ' ' . implode(' ', $templateInstructionErrors);
+                        }
                         $messageType = 'warning';
                     }
                 } else {
                     $message = 'Το πρότυπο ενημερώθηκε επιτυχώς!';
+                    if (!empty($templateInstructionChanges)) {
+                        $message .= ' ' . implode(' ', $templateInstructionChanges);
+                    }
+                    if (!empty($templateInstructionErrors)) {
+                        $message .= ' ' . implode(' ', $templateInstructionErrors);
+                    }
                     $messageType = 'success';
                 }
                 $activeTab = 'templates';
@@ -1115,16 +1894,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $messageType = 'danger';
                 $activeTab = 'templates';
             }
-        } else {
-            $message = 'Μη έγκυρα δεδομένα';
-            $messageType = 'danger';
-            $activeTab = 'templates';
         }
     }
 
     $redirectUrl = 'applications.php';
     if ($returnViewSubmissions > 0) {
         $redirectUrl .= '?view_submissions=' . $returnViewSubmissions;
+        $redirectUrl .= '&submissions_sort=' . urlencode($returnSubmissionSort);
         if ($returnScrollY > 0) {
             $redirectUrl .= '&scroll_y=' . $returnScrollY;
         }
@@ -1167,6 +1943,7 @@ $documents = $applicationsService->getAllDocuments();
 $submissions = $applicationsService->getAllSubmissions();
 $templates = $templateService->getAllTemplates();
 $applicationUiMeta = loadApplicationUiMeta();
+$templateUiMeta = loadTemplateUiMeta();
 $documentDisplayNamesByPath = loadApplicationDocumentDisplayNames();
 $documentsByApplication = [];
 
@@ -1182,6 +1959,7 @@ foreach ($documents as $document) {
 }
 
 $submissionCountByApplication = [];
+$newSubmissionCountByApplication = [];
 
 foreach ($submissions as $submission) {
     $applicationId = (int)($submission['application_id'] ?? 0);
@@ -1189,9 +1967,20 @@ foreach ($submissions as $submission) {
         $submissionCountByApplication[$applicationId] = 0;
     }
     $submissionCountByApplication[$applicationId]++;
+
+    $isUnreadWaitingSubmission = (string)($submission['sub_status'] ?? '') === 'waiting'
+        && trim((string)($submission['admin_seen_at'] ?? '')) === '';
+
+    if ($isUnreadWaitingSubmission) {
+        if (!isset($newSubmissionCountByApplication[$applicationId])) {
+            $newSubmissionCountByApplication[$applicationId] = 0;
+        }
+        $newSubmissionCountByApplication[$applicationId]++;
+    }
 }
 
 $selectedApplicationId = (int)($_GET['view_submissions'] ?? 0);
+$selectedSubmissionSort = normalizeSubmissionSort((string)($_GET['submissions_sort'] ?? 'newest'));
 $selectedApplication = $selectedApplicationId > 0 ? $applicationsService->getApplicationById($selectedApplicationId) : null;
 $selectedSubmissions = [];
 
@@ -1201,6 +1990,21 @@ if ($selectedApplicationId > 0) {
             $selectedSubmissions[] = $submission;
         }
     }
+
+    usort($selectedSubmissions, static function (array $a, array $b) use ($selectedSubmissionSort): int {
+        $aTime = strtotime((string)($a['submitted_at'] ?? ''));
+        $bTime = strtotime((string)($b['submitted_at'] ?? ''));
+        $aTs = $aTime !== false ? $aTime : 0;
+        $bTs = $bTime !== false ? $bTime : 0;
+
+        if ($aTs === $bTs) {
+            $aUser = (int)($a['user_id'] ?? 0);
+            $bUser = (int)($b['user_id'] ?? 0);
+            return $selectedSubmissionSort === 'oldest' ? ($aUser <=> $bUser) : ($bUser <=> $aUser);
+        }
+
+        return $selectedSubmissionSort === 'oldest' ? ($aTs <=> $bTs) : ($bTs <=> $aTs);
+    });
 }
 ?>
 <!DOCTYPE html>
@@ -1308,7 +2112,8 @@ if ($selectedApplicationId > 0) {
                                 <tr>
                                     <th>Τίτλος Αίτησης</th>
                                     <th>Υποβολές</th>
-                                    <th>Ημερομηνία</th>
+                                    <th>Άνοιγμα</th>
+                                    <th>Κλείσιμο</th>
                                     <th class="text-end">Ενέργειες</th>
                                 </tr>
                             </thead>
@@ -1317,17 +2122,28 @@ if ($selectedApplicationId > 0) {
                                     <?php
                                         $applicationId = (int)$application['application_id'];
                                         $submissionTotal = $submissionCountByApplication[$applicationId] ?? 0;
+                                        $newSubmissionTotal = $newSubmissionCountByApplication[$applicationId] ?? 0;
                                         $appMeta = $applicationUiMeta[(string)$applicationId] ?? [];
                                         $applicationOpenDate = (string)($appMeta['open_date'] ?? '');
+                                        $applicationCloseDate = (string)($appMeta['close_date'] ?? ($appMeta['deadline'] ?? ''));
                                         $applicationStatusUi = normalizeApplicationStatus((string)($appMeta['status'] ?? 'active'));
                                         $isApplicationPublished = $applicationStatusUi === 'active';
-                                        $applicationDateDisplay = '—';
+                                        $applicationOpenDateDisplay = '—';
                                         if ($applicationOpenDate !== '') {
                                             $applicationDateObj = DateTime::createFromFormat('Y-m-d', $applicationOpenDate);
                                             if ($applicationDateObj && $applicationDateObj->format('Y-m-d') === $applicationOpenDate) {
-                                                $applicationDateDisplay = $applicationDateObj->format('d/m/Y');
+                                                $applicationOpenDateDisplay = $applicationDateObj->format('d/m/Y');
                                             } else {
-                                                $applicationDateDisplay = $applicationOpenDate;
+                                                $applicationOpenDateDisplay = $applicationOpenDate;
+                                            }
+                                        }
+                                        $applicationCloseDateDisplay = '—';
+                                        if ($applicationCloseDate !== '') {
+                                            $applicationCloseDateObj = DateTime::createFromFormat('Y-m-d', $applicationCloseDate);
+                                            if ($applicationCloseDateObj && $applicationCloseDateObj->format('Y-m-d') === $applicationCloseDate) {
+                                                $applicationCloseDateDisplay = $applicationCloseDateObj->format('d/m/Y');
+                                            } else {
+                                                $applicationCloseDateDisplay = $applicationCloseDate;
                                             }
                                         }
                                         $applicationFilesForEdit = [];
@@ -1362,11 +2178,19 @@ if ($selectedApplicationId > 0) {
                                     ?>
                                     <tr>
                                         <td>
-                                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($application['application_title']); ?></div>
+                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                <div class="fw-bold text-dark"><?php echo htmlspecialchars($application['application_title']); ?></div>
+                                                <?php if ($newSubmissionTotal > 0): ?>
+                                                    <span class="application-new-submission-badge" data-application-notification-badge="1" data-application-id="<?php echo $applicationId; ?>" aria-label="Νέες αιτήσεις προς έλεγχο: <?php echo (int)$newSubmissionTotal; ?>">
+                                                        <?php echo $newSubmissionTotal > 9 ? '9+' : (int)$newSubmissionTotal; ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                             <div class="small text-muted text-truncate-two-lines"><?php echo htmlspecialchars($application['application_description'] ?? 'Χωρίς περιγραφή.'); ?></div>
                                         </td>
                                         <td><span class="badge bg-light text-dark border"><?php echo $submissionTotal; ?></span></td>
-                                        <td><span class="text-muted"><?php echo htmlspecialchars($applicationDateDisplay); ?></span></td>
+                                        <td><span class="text-muted"><?php echo htmlspecialchars($applicationOpenDateDisplay); ?></span></td>
+                                        <td><span class="text-muted"><?php echo htmlspecialchars($applicationCloseDateDisplay); ?></span></td>
                                         <td class="text-end">
                                             <div class="d-inline-flex align-items-center gap-2 application-table-actions">
                                                 <button
@@ -1378,6 +2202,7 @@ if ($selectedApplicationId > 0) {
                                                     data-application-title="<?php echo htmlspecialchars($application['application_title'], ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-description="<?php echo htmlspecialchars($application['application_description'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-open-date="<?php echo htmlspecialchars($applicationOpenDate, ENT_QUOTES, 'UTF-8'); ?>"
+                                                    data-application-close-date="<?php echo htmlspecialchars($applicationCloseDate, ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-documents="<?php echo htmlspecialchars($applicationFilesForEditJson ?: '[]', ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-form-fields="<?php echo htmlspecialchars($applicationFormFieldsForEditJson ?: '[]', ENT_QUOTES, 'UTF-8'); ?>"
                                                     data-application-published="<?php echo $isApplicationPublished ? '1' : '0'; ?>"
@@ -1426,8 +2251,24 @@ if ($selectedApplicationId > 0) {
                             <?php endforeach; ?>
                         </select>
                     </div>
+                    <div class="col-12 col-lg-4">
+                        <label for="submissions_sort" class="form-label"><strong>Ταξινόμηση</strong></label>
+                        <select id="submissions_sort" name="submissions_sort" class="form-select">
+                            <option value="newest" <?php echo $selectedSubmissionSort === 'newest' ? 'selected' : ''; ?>>Πιο πρόσφατες υποβολές</option>
+                            <option value="oldest" <?php echo $selectedSubmissionSort === 'oldest' ? 'selected' : ''; ?>>Πιο παλιές υποβολές</option>
+                        </select>
+                    </div>
                     <div class="col-12 col-lg-auto">
                         <button type="submit" class="btn btn-primary-custom">Προβολή Υποβολών</button>
+                    </div>
+                    <div class="col-12 col-lg-auto">
+                        <a
+                            href="applications.php?view_submissions=<?php echo (int)$selectedApplicationId; ?>&submissions_sort=<?php echo urlencode($selectedSubmissionSort); ?>&export_submissions_excel=1"
+                            class="btn btn-outline-success <?php echo $selectedApplicationId > 0 ? '' : 'disabled'; ?>"
+                            <?php echo $selectedApplicationId > 0 ? '' : 'aria-disabled="true"'; ?>
+                        >
+                            <i class="fas fa-file-excel me-1"></i>Export Excel
+                        </a>
                     </div>
                     <div class="col-12 col-lg-auto">
                         <a href="applications.php" class="btn btn-outline-secondary">Καθαρισμός</a>
@@ -1478,6 +2319,8 @@ if ($selectedApplicationId > 0) {
                                         if (!is_array($formData)) {
                                             $formData = [];
                                         }
+                                        $isNewSubmission = (string)($submission['sub_status'] ?? '') === 'waiting'
+                                            && trim((string)($submission['admin_seen_at'] ?? '')) === '';
                                         $parentName = $formData['parent_name'] ?? trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
                                         $submittedAt = !empty($submission['submitted_at']) ? date('d/m/Y H:i', strtotime($submission['submitted_at'])) : '—';
                                         $parentAccountName = trim(($submission['name'] ?? '') . ' ' . ($submission['surname'] ?? ''));
@@ -1534,9 +2377,14 @@ if ($selectedApplicationId > 0) {
                                         ];
                                         $submissionDetailJson = json_encode($submissionDetailPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
                                     ?>
-                                    <tr>
+                                    <tr class="<?php echo $isNewSubmission ? 'submission-row-new' : ''; ?>" data-application-id="<?php echo (int)($submission['application_id'] ?? 0); ?>" data-user-id="<?php echo (int)($submission['user_id'] ?? 0); ?>" data-is-new="<?php echo $isNewSubmission ? '1' : '0'; ?>">
                                         <td>
-                                            <div><?php echo htmlspecialchars((string)$parentName); ?></div>
+                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                <span><?php echo htmlspecialchars((string)$parentName); ?></span>
+                                                <?php if ($isNewSubmission): ?>
+                                                    <span class="application-new-submission-badge submission-new-label" aria-label="Νέα υποβολή">Νέα</span>
+                                                <?php endif; ?>
+                                            </div>
                                             <div class="small text-muted"><?php echo htmlspecialchars((string)($submission['email'] ?? '')); ?></div>
                                         </td>
                                         <td><?php echo htmlspecialchars((string)$submittedAt); ?></td>
@@ -1576,6 +2424,7 @@ if ($selectedApplicationId > 0) {
                                                     <input type="hidden" name="user_id" value="<?php echo (int)$submission['user_id']; ?>">
                                                     <input type="hidden" name="sub_status" value="delete">
                                                     <input type="hidden" name="return_view_submissions" value="<?php echo $selectedApplicationId; ?>">
+                                                    <input type="hidden" name="return_submission_sort" value="<?php echo htmlspecialchars($selectedSubmissionSort, ENT_QUOTES, 'UTF-8'); ?>">
                                                     <input type="hidden" name="return_scroll_y" value="0">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                                         <i class="fas fa-trash-alt me-1"></i>Διαγραφή
@@ -1631,7 +2480,7 @@ if ($selectedApplicationId > 0) {
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
-                                    <form method="POST" id="createTemplateForm">
+                                    <form method="POST" enctype="multipart/form-data" id="createTemplateForm">
                                         <input type="hidden" name="action" value="create_template">
                                         <input type="hidden" name="form_schema" id="create_template_schema" value="[]">
 
@@ -1645,6 +2494,33 @@ if ($selectedApplicationId > 0) {
                                         <div class="mb-4">
                                             <label class="form-label"><strong>Περιγραφή</strong></label>
                                             <textarea name="description" class="form-control" rows="2" placeholder="Προαιρετική περιγραφή προτύπου"></textarea>
+                                        </div>
+
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label"><strong>Ημερομηνία Ανοίγματος *</strong></label>
+                                                <input type="date" name="template_open_date_ui" id="create_template_open_date" class="form-control" value="<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
+                                                <input type="date" name="template_close_date_ui" id="create_template_close_date" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label"><strong>Αρχεία Οδηγιών (μέχρι 4)</strong></label>
+                                            <input
+                                                type="file"
+                                                name="instruction_file[]"
+                                                id="create_template_instruction_files"
+                                                class="form-control"
+                                                accept=".pdf,.doc,.docx"
+                                                multiple
+                                            >
+                                            <div class="form-text">Τα αρχεία αποθηκεύονται στο πρότυπο και θα μεταφέρονται αυτόματα στη νέα αίτηση όταν πατήσετε «Δημοσίευση».</div>
+                                            <div id="create_template_instruction_files_list" class="vstack gap-2 mt-2">
+                                                <div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>
+                                            </div>
                                         </div>
 
                                         <div class="card bg-white border mb-4">
@@ -1693,6 +2569,7 @@ if ($selectedApplicationId > 0) {
                                 <input type="hidden" name="action" value="update_template">
                                 <input type="hidden" name="template_id" id="edit_template_id">
                                 <input type="hidden" name="form_schema" id="edit_template_schema">
+                                <input type="hidden" name="removed_instruction_files" id="edit_template_removed_instruction_files" value="[]">
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-12">
@@ -1706,6 +2583,17 @@ if ($selectedApplicationId > 0) {
                                     <textarea name="description" id="edit_template_description" class="form-control" rows="2"></textarea>
                                 </div>
 
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><strong>Ημερομηνία Ανοίγματος *</strong></label>
+                                        <input type="date" name="template_open_date_ui" id="edit_template_open_date" class="form-control" required>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
+                                        <input type="date" name="template_close_date_ui" id="edit_template_close_date" class="form-control">
+                                    </div>
+                                </div>
+
                                 <div class="mb-4">
                                     <label class="form-label"><strong>Αρχεία Οδηγιών (μέχρι 4)</strong></label>
                                     <input
@@ -1717,6 +2605,10 @@ if ($selectedApplicationId > 0) {
                                         multiple
                                     >
                                     <div class="form-text">Τα αρχεία θα συσχετιστούν με τη νέα αίτηση όταν πατήσετε «Δημοσίευση».</div>
+                                    <div class="form-text">Μπορείτε να αφαιρέσετε υπάρχοντα αρχεία ή να προσθέσετε νέα. Οι αλλαγές αποθηκεύονται με «Αποθήκευση Αλλαγών» ή «Δημοσίευση».</div>
+                                    <div id="edit_template_instruction_files_list" class="vstack gap-2 mt-2">
+                                        <div class="text-muted small">Δεν υπάρχουν αρχεία οδηγιών.</div>
+                                    </div>
                                 </div>
 
                                 <!-- Form Fields Editor -->
@@ -1796,10 +2688,21 @@ if ($selectedApplicationId > 0) {
                         <label class="form-label"><strong>Περιγραφή</strong></label>
                         <textarea id="create_application_description" class="form-control form-control-custom" rows="3" placeholder="Προαιρετικη περιγραφή της αίτησης"></textarea>
                     </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label"><strong>Ημερομηνία Ανοίγματος *</strong></label>
+                        <input type="date" id="create_application_open_date" class="form-control form-control-custom" value="<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>" required>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
+                        <input type="date" id="create_application_close_date" class="form-control form-control-custom">
+                    </div>
                     <div class="col-12">
                         <label class="form-label"><strong>Αρχεία Οδηγιών (μέχρι 4)</strong></label>
                         <input type="file" id="create_instruction_files" name="instruction_file[]" class="form-control" accept=".pdf,.doc,.docx" multiple>
                         <div class="form-text">Μέχρι 4 αρχεία PDF ή εγγράφων</div>
+                        <div id="create_instruction_files_list" class="vstack gap-2 mt-2">
+                            <div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1889,6 +2792,16 @@ if ($selectedApplicationId > 0) {
                                         <div>
                                             <label class="form-label"><strong>Περιγραφή</strong></label>
                                             <textarea name="application_description" id="edit_application_description" class="form-control form-control-sm form-control-custom" rows="3"></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label"><strong>Ημερομηνία Ανοίγματος *</strong></label>
+                                            <input type="date" name="application_open_date_ui" id="edit_application_open_date" class="form-control form-control-sm form-control-custom" required>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label"><strong>Ημερομηνία Κλεισίματος</strong></label>
+                                            <input type="date" name="application_close_date_ui" id="edit_application_close_date" class="form-control form-control-sm form-control-custom">
                                         </div>
                                     </div>
                                 </div>
@@ -2060,6 +2973,7 @@ if ($selectedApplicationId > 0) {
                 <input type="hidden" name="user_id" id="delete_submission_user_id">
                 <input type="hidden" name="sub_status" value="delete">
                 <input type="hidden" name="return_view_submissions" id="delete_submission_return_view_submissions" value="0">
+                <input type="hidden" name="return_submission_sort" id="delete_submission_return_submission_sort" value="<?php echo htmlspecialchars($selectedSubmissionSort, ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="return_scroll_y" id="delete_submission_return_scroll_y" value="0">
 
                 <div class="modal-header delete-submission-modal-header">
@@ -2144,16 +3058,130 @@ if ($selectedApplicationId > 0) {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var createInstructionFiles = document.getElementById('create_instruction_files');
+    var createInstructionFilesList = document.getElementById('create_instruction_files_list');
+    var createInstructionSelectedFiles = [];
+    var createApplicationOpenDate = document.getElementById('create_application_open_date');
+    var createApplicationCloseDate = document.getElementById('create_application_close_date');
+
+    function syncCreateCloseDateMin() {
+        if (!createApplicationOpenDate || !createApplicationCloseDate) {
+            return;
+        }
+
+        var openValue = String(createApplicationOpenDate.value || '').trim();
+        createApplicationCloseDate.min = openValue;
+        if (openValue !== '' && createApplicationCloseDate.value !== '' && createApplicationCloseDate.value < openValue) {
+            createApplicationCloseDate.value = '';
+        }
+    }
+
+    if (createApplicationOpenDate && createApplicationCloseDate) {
+        createApplicationOpenDate.addEventListener('change', syncCreateCloseDateMin);
+        syncCreateCloseDateMin();
+    }
+
+    function syncCreateInstructionInputFiles(nextFiles) {
+        if (!createInstructionFiles) {
+            return;
+        }
+
+        if (typeof DataTransfer === 'undefined') {
+            if (!Array.isArray(nextFiles) || nextFiles.length === 0) {
+                createInstructionFiles.value = '';
+            }
+            return;
+        }
+
+        var transfer = new DataTransfer();
+        (Array.isArray(nextFiles) ? nextFiles : []).forEach(function (file) {
+            if (!file) {
+                return;
+            }
+            transfer.items.add(file);
+        });
+        createInstructionFiles.files = transfer.files;
+    }
+
+    function renderCreateInstructionFilesList() {
+        if (!createInstructionFilesList) {
+            return;
+        }
+
+        if (!Array.isArray(createInstructionSelectedFiles) || createInstructionSelectedFiles.length === 0) {
+            createInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>';
+            return;
+        }
+
+        createInstructionFilesList.innerHTML = createInstructionSelectedFiles.map(function (file, index) {
+            var fileName = file && file.name ? String(file.name) : 'Αρχείο';
+            return '' +
+                '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
+                    '<div class="card-body py-2 px-3">' +
+                        '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">' +
+                            '<div class="fw-semibold text-primary">' +
+                                '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
+                            '</div>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger js-remove-create-instruction-file" data-file-index="' + String(index) + '">' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }).join('');
+
+        createInstructionFilesList.querySelectorAll('.js-remove-create-instruction-file').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var fileIndex = parseInt(button.getAttribute('data-file-index') || '-1', 10);
+                if (Number.isNaN(fileIndex) || fileIndex < 0 || fileIndex >= createInstructionSelectedFiles.length) {
+                    return;
+                }
+
+                createInstructionSelectedFiles.splice(fileIndex, 1);
+                syncCreateInstructionInputFiles(createInstructionSelectedFiles);
+                renderCreateInstructionFilesList();
+            });
+        });
+    }
+
     if (createInstructionFiles) {
         createInstructionFiles.addEventListener('change', function () {
-            if (!createInstructionFiles.files || createInstructionFiles.files.length <= 4) {
+            var selectedFiles = Array.from(createInstructionFiles.files || []);
+            if (selectedFiles.length === 0) {
+                createInstructionSelectedFiles = [];
+                renderCreateInstructionFilesList();
                 return;
             }
 
-            alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
-            createInstructionFiles.value = '';
+            if (selectedFiles.length > 4) {
+                alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
+                createInstructionFiles.value = '';
+                createInstructionSelectedFiles = [];
+                renderCreateInstructionFilesList();
+                return;
+            }
+
+            var allowedExtensions = ['pdf', 'doc', 'docx'];
+            var hasInvalidFile = selectedFiles.some(function (file) {
+                var fileName = String((file && file.name) || '');
+                var extension = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+                return allowedExtensions.indexOf(extension) === -1;
+            });
+
+            if (hasInvalidFile) {
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
+                createInstructionFiles.value = '';
+                createInstructionSelectedFiles = [];
+                renderCreateInstructionFilesList();
+                return;
+            }
+
+            createInstructionSelectedFiles = selectedFiles;
+            renderCreateInstructionFilesList();
         });
+
+        renderCreateInstructionFilesList();
     }
+
     var createModalEl = document.getElementById('createApplicationModal');
     if (createModalEl) {
         createModalEl.addEventListener('hidden.bs.modal', function () {
@@ -2165,9 +3193,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (createApplicationDescription) {
                 createApplicationDescription.value = '';
             }
+            if (createApplicationOpenDate) {
+                createApplicationOpenDate.value = '<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>';
+            }
+            if (createApplicationCloseDate) {
+                createApplicationCloseDate.value = '';
+            }
+            syncCreateCloseDateMin();
             if (createInstructionFiles) {
                 createInstructionFiles.value = '';
             }
+            createInstructionSelectedFiles = [];
+            renderCreateInstructionFilesList();
 
             var createStatusSelect = document.getElementById('create_application_status');
             if (createStatusSelect) {
@@ -2222,6 +3259,24 @@ document.addEventListener('DOMContentLoaded', function () {
     var editApplicationFormSchema = [];
     var editApplicationIsPublished = false;
     var editApplicationExistingFiles = [];
+    var editApplicationOpenDateInput = document.getElementById('edit_application_open_date');
+    var editApplicationCloseDateInput = document.getElementById('edit_application_close_date');
+
+    function syncEditCloseDateMin() {
+        if (!editApplicationOpenDateInput || !editApplicationCloseDateInput) {
+            return;
+        }
+
+        var openValue = String(editApplicationOpenDateInput.value || '').trim();
+        editApplicationCloseDateInput.min = openValue;
+        if (openValue !== '' && editApplicationCloseDateInput.value !== '' && editApplicationCloseDateInput.value < openValue) {
+            editApplicationCloseDateInput.value = '';
+        }
+    }
+
+    if (editApplicationOpenDateInput) {
+        editApplicationOpenDateInput.addEventListener('change', syncEditCloseDateMin);
+    }
 
     var editApplicationFieldTypes = {
         text: 'Κείμενο',
@@ -2754,6 +3809,13 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit_application_id').value = applicationId;
             document.getElementById('edit_application_title').value = button.getAttribute('data-application-title') || '';
             document.getElementById('edit_application_description').value = button.getAttribute('data-application-description') || '';
+            if (editApplicationOpenDateInput) {
+                editApplicationOpenDateInput.value = button.getAttribute('data-application-open-date') || '';
+            }
+            if (editApplicationCloseDateInput) {
+                editApplicationCloseDateInput.value = button.getAttribute('data-application-close-date') || '';
+            }
+            syncEditCloseDateMin();
 
             if (editInstructionFiles) {
                 editInstructionFiles.value = '';
@@ -2823,6 +3885,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (editForm) {
         editForm.addEventListener('submit', function (event) {
+            var editOpenDateValue = editApplicationOpenDateInput ? String(editApplicationOpenDateInput.value || '').trim() : '';
+            var editCloseDateValue = editApplicationCloseDateInput ? String(editApplicationCloseDateInput.value || '').trim() : '';
+            if (editOpenDateValue === '') {
+                event.preventDefault();
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
+                if (editApplicationOpenDateInput) {
+                    editApplicationOpenDateInput.focus();
+                }
+                return;
+            }
+            if (editCloseDateValue !== '' && editCloseDateValue < editOpenDateValue) {
+                event.preventDefault();
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                if (editApplicationCloseDateInput) {
+                    editApplicationCloseDateInput.focus();
+                }
+                return;
+            }
+
             if (editReturnApplicationIdInput) {
                 var editApplicationIdInput = document.getElementById('edit_application_id');
                 editReturnApplicationIdInput.value = editApplicationIdInput ? String(editApplicationIdInput.value || '0') : '0';
@@ -2921,6 +4002,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var deleteSubmissionApplicationId = document.getElementById('delete_submission_application_id');
     var deleteSubmissionUserId = document.getElementById('delete_submission_user_id');
     var deleteSubmissionReturnView = document.getElementById('delete_submission_return_view_submissions');
+    var deleteSubmissionReturnSort = document.getElementById('delete_submission_return_submission_sort');
     var deleteSubmissionReturnScroll = document.getElementById('delete_submission_return_scroll_y');
     var deleteSubmissionDetails = document.getElementById('delete_submission_details');
 
@@ -2942,6 +4024,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var applicationIdInput = form.querySelector('input[name="application_id"]');
             var userIdInput = form.querySelector('input[name="user_id"]');
             var returnViewInput = form.querySelector('input[name="return_view_submissions"]');
+            var returnSortInput = form.querySelector('input[name="return_submission_sort"]');
             var applicationTitle = form.getAttribute('data-application-title') || '—';
             var parentName = form.getAttribute('data-parent-name') || '—';
 
@@ -2953,6 +4036,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (deleteSubmissionReturnView) {
                 deleteSubmissionReturnView.value = returnViewInput ? returnViewInput.value : '0';
+            }
+            if (deleteSubmissionReturnSort) {
+                deleteSubmissionReturnSort.value = returnSortInput ? returnSortInput.value : 'newest';
             }
             if (deleteSubmissionReturnScroll) {
                 deleteSubmissionReturnScroll.value = String(window.scrollY || window.pageYOffset || 0);
@@ -2973,6 +4059,161 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    function formatApplicationNotificationCount(count) {
+        var value = Number(count) || 0;
+        if (value <= 0) {
+            return '';
+        }
+        return value > 9 ? '9+' : String(value);
+    }
+
+    function formatSidebarNotificationCount(count) {
+        var value = Number(count) || 0;
+        if (value <= 0) {
+            return '';
+        }
+        return value > 10 ? '10+' : String(value);
+    }
+
+    function removeElementSmooth(element, delayMs) {
+        if (!element) {
+            return;
+        }
+
+        if (element.getAttribute('data-removing') === '1') {
+            return;
+        }
+
+        element.setAttribute('data-removing', '1');
+        element.classList.add('notification-badge-fade-out');
+
+        window.setTimeout(function () {
+            if (element && element.parentNode) {
+                element.remove();
+            }
+        }, delayMs || 280);
+    }
+
+    function updateApplicationNotificationBadge(applicationId, waitingCount) {
+        var selector = '.application-new-submission-badge[data-application-notification-badge="1"][data-application-id="' + String(applicationId) + '"]';
+        var badge = document.querySelector(selector);
+        var badgeText = formatApplicationNotificationCount(waitingCount);
+
+        if (badgeText === '') {
+            if (badge) {
+                removeElementSmooth(badge, 280);
+            }
+            return;
+        }
+
+        if (!badge) {
+            var actionButton = document.querySelector('.js-edit-application[data-application-id="' + String(applicationId) + '"]');
+            var titleWrap = actionButton ? actionButton.closest('tr').querySelector('td .d-flex.align-items-center.flex-wrap.gap-2') : null;
+            if (!titleWrap) {
+                return;
+            }
+
+            badge = document.createElement('span');
+            badge.className = 'application-new-submission-badge';
+            badge.setAttribute('data-application-notification-badge', '1');
+            badge.setAttribute('data-application-id', String(applicationId));
+            titleWrap.appendChild(badge);
+        }
+
+        badge.textContent = badgeText;
+        badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
+    }
+
+    function updateSidebarApplicationsBadge(waitingCount) {
+        var applicationsNavLink = document.querySelector('#adminSidebar a[href="applications.php"]');
+        if (!applicationsNavLink) {
+            return;
+        }
+
+        var badge = applicationsNavLink.querySelector('.admin-notification-badge');
+        var badgeText = formatSidebarNotificationCount(waitingCount);
+
+        if (badgeText === '') {
+            if (badge) {
+                removeElementSmooth(badge, 280);
+            }
+            return;
+        }
+
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'admin-notification-badge';
+            applicationsNavLink.appendChild(badge);
+        }
+
+        badge.textContent = badgeText;
+        badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
+    }
+
+    function markSubmissionAsSeenOnHover(row) {
+        if (!row || row.getAttribute('data-is-new') !== '1' || row.getAttribute('data-seen-request-running') === '1') {
+            return;
+        }
+
+        var applicationId = parseInt(row.getAttribute('data-application-id') || '0', 10);
+        var userId = parseInt(row.getAttribute('data-user-id') || '0', 10);
+        if (Number.isNaN(applicationId) || Number.isNaN(userId) || applicationId <= 0 || userId <= 0) {
+            return;
+        }
+
+        row.setAttribute('data-seen-request-running', '1');
+
+        var payload = new URLSearchParams();
+        payload.set('action', 'mark_submission_seen');
+        payload.set('application_id', String(applicationId));
+        payload.set('user_id', String(userId));
+
+        fetch('applications.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: payload.toString()
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('HTTP error');
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if (!data || data.success !== true) {
+                    throw new Error('Request failed');
+                }
+
+                row.setAttribute('data-is-new', '0');
+
+                var newBadge = row.querySelector('.submission-new-label');
+                if (newBadge) {
+                    removeElementSmooth(newBadge, 300);
+                    window.setTimeout(function () {
+                        row.classList.remove('submission-row-new');
+                    }, 300);
+                } else {
+                    row.classList.remove('submission-row-new');
+                }
+
+                updateApplicationNotificationBadge(applicationId, Number(data.application_waiting_count || 0));
+                updateSidebarApplicationsBadge(Number(data.global_waiting_count || 0));
+            })
+            .catch(function () {
+                row.setAttribute('data-seen-request-running', '0');
+            });
+    }
+
+    document.querySelectorAll('tr.submission-row-new[data-is-new="1"]').forEach(function (row) {
+        row.addEventListener('mouseenter', function handleHover() {
+            markSubmissionAsSeenOnHover(row);
+        }, { passive: true });
+    });
 
     function getSubmissionNoteKey(applicationId, userId) {
         return 'admin_submission_note_' + String(applicationId) + '_' + String(userId);
@@ -3035,7 +4276,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const editTemplateId = document.getElementById('edit_template_id');
     const editTemplateName = document.getElementById('edit_template_name');
     const editTemplateDescription = document.getElementById('edit_template_description');
+    const editTemplateOpenDate = document.getElementById('edit_template_open_date');
+    const editTemplateCloseDate = document.getElementById('edit_template_close_date');
     const editTemplateInstructionFiles = document.getElementById('edit_template_instruction_files');
+    const editTemplateInstructionFilesList = document.getElementById('edit_template_instruction_files_list');
+    const editTemplateRemovedInstructionFiles = document.getElementById('edit_template_removed_instruction_files');
     const editTemplateSchema = document.getElementById('edit_template_schema');
     const publishTemplateBtn = document.getElementById('publish_template_btn');
     const deleteTemplateForm = document.getElementById('deleteTemplateForm');
@@ -3043,6 +4288,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteTemplateBtn = document.getElementById('delete_template_btn');
     const createTemplateForm = document.getElementById('createTemplateForm');
     const createTemplateSchema = document.getElementById('create_template_schema');
+    const createTemplateOpenDate = document.getElementById('create_template_open_date');
+    const createTemplateCloseDate = document.getElementById('create_template_close_date');
+    const createTemplateInstructionFiles = document.getElementById('create_template_instruction_files');
+    const createTemplateInstructionFilesList = document.getElementById('create_template_instruction_files_list');
     const createTemplateFieldsContainer = document.getElementById('create_template_fields_container');
     const addCreateTemplateFieldBtn = document.getElementById('add_create_template_field_btn');
     const closeCreateTemplateBtn = document.getElementById('close_create_template_btn');
@@ -3056,12 +4305,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteTemplateConfirmModal = deleteTemplateConfirmModalEl ? new bootstrap.Modal(deleteTemplateConfirmModalEl) : null;
 
     // Template data (passed from PHP)
-    const templatesData = <?php echo json_encode(array_map(function($t) {
+    const templatesData = <?php echo json_encode(array_map(function($t) use ($templateUiMeta) {
+        $templateId = (int)($t['template_id'] ?? 0);
+        $templateMeta = $templateUiMeta[(string)$templateId] ?? [];
         return [
-            'id' => $t['template_id'] ?? 0,
+            'id' => $templateId,
             'name' => $t['name'] ?? '',
             'description' => $t['description'] ?? '',
-            'form_schema' => is_array($t['form_schema']) ? $t['form_schema'] : json_decode($t['form_schema'] ?? '[]', true)
+            'open_date' => (string)($templateMeta['open_date'] ?? getTodayUiDate()),
+            'close_date' => (string)($templateMeta['close_date'] ?? ''),
+            'form_schema' => is_array($t['form_schema']) ? $t['form_schema'] : json_decode($t['form_schema'] ?? '[]', true),
+            'instruction_files' => getTemplateInstructionFilesByTemplateId($templateId)
         ];
     }, $templates), JSON_UNESCAPED_UNICODE); ?>;
 
@@ -3077,6 +4331,243 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentFormSchema = [];
     let createFormSchema = [];
+    let createTemplateSelectedFiles = [];
+    let editTemplateInitialInstructionFiles = [];
+    let editTemplateExistingInstructionFiles = [];
+    let editTemplateSelectedFiles = [];
+
+    function syncCreateTemplateCloseDateMin() {
+        if (!createTemplateOpenDate || !createTemplateCloseDate) {
+            return;
+        }
+
+        const openDate = String(createTemplateOpenDate.value || '').trim();
+        createTemplateCloseDate.min = openDate;
+        if (openDate !== '' && createTemplateCloseDate.value !== '' && createTemplateCloseDate.value < openDate) {
+            createTemplateCloseDate.value = '';
+        }
+    }
+
+    function syncEditTemplateCloseDateMin() {
+        if (!editTemplateOpenDate || !editTemplateCloseDate) {
+            return;
+        }
+
+        const openDate = String(editTemplateOpenDate.value || '').trim();
+        editTemplateCloseDate.min = openDate;
+        if (openDate !== '' && editTemplateCloseDate.value !== '' && editTemplateCloseDate.value < openDate) {
+            editTemplateCloseDate.value = '';
+        }
+    }
+
+    if (createTemplateOpenDate && createTemplateCloseDate) {
+        createTemplateOpenDate.addEventListener('change', syncCreateTemplateCloseDateMin);
+        syncCreateTemplateCloseDateMin();
+    }
+
+    if (editTemplateOpenDate && editTemplateCloseDate) {
+        editTemplateOpenDate.addEventListener('change', syncEditTemplateCloseDateMin);
+        syncEditTemplateCloseDateMin();
+    }
+
+    function escapeHtml(value) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+
+        return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => map[char]);
+    }
+
+    function syncCreateTemplateInputFiles(nextFiles) {
+        if (!createTemplateInstructionFiles) {
+            return;
+        }
+
+        if (typeof DataTransfer === 'undefined') {
+            if (!Array.isArray(nextFiles) || nextFiles.length === 0) {
+                createTemplateInstructionFiles.value = '';
+            }
+            return;
+        }
+
+        const transfer = new DataTransfer();
+        (Array.isArray(nextFiles) ? nextFiles : []).forEach((file) => {
+            if (!file) {
+                return;
+            }
+            transfer.items.add(file);
+        });
+        createTemplateInstructionFiles.files = transfer.files;
+    }
+
+    function renderCreateTemplateInstructionFilesList() {
+        if (!createTemplateInstructionFilesList) {
+            return;
+        }
+
+        if (!Array.isArray(createTemplateSelectedFiles) || createTemplateSelectedFiles.length === 0) {
+            createTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>';
+            return;
+        }
+
+        createTemplateInstructionFilesList.innerHTML = createTemplateSelectedFiles.map((file, index) => {
+            const fileName = file && file.name ? String(file.name) : 'Αρχείο';
+            return '' +
+                '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
+                    '<div class="card-body py-2 px-3">' +
+                        '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">' +
+                            '<div class="fw-semibold text-primary">' +
+                                '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
+                            '</div>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger js-remove-create-template-file" data-file-index="' + String(index) + '">' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }).join('');
+
+        createTemplateInstructionFilesList.querySelectorAll('.js-remove-create-template-file').forEach((button) => {
+            button.addEventListener('click', () => {
+                const fileIndex = parseInt(button.getAttribute('data-file-index') || '-1', 10);
+                if (Number.isNaN(fileIndex) || fileIndex < 0 || fileIndex >= createTemplateSelectedFiles.length) {
+                    return;
+                }
+
+                createTemplateSelectedFiles.splice(fileIndex, 1);
+                syncCreateTemplateInputFiles(createTemplateSelectedFiles);
+                renderCreateTemplateInstructionFilesList();
+            });
+        });
+    }
+
+    function syncEditTemplateInputFiles(nextFiles) {
+        if (!editTemplateInstructionFiles) {
+            return;
+        }
+
+        if (typeof DataTransfer === 'undefined') {
+            if (!Array.isArray(nextFiles) || nextFiles.length === 0) {
+                editTemplateInstructionFiles.value = '';
+            }
+            return;
+        }
+
+        const transfer = new DataTransfer();
+        (Array.isArray(nextFiles) ? nextFiles : []).forEach((file) => {
+            if (!file) {
+                return;
+            }
+            transfer.items.add(file);
+        });
+        editTemplateInstructionFiles.files = transfer.files;
+    }
+
+    function getEditTemplateRemovedInstructionPaths() {
+        const activePaths = new Set(
+            (Array.isArray(editTemplateExistingInstructionFiles) ? editTemplateExistingInstructionFiles : [])
+                .map((file) => String((file && file.path) || '').trim())
+                .filter((path) => path !== '')
+        );
+
+        return (Array.isArray(editTemplateInitialInstructionFiles) ? editTemplateInitialInstructionFiles : [])
+            .map((file) => String((file && file.path) || '').trim())
+            .filter((path) => path !== '' && !activePaths.has(path));
+    }
+
+    function renderEditTemplateInstructionFilesList() {
+        if (!editTemplateInstructionFilesList) {
+            return;
+        }
+
+        const existingFiles = Array.isArray(editTemplateExistingInstructionFiles) ? editTemplateExistingInstructionFiles : [];
+        const stagedFiles = Array.isArray(editTemplateSelectedFiles) ? editTemplateSelectedFiles : [];
+
+        if (existingFiles.length === 0 && stagedFiles.length === 0) {
+            editTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν υπάρχουν αρχεία οδηγιών.</div>';
+            if (editTemplateRemovedInstructionFiles) {
+                editTemplateRemovedInstructionFiles.value = '[]';
+            }
+            return;
+        }
+
+        const existingHtml = existingFiles.map((file, index) => {
+            const fileName = file && file.name ? String(file.name) : 'Αρχείο';
+            const fileUrl = file && file.url ? String(file.url) : '#';
+            return '' +
+                '<div class="card border-0 bg-light">' +
+                    '<div class="card-body py-2 px-3">' +
+                        '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">' +
+                            '<a href="' + escapeHtml(fileUrl) + '" target="_blank" rel="noopener noreferrer" class="fw-semibold text-decoration-none">' +
+                                '<i class="fas fa-file-alt me-1"></i>' + escapeHtml(fileName) +
+                            '</a>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger js-remove-edit-template-existing-file" data-file-index="' + String(index) + '">' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }).join('');
+
+        const stagedHtml = stagedFiles.map((file, index) => {
+            const fileName = file && file.name ? String(file.name) : 'Νέο αρχείο';
+            return '' +
+                '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
+                    '<div class="card-body py-2 px-3">' +
+                        '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">' +
+                            '<div class="fw-semibold text-primary">' +
+                                '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
+                            '</div>' +
+                            '<button type="button" class="btn btn-sm btn-outline-danger js-remove-edit-template-staged-file" data-file-index="' + String(index) + '">' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        }).join('');
+
+        const slotsLeft = Math.max(0, 4 - existingFiles.length);
+        const slotsInfo = '<div class="text-muted small">Διαθέσιμες θέσεις για νέα αρχεία: ' + String(slotsLeft) + ' / 4</div>';
+        editTemplateInstructionFilesList.innerHTML = existingHtml + stagedHtml + slotsInfo;
+
+        editTemplateInstructionFilesList.querySelectorAll('.js-remove-edit-template-existing-file').forEach((button) => {
+            button.addEventListener('click', () => {
+                const fileIndex = parseInt(button.getAttribute('data-file-index') || '-1', 10);
+                if (Number.isNaN(fileIndex) || fileIndex < 0 || fileIndex >= editTemplateExistingInstructionFiles.length) {
+                    return;
+                }
+
+                editTemplateExistingInstructionFiles.splice(fileIndex, 1);
+                const maxNewFiles = Math.max(0, 4 - editTemplateExistingInstructionFiles.length);
+                if (editTemplateSelectedFiles.length > maxNewFiles) {
+                    editTemplateSelectedFiles = editTemplateSelectedFiles.slice(0, maxNewFiles);
+                    syncEditTemplateInputFiles(editTemplateSelectedFiles);
+                }
+                renderEditTemplateInstructionFilesList();
+            });
+        });
+
+        editTemplateInstructionFilesList.querySelectorAll('.js-remove-edit-template-staged-file').forEach((button) => {
+            button.addEventListener('click', () => {
+                const fileIndex = parseInt(button.getAttribute('data-file-index') || '-1', 10);
+                if (Number.isNaN(fileIndex) || fileIndex < 0 || fileIndex >= editTemplateSelectedFiles.length) {
+                    return;
+                }
+
+                editTemplateSelectedFiles.splice(fileIndex, 1);
+                syncEditTemplateInputFiles(editTemplateSelectedFiles);
+                renderEditTemplateInstructionFilesList();
+            });
+        });
+
+        if (editTemplateRemovedInstructionFiles) {
+            editTemplateRemovedInstructionFiles.value = JSON.stringify(getEditTemplateRemovedInstructionPaths());
+        }
+    }
 
     function syncCurrentFormSchemaFromInputs() {
         if (!templateFieldsContainer) {
@@ -3263,6 +4754,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (deleteTemplateId) {
                     deleteTemplateId.value = '';
                 }
+                if (editTemplateOpenDate) {
+                    editTemplateOpenDate.value = '';
+                }
+                if (editTemplateCloseDate) {
+                    editTemplateCloseDate.value = '';
+                }
+                syncEditTemplateCloseDateMin();
+                if (editTemplateInstructionFiles) {
+                    editTemplateInstructionFiles.value = '';
+                }
+                editTemplateInitialInstructionFiles = [];
+                editTemplateExistingInstructionFiles = [];
+                editTemplateSelectedFiles = [];
+                renderEditTemplateInstructionFilesList();
                 return;
             }
             
@@ -3275,9 +4780,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             editTemplateName.value = template.name;
             editTemplateDescription.value = template.description;
+            if (editTemplateOpenDate) {
+                editTemplateOpenDate.value = String(template.open_date || '<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>');
+            }
+            if (editTemplateCloseDate) {
+                editTemplateCloseDate.value = String(template.close_date || '');
+            }
+            syncEditTemplateCloseDateMin();
             currentFormSchema = template.form_schema || [];
+            editTemplateInitialInstructionFiles = Array.isArray(template.instruction_files)
+                ? template.instruction_files.map((file) => ({
+                    path: String((file && file.path) || ''),
+                    name: String((file && file.name) || ''),
+                    url: String((file && file.url) || '#')
+                }))
+                : [];
+            editTemplateExistingInstructionFiles = editTemplateInitialInstructionFiles.map((file) => ({ ...file }));
+            editTemplateSelectedFiles = [];
+            if (editTemplateInstructionFiles) {
+                editTemplateInstructionFiles.value = '';
+            }
             
             renderFormFields();
+            renderEditTemplateInstructionFilesList();
             
             templateEmptyState.style.display = 'none';
             templateEditor.style.display = 'block';
@@ -3305,18 +4830,103 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (editTemplateInstructionFiles) {
         editTemplateInstructionFiles.addEventListener('change', function () {
-            if (!editTemplateInstructionFiles.files || editTemplateInstructionFiles.files.length <= 4) {
+            const selectedFiles = Array.from(editTemplateInstructionFiles.files || []);
+            if (selectedFiles.length === 0) {
+                editTemplateSelectedFiles = [];
+                renderEditTemplateInstructionFilesList();
                 return;
             }
 
-            alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
-            editTemplateInstructionFiles.value = '';
+            const remainingSlots = Math.max(0, 4 - editTemplateExistingInstructionFiles.length);
+            if (selectedFiles.length > remainingSlots) {
+                alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία οδηγιών.');
+                editTemplateInstructionFiles.value = '';
+                editTemplateSelectedFiles = [];
+                renderEditTemplateInstructionFilesList();
+                return;
+            }
+
+            const allowedExtensions = ['pdf', 'doc', 'docx'];
+            const hasInvalidFile = selectedFiles.some((file) => {
+                const fileName = String((file && file.name) || '');
+                const extension = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+                return !allowedExtensions.includes(extension);
+            });
+
+            if (hasInvalidFile) {
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
+                editTemplateInstructionFiles.value = '';
+                editTemplateSelectedFiles = [];
+                renderEditTemplateInstructionFilesList();
+                return;
+            }
+
+            editTemplateSelectedFiles = selectedFiles;
+            renderEditTemplateInstructionFilesList();
         });
+
+        renderEditTemplateInstructionFilesList();
+    }
+
+    if (createTemplateInstructionFiles) {
+        createTemplateInstructionFiles.addEventListener('change', function () {
+            const selectedFiles = Array.from(createTemplateInstructionFiles.files || []);
+            if (selectedFiles.length === 0) {
+                createTemplateSelectedFiles = [];
+                renderCreateTemplateInstructionFilesList();
+                return;
+            }
+
+            if (selectedFiles.length > 4) {
+                alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
+                createTemplateInstructionFiles.value = '';
+                createTemplateSelectedFiles = [];
+                renderCreateTemplateInstructionFilesList();
+                return;
+            }
+
+            const allowedExtensions = ['pdf', 'doc', 'docx'];
+            const hasInvalidFile = selectedFiles.some((file) => {
+                const fileName = String((file && file.name) || '');
+                const extension = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
+                return !allowedExtensions.includes(extension);
+            });
+
+            if (hasInvalidFile) {
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
+                createTemplateInstructionFiles.value = '';
+                createTemplateSelectedFiles = [];
+                renderCreateTemplateInstructionFilesList();
+                return;
+            }
+
+            createTemplateSelectedFiles = selectedFiles;
+            renderCreateTemplateInstructionFilesList();
+        });
+
+        renderCreateTemplateInstructionFilesList();
     }
 
     if (editTemplateForm) {
         editTemplateForm.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            const editOpenDateValue = editTemplateOpenDate ? String(editTemplateOpenDate.value || '').trim() : '';
+            const editCloseDateValue = editTemplateCloseDate ? String(editTemplateCloseDate.value || '').trim() : '';
+            if (editOpenDateValue === '') {
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
+                if (editTemplateOpenDate) {
+                    editTemplateOpenDate.focus();
+                }
+                return;
+            }
+            if (editCloseDateValue !== '' && editCloseDateValue < editOpenDateValue) {
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                if (editTemplateCloseDate) {
+                    editTemplateCloseDate.focus();
+                }
+                return;
+            }
 
             syncCurrentFormSchemaFromInputs();
             const fields = currentFormSchema
@@ -3326,6 +4936,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     required: Boolean(field.required)
                 }))
                 .filter((field) => field.name !== '');
+
+            if (editTemplateInstructionFiles && editTemplateSelectedFiles.length !== Array.from(editTemplateInstructionFiles.files || []).length) {
+                syncEditTemplateInputFiles(editTemplateSelectedFiles);
+            }
+
+            const remainingSlots = Math.max(0, 4 - editTemplateExistingInstructionFiles.length);
+            if (editTemplateSelectedFiles.length > remainingSlots) {
+                alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία οδηγιών.');
+                return;
+            }
+
+            if (editTemplateRemovedInstructionFiles) {
+                editTemplateRemovedInstructionFiles.value = JSON.stringify(getEditTemplateRemovedInstructionPaths());
+            }
 
             editTemplateSchema.value = JSON.stringify(fields);
             this.submit();
@@ -3401,8 +5025,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (createTemplateForm) {
-        createTemplateForm.addEventListener('submit', function () {
+        createTemplateForm.addEventListener('submit', function (event) {
+            const createOpenDateValue = createTemplateOpenDate ? String(createTemplateOpenDate.value || '').trim() : '';
+            const createCloseDateValue = createTemplateCloseDate ? String(createTemplateCloseDate.value || '').trim() : '';
+            if (createOpenDateValue === '') {
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
+                if (createTemplateOpenDate) {
+                    createTemplateOpenDate.focus();
+                }
+                event.preventDefault();
+                return;
+            }
+            if (createCloseDateValue !== '' && createCloseDateValue < createOpenDateValue) {
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
+                if (createTemplateCloseDate) {
+                    createTemplateCloseDate.focus();
+                }
+                event.preventDefault();
+                return;
+            }
+
             syncCreateFormSchemaFromInputs();
+
+            if (createTemplateInstructionFiles && createTemplateSelectedFiles.length !== Array.from(createTemplateInstructionFiles.files || []).length) {
+                syncCreateTemplateInputFiles(createTemplateSelectedFiles);
+            }
 
             const fields = createFormSchema
                 .map((field) => ({
@@ -3417,6 +5064,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         createTemplateForm.addEventListener('reset', function () {
             createFormSchema = [];
+            if (createTemplateOpenDate) {
+                createTemplateOpenDate.value = '<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>';
+            }
+            if (createTemplateCloseDate) {
+                createTemplateCloseDate.value = '';
+            }
+            syncCreateTemplateCloseDateMin();
+            if (createTemplateInstructionFiles) {
+                createTemplateInstructionFiles.value = '';
+            }
+            createTemplateSelectedFiles = [];
+            renderCreateTemplateInstructionFilesList();
             window.setTimeout(renderCreateTemplateFields, 0);
         });
     }
@@ -3444,6 +5103,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (createTemplateForm) {
                 createTemplateForm.reset();
+                if (createTemplateOpenDate) {
+                    createTemplateOpenDate.value = '<?php echo htmlspecialchars(getTodayUiDate(), ENT_QUOTES, 'UTF-8'); ?>';
+                }
+                if (createTemplateCloseDate) {
+                    createTemplateCloseDate.value = '';
+                }
+                syncCreateTemplateCloseDateMin();
+                if (createTemplateInstructionFiles) {
+                    createTemplateInstructionFiles.value = '';
+                }
+                createTemplateSelectedFiles = [];
+                renderCreateTemplateInstructionFilesList();
                 createFormSchema = [{ name: '', type: 'text', required: true }];
                 renderCreateTemplateFields();
             }

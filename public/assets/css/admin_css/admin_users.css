@@ -330,15 +330,19 @@
     flex-direction: column;
     gap: 0.28rem;
     margin-top: 0.3rem;
+    min-width: 0;
 }
 
 .user-contact-item {
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
     gap: 0.45rem;
     color: var(--users-text-muted);
     font-size: 0.9rem;
     line-height: 1.35;
+    min-width: 0;
+    overflow-wrap: anywhere;
     word-break: break-word;
 }
 
@@ -754,6 +758,72 @@
     border: 1px solid var(--users-border);
 }
 
+.registration-schedule-toolbar {
+    margin-bottom: 0 !important;
+}
+
+.registration-schedule-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: inherit;
+}
+
+.registration-schedule-toggle-label {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--users-accent);
+}
+
+.registration-schedule-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--users-border);
+    border-radius: 999px;
+    background: var(--users-surface-soft);
+    color: var(--users-text);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.registration-schedule-toggle:hover .registration-schedule-toggle-icon,
+.registration-schedule-toggle:focus-visible .registration-schedule-toggle-icon {
+    background: var(--users-accent-soft);
+    border-color: #b9d3f8;
+}
+
+.registration-schedule-toggle:focus-visible {
+    outline: none;
+}
+
+.registration-schedule-toggle:focus-visible .registration-schedule-toggle-icon {
+    box-shadow: 0 0 0 0.2rem rgba(31, 122, 236, 0.12);
+}
+
+.registration-schedule-content {
+    margin-top: 1rem;
+}
+
+.registration-schedule-card:not(.registration-schedule-card--collapsed) .registration-schedule-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.registration-schedule-toolbar-actions {
+    display: none;
+}
+
 .registration-schedule-table thead th {
     background: var(--users-surface-soft);
     color: var(--users-text);
@@ -840,6 +910,134 @@
 }
 
 @media (max-width: 767.98px) {
+    .users-table {
+        min-width: 1080px;
+    }
+
+    .users-table th:nth-child(1),
+    .users-table td:nth-child(1) {
+        width: 320px;
+        min-width: 320px;
+    }
+
+    .users-table th:nth-child(2),
+    .users-table td:nth-child(2) {
+        width: 140px;
+        min-width: 140px;
+    }
+
+    .users-table th:nth-child(3),
+    .users-table td:nth-child(3) {
+        width: 140px;
+        min-width: 140px;
+    }
+
+    .users-table th:nth-child(5),
+    .users-table td:nth-child(5) {
+        width: 190px;
+        min-width: 190px;
+    }
+
+    .users-table th:nth-child(7),
+    .users-table td:nth-child(7) {
+        width: 230px;
+        min-width: 230px;
+    }
+
+    .users-table .user-main-cell {
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .users-table .user-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    .user-info,
+    .user-contact-list,
+    .user-contact-item,
+    .users-table .user-flags {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .user-full-name {
+        font-size: 0.95rem;
+        overflow-wrap: anywhere;
+    }
+
+    .users-table td:nth-child(2) .status-pill,
+    .users-table td:nth-child(3) .status-pill {
+        white-space: nowrap;
+    }
+
+    .history-summary {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .history-summary .status-pill,
+    .history-summary .users-action-btn {
+        width: 100%;
+    }
+
+    .users-table td:nth-child(7) {
+        text-align: left !important;
+    }
+
+    .users-toolbar,
+    .users-toolbar-actions,
+    .users-sort-form {
+        width: 100%;
+    }
+
+    .users-toolbar-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .users-sort-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+    }
+
+    .users-sort-form .form-select,
+    .users-search-wrap {
+        width: 100%;
+        max-width: none;
+    }
+
+    .users-sort-label {
+        font-size: 0.78rem;
+    }
+
+    .users-sort-form,
+    .users-sort-form .form-select {
+        font-size: 0.84rem;
+    }
+
+    .users-sort-form .form-select {
+        min-width: 0;
+        min-height: 38px;
+        padding-left: 0.72rem;
+        padding-right: 1.9rem;
+        border-radius: 10px;
+    }
+
+    .users-table-actions {
+        width: 100%;
+        justify-content: stretch !important;
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .users-table-actions > * {
+        flex: 1 1 100%;
+    }
+
     .admin-page-header .btn-primary-custom {
         width: 100%;
         justify-content: center;
@@ -866,5 +1064,14 @@
     .users-action-btn {
         width: 100%;
         min-width: 0;
+    }
+
+    .registration-schedule-toggle {
+        align-items: flex-start;
+    }
+
+    .registration-schedule-toggle-icon {
+        width: 38px;
+        height: 38px;
     }
 }

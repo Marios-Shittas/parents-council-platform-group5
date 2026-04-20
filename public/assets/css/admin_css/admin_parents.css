@@ -251,6 +251,24 @@
     box-shadow: 0 14px 26px rgba(185, 39, 39, 0.28);
 }
 
+.board-archive-editor {
+    display: grid;
+    gap: 18px;
+}
+
+.board-archive-editor__block {
+    padding: 18px;
+    border: 1px solid #d9e4f0;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f4f8fc 100%);
+    box-shadow: 0 10px 24px rgba(16, 24, 40, 0.05);
+}
+
+.board-archive-editor__block--new {
+    border-style: dashed;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
 .parents-confirm-modal .modal-content {
     border: none;
     border-radius: 24px;

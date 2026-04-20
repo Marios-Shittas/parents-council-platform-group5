@@ -68,3 +68,22 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 767.98px) {
+    .orders-summary-card {
+        padding: 16px;
+    }
+
+    .orders-panel-head {
+        padding: 16px 18px;
+    }
+
+    .orders-panel-head h3 {
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+
+    .orders-panel .admin-table {
+        min-width: 640px;
+    }
+}
