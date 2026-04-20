@@ -87,7 +87,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
-                <i class="fas fa-info-circle"></i> Χρήσιμοι Σύνδεσμοι & Πληροφορίες
+                <i class="fas fa-info-circle"></i> Χρήσιμοι Σύνδεσμοι
             </a>
         </li>
 

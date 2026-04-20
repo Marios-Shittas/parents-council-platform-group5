@@ -1790,8 +1790,11 @@ class UsersService
         }
 
         $subject = ApprovalMailer::approvalEmailSubject();
-        $message = ApprovalMailer::approvalEmailTextBody($link);
-        $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+        $message = ApprovalMailer::approvalEmailHtmlBody($link);
+        $headers =
+            'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: text/html; charset=UTF-8";
 
         if (!mail($email, $subject, $message, $headers)) {
             $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';

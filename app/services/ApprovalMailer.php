@@ -42,7 +42,7 @@ class ApprovalMailer
         }
 
         $subject = self::approvalEmailSubject();
-        $body = self::approvalEmailTextBody($link);
+        $body = self::approvalEmailHtmlBody($link);
 
         $socket = $this->openConnection();
 
@@ -72,7 +72,7 @@ class ApprovalMailer
             $this->command($socket, 'MAIL FROM:<' . $this->fromEmail . '>', [250]);
             $this->command($socket, 'RCPT TO:<' . $toEmail . '>', [250, 251]);
             $this->command($socket, 'DATA', [354]);
-            $this->write($socket, $this->buildMessage($toEmail, $subject, $body) . "\r\n.\r\n");
+            $this->write($socket, $this->buildHtmlMessage($toEmail, $subject, $body) . "\r\n.\r\n");
             $this->expect($socket, [250]);
             $this->command($socket, 'QUIT', [221]);
         } finally {
@@ -241,7 +241,13 @@ class ApprovalMailer
 
     public static function approvalEmailHtmlBody(string $link): string
     {
-        return self::approvalEmailTextBody($link);
+        $safeLink = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+        return
+            '<p>Η εγγραφή σας εγκρίθηκε από τον διαχειριστή.</p>' .
+            '<p>Μπορείτε πλέον να προχωρήσετε για να ολοκληρώσετε τη διαδικασία της εγγραφής σας.</p>' .
+            '<p><a href="' . $safeLink . '"><strong>Σύνδεσμος Συνδρομής</strong></a></p>' .
+            '<p>Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.</p>';
     }
 
     public static function approvalEmailTextBody(string $link): string

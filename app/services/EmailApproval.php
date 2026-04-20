@@ -73,9 +73,9 @@ class EmailApproval
                 $this->applyTransportMode($mode);
                 $this->mailer->clearAllRecipients();
                 $this->mailer->addAddress($toEmail);
-                $this->mailer->isHTML(false);
+                $this->mailer->isHTML(true);
                 $this->mailer->Subject = \ApprovalMailer::approvalEmailSubject();
-                $this->mailer->Body = \ApprovalMailer::approvalEmailTextBody($link);
+                $this->mailer->Body = \ApprovalMailer::approvalEmailHtmlBody($link);
                 $this->mailer->AltBody = \ApprovalMailer::approvalEmailTextBody($link);
 
                 $this->mailer->send();

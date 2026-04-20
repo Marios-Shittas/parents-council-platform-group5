@@ -25,6 +25,34 @@ $announcementsBlockTitle = (string)($announcementsSection['title'] ?? 'Τελε�
 $announcementsBlockButton = (string)($announcementsSection['content']['button_label'] ?? 'Όλες οι Ανακοινώσεις');
 $eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Εκδηλώσεις');
 $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
+
+if (!function_exists('home_public_content_url_exists')) {
+    function home_public_content_url_exists(string $url): bool
+    {
+        $path = (string)parse_url($url, PHP_URL_PATH);
+        if ($path === '') {
+            return true;
+        }
+
+        $publicPrefix = '/parents-council-platform-group5/public/';
+        if (strpos($path, $publicPrefix) !== 0) {
+            return true;
+        }
+
+        $relativePath = urldecode(substr($path, strlen($publicPrefix)));
+        if ($relativePath === '' || strpos(str_replace('\\', '/', $relativePath), '..') !== false) {
+            return false;
+        }
+
+        $publicRoot = realpath(__DIR__ . '/../../../public');
+        if ($publicRoot === false) {
+            return false;
+        }
+
+        $filePath = $publicRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+        return is_file($filePath);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -61,6 +89,14 @@ $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλ
 
             $resolvedSrc = site_resolve_content_url((string)($storedSlide['src'] ?? $defaultSlide['src']));
             if (trim($resolvedSrc) === '') {
+                continue;
+            }
+
+            if (!home_public_content_url_exists($resolvedSrc)) {
+                $resolvedSrc = site_resolve_content_url((string)$defaultSlide['src']);
+            }
+
+            if (!home_public_content_url_exists($resolvedSrc)) {
                 continue;
             }
 
