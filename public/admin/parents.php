@@ -371,7 +371,7 @@ $parentsContentTabs = [
     'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
-    'attendance_portal_section' => ['label' => 'Πύλη Απουσιολογίου', 'icon' => 'fas fa-user-check'],
+    'attendance_portal_section' => ['label' => 'Επιπρόσθετα Στοιχεία', 'icon' => 'fas fa-folder-open'],
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
@@ -618,10 +618,10 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'attendance_portal_section' ? 'show active' : ''; ?>" id="tab-attendance_portal_section" role="tabpanel" aria-labelledby="tab-attendance_portal_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Πύλη Απουσιολογίου</h3>
-                            <p>Περιεχόμενο για το νέο κουτί σύνδεσης που εμφανίζεται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
+                            <h3>Επιπρόσθετα Στοιχεία</h3>
+                            <p>Περιεχόμενο για πρόσθετη κάρτα ή βοηθητικά στοιχεία που εμφανίζονται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
                         </div>
-                        <span class="content-editor-card__icon"><i class="fas fa-user-check"></i></span>
+                        <span class="content-editor-card__icon"><i class="fas fa-folder-open"></i></span>
                     </div>
 
                     <form method="POST">
@@ -657,7 +657,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Πύλης Απουσιολογίου
+                                <i class="fas fa-save"></i> Αποθήκευση Επιπρόσθετων Στοιχείων
                             </button>
                         </div>
                     </form>
@@ -1012,7 +1012,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="content-subcard">
-                                <h4>Internet Explorer / Edge</h4>
+                                <h4>Microsoft Edge</h4>
 
                                 <div class="form-group">
                                     <label for="edge-heading">Τίτλος</label>
