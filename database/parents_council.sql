@@ -443,9 +443,8 @@ CREATE TABLE `SystemSchedule` (
   `start_date` datetime NOT NULL,
   `end_date` datetime NOT NULL,
   `ss_status` enum('active','inactive') DEFAULT 'inactive',
-  PRIMARY KEY (`ss_id`),
-  UNIQUE KEY `uq_system_schedule_feature` (`feature`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`ss_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `UsefulInformationSections`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

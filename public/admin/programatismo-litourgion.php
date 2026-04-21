@@ -153,19 +153,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $registrationSchedules = $usersService->getSystemSchedules();
-$scheduleFeatureOptions = ['registration', 'delete_users', 'cleanup_submissions'];
-$existingScheduleFeatures = [];
-foreach ($registrationSchedules as $schedule) {
-    $existingFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? ''));
-    if ($existingFeature !== '' && !in_array($existingFeature, $existingScheduleFeatures, true)) {
-        $existingScheduleFeatures[] = $existingFeature;
-    }
-}
-$availableScheduleFeatures = array_values(array_filter(
-    $scheduleFeatureOptions,
-    static fn(string $feature): bool => !in_array($feature, $existingScheduleFeatures, true)
-));
-$newScheduleFeature = $availableScheduleFeatures[0] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -272,36 +259,26 @@ $newScheduleFeature = $availableScheduleFeatures[0] ?? '';
                     <tr class="program-feature-new-row">
                         <?php $newScheduleFormId = 'registration-schedule-form-new'; ?>
                         <td>
-                            <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" <?php echo $newScheduleFeature === '' ? 'disabled' : 'required'; ?>>
-                                <?php if ($newScheduleFeature === ''): ?>
-                                    <option value="" selected>Όλες οι λειτουργίες υπάρχουν ήδη</option>
-                                <?php else: ?>
-                                    <?php foreach ($scheduleFeatureOptions as $featureOption): ?>
-                                        <?php
-                                            $featureExists = in_array($featureOption, $existingScheduleFeatures, true);
-                                            $isSelectedFeature = $featureOption === $newScheduleFeature;
-                                        ?>
-                                        <option value="<?php echo htmlspecialchars($featureOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $isSelectedFeature ? 'selected' : ''; ?> <?php echo $featureExists ? 'disabled' : ''; ?>>
-                                            <?php echo htmlspecialchars(scheduleFeatureLabel($featureOption), ENT_QUOTES, 'UTF-8'); ?><?php echo $featureExists ? ' (υπάρχει ήδη)' : ''; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                            <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
+                                <option value="registration" selected><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
+                                <option value="delete_users"><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
+                                <option value="cleanup_submissions"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
                             </select>
                         </td>
                         <td>
-                            <input type="datetime-local" name="registration_start_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" <?php echo $newScheduleFeature === '' ? 'disabled' : 'required'; ?>>
+                            <input type="datetime-local" name="registration_start_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
                         </td>
                         <td>
-                            <input type="datetime-local" name="registration_end_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" <?php echo $newScheduleFeature === '' ? 'disabled' : 'required'; ?>>
+                            <input type="datetime-local" name="registration_end_date" class="form-control" form="<?php echo $newScheduleFormId; ?>" required>
                         </td>
                         <td>
-                            <select name="registration_status" class="form-select" form="<?php echo $newScheduleFormId; ?>" <?php echo $newScheduleFeature === '' ? 'disabled' : 'required'; ?>>
+                            <select name="registration_status" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
                                 <option value="active" selected>Ενεργό</option>
                                 <option value="inactive">Ανενεργό</option>
                             </select>
                         </td>
                         <td class="text-end">
-                            <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>" <?php echo $newScheduleFeature === '' ? 'disabled' : ''; ?>>
+                            <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>">
                                 <i class="fas fa-plus me-1"></i>Προσθήκη
                             </button>
                         </td>

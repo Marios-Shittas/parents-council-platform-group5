@@ -209,7 +209,8 @@ INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
 --
 
 INSERT INTO `SystemSchedule` (`ss_id`, `feature`, `start_date`, `end_date`, `ss_status`) VALUES
-(1, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active');
+(1, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active'),
+(2, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active');
 
 --
 -- Dumping data for table `UsefulInformationSections`

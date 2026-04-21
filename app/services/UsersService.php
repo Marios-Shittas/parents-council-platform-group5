@@ -542,18 +542,6 @@ class UsersService
         $normalizedEnd = $normalized['end_date'];
         $normalizedStatus = $normalized['status'];
 
-        $duplicateCheck = $this->systemScheduleFeatureExists($normalizedFeature, $ssId);
-        if ($duplicateCheck === null) {
-            return ['success' => false, 'message' => 'Αποτυχία ελέγχου υπάρχοντος προγράμματος.'];
-        }
-
-        if ($duplicateCheck) {
-            return [
-                'success' => false,
-                'message' => 'Υπάρχει ήδη πρόγραμμα για τη λειτουργία "' . $this->systemScheduleFeatureLabel($normalizedFeature) . '". Δεν μπορεί να δημιουργηθεί δεύτερο.',
-            ];
-        }
-
         $stmt = $this->conn->prepare(
             "UPDATE SystemSchedule
              SET feature = ?, start_date = ?, end_date = ?, ss_status = ?
@@ -598,18 +586,6 @@ class UsersService
         $normalizedStart = $normalized['start_date'];
         $normalizedEnd = $normalized['end_date'];
         $normalizedStatus = $normalized['status'];
-
-        $duplicateCheck = $this->systemScheduleFeatureExists($normalizedFeature);
-        if ($duplicateCheck === null) {
-            return ['success' => false, 'message' => 'Αποτυχία ελέγχου υπάρχοντος προγράμματος.'];
-        }
-
-        if ($duplicateCheck) {
-            return [
-                'success' => false,
-                'message' => 'Υπάρχει ήδη πρόγραμμα για τη λειτουργία "' . $this->systemScheduleFeatureLabel($normalizedFeature) . '". Ενημέρωσε το υπάρχον αντί να προσθέσεις νέο.',
-            ];
-        }
 
         $stmt = $this->conn->prepare(
             "INSERT INTO SystemSchedule (feature, start_date, end_date, ss_status)
@@ -1735,48 +1711,6 @@ class UsersService
 
         $allowed = ['registration', 'delete_users', 'cleanup_submissions'];
         return in_array($normalized, $allowed, true) ? $normalized : '';
-    }
-
-    private function systemScheduleFeatureExists(string $feature, ?int $excludeScheduleId = null): ?bool
-    {
-        $normalizedFeature = $this->normalizeScheduleFeature($feature);
-        if ($normalizedFeature === '') {
-            return false;
-        }
-
-        if ($excludeScheduleId !== null && $excludeScheduleId > 0) {
-            $stmt = $this->conn->prepare('SELECT ss_id FROM SystemSchedule WHERE feature = ? AND ss_id <> ? LIMIT 1');
-            if (!$stmt) {
-                return null;
-            }
-
-            $stmt->bind_param('si', $normalizedFeature, $excludeScheduleId);
-        } else {
-            $stmt = $this->conn->prepare('SELECT ss_id FROM SystemSchedule WHERE feature = ? LIMIT 1');
-            if (!$stmt) {
-                return null;
-            }
-
-            $stmt->bind_param('s', $normalizedFeature);
-        }
-
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $exists = $result && $result->num_rows > 0;
-        $stmt->close();
-
-        return $exists;
-    }
-
-    private function systemScheduleFeatureLabel(string $feature): string
-    {
-        $labels = [
-            'registration' => 'Εγγραφές',
-            'delete_users' => 'Διαγραφή Χρηστών',
-            'cleanup_submissions' => 'Καθαρισμός Υποβολών',
-        ];
-
-        return $labels[$feature] ?? $feature;
     }
 
     private function isSingleMomentScheduleFeature(string $feature): bool
