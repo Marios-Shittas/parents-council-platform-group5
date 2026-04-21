@@ -187,8 +187,8 @@ class UsefulInformationService
         $legacyPageHeaderSubtitle = 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.';
         $currentSymbolSubtitle = 'Χρήσιμοι Συνδέσμοι & Πληροφορίες/ Ενημερωτικό Υλικό/ Έντυπα & Ενημερώσεις';
         $oldSpacedSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.';
-        $newPageHeaderTitle = 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι';
-        $newPageHeaderSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες,ενημερωτικό υλικό,έντυπα και ενημερώσεις.';
+        $newPageHeaderTitle = 'Χρήσιμες Πληροφορίες & Σύνδεσμοι';
+        $newPageHeaderSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.';
 
         $pageHeader = $this->getSection('page_header');
         if (is_array($pageHeader)) {
@@ -200,6 +200,7 @@ class UsefulInformationService
                 || $currentSubtitle === $oldSpacedSubtitle
                 || $currentTitle === 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες'
                 || $currentTitle === 'Χρήσιμοι Σύνδεσμοι και Πληροφορίες'
+                || $currentTitle === 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι'
             );
 
             if ($shouldUpdatePageHeader) {
@@ -258,8 +259,8 @@ class UsefulInformationService
     {
         return [
             'page_header' => [
-                'title' => 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι',
-                'subtitle' => 'Χρήσιμοι σύνδεσμοι και πληροφορίες,ενημερωτικό υλικό,έντυπα και ενημερώσεις.',
+                'title' => 'Χρήσιμες Πληροφορίες & Σύνδεσμοι',
+                'subtitle' => 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.',
                 'content' => [
                     'eyebrow' => 'Οδηγός Γονέων Και Μαθητών',
                 ],

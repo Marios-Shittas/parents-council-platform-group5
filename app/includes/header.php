@@ -33,7 +33,7 @@ $nav_items = [
         'match' => ['home.php', 'index.php', ''],
     ],
     [
-        'label' => site_is_parent() ? 'Συνδεσμος Γωνεων' : 'Σύνδεσμος Γονέων',
+        'label' => site_is_parent() ? 'Σύνδεσμος Γονέων' : 'Σύνδεσμος Γονέων',
         'href' => site_section_url('parents.php'),
         'icon' => 'fas fa-users',
         'match' => ['parents.php'],
@@ -89,6 +89,46 @@ if (site_is_parent()) {
     ];
 }
 ?>
+<script>
+    (function () {
+        var faviconHref = '<?php echo site_asset_url('img/logo-icon.png'); ?>';
+        var head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+        var img = new Image();
+
+        img.onload = function () {
+            var size = 128;
+            var canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+
+            var context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            context.clearRect(0, 0, size, size);
+            context.beginPath();
+            context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            context.closePath();
+            context.clip();
+            context.drawImage(img, 0, 0, size, size);
+
+            var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+            existingIcons.forEach(function (icon) {
+                icon.parentNode.removeChild(icon);
+            });
+
+            var icon = document.createElement('link');
+            icon.rel = 'icon';
+            icon.type = 'image/png';
+            icon.href = canvas.toDataURL('image/png');
+            head.appendChild(icon);
+        };
+
+        img.src = faviconHref;
+    })();
+</script>
 <style>
         /* Βασικά χρώματα για ενιαίο design. */
         :root {
@@ -138,6 +178,7 @@ if (site_is_parent()) {
             border-bottom: 1px solid var(--header-border);
             padding: .95rem 0 .7rem;
             font-family: 'Lato', sans-serif;
+            overflow: visible;
         }
 
         /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
@@ -161,11 +202,12 @@ if (site_is_parent()) {
             align-items: center;
             flex: 0 0 auto;
             width: fit-content;
+            transform: translateX(62px);
         }
 
         .navbar-brand img {
-            width: 104px;
-            height: 104px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
@@ -419,7 +461,8 @@ if (site_is_parent()) {
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
         .navbar-collapse {
             width: 100%;
-            justify-content: space-between;
+            min-width: max-content;
+            justify-content: center;
             align-items: center;
             gap: 1rem;
             margin-top: .05rem;
@@ -431,16 +474,15 @@ if (site_is_parent()) {
         }
 
         .navbar-nav {
-            flex: 1 1 auto;
+            flex: 0 0 auto;
             display: flex;
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
             margin: 0;
             gap: .25rem;
-            min-width: 0;
-            overflow-x: auto;
-            scrollbar-width: thin;
+            min-width: max-content;
+            overflow: visible;
         }
 
         .navbar-public .navbar-nav {
@@ -503,6 +545,7 @@ if (site_is_parent()) {
             flex-wrap: wrap;
             align-items: center;
             max-width: 1560px;
+            overflow: visible;
             position: relative;
             z-index: 1;
         }
@@ -627,13 +670,16 @@ if (site_is_parent()) {
             .navbar-collapse {
                 margin-top: .7rem;
                 padding: .85rem 1rem;
+                min-width: 0;
             }
 
             .navbar-nav {
                 margin-top: .75rem;
+                flex: 1 1 auto;
                 flex-wrap: wrap;
                 justify-content: flex-start;
                 gap: .1rem;
+                min-width: 0;
                 overflow: visible;
             }
 

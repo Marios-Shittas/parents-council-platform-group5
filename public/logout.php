@@ -44,6 +44,22 @@ if (($logoutEmail === null || $logoutEmail === '') && isset($_SESSION['temp_emai
 
 clearUserTokenOnLogout($conn, $logoutUserId, $logoutEmail);
 
+// Log the logout event before destroying the session (only for parents, not admins)
+if ($logoutUserId !== null && $logoutUserId > 0 && strtolower((string)$role) === 'parent') {
+    $logoutDescription = sprintf(
+        'Logout for parent user #%d (%s).',
+        $logoutUserId,
+        (string)$logoutEmail
+    );
+    $stmtLog = $conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)');
+    if ($stmtLog) {
+        $logoutAction = 'PARENT_LOGOUT';
+        $stmtLog->bind_param('iss', $logoutUserId, $logoutAction, $logoutDescription);
+        $stmtLog->execute();
+        $stmtLog->close();
+    }
+}
+
 // Determine redirect URL based on role
 switch ($role) {
     case 'admin':

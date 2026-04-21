@@ -24,7 +24,7 @@ $uniform = $sections['uniform'];
     <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/useful-information.css'); ?>">
-    <title>Χρήσιμοι Σύνδεσμοι & Πληροφορίες - Γυμνάσιο Αγίου Αθανασίου</title>
+    <title>Χρήσιμοι Σύνδεσμοι - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
 <body>
 <?php include __DIR__ . '/../../includes/header.php'; ?>

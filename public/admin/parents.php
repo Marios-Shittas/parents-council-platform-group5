@@ -348,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['flash_message'] = $saved
-            ? 'Το περιεχόμενο της σελίδας Συνδεσμος Γωνεων ενημερώθηκε επιτυχώς.'
+            ? 'Το περιεχόμενο της σελίδας Σύνδεσμος Γονέων ενημερώθηκε επιτυχώς.'
             : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $parentsPageService->getLastError();
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
@@ -376,7 +376,7 @@ $parentsContentTabs = [
     'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
-    'attendance_portal_section' => ['label' => 'Πύλη Απουσιολογίου', 'icon' => 'fas fa-user-check'],
+    'attendance_portal_section' => ['label' => 'Επιπρόσθετα Στοιχεία', 'icon' => 'fas fa-folder-open'],
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
@@ -391,7 +391,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Διαχείριση Σελίδας Συνδεσμος Γωνεων - Admin</title>
+    <title>Διαχείριση Σελίδας Σύνδεσμος Γονέων - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -413,7 +413,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
         <div class="admin-header">
             <h1>
                 <i class="fas fa-users"></i>
-                Διαχείριση Σελίδας Συνδεσμος Γωνεων
+                Διαχείριση Σελίδας Σύνδεσμος Γονέων
             </h1>
         </div>
 
@@ -534,8 +534,8 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'association_section' ? 'show active' : ''; ?>" id="tab-association_section" role="tabpanel" aria-labelledby="tab-association_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
-                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδεσμου Γωνεων.</p>
+                            <h3>Σύνδεσμος Γονέων</h3>
+                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδέσμου Γονέων.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-handshake"></i></span>
                     </div>
@@ -609,7 +609,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Συνδεσμου Γωνεων
+                                <i class="fas fa-save"></i> Αποθήκευση Συνδέσμου Γονέων
                             </button>
                         </div>
                     </form>
@@ -618,10 +618,10 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'attendance_portal_section' ? 'show active' : ''; ?>" id="tab-attendance_portal_section" role="tabpanel" aria-labelledby="tab-attendance_portal_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Πύλη Απουσιολογίου</h3>
-                            <p>Περιεχόμενο για το νέο κουτί σύνδεσης που εμφανίζεται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
+                            <h3>Επιπρόσθετα Στοιχεία</h3>
+                            <p>Περιεχόμενο για πρόσθετη κάρτα ή βοηθητικά στοιχεία που εμφανίζονται κάτω από την ενότητα του Συνδέσμου Γονέων.</p>
                         </div>
-                        <span class="content-editor-card__icon"><i class="fas fa-user-check"></i></span>
+                        <span class="content-editor-card__icon"><i class="fas fa-folder-open"></i></span>
                     </div>
 
                     <form method="POST">
@@ -657,7 +657,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Πύλης Απουσιολογίου
+                                <i class="fas fa-save"></i> Αποθήκευση Επιπρόσθετων Στοιχείων
                             </button>
                         </div>
                     </form>
@@ -729,7 +729,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'board_section' ? 'show active' : ''; ?>" id="tab-board_section" role="tabpanel" aria-labelledby="tab-board_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
+                            <h3>Σύνδεσμος Γονέων</h3>
                             <p>Lead paragraph, labels πίνακα και μέλη Δ.Σ. Μορφή γραμμής: <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-user-friends"></i></span>
@@ -1012,7 +1012,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             </div>
 
                             <div class="content-subcard">
-                                <h4>Internet Explorer / Edge</h4>
+                                <h4>Microsoft Edge</h4>
 
                                 <div class="form-group">
                                     <label for="edge-heading">Τίτλος</label>

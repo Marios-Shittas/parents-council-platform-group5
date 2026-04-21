@@ -44,6 +44,46 @@ if ($pendingApplicationSubmissions > 0) {
     $applicationsBadgeText = $pendingApplicationSubmissions > 10 ? '10+' : (string)$pendingApplicationSubmissions;
 }
 ?>
+<script>
+    (function () {
+        var faviconHref = '/parents-council-platform-group5/public/assets/img/logo-icon.png';
+        var head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+        var img = new Image();
+
+        img.onload = function () {
+            var size = 128;
+            var canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+
+            var context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            context.clearRect(0, 0, size, size);
+            context.beginPath();
+            context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            context.closePath();
+            context.clip();
+            context.drawImage(img, 0, 0, size, size);
+
+            var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+            existingIcons.forEach(function (icon) {
+                icon.parentNode.removeChild(icon);
+            });
+
+            var icon = document.createElement('link');
+            icon.rel = 'icon';
+            icon.type = 'image/png';
+            icon.href = canvas.toDataURL('image/png');
+            head.appendChild(icon);
+        };
+
+        img.src = faviconHref;
+    })();
+</script>
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>
@@ -74,12 +114,6 @@ if ($pendingApplicationSubmissions > 0) {
         </li>
 
         <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
-                <i class="fas fa-users"></i> Συνδεσμος Γωνεων
-            </a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'announcements.php' ? 'active' : ''; ?>" href="announcements.php">
                 <i class="fas fa-bullhorn"></i> Ανακοινώσεις
             </a>
@@ -93,7 +127,13 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
-                <i class="fas fa-info-circle"></i> Χρήσιμες Πληροφορίες
+                <i class="fas fa-info-circle"></i> Χρήσιμοι Σύνδεσμοι
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
+                <i class="fas fa-users"></i> Σύνδεσμος Γονέων
             </a>
         </li>
 
