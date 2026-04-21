@@ -44,6 +44,24 @@ if ($pendingApplicationSubmissions > 0) {
     $applicationsBadgeText = $pendingApplicationSubmissions > 10 ? '10+' : (string)$pendingApplicationSubmissions;
 }
 ?>
+<script>
+    (function () {
+        var faviconHref = '/parents-council-platform-group5/public/assets/img/logo-icon.png';
+        var head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+
+        var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+        existingIcons.forEach(function (icon) {
+            icon.parentNode.removeChild(icon);
+        });
+
+        var icon = document.createElement('link');
+        icon.rel = 'icon';
+        icon.type = 'image/png';
+        icon.href = faviconHref;
+        head.appendChild(icon);
+    })();
+</script>
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>
@@ -93,7 +111,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
-                <i class="fas fa-users"></i> Συνδεσμος Γωνεων
+                <i class="fas fa-users"></i> Σύνδεσμος Γονέων
             </a>
         </li>
 

@@ -90,6 +90,24 @@ if (site_is_parent()) {
     ];
 }
 ?>
+<script>
+    (function () {
+        var faviconHref = '<?php echo site_asset_url('img/logo-icon.png'); ?>';
+        var head = document.head || document.getElementsByTagName('head')[0];
+        if (!head) return;
+
+        var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+        existingIcons.forEach(function (icon) {
+            icon.parentNode.removeChild(icon);
+        });
+
+        var icon = document.createElement('link');
+        icon.rel = 'icon';
+        icon.type = 'image/png';
+        icon.href = faviconHref;
+        head.appendChild(icon);
+    })();
+</script>
 <style>
         /* Βασικά χρώματα για ενιαίο design. */
         :root {
@@ -163,11 +181,12 @@ if (site_is_parent()) {
             align-items: center;
             flex: 0 0 auto;
             width: fit-content;
+            transform: translateX(62px);
         }
 
         .navbar-brand img {
-            width: 104px;
-            height: 104px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);

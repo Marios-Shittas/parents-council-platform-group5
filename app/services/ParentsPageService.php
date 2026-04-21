@@ -484,10 +484,10 @@ class ParentsPageService
                     'login_heading' => 'Οδηγίες για την είσοδο στο Σύστημα Ηλεκτρονικής Διοίκησης',
                     'login_steps' => [
                         'Αν κατά την είσοδο εμφανίζεται λάθος σύνδεσης, καθαρίστε το ιστορικό του browser σας (Clear Browser History). Αυτό χρειάζεται συνήθως μόνο την πρώτη φορά που θα παρουσιαστεί το πρόβλημα.',
-                        'Αν χρησιμοποιείτε Internet Explorer (Microsoft Edge), κάντε τα εξής:',
+                        'Αν χρησιμοποιείτε Microsoft Edge, κάντε τα εξής:',
                         'Αν χρησιμοποιείτε Google Chrome, κάντε τα εξής:',
                     ],
-                    'edge_heading' => 'Βήματα για Internet Explorer (Microsoft Edge)',
+                    'edge_heading' => 'Βήματα για Microsoft Edge',
                     'edge_steps' => [
                         'Επιλέξτε στο πάνω δεξί μέρος της οθόνης το εικονίδιο Tools.',
                         'Επιλέξτε Internet Options.',
