@@ -661,6 +661,10 @@ if (site_is_parent()) {
                 padding: .65rem 0;
             }
 
+            .logo-stack {
+                margin-left: .15rem;
+            }
+
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;
