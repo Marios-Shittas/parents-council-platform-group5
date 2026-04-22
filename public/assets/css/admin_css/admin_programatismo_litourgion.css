@@ -67,6 +67,20 @@
     vertical-align: middle;
 }
 
+.program-feature-actions-cell {
+    text-align: center;
+}
+
+.program-feature-actions-cell .btn {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.program-feature-actions-cell .btn + .btn {
+    margin-top: 0.5rem;
+}
+
 .program-feature-table .form-select,
 .program-feature-table .form-control,
 .program-log-search-input-wrap .form-control {
@@ -280,7 +294,8 @@
 
     .program-feature-table,
     .program-log-table {
-        min-width: 760px;
+        min-width: 0;
+        width: 100%;
     }
 
     .program-log-search-bar .btn-primary-custom {
@@ -290,35 +305,36 @@
 
 @media (max-width: 767.98px) {
     .program-feature-table {
-        min-width: 920px;
+        min-width: 0;
+        width: 100%;
         table-layout: fixed;
     }
 
     .program-feature-table th,
     .program-feature-table td {
-        white-space: nowrap;
+        white-space: normal;
     }
 
     .program-feature-table th:nth-child(1),
     .program-feature-table td:nth-child(1) {
-        width: 210px;
+        width: 150px;
     }
 
     .program-feature-table th:nth-child(2),
     .program-feature-table td:nth-child(2),
     .program-feature-table th:nth-child(3),
     .program-feature-table td:nth-child(3) {
-        width: 190px;
+        width: 165px;
     }
 
     .program-feature-table th:nth-child(4),
     .program-feature-table td:nth-child(4) {
-        width: 150px;
+        width: 110px;
     }
 
     .program-feature-table th:nth-child(5),
     .program-feature-table td:nth-child(5) {
-        width: 180px;
+        width: 140px;
     }
 
     .program-feature-table td:last-child {
@@ -326,9 +342,15 @@
     }
 
     .program-feature-table td:last-child .btn {
-        display: inline-flex;
+        display: block;
         align-items: center;
         justify-content: center;
+        width: 100%;
         min-width: 0;
+    }
+
+    .program-feature-table td:last-child .btn + .btn {
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
     }
 }

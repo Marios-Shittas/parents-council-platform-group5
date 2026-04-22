@@ -67,6 +67,22 @@ INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `desc
 (2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
 
 --
+-- Dumping data for table `Applications`
+--
+
+INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`, `title`, `application_description`, `description`, `submission_type`, `academic_year`, `open_date`, `due_date`, `status`, `allow_online_submission`, `allow_file_submission`, `require_signature`, `form_schema`, `target_audience`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, NULL, 'Field Trip Permission', 'Field Trip Permission', 'Form to allow your child to attend field trip', 'Form to allow your child to attend field trip', 'file', '2025-2026', '2026-03-01', '2026-06-15', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11'),
+(2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11');
+
+--
+-- Dumping data for table `ApplicationsDocuments`
+--
+
+INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
+(1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
+(2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
+
+--
 -- Dumping data for table `Children`
 --
 
@@ -203,6 +219,14 @@ INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
 (2, 2, '/parents-council-platform-group5/public/assets/Products_img/product_69c4ffe67280e6.61595091.jpg'),
 (3, 3, '/parents-council-platform-group5/public/assets/Products_img/default-product.svg');
+
+--
+-- Dumping data for table `Submissions`
+--
+
+INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `sub_status`) VALUES
+(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', 'approved'),
+(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', 'waiting');
 
 --
 -- Dumping data for table `SystemSchedule`

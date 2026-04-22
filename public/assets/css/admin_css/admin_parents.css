@@ -1,3 +1,11 @@
+.admin-section-tabs .nav-link:focus,
+.admin-section-tabs .nav-link:focus-visible,
+.admin-section-tabs .nav-link.active:focus,
+.admin-section-tabs .nav-link.active:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 .parents-upload-panel {
     display: grid;
     gap: 16px;

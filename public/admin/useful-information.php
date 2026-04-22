@@ -111,11 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'quick_links':
                 $items = [];
                 for ($i = 1; $i <= 3; $i++) {
+                    $existingIcon = usefulInfoTrim($sections['quick_links']['content']['items'][$i - 1]['icon'] ?? 'fas fa-link');
                     $items[] = [
                         'title' => usefulInfoTrim($_POST["link_{$i}_title"] ?? ''),
                         'description' => usefulInfoTrim($_POST["link_{$i}_description"] ?? ''),
                         'url' => usefulInfoTrim($_POST["link_{$i}_url"] ?? ''),
-                        'icon' => usefulInfoTrim($_POST["link_{$i}_icon"] ?? ''),
+                        'icon' => $existingIcon,
                     ];
                 }
 
@@ -162,10 +163,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'safety':
                 $downloads = [];
                 for ($i = 1; $i <= 3; $i++) {
+                    $existingIcon = usefulInfoTrim($sections['safety']['content']['downloads'][$i - 1]['icon'] ?? 'fas fa-download');
                     $downloads[] = [
                         'title' => usefulInfoTrim($_POST["download_{$i}_title"] ?? ''),
                         'url' => usefulInfoTrim($_POST["download_{$i}_url"] ?? ''),
-                        'icon' => usefulInfoTrim($_POST["download_{$i}_icon"] ?? ''),
+                        'icon' => $existingIcon,
                     ];
                 }
 
@@ -216,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $sections = $usefulInformationService->getAllSections();
 $usefulInfoTabs = [
-    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'quick_links' => ['label' => 'Σύνδεσμοι', 'icon' => 'fas fa-link'],
     'school_year' => ['label' => 'Σχολική Χρονιά', 'icon' => 'fas fa-calendar-check'],
     'holidays' => ['label' => 'Αργίες', 'icon' => 'fas fa-calendar-alt'],
@@ -257,7 +259,7 @@ $uniform = $sections['uniform'];
 
     <main class="admin-content">
         <a href="home.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+            <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
@@ -299,7 +301,7 @@ $uniform = $sections['uniform'];
             <section class="card card-custom section-editor tab-pane fade <?php echo $activeUsefulInfoTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                 <div class="section-editor__header">
                     <div>
-                        <h2>Header Σελίδας</h2>
+                        <h2>Κεφαλίδα Σελίδας</h2>
                         <p>Τίτλος, υπότιτλος και υπέρτιτλος στην κορυφή της σελίδας.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-heading"></i></span>
@@ -334,7 +336,7 @@ $uniform = $sections['uniform'];
                 <div class="section-editor__header">
                     <div>
                         <h2>Γρήγοροι Σύνδεσμοι</h2>
-                        <p>Οι τρεις cards με εξωτερικά links στην αρχή της σελίδας.</p>
+                        <p>Οι τρεις κάρτες με εξωτερικούς συνδέσμους στην αρχή της σελίδας.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-link"></i></span>
                 </div>
@@ -366,13 +368,8 @@ $uniform = $sections['uniform'];
                                     <textarea name="link_<?php echo $i + 1; ?>_description" class="form-control form-control-custom"><?php echo htmlspecialchars($item['description']); ?></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label><strong>URL</strong></label>
+                                    <label><strong>Σύνδεσμος (URL)</strong></label>
                                     <input type="url" name="link_<?php echo $i + 1; ?>_url" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['url']); ?>">
-                                </div>
-                                <div class="form-group mb-0">
-                                    <label><strong>Κλάση Εικονιδίου</strong></label>
-                                    <input type="text" name="link_<?php echo $i + 1; ?>_icon" class="form-control form-control-custom" value="<?php echo htmlspecialchars($item['icon']); ?>">
-                                    <small class="editor-help">Παράδειγμα: <code>fas fa-school</code></small>
                                 </div>
                             </div>
                         <?php endfor; ?>
@@ -388,7 +385,7 @@ $uniform = $sections['uniform'];
                 <div class="section-editor__header">
                     <div>
                         <h2>Σχολική Χρονιά</h2>
-                        <p>Οι τρεις κάρτες με ημερομηνίες και το ενημερωτικό note από κάτω.</p>
+                        <p>Οι τρεις κάρτες με ημερομηνίες και η ενημερωτική σημείωση από κάτω.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-calendar-check"></i></span>
                 </div>
@@ -477,7 +474,7 @@ $uniform = $sections['uniform'];
                 <div class="section-editor__header">
                     <div>
                         <h2>Ασφάλεια & Λήψεις</h2>
-                        <p>Bullet points αριστερά και downloadable links δεξιά.</p>
+                        <p>Σημεία λίστας αριστερά και σύνδεσμοι λήψης δεξιά.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-user-shield"></i></span>
                 </div>
@@ -497,7 +494,7 @@ $uniform = $sections['uniform'];
                         </div>
                         <div class="editor-subcard">
                             <h3>Σημεία Λίστας</h3>
-                            <label><strong>Ένα item ανά γραμμή</strong></label>
+                            <label><strong>Ένα στοιχείο ανά γραμμή</strong></label>
                             <textarea name="bullets" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(usefulInfoListToTextarea($safety['content']['bullets'] ?? [])); ?></textarea>
                         </div>
 
@@ -509,7 +506,6 @@ $uniform = $sections['uniform'];
                                     <label><strong>Τίτλος <?php echo $i + 1; ?></strong></label>
                                     <input type="text" name="download_<?php echo $i + 1; ?>_title" class="form-control form-control-custom mb-2" value="<?php echo htmlspecialchars($download['title']); ?>">
                                     <input type="url" name="download_<?php echo $i + 1; ?>_url" class="form-control form-control-custom mb-2" value="<?php echo htmlspecialchars($download['url']); ?>" placeholder="https://...">
-                                    <input type="text" name="download_<?php echo $i + 1; ?>_icon" class="form-control form-control-custom" value="<?php echo htmlspecialchars($download['icon']); ?>" placeholder="fas fa-download">
                                 </div>
                             <?php endfor; ?>
                         </div>
@@ -525,7 +521,7 @@ $uniform = $sections['uniform'];
                 <div class="section-editor__header">
                     <div>
                         <h2>Μαθητική Στολή</h2>
-                        <p>Τρεις κάρτες με λίστες στολής, note και κουμπί κανονισμών.</p>
+                        <p>Τρεις κάρτες με λίστες στολής, σημείωση και κουμπί κανονισμών.</p>
                     </div>
                     <span class="section-editor__icon"><i class="fas fa-tshirt"></i></span>
                 </div>
@@ -569,7 +565,7 @@ $uniform = $sections['uniform'];
                             <input type="text" name="button_text" class="form-control form-control-custom" value="<?php echo htmlspecialchars($uniform['content']['button_text'] ?? ''); ?>">
                         </div>
                         <div>
-                            <label><strong>URL Κανονισμών</strong></label>
+                            <label><strong>Σύνδεσμος Κανονισμών</strong></label>
                             <input type="url" name="button_url" class="form-control form-control-custom" value="<?php echo htmlspecialchars($uniform['content']['button_url'] ?? ''); ?>">
                         </div>
                     </div>

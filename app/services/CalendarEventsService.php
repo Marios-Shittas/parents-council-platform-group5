@@ -20,6 +20,7 @@ $announcements = array_map(static function ($announcement) {
 }, $announcementsService->getAllAnnouncements());
 
 $events = array_merge($events, $announcements);
+$events = array_merge($events, $usefulInformationService->getSchoolYearCalendarItems());
 $events = array_merge($events, $usefulInformationService->getHolidayCalendarItems());
 
 echo json_encode($events);

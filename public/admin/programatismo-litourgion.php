@@ -159,7 +159,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ενέργειες Συστήματος - Admin</title>
+    <title>Ενέργειες Συστήματος - Διαχείριση</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -175,7 +175,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
 
     <main class="admin-content">
         <a href="home.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+            <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
         </a>
 
         <div class="admin-header admin-page-header">
@@ -207,7 +207,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <th>Έναρξη</th>
                         <th>Λήξη</th>
                         <th>Κατάσταση</th>
-                        <th class="text-end">Ενέργεια</th>
+                        <th>Ενέργεια</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -244,7 +244,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                         <option value="inactive" <?php echo $rowStatus === 'inactive' ? 'selected' : ''; ?>>Ανενεργό</option>
                                     </select>
                                 </td>
-                                <td class="text-end">
+                                <td class="program-feature-actions-cell">
                                     <button type="submit" class="btn btn-primary-custom" form="<?php echo htmlspecialchars($scheduleFormId); ?>">
                                         <i class="fas fa-save me-1"></i>Αποθήκευση
                                     </button>
@@ -277,7 +277,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                 <option value="inactive">Ανενεργό</option>
                             </select>
                         </td>
-                        <td class="text-end">
+                        <td class="program-feature-actions-cell">
                             <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>">
                                 <i class="fas fa-plus me-1"></i>Προσθήκη
                             </button>
@@ -310,7 +310,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
         <section class="program-log-card card-custom">
             <div class="program-log-head">
                 <div>
-                    <span class="program-feature-kicker">Log Search</span>
+                    <span class="program-feature-kicker">Αναζήτηση Καταγραφών</span>
                     <h2>Ενέργειες γονέα με βάση το email</h2>
                     <p>Εισήγαγε το email του γονέα για να δεις τα στοιχεία του και τις καταγεγραμμένες ενέργειές του από τον πίνακα Logs.</p>
                 </div>
@@ -343,8 +343,8 @@ $registrationSchedules = $usersService->getSystemSchedules();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel" src="../assets/js/admin-programatismo-litourgion.jsx"></script>
 <script>
     (function () {

@@ -270,37 +270,6 @@
     transform: translateY(-1px);
 }
 
-/* Closed registration notice */
-.registration-closed-alert {
-    border-radius: 14px;
-    padding: 20px 20px 22px;
-}
-
-.registration-closed-alert__title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 10px;
-}
-
-.registration-closed-alert__title span {
-    display: inline-block;
-    padding-left: 2px;
-}
-
-.registration-closed-alert__period-title {
-    margin: 0 0 8px;
-}
-
-.registration-closed-alert__period-list {
-    margin: 0;
-    padding-left: 0;
-}
-
-.registration-closed-alert__period-item {
-    padding-left: 0;
-}
-
 /* ── Success modal ── */
 .register-success-modal {
     position: fixed;
@@ -407,6 +376,15 @@
 
 /* ── Responsive ── */
 @media (max-width: 576px) {
+    .register-page {
+        padding: 20px 0 30px;
+    }
+
+    .register-section-card {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
     .register-section-card .form-group-inline {
         flex-direction: column;
         align-items: stretch;
@@ -416,6 +394,7 @@
         padding-top: 0;
         width: auto;
         min-width: 0;
+        white-space: normal;
     }
     .register-input-stack {
         width: 100%;

@@ -4,18 +4,19 @@
 
 .page-content {
     background: #ffffff;
-    width: 420px;
-    height: 520px;
+    width: min(calc(100% - 24px), 420px);
+    min-height: 520px;
+    height: auto;
     border-radius: 12px;
     padding: 2rem 2rem 1.5rem;
-    margin: 100px auto;
+    margin: clamp(24px, 8vh, 100px) auto;
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
 }
 
 #two-factor-title {
     text-align: left;
     margin: 20px 20px 10px;
-    width: 280px;
+    width: auto;
     color: #1E2D5A;
 }
 
@@ -145,4 +146,26 @@
 #resend-button:disabled {
     opacity: 0.65;
     cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding: 1.2rem 1rem 1rem;
+        border-radius: 10px;
+        min-height: 0;
+    }
+
+    #two-factor-title {
+        margin: 10px 8px 6px;
+    }
+
+    .two-factor-container {
+        padding: 8px;
+    }
+
+    .resend-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 }

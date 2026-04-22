@@ -80,6 +80,30 @@ if (!function_exists('home_public_content_url_exists')) {
         ];
         $storedHomeBannerSlides = is_array($bannerSection['content']['slides'] ?? null) ? $bannerSection['content']['slides'] : [];
         $homeBannerSlides = [];
+        $isRenderableBannerAsset = static function (string $url): bool {
+            $trimmedUrl = trim($url);
+            if ($trimmedUrl === '') {
+                return false;
+            }
+
+            if (strpos($trimmedUrl, 'data:') === 0 || preg_match('#^https?://#i', $trimmedUrl)) {
+                return true;
+            }
+
+            if ($trimmedUrl[0] !== '/') {
+                return true;
+            }
+
+            $documentRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/\\');
+            if ($documentRoot === '') {
+                return true;
+            }
+
+            $relativePath = str_replace('/', DIRECTORY_SEPARATOR, ltrim($trimmedUrl, '/'));
+            $absolutePath = $documentRoot . DIRECTORY_SEPARATOR . $relativePath;
+
+            return is_file($absolutePath);
+        };
 
         foreach ($defaultHomeBannerSlides as $index => $defaultSlide) {
             $storedSlide = is_array($storedHomeBannerSlides[$index] ?? null) ? $storedHomeBannerSlides[$index] : [];
@@ -87,16 +111,19 @@ if (!function_exists('home_public_content_url_exists')) {
                 continue;
             }
 
-            $resolvedSrc = site_resolve_content_url((string)($storedSlide['src'] ?? $defaultSlide['src']));
+            $storedSrc = trim((string)($storedSlide['src'] ?? ''));
+            $defaultSrc = (string)$defaultSlide['src'];
+            $resolvedSrc = site_resolve_content_url($storedSrc !== '' ? $storedSrc : $defaultSrc);
+
+            if (!$isRenderableBannerAsset($resolvedSrc)) {
+                $resolvedSrc = site_resolve_content_url($defaultSrc);
+            }
+
             if (trim($resolvedSrc) === '') {
                 continue;
             }
 
-            if (!home_public_content_url_exists($resolvedSrc)) {
-                $resolvedSrc = site_resolve_content_url((string)$defaultSlide['src']);
-            }
-
-            if (!home_public_content_url_exists($resolvedSrc)) {
+            if (!$isRenderableBannerAsset($resolvedSrc)) {
                 continue;
             }
 

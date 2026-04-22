@@ -98,7 +98,7 @@ CREATE TABLE `ApplicationTemplates` (
   PRIMARY KEY (`template_id`),
   UNIQUE KEY `uq_application_templates_template_key` (`template_key`),
   KEY `idx_application_templates_category` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `Applications`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -129,7 +129,7 @@ CREATE TABLE `Applications` (
   KEY `idx_applications_created_by` (`created_by`),
   CONSTRAINT `fk_applications_created_by` FOREIGN KEY (`created_by`) REFERENCES `Users` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_applications_template` FOREIGN KEY (`template_id`) REFERENCES `ApplicationTemplates` (`template_id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ApplicationsDocuments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -141,7 +141,7 @@ CREATE TABLE `ApplicationsDocuments` (
   PRIMARY KEY (`ap_document_id`),
   KEY `fk_app_doc` (`application_id`),
   CONSTRAINT `fk_app_doc` FOREIGN KEY (`application_id`) REFERENCES `Applications` (`application_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ApplicationsFormFields`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

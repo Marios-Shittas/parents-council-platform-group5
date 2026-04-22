@@ -83,6 +83,16 @@ class UsersService
         $stmt->execute();
         $stmt->close();
 
+        $role = strtolower((string)($user['role'] ?? ''));
+        if ($role === 'parent') {
+            $loginDescription = sprintf(
+                'Successful login for parent user #%d (%s).',
+                (int)$user['user_id'],
+                (string)($user['email'] ?? '')
+            );
+            $this->insertAdminLog((int)$user['user_id'], 'PARENT_LOGIN', $loginDescription);
+        }
+
         return [
             'success' => true,
             'user' => $user,
