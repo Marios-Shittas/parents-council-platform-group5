@@ -10,6 +10,22 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /parents-council-platform-group5/public/login.php');
+    exit;
+}
+
+const EVENT_IMAGE_LIMIT = 6;
+
+function getDefaultEventGdprNotice() {
+    return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
+}
+
 function getEventImageUploadDir() {
     return dirname(__DIR__) . '/assets/Events_img/';
 }
@@ -39,7 +55,25 @@ function uploadEventImages($eventsService, $eventId) {
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     $maxFileSize = 5 * 1024 * 1024;
 
+    $existingImagesCount = $eventsService->countImages($eventId);
+    $availableSlots = max(0, EVENT_IMAGE_LIMIT - $existingImagesCount);
+    $selectedFilesCount = is_array($_FILES['images']['name'] ?? null) ? count($_FILES['images']['name']) : 0;
+
+    if ($availableSlots === 0) {
+        $uploadErrors[] = 'Η εκδήλωση έχει ήδη τον μέγιστο επιτρεπόμενο αριθμό φωτογραφιών (' . EVENT_IMAGE_LIMIT . ').';
+        return [$uploadedCount, $uploadErrors];
+    }
+
+    if ($selectedFilesCount > $availableSlots) {
+        $uploadErrors[] = 'Επιλέχθηκαν ' . $selectedFilesCount . ' αρχεία, αλλά μπορούν να αποθηκευτούν μόνο ' . $availableSlots . ' ακόμη φωτογραφίες για αυτή την εκδήλωση.';
+    }
+
     foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
+        if ($uploadedCount >= $availableSlots) {
+            $uploadErrors[] = 'Μπορούν να αποθηκευτούν έως ' . EVENT_IMAGE_LIMIT . ' φωτογραφίες ανά εκδήλωση.';
+            break;
+        }
+
         $fileName = basename($_FILES['images']['name'][$key] ?? '');
         $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
         $uploadError = $_FILES['images']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
@@ -91,7 +125,16 @@ function uploadEventImages($eventsService, $eventId) {
             if ($eventsService->addImage($eventId, $imagePath)) {
                 $uploadedCount++;
             } else {
-                $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
+                if (file_exists($targetPath)) {
+                    unlink($targetPath);
+                }
+
+                $serviceError = trim((string)$eventsService->getLastOperationError());
+                if ($serviceError !== '') {
+                    $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν αποθηκεύτηκε. {$serviceError}";
+                } else {
+                    $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
+                }
             }
         } else {
             $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
@@ -112,13 +155,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultEventGdprNotice());
         $eventDate = trim($_POST['event_date'] ?? '');
         $eventTime = trim($_POST['event_time'] ?? '00:00');
         $publishDate = date('Y-m-d');
         $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
 
         if (!empty($title) && !empty($eventDate)) {
-            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate);
+            $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, $gdprNotice);
 
             if ($eventId) {
                 [$uploadedCount, $uploadErrors] = uploadEventImages($eventsService, $eventId);
@@ -149,13 +193,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultEventGdprNotice());
         $eventDate = trim($_POST['event_date'] ?? '');
         $eventTime = trim($_POST['event_time'] ?? '00:00');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         $eventDateTime = $eventDate . ' ' . $eventTime . ':00';
 
         if ($id > 0 && !empty($title) && !empty($eventDate)) {
-            if ($eventsService->updateEvent($id, $title, $description, $eventDateTime, $publishDate)) {
+            if ($eventsService->updateEvent($id, $title, $description, $eventDateTime, $publishDate, $gdprNotice)) {
                 [$uploadedCount, $uploadErrors] = uploadEventImages($eventsService, $id);
 
                 if ($uploadedCount > 0) {
@@ -348,6 +393,11 @@ $events = $eventsService->getAllEvents();
                         <textarea id="edit_description" name="description" class="form-control form-control-custom" rows="5"><?php echo htmlspecialchars($editEvent['event_description'] ?? ''); ?></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="edit_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea id="edit_gdpr_notice" name="gdpr_notice" class="form-control form-control-custom" rows="3"><?php echo htmlspecialchars($editEvent['gdpr_notice'] ?? getDefaultEventGdprNotice()); ?></textarea>
+                    </div>
+
                     <?php if (!empty($editImages)): ?>
                         <div class="form-group">
                             <label><strong>Υπάρχουσες Εικόνες</strong></label>
@@ -370,13 +420,23 @@ $events = $eventsService->getAllEvents();
 
                     <div class="form-group">
                         <label for="edit_images"><strong>Προσθήκη Νέων Εικόνων</strong></label>
-                        <input type="file" id="edit_images" name="images[]" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            id="edit_images"
+                            name="images[]"
+                            class="form-control-file"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="<?php echo count($editImages); ?>"
+                            <?php echo count($editImages) >= EVENT_IMAGE_LIMIT ? 'disabled' : ''; ?>
+                        >
                         <small class="text-muted d-block mt-1">
-                            Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo EVENT_IMAGE_LIMIT; ?> φωτογραφίες ανά εκδήλωση
                         </small>
                         <small class="text-muted d-block">
-                            Οι νέες εικόνες θα προστεθούν στις υπάρχουσες
+                            Οι νέες εικόνες θα προστεθούν στις υπάρχουσες. Αυτή τη στιγμή μπορείτε να προσθέσετε έως <?php echo max(0, EVENT_IMAGE_LIMIT - count($editImages)); ?> ακόμη.
                         </small>
+                        <div id="editPreview" class="image-preview"></div>
                     </div>
 
                     <div class="d-flex gap-2" style="gap: 10px;">
@@ -406,7 +466,7 @@ $events = $eventsService->getAllEvents();
                                 <tr>
                                     <th>Εικόνα</th>
                                     <th>Τίτλος</th>
-                                    <th>Ημερομηνία Εκδήλωσης</th>
+                                    <th>Ημ. Εκδήλωσης</th>
                                     <th>Ημ. Δημοσίευσης</th>
                                     <th>Περιγραφή</th>
                                     <th style="width: 150px;">Ενέργειες</th>
@@ -441,10 +501,10 @@ $events = $eventsService->getAllEvents();
                                             <a href="?edit=<?php echo (int)$event['event_id']; ?>" class="btn btn-sm btn-outline-primary mr-1" title="Επεξεργασία">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form method="POST" style="display: inline;">
+                                            <form method="POST" style="display: inline;" class="js-confirm-submit" data-confirm-message="Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την εκδήλωση;" data-confirm-title="Επιβεβαίωση διαγραφής">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo (int)$event['event_id']; ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την εκδήλωση;')" title="Διαγραφή">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Διαγραφή">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -502,10 +562,23 @@ $events = $eventsService->getAllEvents();
                     </div>
 
                     <div class="form-group">
+                        <label for="gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
+                        <textarea class="form-control form-control-custom" id="gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(getDefaultEventGdprNotice()); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
                         <label for="images"><strong>Εικόνες</strong></label>
-                        <input type="file" class="form-control-file" id="images" name="images[]" multiple accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+                        <input
+                            type="file"
+                            class="form-control-file"
+                            id="images"
+                            name="images[]"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif"
+                            data-existing-count="0"
+                        >
                         <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο
+                            <i class="fas fa-info-circle"></i> Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF | Μέγιστο μέγεθος: 5MB ανά αρχείο | Μέγιστο <?php echo EVENT_IMAGE_LIMIT; ?> φωτογραφίες ανά εκδήλωση
                         </small>
                         <small class="text-muted d-block">
                             <i class="fas fa-lightbulb"></i> Μπορείτε να επιλέξετε πολλές εικόνες ταυτόχρονα
@@ -529,106 +602,334 @@ $events = $eventsService->getAllEvents();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-function deleteEventImage(imageId, eventId) {
-    if (!confirm('Διαγραφή εικόνας;')) {
+function ensureNoticeElements() {
+    if (document.getElementById('page-notice-overlay')) {
         return;
     }
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '';
+    const overlay = document.createElement('div');
+    overlay.id = 'page-notice-overlay';
+    overlay.className = 'page-notice-overlay';
+    overlay.innerHTML = '' +
+        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
+            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
+            '<div class="page-notice-message" id="page-notice-message">—</div>' +
+            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
+        '</div>';
 
-    const actionInput = document.createElement('input');
-    actionInput.type = 'hidden';
-    actionInput.name = 'action';
-    actionInput.value = 'delete_image';
-
-    const imageIdInput = document.createElement('input');
-    imageIdInput.type = 'hidden';
-    imageIdInput.name = 'image_id';
-    imageIdInput.value = String(imageId);
-
-    const eventIdInput = document.createElement('input');
-    eventIdInput.type = 'hidden';
-    eventIdInput.name = 'event_id';
-    eventIdInput.value = String(eventId);
-
-    form.appendChild(actionInput);
-    form.appendChild(imageIdInput);
-    form.appendChild(eventIdInput);
-    document.body.appendChild(form);
-    form.submit();
-}
-
-function validateAndPreviewImages(input, previewId) {
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-    const maxFileSize = 5 * 1024 * 1024;
-    let warnings = [];
-
-    [...input.files].forEach((file) => {
-        const fileExt = file.name.split('.').pop().toLowerCase();
-        let hasWarning = false;
-
-        if (!allowedExtensions.includes(fileExt)) {
-            warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-            hasWarning = true;
-        }
-
-        if (file.size > maxFileSize) {
-            warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-            hasWarning = true;
-        }
-
-        if (!file.type.startsWith('image/')) {
-            warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-            hasWarning = true;
-        }
-
-        if (file.type.startsWith('image/') && !hasWarning) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'image-preview-item';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <div style="font-size: 10px; text-align: center; margin-top: 2px;">${file.name.substring(0, 15)}...</div>
-                `;
-                preview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            overlay.classList.remove('is-open');
+            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
         }
     });
 
-    if (warnings.length > 0) {
-        alert('Προειδοποιήσεις:\n\n' + warnings.join('\n\n') + '\n\nΜπορείτε να προσπαθήσετε να ανεβάσετε τα αρχεία, αλλά μπορεί να απορριφθούν από τον διακομιστή.');
+    document.body.appendChild(overlay);
+
+    const closeBtn = document.getElementById('page-notice-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            overlay.classList.remove('is-open');
+            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
+        });
     }
 }
 
-const createImagesInput = document.getElementById('images');
-if (createImagesInput) {
-    createImagesInput.addEventListener('change', function() {
-        validateAndPreviewImages(this, 'imagePreview');
+function showNotice(message, options) {
+    ensureNoticeElements();
+
+    const overlay = document.getElementById('page-notice-overlay');
+    const card = document.getElementById('page-notice-card');
+    const title = document.getElementById('page-notice-title');
+    const body = document.getElementById('page-notice-message');
+    const opts = options || {};
+
+    if (!overlay || !card || !title || !body) {
+        console.error(message);
+        return;
+    }
+
+    card.classList.remove('is-error', 'is-warning');
+    if (opts.variant === 'error') card.classList.add('is-error');
+    if (opts.variant === 'warning') card.classList.add('is-warning');
+
+    title.textContent = opts.title || 'Ειδοποίηση';
+    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
+
+    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
+    document.body.style.overflow = 'hidden';
+    overlay.classList.add('is-open');
+}
+
+function showConfirm(message, onConfirm, options) {
+    const opts = options || {};
+    const overlay = document.createElement('div');
+    const previousOverflow = document.body.style.overflow || '';
+
+    overlay.className = 'page-confirm-overlay is-open';
+
+    overlay.innerHTML = '' +
+        '<div class="page-confirm-card" role="dialog" aria-modal="true">' +
+            '<h3 class="page-confirm-title">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
+            '<div class="page-confirm-message">' + (message || 'Είστε σίγουροι;') + '</div>' +
+            '<div class="page-confirm-actions">' +
+                '<button type="button" data-action="cancel" class="page-confirm-btn page-confirm-btn--cancel">Όχι</button>' +
+                '<button type="button" data-action="confirm" class="page-confirm-btn page-confirm-btn--confirm">Ναι</button>' +
+            '</div>' +
+        '</div>';
+
+    function closeOverlay() {
+        document.body.style.overflow = previousOverflow;
+        overlay.remove();
+    }
+
+    overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+            closeOverlay();
+        }
+    });
+
+    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
+    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeOverlay);
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            closeOverlay();
+            if (typeof onConfirm === 'function') {
+                onConfirm();
+            }
+        });
+    }
+
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(overlay);
+}
+
+function deleteEventImage(imageId, eventId) {
+    showConfirm('Διαγραφή εικόνας;', function () {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '';
+
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'delete_image';
+
+        const imageIdInput = document.createElement('input');
+        imageIdInput.type = 'hidden';
+        imageIdInput.name = 'image_id';
+        imageIdInput.value = String(imageId);
+
+        const eventIdInput = document.createElement('input');
+        eventIdInput.type = 'hidden';
+        eventIdInput.name = 'event_id';
+        eventIdInput.value = String(eventId);
+
+        form.appendChild(actionInput);
+        form.appendChild(imageIdInput);
+        form.appendChild(eventIdInput);
+        document.body.appendChild(form);
+        form.submit();
+    }, {
+        title: 'Επιβεβαίωση διαγραφής'
     });
 }
 
-const editImagesInput = document.getElementById('edit_images');
-if (editImagesInput) {
-    editImagesInput.addEventListener('change', function() {
-        let preview = document.getElementById('editPreview');
-        if (!preview) {
-            preview = document.createElement('div');
-            preview.className = 'image-preview';
-            preview.id = 'editPreview';
-            preview.style.marginTop = '10px';
-            this.parentElement.appendChild(preview);
+function getEventImageLimit() {
+    return <?php echo EVENT_IMAGE_LIMIT; ?>;
+}
+
+function getEventImageFileKey(file) {
+    return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function truncatePreviewFileName(fileName, maxLength) {
+    if (fileName.length <= maxLength) {
+        return fileName;
+    }
+
+    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
+}
+
+function validateEventImageFile(file) {
+    const warnings = [];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    const maxFileSize = 5 * 1024 * 1024;
+    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+
+    if (!allowedExtensions.includes(fileExt)) {
+        warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
+    }
+
+    if (file.size > maxFileSize) {
+        warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
+    }
+
+    if (!String(file.type || '').startsWith('image/')) {
+        warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
+    }
+
+    return warnings;
+}
+
+function syncEventImageInputFiles(input, stagedFiles) {
+    if (typeof DataTransfer === 'undefined') {
+        return;
+    }
+
+    const dataTransfer = new DataTransfer();
+    stagedFiles.forEach((file) => dataTransfer.items.add(file));
+    input.files = dataTransfer.files;
+}
+
+function renderEventImagePreview(preview, stagedFiles, onRemove) {
+    if (!preview) {
+        return;
+    }
+
+    preview.innerHTML = '';
+
+    stagedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+
+        const image = document.createElement('img');
+        image.alt = file.name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.addEventListener('click', function () {
+            onRemove(index);
+        });
+
+        const caption = document.createElement('div');
+        caption.className = 'preview-file-caption';
+        caption.textContent = truncatePreviewFileName(file.name, 18);
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            image.src = String(event.target && event.target.result ? event.target.result : '');
+        };
+        reader.readAsDataURL(file);
+
+        item.appendChild(image);
+        item.appendChild(deleteBtn);
+        item.appendChild(caption);
+        preview.appendChild(item);
+    });
+}
+
+function setupEventImageInput(input, previewId) {
+    if (!input) {
+        return;
+    }
+
+    const preview = document.getElementById(previewId);
+    const eventImageLimit = getEventImageLimit();
+    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
+    const stagedFiles = [];
+    const stagedKeys = new Set();
+
+    function updateInputState() {
+        if (existingCount + stagedFiles.length >= eventImageLimit) {
+            input.disabled = true;
+        } else if (existingCount < eventImageLimit) {
+            input.disabled = false;
+        }
+    }
+
+    function removeStagedFile(index) {
+        const removedFile = stagedFiles[index];
+        if (!removedFile) {
+            return;
         }
 
-        validateAndPreviewImages(this, 'editPreview');
+        stagedFiles.splice(index, 1);
+        stagedKeys.delete(getEventImageFileKey(removedFile));
+        syncEventImageInputFiles(input, stagedFiles);
+        renderEventImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+    }
+
+    input.addEventListener('change', function () {
+        const incomingFiles = Array.from(input.files || []);
+        const warnings = [];
+        let reachedLimit = false;
+
+        if (incomingFiles.length === 0) {
+            return;
+        }
+
+        if (existingCount >= eventImageLimit) {
+            warnings.push(`Η εκδήλωση έχει ήδη ${eventImageLimit} φωτογραφίες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+        } else {
+            incomingFiles.forEach((file) => {
+                const fileKey = getEventImageFileKey(file);
+                const validationWarnings = validateEventImageFile(file);
+
+                if (validationWarnings.length > 0) {
+                    warnings.push(...validationWarnings);
+                    return;
+                }
+
+                if (stagedKeys.has(fileKey)) {
+                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
+                    return;
+                }
+
+                if (existingCount + stagedFiles.length >= eventImageLimit) {
+                    if (!reachedLimit) {
+                        const remainingSlots = Math.max(0, eventImageLimit - existingCount - stagedFiles.length);
+                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη φωτογραφία/ες σε αυτή την εκδήλωση.`);
+                        reachedLimit = true;
+                    }
+                    return;
+                }
+
+                stagedFiles.push(file);
+                stagedKeys.add(fileKey);
+            });
+        }
+
+        syncEventImageInputFiles(input, stagedFiles);
+        renderEventImagePreview(preview, stagedFiles, removeStagedFile);
+        updateInputState();
+
+        if (warnings.length > 0) {
+            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+                title: 'Έλεγχος αρχείων',
+                variant: 'warning'
+            });
+        }
     });
+
+    updateInputState();
 }
+
+setupEventImageInput(document.getElementById('images'), 'imagePreview');
+setupEventImageInput(document.getElementById('edit_images'), 'editPreview');
+
+document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const message = form.getAttribute('data-confirm-message') || 'Είστε σίγουροι;';
+        const title = form.getAttribute('data-confirm-title') || 'Επιβεβαίωση';
+
+        showConfirm(message, function () {
+            form.submit();
+        }, {
+            title: title
+        });
+    });
+});
 </script>
 
 </body>

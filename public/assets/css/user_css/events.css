@@ -33,6 +33,30 @@
     margin: 3rem 0;
 }
 
+.note-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f4f8fd, #eef5fc);
+    border: 1px solid #d9e6f3;
+    box-shadow: 0 8px 24px rgba(11, 60, 105, 0.08);
+}
+
+.note-card i {
+    color: #0057a8;
+    font-size: 1.05rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.note-card p {
+    color: #18416b;
+    line-height: 1.65;
+    font-size: 0.94rem;
+}
+
 /* ---- Event Card ---- */
 .event-card {
     border: none;
@@ -202,6 +226,20 @@
     flex: 1;
 }
 
+.event-gdpr-note {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #d7e4f2;
+    background: #f8fbff;
+    color: #4a6078;
+    line-height: 1.7;
+}
+
+.event-gdpr-note strong {
+    color: #173957;
+}
+
 .btn-event-details {
     background: linear-gradient(135deg, #0057a8, #003d7a);
     color: white;
@@ -267,6 +305,17 @@
 
 .event-modal .modal-body {
     padding: 1.5rem;
+}
+
+.event-modal .modal-footer .btn.btn-secondary {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.event-modal .modal-footer .btn.btn-secondary:hover,
+.event-modal .modal-footer .btn.btn-secondary:focus {
+    background-color: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
 }
 
 /* Modal carousel container */

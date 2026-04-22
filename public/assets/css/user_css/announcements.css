@@ -1,6 +1,30 @@
 /* ===== ANNOUNCEMENTS PAGE — MODERN REDESIGN ===== */
 
 /* ---- Section Title ---- */
+.note-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f4f8fd, #eef5fc);
+    border: 1px solid #d9e6f3;
+    box-shadow: 0 8px 24px rgba(11, 60, 105, 0.08);
+}
+
+.note-card i {
+    color: #0057a8;
+    font-size: 1.05rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.note-card p {
+    color: #18416b;
+    line-height: 1.65;
+    font-size: 0.94rem;
+}
+
 .announcements-section-title {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.35rem;
@@ -179,6 +203,52 @@
     flex: 1;
 }
 
+.announcement-attachment-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #eef5fc;
+    color: #18416b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+.announcement-attachment-hint i {
+    color: #0057a8;
+}
+
+.announcement-modal .stack-links {
+    display: grid;
+    gap: 10px;
+}
+
+.announcement-modal .action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid #d9e6f3;
+    background: #f8fbff;
+    color: #18416b;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.announcement-modal .action-link:hover {
+    background: #eef5fc;
+    color: #0f3358;
+    text-decoration: none;
+}
+
+.announcement-modal .action-link i {
+    color: #0057a8;
+}
+
 .btn-announcement-details {
     background: linear-gradient(135deg, #0057a8, #003d7a);
     color: white;
@@ -248,6 +318,17 @@
 
 .announcement-modal .modal-body {
     padding: 1.5rem;
+}
+
+.announcement-modal .modal-footer .btn.btn-secondary {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.announcement-modal .modal-footer .btn.btn-secondary:hover,
+.announcement-modal .modal-footer .btn.btn-secondary:focus {
+    background-color: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
 }
 
 /* Modal carousel container */
@@ -336,6 +417,20 @@
     margin-bottom: 0.5rem;
 }
 
+.announcement-gdpr-note {
+    margin-bottom: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: 12px;
+    background: #f8fbff;
+    border: 1px solid #d9e6f3;
+    color: #18416b;
+    line-height: 1.65;
+}
+
+.announcement-gdpr-note strong {
+    color: #0f3358;
+}
+
 /* ---- Empty State ---- */
 .empty-state {
     text-align: center;
@@ -368,6 +463,10 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+    .note-card {
+        padding: 14px 15px;
+    }
+
     .admin-header {
         flex-direction: column;
         gap: var(--spacing-sm);
@@ -378,4 +477,3 @@
         height: 150px;
     }
 }
-

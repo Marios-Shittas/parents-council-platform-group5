@@ -20,6 +20,7 @@ class UsefulInformationService
 
         $this->ensureTable();
         $this->ensureDefaultSections();
+        $this->applyLegacyContentAdjustments();
     }
 
     public function getAllSections()
@@ -181,12 +182,85 @@ class UsefulInformationService
         }
     }
 
+    private function applyLegacyContentAdjustments()
+    {
+        $legacyPageHeaderSubtitle = 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.';
+        $currentSymbolSubtitle = 'Χρήσιμοι Συνδέσμοι & Πληροφορίες/ Ενημερωτικό Υλικό/ Έντυπα & Ενημερώσεις';
+        $oldSpacedSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.';
+        $newPageHeaderTitle = 'Χρήσιμες Πληροφορίες & Σύνδεσμοι';
+        $newPageHeaderSubtitle = 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.';
+
+        $pageHeader = $this->getSection('page_header');
+        if (is_array($pageHeader)) {
+            $currentTitle = (string)($pageHeader['title'] ?? '');
+            $currentSubtitle = (string)($pageHeader['subtitle'] ?? '');
+            $shouldUpdatePageHeader = (
+                $currentSubtitle === $legacyPageHeaderSubtitle
+                || $currentSubtitle === $currentSymbolSubtitle
+                || $currentSubtitle === $oldSpacedSubtitle
+                || $currentTitle === 'Χρήσιμοι Σύνδεσμοι & Πληροφορίες'
+                || $currentTitle === 'Χρήσιμοι Σύνδεσμοι και Πληροφορίες'
+                || $currentTitle === 'Χρήσιμοι Πληροφορίες & Σύνδεσμοι'
+            );
+
+            if ($shouldUpdatePageHeader) {
+                $this->updateSection(
+                    'page_header',
+                    $newPageHeaderTitle,
+                    $newPageHeaderSubtitle,
+                    is_array($pageHeader['content'] ?? null) ? $pageHeader['content'] : []
+                );
+            }
+        }
+
+        $quickLinks = $this->getSection('quick_links');
+        if (!is_array($quickLinks)) {
+            return;
+        }
+
+        $content = is_array($quickLinks['content'] ?? null) ? $quickLinks['content'] : [];
+        $items = $content['items'] ?? [];
+        if (!is_array($items)) {
+            return;
+        }
+
+        $changed = false;
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $itemTitle = trim((string)($item['title'] ?? ''));
+            if ($itemTitle !== 'Εκπαιδευτικοί Σύνδεσμοι' && $itemTitle !== 'Έντυπα Ασφάλειας') {
+                continue;
+            }
+
+            $items[$index]['title'] = 'Πύλη Απουσιολογίου';
+            $items[$index]['description'] = 'Άμεση πρόσβαση στην πύλη απουσιολογίου του σχολείου.';
+            $items[$index]['url'] = 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/';
+            $changed = true;
+        }
+
+        if (!$changed) {
+            return;
+        }
+
+        $content['items'] = $items;
+
+        $this->updateSection(
+            'quick_links',
+            (string)($quickLinks['title'] ?? ''),
+            (string)($quickLinks['subtitle'] ?? ''),
+            $content
+        );
+    }
+
     private function buildDefaultSections()
     {
         return [
             'page_header' => [
-                'title' => 'Χρήσιμες Πληροφορίες',
-                'subtitle' => 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.',
+                'title' => 'Χρήσιμες Πληροφορίες & Σύνδεσμοι',
+                'subtitle' => 'Χρήσιμοι σύνδεσμοι και πληροφορίες, ενημερωτικό υλικό, έντυπα και ενημερώσεις.',
                 'content' => [
                     'eyebrow' => 'Οδηγός Γονέων Και Μαθητών',
                 ],
@@ -209,9 +283,9 @@ class UsefulInformationService
                             'icon' => 'fas fa-file-download',
                         ],
                         [
-                            'title' => 'Έντυπα Ασφάλειας',
-                            'description' => 'Επίσημα έντυπα του ΥΠΑΝ για θέματα ασφάλειας και καταγραφής ατυχημάτων.',
-                            'url' => 'https://www.moec.gov.cy/politiki_amyna/ay_entypa.html',
+                            'title' => 'Πύλη Απουσιολογίου',
+                            'description' => 'Άμεση πρόσβαση στην πύλη απουσιολογίου του σχολείου.',
+                            'url' => 'http://www.gym-ag-athanasios-lem.eschoolsupport.com/',
                             'icon' => 'fas fa-shield-alt',
                         ],
                     ],
@@ -356,6 +430,233 @@ class UsefulInformationService
         }
 
         return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
+    }
+
+    public function getHolidayRows()
+    {
+        $sections = $this->getAllSections();
+        $rows = $sections['holidays']['content']['rows'] ?? [];
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function getHolidayCalendarItems()
+    {
+        $items = [];
+
+        foreach ($this->getHolidayRows() as $holiday) {
+            $title = trim((string)($holiday['name'] ?? ''));
+            $isoDate = $this->convertHolidayDisplayDateToIso((string)($holiday['date'] ?? ''));
+
+            if ($title === '' || $isoDate === null) {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $title,
+                'description' => '',
+                'date' => $isoDate,
+                'type' => 'holiday',
+            ];
+        }
+
+        usort($items, static function ($left, $right) {
+            return strcmp((string)($left['date'] ?? ''), (string)($right['date'] ?? ''));
+        });
+
+        return $items;
+    }
+
+    public function addHolidayFromIsoDate($isoDate, $name)
+    {
+        $this->lastError = '';
+
+        $isoDate = trim((string)$isoDate);
+        $name = trim((string)$name);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $isoDate)) {
+            $this->lastError = 'Μη έγκυρη ημερομηνία αργίας.';
+            return false;
+        }
+
+        if ($name === '') {
+            $this->lastError = 'Το όνομα της αργίας είναι υποχρεωτικό.';
+            return false;
+        }
+
+        $formattedDate = $this->convertIsoDateToHolidayDisplayDate($isoDate);
+        if ($formattedDate === null) {
+            $this->lastError = 'Δεν ήταν δυνατή η μορφοποίηση της ημερομηνίας αργίας.';
+            return false;
+        }
+
+        $section = $this->getSection('holidays');
+        if (!is_array($section)) {
+            $this->lastError = 'Το section των αργιών δεν βρέθηκε.';
+            return false;
+        }
+
+        $rows = $section['content']['rows'] ?? [];
+        if (!is_array($rows)) {
+            $rows = [];
+        }
+
+        foreach ($rows as $row) {
+            $existingDate = trim((string)($row['date'] ?? ''));
+            $existingName = trim((string)($row['name'] ?? ''));
+
+            if ($existingDate === $formattedDate && mb_strtolower($existingName) === mb_strtolower($name)) {
+                return true;
+            }
+        }
+
+        $rows[] = [
+            'date' => $formattedDate,
+            'name' => $name,
+        ];
+
+        $rows = $this->sortHolidayRows($rows);
+
+        return $this->updateSection(
+            'holidays',
+            (string)($section['title'] ?? $this->defaultSections['holidays']['title']),
+            (string)($section['subtitle'] ?? $this->defaultSections['holidays']['subtitle']),
+            ['rows' => $rows]
+        );
+    }
+
+    private function sortHolidayRows(array $rows)
+    {
+        usort($rows, function ($left, $right) {
+            $leftKey = $this->buildHolidaySortKey((string)($left['date'] ?? ''));
+            $rightKey = $this->buildHolidaySortKey((string)($right['date'] ?? ''));
+
+            if ($leftKey === $rightKey) {
+                return strcmp(
+                    mb_strtolower(trim((string)($left['name'] ?? ''))),
+                    mb_strtolower(trim((string)($right['name'] ?? '')))
+                );
+            }
+
+            return strcmp($leftKey, $rightKey);
+        });
+
+        return $rows;
+    }
+
+    private function buildHolidaySortKey($dateText)
+    {
+        $dateText = trim((string)$dateText);
+        if ($dateText === '') {
+            return '9999-99-99';
+        }
+
+        if (strpos($dateText, ' - ') !== false) {
+            [$startPart, $endPart] = array_pad(explode(' - ', $dateText, 2), 2, '');
+            $startIso = $this->convertHolidayDisplayDateToIsoWithFallbackYear($startPart, $endPart);
+
+            if ($startIso !== null) {
+                return $startIso;
+            }
+        }
+
+        $singleIso = $this->convertHolidayDisplayDateToIso($dateText);
+        return $singleIso ?? '9999-99-99';
+    }
+
+    private function convertHolidayDisplayDateToIso($dateText)
+    {
+        $dateText = trim((string)$dateText);
+        if ($dateText === '' || strpos($dateText, ' - ') !== false) {
+            return null;
+        }
+
+        $greekMonths = [
+            'Ιανουαρίου' => '01',
+            'Φεβρουαρίου' => '02',
+            'Μαρτίου' => '03',
+            'Απριλίου' => '04',
+            'Μαΐου' => '05',
+            'Ιουνίου' => '06',
+            'Ιουλίου' => '07',
+            'Αυγούστου' => '08',
+            'Σεπτεμβρίου' => '09',
+            'Οκτωβρίου' => '10',
+            'Νοεμβρίου' => '11',
+            'Δεκεμβρίου' => '12',
+        ];
+
+        foreach ($greekMonths as $greek => $numeric) {
+            $dateText = str_replace($greek, $numeric, $dateText);
+        }
+
+        $parts = preg_split('/\s+/', $dateText);
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        [$day, $month, $year] = $parts;
+        $day = str_pad((string)(int)$day, 2, '0', STR_PAD_LEFT);
+
+        if (!preg_match('/^\d{2}$/', (string)$month) || !preg_match('/^\d{4}$/', (string)$year)) {
+            return null;
+        }
+
+        return $year . '-' . $month . '-' . $day;
+    }
+
+    private function convertHolidayDisplayDateToIsoWithFallbackYear($startText, $endText)
+    {
+        $directIso = $this->convertHolidayDisplayDateToIso((string)$startText);
+        if ($directIso !== null) {
+            return $directIso;
+        }
+
+        $startText = trim((string)$startText);
+        $endText = trim((string)$endText);
+
+        if ($startText === '' || $endText === '') {
+            return null;
+        }
+
+        if (preg_match('/^\d{1,2}\s+\S+$/u', $startText) !== 1) {
+            return null;
+        }
+
+        if (preg_match('/(\d{4})\s*$/u', $endText, $matches) !== 1) {
+            return null;
+        }
+
+        return $this->convertHolidayDisplayDateToIso($startText . ' ' . $matches[1]);
+    }
+
+    private function convertIsoDateToHolidayDisplayDate($isoDate)
+    {
+        $parts = explode('-', (string)$isoDate);
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        [$year, $month, $day] = $parts;
+        $months = [
+            '01' => 'Ιανουαρίου',
+            '02' => 'Φεβρουαρίου',
+            '03' => 'Μαρτίου',
+            '04' => 'Απριλίου',
+            '05' => 'Μαΐου',
+            '06' => 'Ιουνίου',
+            '07' => 'Ιουλίου',
+            '08' => 'Αυγούστου',
+            '09' => 'Σεπτεμβρίου',
+            '10' => 'Οκτωβρίου',
+            '11' => 'Νοεμβρίου',
+            '12' => 'Δεκεμβρίου',
+        ];
+
+        if (!isset($months[$month])) {
+            return null;
+        }
+
+        return ((int)$day) . ' ' . $months[$month] . ' ' . $year;
     }
 }
 ?>

@@ -1,51 +1,124 @@
 function SubscriptionPage() {
 
     const [data, setData] = React.useState(null);
+    const [error, setError] = React.useState("");
     const [includeInsurance, setIncludeInsurance] = React.useState(true);
     const [loading, setLoading] = React.useState(false);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
+    const token = window.APPROVAL_TOKEN || "";
+    const baseServiceUrl = "/parents-council-platform-group5/app/services";
 
-    // ✅ Fetch data ONLY
-    React.useEffect(() => {
-        fetch("../app/services/Subscription.php")
-            .then(res => res.json())
-            .then(data => setData(data))
-            .catch(err => console.error(err));
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
     }, []);
 
-    // ✅ ONE handlePayment ONLY
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
+
+    React.useEffect(() => {
+        fetch(baseServiceUrl + "/Subscription.php?token=" + encodeURIComponent(token))
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Αποτυχία φόρτωσης στοιχείων πληρωμής.");
+                }
+                return res.json();
+            })
+            .then(response => {
+                if (!response.success) {
+                    throw new Error(response.message || "Μη έγκυρο token.");
+                }
+                setData(response.data);
+                setError("");
+            })
+            .catch(err => {
+                console.error(err);
+                setError(err.message || "Δεν ήταν δυνατή η φόρτωση των τιμών.");
+            });
+    }, [token, baseServiceUrl]);
+
+
     const handlePayment = () => {
         if (loading) return;
 
         setLoading(true);
 
-        fetch("../app/services/InsertPayment.php", {
+        fetch(baseServiceUrl + "/InsertPayment.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                includeInsurance: includeInsurance
+                includeInsurance: includeInsurance,
+                token: token
             })
         })
         .then(res => res.json())
         .then(response => {
-            console.log(response);
-            alert("Η πληρωμή δημιουργήθηκε!");
+            if (!response.success) {
+                showNotice(response.message || "Αποτυχία πληρωμής.", {
+                    title: 'Αποτυχία πληρωμής',
+                    variant: 'error'
+                });
+                return;
+            }
+
+            if (!response.redirect_url) {
+                showNotice("Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.", {
+                    title: 'Σφάλμα πληρωμής',
+                    variant: 'error'
+                });
+                return;
+            }
+
+            window.location.href = response.redirect_url;
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+            console.error(err);
+            showNotice("Παρουσιάστηκε σφάλμα κατά τη δημιουργία πληρωμής.", {
+                title: 'Σφάλμα επικοινωνίας',
+                variant: 'error'
+            });
+        })
         .finally(() => setLoading(false));
     };
 
-    // ✅ Loading state
+    if (error) {
+        return <div className="alert alert-danger mt-5 text-center">{error}</div>;
+    }
+
     if (!data) {
         return <div className="text-center mt-5">Loading...</div>;
     }
 
-    // ✅ Calculations
     const insuranceTotal = includeInsurance ? data.insurance_total : 0;
     const total = data.subscription_price + insuranceTotal;
 
     return (
+        <>
         <div className="subscription-wrapper">
 
             <div className="subscription-header text-center">
@@ -116,6 +189,39 @@ function SubscriptionPage() {
 
             </div>
         </div>
+
+        {notice.open && (
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="subscription-notice-title"
+                onClick={closeNotice}
+                className="subscription-notice-overlay"
+            >
+                <div
+                    role="document"
+                    onClick={(event) => event.stopPropagation()}
+                    className={`subscription-notice-card subscription-notice-card--${notice.variant}`}
+                >
+                    <h3 id="subscription-notice-title" className="subscription-notice-title">
+                        {notice.title}
+                    </h3>
+                    <div className="subscription-notice-message">
+                        {notice.message}
+                    </div>
+                    <div className="subscription-notice-actions">
+                        <button
+                            type="button"
+                            onClick={closeNotice}
+                            className={`subscription-notice-button subscription-notice-button--${notice.variant}`}
+                        >
+                            Εντάξει
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
 

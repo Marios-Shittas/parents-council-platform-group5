@@ -113,6 +113,20 @@
     opacity: 1;
 }
 
+#createModal .modal-footer .btn-secondary-custom,
+#editModal .modal-footer .btn-secondary-custom {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#createModal .modal-footer .btn-secondary-custom:hover,
+#createModal .modal-footer .btn-secondary-custom:focus,
+#editModal .modal-footer .btn-secondary-custom:hover,
+#editModal .modal-footer .btn-secondary-custom:focus {
+    background: #c62828;
+    border-color: #c62828;
+    color: #ffffff;
+}
+
 /* Form styling for event forms */
 .event-form-group label {
     font-weight: 600;
@@ -128,4 +142,219 @@
 .card-footer .btn-danger {
     background: #dc3545;
     border-color: #dc3545;
+}
+
+.page-notice-overlay,
+.page-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1600;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(11, 25, 41, 0.62);
+}
+
+.page-notice-overlay.is-open,
+.page-confirm-overlay.is-open {
+    display: flex;
+}
+
+.page-notice-card,
+.page-confirm-card {
+    width: min(500px, 100%);
+    background: #fff;
+    border-radius: 18px;
+    padding: 1.25rem 1.1rem;
+    box-shadow: 0 20px 50px rgba(11, 25, 41, 0.32);
+    border-top: 5px solid #2f6ea0;
+}
+
+.page-notice-card.is-error {
+    border-top-color: #c84545;
+}
+
+.page-notice-card.is-warning,
+.page-confirm-card {
+    border-top-color: #d79f0d;
+}
+
+.page-notice-title,
+.page-confirm-title {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    color: #1a3a5c;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.page-notice-message,
+.page-confirm-message {
+    font-family: Lato, sans-serif;
+    color: #344055;
+    line-height: 1.55;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+.page-notice-actions,
+.page-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 1rem;
+}
+
+.page-notice-btn,
+.page-confirm-btn {
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-weight: 700;
+}
+
+.page-notice-btn {
+    border: 0;
+    background: #1f5f93;
+    color: #fff;
+}
+
+.page-notice-card.is-error .page-notice-btn {
+    background: #bb3535;
+}
+
+.page-notice-card.is-warning .page-notice-btn {
+    background: #b8860b;
+}
+
+.page-confirm-btn--cancel {
+    border: 1px solid #c7d1db;
+    background: #eef2f6;
+    color: #344055;
+}
+
+.page-confirm-btn--confirm {
+    border: 0;
+    background: #bb3535;
+    color: #fff;
+}
+
+.preview-file-caption {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+/* Admin events table tuning, aligned with announcements */
+.admin-table {
+    table-layout: fixed;
+}
+
+.admin-table th {
+    font-size: 16px;
+    line-height: 1.25;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.admin-table td {
+    font-size: 15px;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 120px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    width: 180px;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    width: 175px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    width: 170px;
+    text-align: center;
+}
+
+.admin-table th:nth-child(5) {
+    text-align: left;
+}
+
+.admin-table td:nth-child(5) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+    width: 150px;
+    text-align: center;
+}
+
+@media (max-width: 767.98px) {
+    .admin-table {
+        min-width: 900px;
+    }
+
+    .admin-table th:nth-child(5),
+    .admin-table td:nth-child(5) {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .thumbnail {
+        width: 56px;
+        height: 56px;
+    }
+
+    .image-preview-item {
+        width: 84px;
+        height: 84px;
+    }
+
+    #createModal .modal-dialog,
+    #editModal .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    #createModal textarea,
+    #editEventForm textarea,
+    #edit_description,
+    #description,
+    #gdpr_notice,
+    #edit_gdpr_notice {
+        min-height: 120px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    #createModal .form-group,
+    #editEventForm .form-group {
+        min-width: 0;
+    }
+
+    #editEventForm .d-flex[style*="gap: 10px"] {
+        flex-direction: column;
+    }
+
+    #editEventForm .d-flex[style*="gap: 10px"] > .btn,
+    #editEventForm .d-flex[style*="gap: 10px"] > a {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .page-notice-actions,
+    .page-confirm-actions {
+        flex-direction: column;
+    }
 }

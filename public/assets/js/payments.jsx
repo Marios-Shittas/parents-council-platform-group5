@@ -3,110 +3,339 @@ function Payments() {
     const [cart, setCart] = React.useState([]);
     const [selectedSizes, setSelectedSizes] = React.useState({});
     const [sizeErrors, setSizeErrors] = React.useState({});
+    const [cartLoading, setCartLoading] = React.useState(true);
+    const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+    const [paymentFeedback, setPaymentFeedback] = React.useState(null);
+    const [notice, setNotice] = React.useState({
+        open: false,
+        title: '',
+        message: '',
+        variant: 'warning'
+    });
 
-    // Fetch products from PHP API
-    React.useEffect(() => {
-        fetch("/parents-council-platform-group5/app/services/ProductFetch.php")
-            .then(res => res.json())
-            .then(data => setProducts(data))
-            .catch(err => console.error("Fetch error:", err));
+    const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
+    const cartUrl = "/parents-council-platform-group5/public/cart.php";
+    const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+
+    function getPaymentFeedback(status, message) {
+        const normalizedStatus = (status || '').toLowerCase();
+        const normalizedMessage = (message || '').trim() || 'Η πληρωμή σας ενημερώθηκε.';
+
+        if (normalizedStatus === 'completed') {
+            return {
+                title: 'Η πληρωμή ολοκληρώθηκε',
+                message: normalizedMessage,
+                variant: 'success'
+            };
+        }
+
+        if (normalizedStatus === 'pending') {
+            return {
+                title: 'Η πληρωμή είναι σε αναμονή',
+                message: normalizedMessage,
+                variant: 'info'
+            };
+        }
+
+        if (normalizedStatus === 'refunded') {
+            return {
+                title: 'Η πληρωμή σημειώθηκε ως επιστροφή',
+                message: normalizedMessage,
+                variant: 'warning'
+            };
+        }
+
+        return {
+            title: 'Η πληρωμή δεν ολοκληρώθηκε',
+            message: normalizedMessage,
+            variant: 'error'
+        };
+    }
+
+    const clearPaymentResultParams = React.useCallback(() => {
+        const params = new URLSearchParams(window.location.search);
+        params.delete("payment_status");
+        params.delete("payment_message");
+
+        const nextSearch = params.toString();
+        const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash || ''}`;
+        window.history.replaceState({}, document.title, nextUrl);
     }, []);
 
-    // Update selected size for a product
-    function updateSelectedSize(productId, size) {
-        setSelectedSizes({
-            ...selectedSizes,
-            [productId]: size
-        });
+    const consumePaymentResult = React.useCallback(() => {
+        const params = new URLSearchParams(window.location.search);
+        const paymentStatus = params.get("payment_status");
+        const paymentMessage = params.get("payment_message");
 
-        // Καθαρίζει το error μόλις επιλεγεί μέγεθος
-        if (size) {
-            setSizeErrors({
-                ...sizeErrors,
-                [productId]: ''
+        if (!paymentStatus || !paymentMessage) {
+            return false;
+        }
+
+        setPaymentFeedback(getPaymentFeedback(paymentStatus, paymentMessage));
+        clearPaymentResultParams();
+        return true;
+    }, [clearPaymentResultParams]);
+
+    const showNotice = React.useCallback((message, options = {}) => {
+        setNotice({
+            open: true,
+            title: options.title || 'Ειδοποίηση',
+            message: message || 'Συνέβη ένα απρόσμενο σφάλμα.',
+            variant: options.variant || 'warning'
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!notice.open) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [notice.open]);
+
+    const closeNotice = React.useCallback(() => {
+        setNotice({ open: false, title: '', message: '', variant: 'warning' });
+    }, []);
+
+    React.useEffect(() => {
+        fetch(productsUrl)
+            .then(res => res.json())
+            .then(data => setProducts(data))
+            .catch(err => console.error("Fetch products error:", err));
+    }, []);
+
+    const loadCart = React.useCallback(() => {
+        setCartLoading(true);
+
+        fetch(`${cartUrl}?action=get`)
+            .then(async (res) => {
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || "Σφάλμα φόρτωσης καλαθιού.");
+                }
+
+                const items = (data.cart && data.cart.items) ? data.cart.items : [];
+                setCart(items);
+            })
+            .catch(err => {
+                console.error("Fetch cart error:", err);
+                setCart([]);
+            })
+            .finally(() => {
+                setCartLoading(false);
             });
+    }, [cartUrl]);
+
+    React.useEffect(() => {
+        loadCart();
+    }, [loadCart]);
+
+    React.useEffect(() => {
+        consumePaymentResult();
+    }, [consumePaymentResult]);
+
+    React.useEffect(() => {
+        function handlePageShow() {
+            setCheckoutLoading(false);
+            loadCart();
+            consumePaymentResult();
+        }
+
+        window.addEventListener('pageshow', handlePageShow);
+
+        return () => {
+            window.removeEventListener('pageshow', handlePageShow);
+        };
+    }, [consumePaymentResult, loadCart]);
+
+    function postCartAction(formData) {
+        return fetch(cartUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: new URLSearchParams(formData).toString()
+        })
+        .then(async (res) => {
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Σφάλμα καλαθιού.");
+            }
+
+            const items = (data.cart && data.cart.items) ? data.cart.items : [];
+            setCart(items);
+            return data;
+        });
+    }
+
+    function updateSelectedSize(productId, size) {
+        setSelectedSizes(prev => ({
+            ...prev,
+            [productId]: size
+        }));
+
+        if (size) {
+            setSizeErrors(prev => ({
+                ...prev,
+                [productId]: ''
+            }));
         }
     }
 
-    // Add product to cart
     function addToCart(product) {
         const selectedSize = selectedSizes[product.product_id];
 
-        // Υποχρεωτική επιλογή μεγέθους
         if (!selectedSize || selectedSize.trim() === '') {
-            setSizeErrors({
-                ...sizeErrors,
+            setSizeErrors(prev => ({
+                ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
+            }));
+            return;
+        }
+
+        postCartAction({
+            action: 'add',
+            product_id: product.product_id,
+            quantity: 1,
+            size: selectedSize
+        })
+        .then(() => {
+            setSizeErrors(prev => ({
+                ...prev,
+                [product.product_id]: ''
+            }));
+        })
+        .catch(err => {
+            console.error("Add to cart error:", err);
+            showNotice(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.', {
+                title: 'Αποτυχία προσθήκης',
+                variant: 'error'
+            });
+        });
+    }
+
+    function removeFromCart(productId, size) {
+        postCartAction({
+            action: 'remove',
+            product_id: productId,
+            size: size || ''
+        })
+        .catch(err => {
+            console.error("Remove from cart error:", err);
+            showNotice(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.', {
+                title: 'Αποτυχία αφαίρεσης',
+                variant: 'error'
+            });
+        });
+    }
+
+    function updateQuantity(productId, size, newQuantity) {
+        if (newQuantity < 1) return;
+
+        postCartAction({
+            action: 'update',
+            product_id: productId,
+            size: size || '',
+            quantity: newQuantity
+        })
+        .catch(err => {
+            console.error("Update cart error:", err);
+            showNotice(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.', {
+                title: 'Αποτυχία ενημέρωσης',
+                variant: 'error'
+            });
+        });
+    }
+
+    function calculateTotal() {
+        return cart
+            .reduce((total, item) => total + (Number(item.price_at_purchase) * Number(item.quantity)), 0)
+            .toFixed(2);
+    }
+
+    function calculateItemCount() {
+        return cart.reduce((total, item) => total + Number(item.quantity), 0);
+    }
+
+    function dismissPaymentFeedback() {
+        setPaymentFeedback(null);
+    }
+
+    function handleCheckout() {
+        if (cart.length === 0) {
+            showNotice('Το καλάθι είναι κενό!', {
+                title: 'Δεν υπάρχει παραγγελία',
+                variant: 'warning'
             });
             return;
         }
 
-        const existingIndex = cart.findIndex(item =>
-            item.product_id === product.product_id && item.size === selectedSize
-        );
-
-        if (existingIndex >= 0) {
-            const newCart = [...cart];
-            newCart[existingIndex].quantity += 1;
-            setCart(newCart);
-        } else {
-            setCart([
-                ...cart,
-                {
-                    ...product,
-                    quantity: 1,
-                    size: selectedSize
-                }
-            ]);
-        }
-
-        // Καθαρίζει το error αφού μπει σωστά στο καλάθι
-        setSizeErrors({
-            ...sizeErrors,
-            [product.product_id]: ''
-        });
-    }
-
-    // Remove product from cart
-    function removeFromCart(index) {
-        const newCart = [...cart];
-        newCart.splice(index, 1);
-        setCart(newCart);
-    }
-
-    // Update quantity
-    function updateQuantity(index, newQuantity) {
-        if (newQuantity < 1) return;
-        const newCart = [...cart];
-        newCart[index].quantity = newQuantity;
-        setCart(newCart);
-    }
-
-    // Calculate total
-    function calculateTotal() {
-        return cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
-    }
-
-    // Calculate total quantity in cart
-    function calculateItemCount() {
-        return cart.reduce((total, item) => total + item.quantity, 0);
-    }
-
-    // Handle checkout
-    function handleCheckout() {
-        if (cart.length === 0) {
-            alert('Το καλάθι είναι κενό!');
+        if (checkoutLoading) {
             return;
         }
 
-        alert('Ευχαριστούμε για την αγορά σας!\nΣύνολο: €' + calculateTotal());
-        setCart([]);
+        setCheckoutLoading(true);
+
+        fetch(checkoutUrl, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: new URLSearchParams({ action: 'checkout' }).toString()
+        })
+        .then(async (res) => {
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Δεν ήταν δυνατή η εκκίνηση της πληρωμής.');
+            }
+
+            if (!data.redirect_url) {
+                throw new Error('Δεν επιστράφηκε σύνδεσμος πληρωμής από την JCC.');
+            }
+
+            window.location.assign(data.redirect_url);
+        })
+        .catch(err => {
+            console.error("Checkout error:", err);
+            setCheckoutLoading(false);
+            showNotice(err.message || 'Παρουσιάστηκε σφάλμα κατά τη μετάβαση στην πληρωμή.', {
+                title: 'Σφάλμα πληρωμής',
+                variant: 'error'
+            });
+        });
     }
 
     return (
         <>
             <div className="Page">
                 <div className="container md-4">
+                    {paymentFeedback && (
+                        <div className={`eshop-feedback-banner eshop-feedback-banner--${paymentFeedback.variant}`}>
+                            <div className="eshop-feedback-copy">
+                                <strong>{paymentFeedback.title}</strong>
+                                <span>{paymentFeedback.message}</span>
+                            </div>
+                            <button
+                                type="button"
+                                className="eshop-feedback-dismiss"
+                                onClick={dismissPaymentFeedback}
+                                aria-label="Κλείσιμο μηνύματος πληρωμής"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                    )}
+
                     <div className="row">
                         {products.map(product => (
                             <div className="col-md-4" key={product.product_id}>
@@ -168,7 +397,7 @@ function Payments() {
                                             </select>
 
                                             {sizeErrors[product.product_id] && (
-                                                <div style={{ color: 'red', marginTop: '8px', fontSize: '14px', fontWeight: '600' }}>
+                                                <div className="size-error-text">
                                                     {sizeErrors[product.product_id]}
                                                 </div>
                                             )}
@@ -200,7 +429,14 @@ function Payments() {
                             </div>
                         </div>
 
-                        {cart.length === 0 ? (
+                        {cartLoading ? (
+                            <div className="cart-empty-state">
+                                <div className="cart-empty-icon">
+                                    <i className="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <h3>Φόρτωση καλαθιού...</h3>
+                            </div>
+                        ) : cart.length === 0 ? (
                             <div className="cart-empty-state">
                                 <div className="cart-empty-icon">
                                     <i className="fas fa-shopping-basket"></i>
@@ -211,7 +447,7 @@ function Payments() {
                         ) : (
                             <>
                                 {cart.map((item, index) => (
-                                    <div className="cartitem mb-3" key={index}>
+                                    <div className="cartitem mb-3" key={`${item.product_id}-${item.size || 'no-size'}-${index}`}>
                                         <div className="row align-items-center">
                                             <div className="col-lg-4 col-md-4 cart-pro-title">
                                                 <div>{item.product_name}</div>
@@ -230,7 +466,7 @@ function Payments() {
                                                 <div className="quantity-controls">
                                                     <button
                                                         className="btn btn-sm btn-outline-light"
-                                                        onClick={() => updateQuantity(index, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.product_id, item.size, Number(item.quantity) - 1)}
                                                     >
                                                         <i className="fas fa-minus"></i>
                                                     </button>
@@ -239,12 +475,12 @@ function Payments() {
                                                         type="number"
                                                         className="quantity-input"
                                                         value={item.quantity}
-                                                        onChange={(e) => updateQuantity(index, parseInt(e.target.value, 10) || 1)}
+                                                        onChange={(e) => updateQuantity(item.product_id, item.size, parseInt(e.target.value, 10) || 1)}
                                                     />
 
                                                     <button
                                                         className="btn btn-sm btn-outline-light"
-                                                        onClick={() => updateQuantity(index, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.product_id, item.size, Number(item.quantity) + 1)}
                                                     >
                                                         <i className="fas fa-plus"></i>
                                                     </button>
@@ -253,12 +489,12 @@ function Payments() {
 
                                             <div className="col-lg-2 col-md-2 cart-item-actions">
                                                 <div className="cart-pro-price">
-                                                    <strong>€{(item.price * item.quantity).toFixed(2)}</strong>
+                                                    <strong>€{(Number(item.price_at_purchase) * Number(item.quantity)).toFixed(2)}</strong>
                                                 </div>
 
                                                 <button
                                                     className="delete btn btn-sm btn-danger"
-                                                    onClick={() => removeFromCart(index)}
+                                                    onClick={() => removeFromCart(item.product_id, item.size)}
                                                 >
                                                     <i className="fas fa-trash-alt mr-1"></i>
                                                     Αφαίρεση
@@ -278,9 +514,10 @@ function Payments() {
                                     <button
                                         className="btn btn-success btn-lg checkout-btn"
                                         onClick={handleCheckout}
+                                        disabled={checkoutLoading}
                                     >
                                         <i className="fas fa-credit-card mr-2"></i>
-                                        Ολοκλήρωση Αγοράς
+                                        {checkoutLoading ? 'Μετάβαση στην JCC...' : 'Ολοκλήρωση Αγοράς'}
                                     </button>
                                 </div>
                             </>
@@ -288,10 +525,41 @@ function Payments() {
                     </div>
                 </div>
             </div>
+
+            {notice.open && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="payments-notice-title"
+                    onClick={closeNotice}
+                    className="payments-notice-overlay"
+                >
+                    <div
+                        role="document"
+                        onClick={(event) => event.stopPropagation()}
+                        className={`payments-notice-card payments-notice-card--${notice.variant}`}
+                    >
+                        <h3 id="payments-notice-title" className="payments-notice-title">
+                            {notice.title}
+                        </h3>
+                        <div className="payments-notice-message">
+                            {notice.message}
+                        </div>
+                        <div className="payments-notice-actions">
+                            <button
+                                type="button"
+                                onClick={closeNotice}
+                                className={`payments-notice-button payments-notice-button--${notice.variant}`}
+                            >
+                                Εντάξει
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
 
-// Mount React component
 const root = ReactDOM.createRoot(document.getElementById('payments'));
 root.render(<Payments />);

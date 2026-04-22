@@ -5,7 +5,7 @@
 .page-content {
     background: #ffffff;
     width: 340px;
-    height: 520px;
+    height: 540px;
     border-radius: 12px;
     padding: 2rem 2rem 1.5rem;
     margin: 100px auto;
@@ -21,8 +21,22 @@
 
 #error-message {
     color: red;
+    display: block;
     font-size: 10px;
+    line-height: 1.2;
+    min-height: 12px;
     margin-left: 20px;
+    margin-bottom: 2px;
+}
+
+#success-message {
+    color: green;
+    display: block;
+    font-size: 10px;
+    line-height: 1.2;
+    min-height: 12px;
+    margin-left: 20px;
+    margin-bottom: 2px;
 }
 
 .login-container {
@@ -56,7 +70,7 @@
 #password-label {
     color: #444;
     font-size: 18px;
-    margin-top: 5px;
+    margin-top: 15px;
     font-size: 0.82rem;
     margin-bottom: 5px;
     display: block;

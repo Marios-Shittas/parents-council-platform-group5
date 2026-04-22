@@ -3,17 +3,19 @@ require_once __DIR__ . '/site_context.php';
 
 $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
+    ['label' => 'Σύνδεσμος Γονέων', 'href' => site_section_url('parents.php')],
     ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
     ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
+    ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')],
+    ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')],
 ];
 
 if (site_is_parent()) {
-    $footer_links[] = ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')];
     $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
+    $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_url('photos.php')];
 }
 
 $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
-$footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')];
 ?>
 <style>
    /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */
@@ -79,7 +81,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
    /* Block για όνομα σχολείου. */
    .footer-brand {
-       margin-bottom: 14px;
+       margin-bottom: 20px;
    }
 
 
@@ -126,7 +128,6 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
        gap: 8px 12px;
        max-width: 320px;
    }
-
 
    /* Εμφάνιση links στο footer. */
    .footer-links a {
@@ -210,6 +211,26 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
        font-family: 'Lato', sans-serif;
    }
 
+   #aboutModal .about-people {
+       padding-left: 1.1rem;
+       margin-bottom: 1rem;
+   }
+
+   #aboutModal .about-people li {
+       margin-bottom: .45rem;
+   }
+
+   #aboutModal .about-people a {
+       color: #1a3a5c;
+       font-weight: 700;
+       text-decoration: none;
+   }
+
+   #aboutModal .about-people a:hover {
+       color: #0f5ea8;
+       text-decoration: underline;
+   }
+
    #aboutModal .modal-header .close {
        color: #ffffff;
        opacity: 1;
@@ -273,11 +294,10 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
                <div class="col-lg-5 col-md-12 mb-4 mb-lg-3 pr-lg-4">
                    <div class="footer-badge">Parents Council</div>
                    <div class="footer-brand">
-                       <h5 class="footer-brand-title">Γυμνάσιο Αγίου Αθανασίου</h5>
+                       <h5 class="footer-brand-title">Σύνδεσμος Γονέων &amp; Κηδεμόνων<br>Αγίου Αθανασίου</h5>
                    </div>
-                   <p class="footer-text">Σύλλογος Γονέων & Κηδεμόνων</p>
                    <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΧΡΙΣΤΟΥ ΠΑΠΑΔΟΥΡΗ 50, 4105 ΑΓΙΟΣ ΑΘΑΝΑΣΙΟΣ, Λεμεσός</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>gym-ag-athanasios-lem@schools.ac.cy</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg-gym-ag-athanasios-lem@schools.ac.cy</span></div>
                </div>
 
 
@@ -311,7 +331,7 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
        <div class="container">
            <div class="footer-bottom-wrap">
                <!-- Αυτό ενημερώνεται αυτόματα κάθε χρόνο με PHP date(\"Y\"). -->
-               <div>&copy; <?php echo date("Y"); ?> Γυμνάσιο Αγίου Αθανασίου — Σύλλογος Γονέων & Κηδεμόνων</div>
+               <div>&copy; <?php echo date("Y"); ?> Σύνδεσμος Γονέων &amp; Κηδεμόνων Αγίου Αθανασίου</div>
                <div class="d-flex align-items-center" style="gap:12px;">
                    <button class="footer-about-btn" data-toggle="modal" data-target="#aboutModal">About</button>
                </div>
@@ -331,7 +351,13 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
            </div>
            <div class="modal-body" style="font-size:0.95rem; line-height:1.7; color:#344055;">
                <p class="mb-1">Η ιστοσελίδα δημιουργήθηκε από τους φοιτητές:</p>
-               <p class="mb-3">Μιχάλης Τσαδιώτης, Μάριος Σιήττας, Σοφία Κυριάκου, Κωνσταντίνος Αβραμίδης, Ράσσελλ Βικραμασίγκαμ.</p>
+               <ul class="about-people">
+                   <li>Κωνσταντίνος Αβραμίδης - <a href="https://www.linkedin.com/in/konstandinos-avramidis-15b517303/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                   <li>Μάριος Σιήττας - <a href="https://www.linkedin.com/in/mariosshittas/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                   <li>Μιχάλης Τσαδιώτης - <a href="https://www.linkedin.com/in/michalis-tsadiotis-b7152a309/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                   <li>Ράσσελλ Βικραμασίγκαμ - <a href="https://www.linkedin.com/in/russell-vickramasingam-3b970835b/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                   <li>Σοφία Κυριάκου - <a href="https://www.linkedin.com/in/sophia-kyriacou19/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+               </ul>
                <p class="mb-3">Η ανάπτυξη της πραγματοποιήθηκε στο πλαίσιο ακαδημαϊκής εργασίας του τμήματος Μηχανικών Ηλεκτρονικών Υπολογιστών και Πληροφορικής του Τεχνολογικού Πανεπιστημίου Κύπρου (ΤΕΠΑΚ), υπό την επίβλεψη του καθηγητή κ. Ανδρέα Ανδρέου.</p>
                <p class="mt-3">© 2026 Cyprus University of Technology. All rights reserved.</p>
            </div>
@@ -352,4 +378,3 @@ $footer_links[] = ['label' => 'Χρήσιμες Πληροφορίες', 'href' 
 
 </body>
 </html>
-

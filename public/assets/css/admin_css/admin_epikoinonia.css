@@ -70,19 +70,12 @@ body {
 
 /* Back Link */
 .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--primary);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
     margin-bottom: 24px;
-    transition: var(--transition);
+    transition: color 0.2s ease;
 }
 
 .back-link:hover {
-    color: var(--primary-dark);
+    color: #183f6b;
 }
 
 .back-link.mb-2 {
@@ -1118,6 +1111,15 @@ textarea.form-control {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-custom {
+        min-width: 920px;
+    }
+
     .stats-container {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1136,6 +1138,10 @@ textarea.form-control {
         padding: 20px;
     }
 
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
     .message-detail-card {
         padding: 20px;
     }
@@ -1146,6 +1152,12 @@ textarea.form-control {
 
     .search-filters-content {
         grid-template-columns: 1fr;
+    }
+
+    .search-filters-content .btn-search,
+    .search-filters-content .btn-reset {
+        width: 100%;
+        justify-content: center;
     }
 
     .messages-header {

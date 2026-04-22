@@ -160,6 +160,13 @@ $isPast        = $eventDateTime < new DateTime();
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($event['event_description'] ?? '')); ?></p>
                 </div>
 
+                <?php if (trim((string)($event['gdpr_notice'] ?? '')) !== ''): ?>
+                    <div class="event-gdpr-note">
+                        <strong><i class="fas fa-user-shield mr-2"></i>Ενημέρωση GDPR</strong>
+                        <div><?php echo nl2br(htmlspecialchars($event['gdpr_notice'])); ?></div>
+                    </div>
+                <?php endif; ?>
+
             </div>
 
             <div class="modal-footer">

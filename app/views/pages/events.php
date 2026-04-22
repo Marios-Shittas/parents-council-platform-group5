@@ -41,6 +41,11 @@ include __DIR__ . '/../../includes/public_page_header.php';
             <p>Δεν έχουν καταχωρηθεί εκδηλώσεις αυτή τη στιγμή.</p>
         </div>
     <?php else: ?>
+        <div class="note-card mb-4">
+            <i class="fas fa-user-shield"></i>
+            <p class="mb-0">Το φωτογραφικό υλικό από σχολικές δράσεις και εκδηλώσεις αναρτάται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.</p>
+        </div>
+
         <section class="mb-5">
             <div class="events-section-title">
                 <span class="section-badge"><i class="fas fa-calendar-alt"></i></span>
@@ -91,5 +96,22 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var params = new URLSearchParams(window.location.search);
+        var openId = params.get('open');
+
+        if (!openId) {
+            return;
+        }
+
+        var modalElement = document.getElementById('eventModal' + openId);
+        if (!modalElement || typeof window.jQuery === 'undefined') {
+            return;
+        }
+
+        window.jQuery(modalElement).modal('show');
+    });
+</script>
 </body>
 </html>

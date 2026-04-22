@@ -1,5 +1,28 @@
 <?php
-?>
+declare(strict_types=1);
+
+require_once __DIR__ . '/../app/config/db.php';
+require_once __DIR__ . '/../app/includes/TokenValidator.php';
+
+class SubscriptionPage
+{
+    private mysqli $conn;
+    private TokenValidator $tokenValidator;
+    private string $tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
+
+    public function __construct(mysqli $conn)
+    {
+        $this->conn = $conn;
+        $this->tokenValidator = new TokenValidator($conn);
+    }
+
+    public function render(): void
+    {
+        $token = trim((string) ($_GET['token'] ?? ''));
+        $isValidToken = $this->isTokenValid($token);
+        $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        ?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -16,22 +39,48 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- CSS -->
-   <link rel="stylesheet" href="assets/css/subscription.css">
+    <link rel="stylesheet" href="assets/css/subscription.css">
 
-    <title>Συνδρωμή</title>
+    <title>Συνδρομή</title>
 </head>
 <body>
-    <!-- React will render here -->
-    <div class="container">
-        <div id="root"></div>
-    </div>
+    <?php if (!$isValidToken): ?>
+        <div class="container mt-5">
+            <div class="alert alert-danger text-center" role="alert">
+                <?php echo htmlspecialchars($this->tokenMessage, ENT_QUOTES, 'UTF-8'); ?>
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="container">
+            <div id="root"></div>
+        </div>
+    <?php endif; ?>
 
-    <!-- React / ReactDOM -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+    <?php if ($isValidToken): ?>
+        <!-- React / ReactDOM -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 
-    <!-- Babel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+        <!-- Babel -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-    <!-- Your React JSX -->
-    <script type="text/babel" src="assets/js/subscription.jsx"></script>
+        <script>
+            window.APPROVAL_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
+        </script>
+
+        <script type="text/babel" src="assets/js/subscription.jsx"></script>
+    <?php endif; ?>
+</body>
+</html>
+        <?php
+    }
+
+    private function isTokenValid(string $token): bool
+    {
+        return $this->tokenValidator->isTokenValid($token, 'parent', 'waiting_payment', true);
+    }
+}
+
+$page = new SubscriptionPage($conn);
+$page->render();
+$conn->close();
