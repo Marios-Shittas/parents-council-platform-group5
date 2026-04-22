@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/site_context.php';
 
+$footer_site_name = 'Σύνδεσμος Γονέων Δημοτικού Σχολείου Μέσα Γειτονιάς ΚΘ\' Γ.Ν. Καλογεροπούλου';
+
 $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
     ['label' => 'Σύνδεσμος Γονέων', 'href' => site_section_url('parents.php')],
@@ -12,10 +14,10 @@ $footer_links = [
 
 if (site_is_parent()) {
     $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
-    $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_url('photos.php')];
 }
 
 $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
+$footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_url('photos.php')];
 ?>
 <style>
    /* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */
@@ -294,7 +296,7 @@ $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_u
                <div class="col-lg-5 col-md-12 mb-4 mb-lg-3 pr-lg-4">
                    <div class="footer-badge">Parents Council</div>
                    <div class="footer-brand">
-                       <h5 class="footer-brand-title">Σύνδεσμος Γονέων &amp; Κηδεμόνων<br>Γυμνασίου Αγίου Αθανασίου</h5>
+                       <h5 class="footer-brand-title"><?php echo htmlspecialchars($footer_site_name); ?></h5>
                    </div>
                    <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΧΡΙΣΤΟΥ ΠΑΠΑΔΟΥΡΗ 50, 4105 ΑΓΙΟΣ ΑΘΑΝΑΣΙΟΣ, Λεμεσός</span></div>
                    <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg.ag.athanasiou@gmail.com</span></div>
@@ -331,7 +333,7 @@ $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_u
        <div class="container">
            <div class="footer-bottom-wrap">
                <!-- Αυτό ενημερώνεται αυτόματα κάθε χρόνο με PHP date(\"Y\"). -->
-               <div>&copy; <?php echo date("Y"); ?> Σύνδεσμος Γονέων &amp; Κηδεμόνων Αγίου Αθανασίου</div>
+               <div>&copy; <?php echo date("Y"); ?> <?php echo htmlspecialchars($footer_site_name); ?></div>
                <div class="d-flex align-items-center" style="gap:12px;">
                    <button class="footer-about-btn" data-toggle="modal" data-target="#aboutModal">About</button>
                </div>

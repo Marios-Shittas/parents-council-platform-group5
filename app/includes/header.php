@@ -14,9 +14,10 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Σύνδεσμος Γονέων & Κηδεμόνων';
+$site_title = 'Σύνδεσμος Γονέων Δημοτικού Σχολείου Μέσα Γειτονιάς ΚΘ\' Γ.Ν. Καλογεροπούλου';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
 $portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
+$header_logo_src = site_asset_url('img/primary-school-logo.png');
 
 $profile_item = [
     'label' => 'Το Προφίλ Μου',
@@ -80,31 +81,51 @@ $nav_items[] = [
     'match' => ['epikoinonia.php'],
 ];
 
-if (site_is_parent()) {
-    $nav_items[] = [
-        'label' => 'Φωτογραφίες',
-        'href' => site_section_url('photos.php'),
-        'icon' => 'fas fa-camera',
-        'match' => ['photos.php'],
-    ];
-}
+$nav_items[] = [
+    'label' => 'Φωτογραφίες',
+    'href' => site_section_url('photos.php'),
+    'icon' => 'fas fa-camera',
+    'match' => ['photos.php'],
+];
 ?>
 <script>
     (function () {
-        var faviconHref = '<?php echo site_asset_url('img/logo-icon.png'); ?>';
+        var faviconHref = '<?php echo site_asset_url('img/primary-school-logo.png'); ?>';
         var head = document.head || document.getElementsByTagName('head')[0];
         if (!head) return;
 
-        var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
-        existingIcons.forEach(function (icon) {
-            icon.parentNode.removeChild(icon);
-        });
+        var img = new Image();
+        img.onload = function () {
+            var size = 128;
+            var canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
 
-        var icon = document.createElement('link');
-        icon.rel = 'icon';
-        icon.type = 'image/png';
-        icon.href = faviconHref;
-        head.appendChild(icon);
+            var context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            context.clearRect(0, 0, size, size);
+            context.beginPath();
+            context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            context.closePath();
+            context.clip();
+            context.drawImage(img, 0, 0, size, size);
+
+            var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+            existingIcons.forEach(function (icon) {
+                icon.parentNode.removeChild(icon);
+            });
+
+            var icon = document.createElement('link');
+            icon.rel = 'icon';
+            icon.type = 'image/png';
+            icon.href = canvas.toDataURL('image/png');
+            head.appendChild(icon);
+        };
+
+        img.src = faviconHref;
     })();
 </script>
 <style>
@@ -186,12 +207,12 @@ if (site_is_parent()) {
             margin-left: -.65rem;
         }
 
-        .navbar-brand img {
+        .site-logo-image {
             display: block;
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            object-fit: cover;
+            object-fit: contain;
             background: #ffffff;
             border: 3px solid rgba(255, 255, 255, 0.92);
             box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
@@ -565,7 +586,7 @@ if (site_is_parent()) {
                 gap: .8rem;
             }
 
-            .navbar-brand img {
+            .site-logo-image {
                 width: 110px;
                 height: 110px;
             }
@@ -631,7 +652,7 @@ if (site_is_parent()) {
         }
 
         @media (max-width: 1199.98px) {
-            .navbar-brand img {
+            .site-logo-image {
                 width: 84px;
                 height: 84px;
             }
@@ -661,17 +682,36 @@ if (site_is_parent()) {
                 padding: .65rem 0;
             }
 
+            .navbar .container {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: center;
+                column-gap: .55rem;
+                row-gap: .7rem;
+            }
+
+            .logo-stack {
+                margin-left: 0;
+            }
+
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;
                 justify-content: flex-start;
                 flex-wrap: nowrap;
-                max-width: calc(100% - 78px);
+                width: 100%;
+                max-width: 100%;
                 gap: .65rem;
                 min-width: 0;
             }
 
-            .navbar-brand img {
+            .navbar-toggler {
+                margin-left: 0;
+                justify-self: end;
+                align-self: center;
+            }
+
+            .site-logo-image {
                 width: 74px;
                 height: 74px;
             }
@@ -692,9 +732,11 @@ if (site_is_parent()) {
             }
 
             .navbar-collapse {
+                grid-column: 1 / -1;
                 margin-top: .7rem;
                 padding: .85rem 1rem;
                 min-width: 0;
+                width: 100%;
                 border-radius: 18px !important;
                 flex-direction: column;
                 flex-wrap: nowrap !important;
@@ -756,11 +798,10 @@ if (site_is_parent()) {
 
         @media (max-width: 767.98px) {
             .navbar-brand {
-                max-width: calc(100% - 60px);
                 gap: .45rem;
             }
 
-            .navbar-brand img {
+            .site-logo-image {
                 width: 64px;
                 height: 64px;
             }
@@ -780,9 +821,9 @@ if (site_is_parent()) {
         <!-- Λογότυπο + τίτλος σχολείου. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <span class="logo-stack">
-                <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo">
+                <img class="site-logo-image" src="<?php echo htmlspecialchars($header_logo_src); ?>" alt="Λογότυπο σχολείου">
             </span>
-            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</span>
+            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>"><?php echo htmlspecialchars($site_title); ?></span>
         </a>
 
         <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->

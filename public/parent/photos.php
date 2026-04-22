@@ -6,7 +6,10 @@ header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
-auth_require_role('parent');
+if (auth_user_role() !== 'parent') {
+    header('Location: ../photos.php');
+    exit;
+}
 
 $siteContext = 'parent';
 require __DIR__ . '/../../app/views/pages/photos.php';
