@@ -184,16 +184,12 @@ if (site_is_parent()) {
             align-items: center;
             flex: 0 0 auto;
             width: fit-content;
-            min-width: 0;
-        }
-
-        .navbar-brand .logo-stack {
-            margin-right: 0 !important;
+            transform: translateX(62px);
         }
 
         .navbar-brand img {
-            width: 145px;
-            height: 145px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
@@ -201,20 +197,22 @@ if (site_is_parent()) {
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
-            display: block;
-            flex: 0 1 auto;
-            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            flex: 1 1 auto;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
             font-size: 2.2rem;
             line-height: 1.02;
             letter-spacing: 0.01em;
-            white-space: normal;
-            overflow-wrap: normal;
-            word-break: normal;
-            max-width: calc(100% - 170px);
-            width: auto;
+            white-space: nowrap;
+            max-width: none;
+            width: 100%;
+            min-width: 0;
         }
 
         .brand-line {
@@ -429,13 +427,10 @@ if (site_is_parent()) {
             position: relative;
             margin: 0 0 1rem;
             flex: 0 0 100%;
-            justify-content: center;
-            flex-wrap: nowrap;
+            justify-content: flex-start;
             gap: 1rem;
-            text-align: center;
+            text-align: left;
             width: 100%;
-            min-width: 0;
-            max-width: 100%;
         }
 
         .navbar-brand::after {
@@ -658,8 +653,8 @@ if (site_is_parent()) {
 
         @media (max-width: 1199.98px) {
             .navbar-brand img {
-                width: 85px;
-                height: 85px;
+                width: 88px;
+                height: 88px;
             }
 
             .logo-line {
@@ -667,7 +662,7 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                font-size: 1.35rem;
+                font-size: 1.7rem;
             }
 
             .navbar-public .navbar-nav {
@@ -698,8 +693,8 @@ if (site_is_parent()) {
             }
 
             .navbar-brand img {
-                width: 85px;
-                height: 85px;
+                width: 58px;
+                height: 58px;
             }
 
             .logo-line {
@@ -707,11 +702,9 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                display: block;
-                flex: 1 1 auto;
-                min-width: 0;
-                max-width: calc(100vw - 180px);
-                font-size: 1.35rem;
+                display: inline-block;
+                max-width: calc(100vw - 150px);
+                font-size: 1.22rem;
                 line-height: 1.1;
                 overflow: visible;
                 text-overflow: clip;
