@@ -138,6 +138,8 @@ if (site_is_parent()) {
         .site-header {
             font-family: 'Lato', sans-serif;
             color: var(--text-main);
+            max-width: 100%;
+            overflow-x: clip;
         }
 
         .site-header a,
@@ -157,7 +159,8 @@ if (site_is_parent()) {
             border-bottom: 1px solid var(--header-border);
             padding: .95rem 0 .7rem;
             font-family: 'Lato', sans-serif;
-            overflow: visible;
+            overflow-x: clip;
+            overflow-y: visible;
         }
 
         /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
@@ -181,12 +184,16 @@ if (site_is_parent()) {
             align-items: center;
             flex: 0 0 auto;
             width: fit-content;
-            transform: translateX(62px);
+            min-width: 0;
+        }
+
+        .navbar-brand .logo-stack {
+            margin-right: 0 !important;
         }
 
         .navbar-brand img {
-            width: 120px;
-            height: 120px;
+            width: 145px;
+            height: 145px;
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
@@ -194,22 +201,20 @@ if (site_is_parent()) {
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            justify-content: center;
-            align-items: center;
-            flex: 1 1 auto;
+            display: block;
+            flex: 0 1 auto;
+            min-width: 0;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
             font-size: 2.2rem;
             line-height: 1.02;
             letter-spacing: 0.01em;
-            white-space: nowrap;
-            max-width: none;
-            width: 100%;
-            min-width: 0;
+            white-space: normal;
+            overflow-wrap: normal;
+            word-break: normal;
+            max-width: calc(100% - 170px);
+            width: auto;
         }
 
         .brand-line {
@@ -281,12 +286,18 @@ if (site_is_parent()) {
         }
 
         /* Μικρή μπλε μπάρα κάτω από το ενεργό link. */
-        .navbar-nav .active > .nav-link::after {
+        .navbar-nav .nav-link-content {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .navbar-nav .active > .nav-link .nav-link-content::after {
             content: "";
             position: absolute;
-            left: .8rem;
-            right: .8rem;
-            bottom: .28rem;
+            left: 0;
+            right: 0;
+            bottom: -.35rem;
             height: 2px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.82);
@@ -418,38 +429,52 @@ if (site_is_parent()) {
             position: relative;
             margin: 0 0 1rem;
             flex: 0 0 100%;
-            justify-content: flex-start;
+            justify-content: center;
+            flex-wrap: nowrap;
             gap: 1rem;
-            text-align: left;
+            text-align: center;
             width: 100%;
+            min-width: 0;
+            max-width: 100%;
         }
 
         .navbar-brand::after {
             content: "";
             position: absolute;
-            left: calc(50% - 50vw);
+            left: 50%;
+            right: 50%;
             bottom: -.45rem;
             width: 100vw;
+            margin-left: -50vw;
+            margin-right: -50vw;
             height: 2px;
             border-radius: 999px;
             background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
             opacity: .65;
             pointer-events: none;
+            margin-top: 18px; /* προσθέτει εμφανές κενό πάνω από τη γραμμή */
         }
 
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
         .navbar-collapse {
             width: 100%;
-            min-width: max-content;
-            justify-content: center;
+            min-width: 0;
+            max-width: 100%;
+            justify-content: safe center;
             align-items: center;
-            gap: 1rem;
+            gap: .7rem;
             margin-top: .05rem;
-            padding: .95rem 1.15rem;
+            padding: .85rem .9rem;
             border-top: 0;
-            border-radius: 18px;
+            border-radius: 18px !important;
             background: var(--nav-row-bg);
             box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 18px 34px rgba(15, 42, 76, 0.18);
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            overflow-y: visible;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
 
         .navbar-nav {
@@ -459,24 +484,26 @@ if (site_is_parent()) {
             justify-content: center;
             align-items: center;
             margin: 0;
-            gap: .25rem;
+            gap: clamp(.55rem, 1vw, 1.2rem);
             min-width: max-content;
+            max-width: none;
             overflow: visible;
+            box-sizing: border-box;
         }
 
         .navbar-public .navbar-nav {
             justify-content: center;
             margin: 0;
-            gap: .35rem;
+            gap: clamp(.7rem, 1.4vw, 1.6rem);
         }
 
         .navbar-parent .navbar-collapse {
-            gap: .7rem;
+            gap: .45rem;
         }
 
         .navbar-parent .navbar-nav {
-            justify-content: flex-start;
-            gap: .12rem;
+            justify-content: center;
+            gap: clamp(.5rem, .9vw, 1.05rem);
             padding-right: .35rem;
         }
 
@@ -505,12 +532,14 @@ if (site_is_parent()) {
 
         .navbar-tools {
             flex: 0 0 auto;
+            flex-wrap: nowrap;
             justify-content: flex-end;
             gap: .8rem;
             margin-left: 1rem;
             min-width: auto;
             padding: .2rem 0 .2rem .9rem;
             border-left: 1px solid rgba(255, 255, 255, 0.18);
+            white-space: nowrap;
         }
 
         .navbar-parent .navbar-tools {
@@ -523,7 +552,8 @@ if (site_is_parent()) {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            max-width: 1560px;
+            max-width: 100%;
+            width: 100%;
             overflow: visible;
             position: relative;
             z-index: 1;
@@ -537,6 +567,10 @@ if (site_is_parent()) {
             white-space: nowrap;
         }
 
+        .site-header .login-btn {
+            white-space: nowrap;
+        }
+
         /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
         .navbar-nav .nav-link:focus-visible,
         .login-btn:focus-visible,
@@ -546,10 +580,86 @@ if (site_is_parent()) {
             outline-offset: 2px;
         }
 
+        @media (min-width: 1200px) and (max-width: 1799.98px) {
+            .navbar .container {
+                max-width: 100%;
+                padding-left: .65rem;
+                padding-right: .65rem;
+            }
+
+            .navbar-brand {
+                gap: .8rem;
+            }
+
+            .navbar-brand img {
+                width: 116px;
+                height: 116px;
+            }
+
+            .brand-text {
+                font-size: 1.85rem;
+            }
+
+            .navbar-collapse {
+                gap: .38rem;
+                padding: .7rem .65rem;
+                border-radius: 18px !important;
+            }
+
+            .navbar-nav {
+                flex: 0 0 auto;
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 1.2rem;
+                min-width: max-content;
+                max-width: none;
+            }
+
+            .navbar-nav .nav-item,
+            .navbar-public .navbar-nav .nav-item,
+            .navbar-parent .navbar-nav .nav-item {
+                flex: 0 0 auto;
+                min-width: auto;
+                margin: 0;
+            }
+
+            .navbar-nav .nav-link,
+            .navbar-public .navbar-nav .nav-link,
+            .navbar-parent .navbar-nav .nav-link {
+                padding: .38rem .48rem;
+                font-size: .82rem;
+            }
+
+            .navbar-parent .navbar-nav .nav-link--icon-only {
+                width: 2.25rem;
+                height: 2.25rem;
+                min-width: 2.25rem;
+            }
+
+            .navbar-tools,
+            .navbar-parent .navbar-tools {
+                gap: .35rem;
+                margin-left: .35rem;
+                padding-left: .45rem;
+            }
+
+            .site-header .login-btn,
+            .site-header .login-btn.btn,
+            .site-header .login-btn.btn-sm {
+                padding: .26rem .65rem !important;
+                font-size: .82rem !important;
+            }
+
+            .utility-icon-link {
+                width: 34px;
+                height: 34px;
+            }
+        }
+
         @media (max-width: 1199.98px) {
             .navbar-brand img {
-                width: 88px;
-                height: 88px;
+                width: 85px;
+                height: 85px;
             }
 
             .logo-line {
@@ -557,7 +667,7 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                font-size: 1.7rem;
+                font-size: 1.35rem;
             }
 
             .navbar-public .navbar-nav {
@@ -572,7 +682,7 @@ if (site_is_parent()) {
         }
 
         /* Ρυθμίσεις για κινητό/tablet. */
-        @media (max-width: 991.98px) {
+        @media (max-width: 1199.98px) {
             .navbar {
                 padding: .65rem 0;
             }
@@ -581,13 +691,15 @@ if (site_is_parent()) {
                 margin: 0;
                 flex: 0 1 auto;
                 justify-content: flex-start;
+                flex-wrap: nowrap;
                 max-width: calc(100% - 78px);
                 gap: .7rem;
+                min-width: 0;
             }
 
             .navbar-brand img {
-                width: 58px;
-                height: 58px;
+                width: 85px;
+                height: 85px;
             }
 
             .logo-line {
@@ -595,9 +707,11 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                display: inline-block;
-                max-width: calc(100vw - 150px);
-                font-size: 1.22rem;
+                display: block;
+                flex: 1 1 auto;
+                min-width: 0;
+                max-width: calc(100vw - 180px);
+                font-size: 1.35rem;
                 line-height: 1.1;
                 overflow: visible;
                 text-overflow: clip;
@@ -617,39 +731,86 @@ if (site_is_parent()) {
                 margin-top: .7rem;
                 padding: .85rem 1rem;
                 min-width: 0;
+                border-radius: 18px !important;
+                flex-direction: column;
+                flex-wrap: nowrap !important;
+                align-items: center;
+                justify-content: flex-start;
+                overflow-x: hidden;
+                overflow-y: visible;
+            }
+
+            .navbar-collapse.show {
+                display: flex;
             }
 
             .navbar-nav {
-                margin-top: .75rem;
-                flex: 1 1 auto;
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                gap: .1rem;
-                min-width: 0;
+                margin-top: 0;
+                flex: 0 0 auto;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: center;
+                gap: .75rem;
+                min-width: max-content;
+                max-width: none;
                 overflow: visible;
+                box-sizing: border-box;
             }
 
             .navbar-nav .nav-item {
-                margin: .15rem 0;
+                flex: 0 0 auto;
+                margin: 0;
+            }
+
+            .navbar-nav .nav-link {
+                white-space: nowrap;
+                overflow-wrap: normal;
             }
 
             .navbar-tools {
+                flex-direction: row !important;
+                align-items: center !important;
+                flex: 0 0 auto;
                 margin-top: .75rem;
                 margin-left: 0;
-                padding-top: .5rem;
+                padding-top: .75rem;
                 padding-left: 0;
                 border-top: 1px solid rgba(255, 255, 255, 0.2);
                 border-left: 0;
                 gap: .5rem;
                 min-width: 100%;
-                justify-content: flex-start;
+                justify-content: center;
+            }
+
+            .navbar-tools .login-btn,
+            .navbar-tools .utility-icon-link {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .navbar-brand {
+                max-width: calc(100% - 64px);
+                gap: .55rem;
+            }
+
+            .navbar-brand img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .brand-text {
+                font-size: 1.12rem;
+                max-width: calc(100vw - 132px);
             }
         }
     </style>
 
 <header class="site-header">
 <!-- Κύριο navigation όλου του site. -->
-<nav class="navbar navbar-expand-lg navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
+<nav class="navbar navbar-expand-xl navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
     <div class="container">
 
         <!-- Λογότυπο + τίτλος σχολείου. -->
@@ -685,28 +846,30 @@ if (site_is_parent()) {
                            aria-label="<?php echo htmlspecialchars($item['label']); ?>"
                            title="<?php echo htmlspecialchars($item['label']); ?>"
                            <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
-                            <i class="<?php echo $item['icon']; ?>" aria-hidden="true"></i>
-                            <?php if (empty($item['icon_only'])): ?>
-                                <?php echo $item['label']; ?>
-                            <?php else: ?>
-                                <span class="sr-only"><?php echo htmlspecialchars($item['label']); ?></span>
-                            <?php endif; ?>
+                            <span class="nav-link-content">
+                                <i class="<?php echo $item['icon']; ?>" aria-hidden="true"></i>
+                                <?php if (empty($item['icon_only'])): ?>
+                                    <span class="nav-link-text"><?php echo $item['label']; ?></span>
+                                <?php else: ?>
+                                    <span class="sr-only"><?php echo htmlspecialchars($item['label']); ?></span>
+                                <?php endif; ?>
+                            </span>
                         </a>
                     </li>
                 <?php endforeach; ?>
             </ul>
 
             <!-- Δεξιά εργαλεία: login + shortcut. -->
-            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center navbar-tools">
+            <div class="d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center navbar-tools">
 
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('logout.php'); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn logout-btn">
+                       class="btn btn-outline-dark btn-sm my-2 my-xl-0 login-btn logout-btn">
                         <i class="fas fa-sign-out-alt mr-1"></i> Log out
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn login-btn-green">
+                       class="btn btn-outline-dark btn-sm my-2 my-xl-0 login-btn login-btn-green">
                         <i class="fas fa-sign-in-alt mr-1"></i> Login
                     </a>
                 <?php endif; ?>
@@ -714,7 +877,7 @@ if (site_is_parent()) {
                 <?php if (site_is_parent()): ?>
                     <?php $is_profile_active = in_array($current_page, $profile_item['match'], true); ?>
                     <a href="<?php echo $profile_item['href']; ?>"
-                       class="mt-2 mt-lg-0 utility-icon-link profile-icon-link<?php echo $is_profile_active ? ' active' : ''; ?>"
+                       class="mt-2 mt-xl-0 utility-icon-link profile-icon-link<?php echo $is_profile_active ? ' active' : ''; ?>"
                        aria-label="<?php echo htmlspecialchars($profile_item['label']); ?>"
                        title="<?php echo htmlspecialchars($profile_item['label']); ?>"
                        <?php echo $is_profile_active ? 'aria-current="page"' : ''; ?>>
