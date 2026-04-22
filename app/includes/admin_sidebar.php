@@ -49,45 +49,23 @@ if ($pendingApplicationSubmissions > 0) {
         var faviconHref = '/parents-council-platform-group5/public/assets/img/logo-icon.png';
         var head = document.head || document.getElementsByTagName('head')[0];
         if (!head) return;
-        var img = new Image();
 
-        img.onload = function () {
-            var size = 128;
-            var canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+        var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+        existingIcons.forEach(function (icon) {
+            icon.parentNode.removeChild(icon);
+        });
 
-            var context = canvas.getContext('2d');
-            if (!context) {
-                return;
-            }
-
-            context.clearRect(0, 0, size, size);
-            context.beginPath();
-            context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-            context.closePath();
-            context.clip();
-            context.drawImage(img, 0, 0, size, size);
-
-            var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
-            existingIcons.forEach(function (icon) {
-                icon.parentNode.removeChild(icon);
-            });
-
-            var icon = document.createElement('link');
-            icon.rel = 'icon';
-            icon.type = 'image/png';
-            icon.href = canvas.toDataURL('image/png');
-            head.appendChild(icon);
-        };
-
-        img.src = faviconHref;
+        var icon = document.createElement('link');
+        icon.rel = 'icon';
+        icon.type = 'image/png';
+        icon.href = faviconHref;
+        head.appendChild(icon);
     })();
 </script>
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>
-    <span>Μενού</span>
+    <span>Menu</span>
 </button>
 
 <div class="admin-sidebar-backdrop" data-admin-sidebar-backdrop></div>
@@ -97,7 +75,7 @@ if ($pendingApplicationSubmissions > 0) {
     <div class="admin-sidebar-top">
         <div class="brand">
             <i class="fas fa-school"></i>
-            Πίνακας Διαχείρισης
+            Admin Panel
         </div>
 
         <button class="admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Κλείσιμο admin menu">
@@ -109,37 +87,43 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'home.php' ? 'active' : ''; ?>" href="home.php">
-                <i class="fas fa-home"></i> Αρχική
+                <i class="fas fa-home"></i>
+                <span class="admin-nav-label">Dashboard</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'announcements.php' ? 'active' : ''; ?>" href="announcements.php">
-                <i class="fas fa-bullhorn"></i> Ανακοινώσεις
+                <i class="fas fa-bullhorn"></i>
+                <span class="admin-nav-label">Ανακοινώσεις</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'events.php' ? 'active' : ''; ?>" href="events.php">
-                <i class="fas fa-calendar-alt"></i> Εκδηλώσεις
+                <i class="fas fa-calendar-alt"></i>
+                <span class="admin-nav-label">Εκδηλώσεις</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'useful-information.php' ? 'active' : ''; ?>" href="useful-information.php">
-                <i class="fas fa-info-circle"></i> Χρήσιμοι Σύνδεσμοι
+                <i class="fas fa-info-circle"></i>
+                <span class="admin-nav-label">Χρήσιμοι Σύνδεσμοι</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'parents.php' ? 'active' : ''; ?>" href="parents.php">
-                <i class="fas fa-users"></i> Σύνδεσμος Γονέων
+                <i class="fas fa-users"></i>
+                <span class="admin-nav-label">Σύνδεσμος Γονέων</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'users.php' ? 'active' : ''; ?>" href="users.php">
-                <i class="fas fa-users"></i> Χρήστες
+                <i class="fas fa-users"></i>
+                <span class="admin-nav-label">Χρήστες</span>
             </a>
         </li>
 
@@ -155,7 +139,15 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'eshop.php' ? 'active' : ''; ?>" href="eshop.php">
-                <i class="fas fa-shopping-cart"></i> Κατάστημα
+                <i class="fas fa-shopping-cart"></i>
+                <span class="admin-nav-label">E-shop</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
+                <i class="fas fa-receipt"></i>
+                <span class="admin-nav-label">Παραγγελίες</span>
             </a>
         </li>
 
@@ -171,13 +163,15 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'photos.php' ? 'active' : ''; ?>" href="photos.php">
-                <i class="fas fa-camera"></i> Φωτογραφίες
+                <i class="fas fa-camera"></i>
+                <span class="admin-nav-label">Φωτογραφίες</span>
             </a>
         </li>
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'programatismo-litourgion.php' ? 'active' : ''; ?>" href="programatismo-litourgion.php">
-                <i class="fas fa-cogs"></i> Ενέργειες Συστήματος
+                <i class="fas fa-cogs"></i>
+                <span class="admin-nav-label">Ενέργειες Συστήματος</span>
             </a>
         </li>
 
@@ -185,7 +179,8 @@ if ($pendingApplicationSubmissions > 0) {
 
     <div class="admin-sidebar-footer">
         <a class="nav-link admin-logout-link" href="../logout.php">
-            <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="admin-nav-label">Logout</span>
         </a>
     </div>
 
@@ -201,7 +196,7 @@ if ($pendingApplicationSubmissions > 0) {
         var toggleButton = document.querySelector('[data-admin-sidebar-toggle]');
         var closeButton = document.querySelector('[data-admin-sidebar-close]');
         var backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
-        var mobileQuery = window.matchMedia('(max-width: 991.98px)');
+        var mobileQuery = window.matchMedia('(max-width: 1199.98px), (max-height: 720px)');
         var usersBadgeText = <?php echo json_encode($usersBadgeText); ?>;
 
         if (!wrapper || !sidebar || !toggleButton || !backdrop) return;
@@ -240,7 +235,7 @@ if ($pendingApplicationSubmissions > 0) {
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
-                : wrapper.classList.contains('sidebar-collapsed');
+                : true;
             toggleButton.hidden = !shouldShowToggle;
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }
