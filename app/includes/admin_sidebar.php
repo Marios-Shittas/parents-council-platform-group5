@@ -75,7 +75,7 @@ if ($pendingApplicationSubmissions > 0) {
     <div class="admin-sidebar-top">
         <div class="brand">
             <i class="fas fa-school"></i>
-            Admin Panel
+            Πίνακας Διαχείρισης
         </div>
 
         <button class="admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Κλείσιμο admin menu">
@@ -88,7 +88,7 @@ if ($pendingApplicationSubmissions > 0) {
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'home.php' ? 'active' : ''; ?>" href="home.php">
                 <i class="fas fa-home"></i>
-                <span class="admin-nav-label">Dashboard</span>
+                <span class="admin-nav-label">Αρχική</span>
             </a>
         </li>
 
@@ -140,7 +140,7 @@ if ($pendingApplicationSubmissions > 0) {
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'eshop.php' ? 'active' : ''; ?>" href="eshop.php">
                 <i class="fas fa-shopping-cart"></i>
-                <span class="admin-nav-label">E-shop</span>
+                <span class="admin-nav-label">Κατάστημα</span>
             </a>
         </li>
 
@@ -235,7 +235,7 @@ if ($pendingApplicationSubmissions > 0) {
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
-                : true;
+                : !isOpen;
             toggleButton.hidden = !shouldShowToggle;
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }

@@ -86,7 +86,6 @@ if (site_is_parent()) {
         'href' => site_section_url('photos.php'),
         'icon' => 'fas fa-camera',
         'match' => ['photos.php'],
-        'icon_only' => true,
     ];
 }
 ?>
@@ -180,48 +179,41 @@ if (site_is_parent()) {
         /* Στυλ λογοτύπου. */
         .logo-stack {
             display: inline-flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             flex: 0 0 auto;
-            width: fit-content;
-            transform: translateX(62px);
+            width: auto;
+            margin-left: -.65rem;
         }
 
         .navbar-brand img {
+            display: block;
             width: 120px;
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
+            background: #ffffff;
+            border: 3px solid rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
         }
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
+            display: block;
             justify-content: center;
             align-items: center;
-            flex: 1 1 auto;
+            flex: 0 1 auto;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
-            font-size: 2.2rem;
-            line-height: 1.02;
+            font-size: 1.75rem;
+            line-height: 1.15;
             letter-spacing: 0.01em;
             white-space: nowrap;
+            text-align: center;
             max-width: none;
-            width: 100%;
-            min-width: 0;
-        }
-
-        .brand-line {
-            display: inline;
             width: auto;
-        }
-
-        .brand-line + .brand-line {
-            margin-left: .35rem;
+            min-width: 0;
         }
 
         /* Λίγο κενό ανάμεσα στα menu items. */
@@ -427,27 +419,14 @@ if (site_is_parent()) {
             position: relative;
             margin: 0 0 1rem;
             flex: 0 0 100%;
-            justify-content: flex-start;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: nowrap;
             gap: 1rem;
-            text-align: left;
+            text-align: center;
             width: 100%;
-        }
-
-        .navbar-brand::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            right: 50%;
-            bottom: -.45rem;
-            width: 100vw;
-            margin-left: -50vw;
-            margin-right: -50vw;
-            height: 2px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
-            opacity: .65;
-            pointer-events: none;
-            margin-top: 18px; /* προσθέτει εμφανές κενό πάνω από τη γραμμή */
+            max-width: 100%;
+            min-width: 0;
         }
 
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
@@ -587,12 +566,12 @@ if (site_is_parent()) {
             }
 
             .navbar-brand img {
-                width: 116px;
-                height: 116px;
+                width: 110px;
+                height: 110px;
             }
 
             .brand-text {
-                font-size: 1.85rem;
+                font-size: 1.45rem;
             }
 
             .navbar-collapse {
@@ -653,8 +632,8 @@ if (site_is_parent()) {
 
         @media (max-width: 1199.98px) {
             .navbar-brand img {
-                width: 88px;
-                height: 88px;
+                width: 84px;
+                height: 84px;
             }
 
             .logo-line {
@@ -662,7 +641,7 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                font-size: 1.7rem;
+                font-size: 1.12rem;
             }
 
             .navbar-public .navbar-nav {
@@ -688,13 +667,13 @@ if (site_is_parent()) {
                 justify-content: flex-start;
                 flex-wrap: nowrap;
                 max-width: calc(100% - 78px);
-                gap: .7rem;
+                gap: .65rem;
                 min-width: 0;
             }
 
             .navbar-brand img {
-                width: 58px;
-                height: 58px;
+                width: 74px;
+                height: 74px;
             }
 
             .logo-line {
@@ -702,22 +681,14 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                display: inline-block;
-                max-width: calc(100vw - 150px);
-                font-size: 1.22rem;
-                line-height: 1.1;
+                display: block;
+                max-width: calc(100vw - 156px);
+                font-size: 1rem;
+                line-height: 1.08;
                 overflow: visible;
                 text-overflow: clip;
                 white-space: normal;
-            }
-
-            .brand-line {
-                display: inline;
-                width: auto;
-            }
-
-            .brand-line + .brand-line {
-                margin-left: 0;
+                text-align: left;
             }
 
             .navbar-collapse {
@@ -785,18 +756,18 @@ if (site_is_parent()) {
 
         @media (max-width: 767.98px) {
             .navbar-brand {
-                max-width: calc(100% - 64px);
-                gap: .55rem;
+                max-width: calc(100% - 60px);
+                gap: .45rem;
             }
 
             .navbar-brand img {
-                width: 70px;
-                height: 70px;
+                width: 64px;
+                height: 64px;
             }
 
             .brand-text {
-                font-size: 1.12rem;
-                max-width: calc(100vw - 132px);
+                font-size: .9rem;
+                max-width: calc(100vw - 126px);
             }
         }
     </style>
@@ -808,14 +779,10 @@ if (site_is_parent()) {
 
         <!-- Λογότυπο + τίτλος σχολείου. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
-            <span class="logo-stack mr-2">
+            <span class="logo-stack">
                 <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo">
             </span>
-            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">
-                <span class="brand-line">Σύνδεσμος Γονέων &amp;</span>
-                <span class="brand-line">Κηδεμόνων Γυμνασίου</span>
-                <span class="brand-line">Αγίου Αθανασίου</span>
-            </span>
+            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</span>
         </a>
 
         <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->

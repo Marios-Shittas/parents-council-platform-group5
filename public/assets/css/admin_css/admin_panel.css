@@ -129,6 +129,14 @@ body {
     flex: 0 0 42px;
     background: rgba(255, 255, 255, 0.14);
     color: #fff;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.admin-sidebar-close:hover,
+.admin-sidebar-close:focus-visible {
+    background: #dc3545;
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 .admin-sidebar-backdrop {
@@ -464,10 +472,6 @@ body {
 
     .admin-sidebar-top {
         margin-bottom: 18px;
-    }
-
-    .admin-sidebar-close {
-        display: none;
     }
 
     .admin-sidebar .brand {
