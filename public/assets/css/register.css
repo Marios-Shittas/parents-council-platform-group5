@@ -376,6 +376,15 @@
 
 /* ── Responsive ── */
 @media (max-width: 576px) {
+    .register-page {
+        padding: 20px 0 30px;
+    }
+
+    .register-section-card {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
     .register-section-card .form-group-inline {
         flex-direction: column;
         align-items: stretch;
@@ -385,6 +394,7 @@
         padding-top: 0;
         width: auto;
         min-width: 0;
+        white-space: normal;
     }
     .register-input-stack {
         width: 100%;

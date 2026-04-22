@@ -87,7 +87,7 @@ if ($pendingApplicationSubmissions > 0) {
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>
-    <span>Menu</span>
+    <span>Μενού</span>
 </button>
 
 <div class="admin-sidebar-backdrop" data-admin-sidebar-backdrop></div>
@@ -97,7 +97,7 @@ if ($pendingApplicationSubmissions > 0) {
     <div class="admin-sidebar-top">
         <div class="brand">
             <i class="fas fa-school"></i>
-            Admin Panel
+            Πίνακας Διαχείρισης
         </div>
 
         <button class="admin-sidebar-close" type="button" data-admin-sidebar-close aria-label="Κλείσιμο admin menu">
@@ -109,7 +109,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'home.php' ? 'active' : ''; ?>" href="home.php">
-                <i class="fas fa-home"></i> Dashboard
+                <i class="fas fa-home"></i> Αρχική
             </a>
         </li>
 
@@ -155,13 +155,7 @@ if ($pendingApplicationSubmissions > 0) {
 
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'eshop.php' ? 'active' : ''; ?>" href="eshop.php">
-                <i class="fas fa-shopping-cart"></i> E-shop
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
-                <i class="fas fa-receipt"></i> Παραγγελίες
+                <i class="fas fa-shopping-cart"></i> Κατάστημα
             </a>
         </li>
 
@@ -191,7 +185,7 @@ if ($pendingApplicationSubmissions > 0) {
 
     <div class="admin-sidebar-footer">
         <a class="nav-link admin-logout-link" href="../logout.php">
-            <i class="fas fa-sign-out-alt"></i> Logout
+            <i class="fas fa-sign-out-alt"></i> Αποσύνδεση
         </a>
     </div>
 
@@ -246,7 +240,7 @@ if ($pendingApplicationSubmissions > 0) {
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
-                : true;
+                : wrapper.classList.contains('sidebar-collapsed');
             toggleButton.hidden = !shouldShowToggle;
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }

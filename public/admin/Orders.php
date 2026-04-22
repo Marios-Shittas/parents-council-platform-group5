@@ -34,7 +34,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 
 		<main class="admin-content">
 			<a href="home.php" class="back-link">
-				<i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+				<i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
 			</a>
 
 			<div class="admin-header">

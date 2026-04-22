@@ -33,7 +33,7 @@ $nav_items = [
         'match' => ['home.php', 'index.php', ''],
     ],
     [
-        'label' => 'Σύνδεσμος Γονέων',
+        'label' => site_is_parent() ? 'Σύνδεσμος Γονέων' : 'Σύνδεσμος Γονέων',
         'href' => site_section_url('parents.php'),
         'icon' => 'fas fa-users',
         'match' => ['parents.php'],
@@ -86,7 +86,6 @@ if (site_is_parent()) {
         'href' => site_section_url('photos.php'),
         'icon' => 'fas fa-camera',
         'match' => ['photos.php'],
-        'icon_only' => true,
     ];
 }
 ?>
@@ -599,6 +598,38 @@ if (site_is_parent()) {
                 padding: .65rem 0;
             }
 
+            .navbar-collapse.collapse {
+                display: block;
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transform: translateY(-6px);
+                pointer-events: none;
+                margin-top: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                transition: max-height .32s ease, opacity .26s ease, transform .26s ease, margin-top .26s ease, padding-top .26s ease, padding-bottom .26s ease;
+            }
+
+            .navbar-collapse.collapse.show {
+                max-height: 84vh;
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+                overflow-y: auto;
+                margin-top: .7rem;
+                padding-top: .85rem;
+                padding-bottom: .85rem;
+            }
+
+            .navbar-collapse.collapsing {
+                display: block;
+                overflow: hidden;
+                opacity: .45;
+                transform: translateY(-2px);
+                transition: height .32s ease, opacity .2s ease;
+            }
+
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;
@@ -627,12 +658,13 @@ if (site_is_parent()) {
             }
 
             .brand-line {
-                display: inline;
-                width: auto;
+                display: block;
+                width: 100%;
             }
 
             .brand-line + .brand-line {
                 margin-left: 0;
+                margin-top: .1rem;
             }
 
             .navbar-collapse {
@@ -651,6 +683,11 @@ if (site_is_parent()) {
                 overflow: visible;
             }
 
+            .navbar-nav .nav-link {
+                white-space: normal;
+                word-break: break-word;
+            }
+
             .navbar-nav .nav-item {
                 margin: .15rem 0;
             }
@@ -665,6 +702,16 @@ if (site_is_parent()) {
                 gap: .5rem;
                 min-width: 100%;
                 justify-content: flex-start;
+            }
+
+            .navbar-tools .btn {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .navbar-tools .utility-icon-link {
+                align-self: flex-start;
             }
         }
     </style>
@@ -724,12 +771,12 @@ if (site_is_parent()) {
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('logout.php'); ?>"
                        class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn logout-btn">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Log out
+                        <i class="fas fa-sign-out-alt mr-1"></i> Αποσύνδεση
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
                        class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn login-btn-green">
-                        <i class="fas fa-sign-in-alt mr-1"></i> Login
+                        <i class="fas fa-sign-in-alt mr-1"></i> Σύνδεση
                     </a>
                 <?php endif; ?>
 
@@ -751,42 +798,59 @@ if (site_is_parent()) {
 </header>
 
 <script>
-    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
+    // Ενιαίος χειρισμός toggle για σταθερό άνοιγμα/κλείσιμο του mobile menu.
     (function () {
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
         }
 
-        function bindFallbackNavbarToggle() {
-            if (hasBootstrapCollapse()) return;
-
-            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+        function bindNavbarToggle() {
             var toggler = document.querySelector('[data-target="#mainNavbar"]');
             var menu = document.getElementById('mainNavbar');
-            if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
+            if (!toggler || !menu || toggler.dataset.toggleBound === 'true') return;
 
-            toggler.dataset.fallbackBound = 'true';
+            toggler.dataset.toggleBound = 'true';
 
-            // Εναλλαγή open/close όταν πατάμε το hamburger.
-            toggler.addEventListener('click', function (event) {
-                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
-                if (hasBootstrapCollapse()) return;
+            function setExpandedState(isOpen) {
+                toggler.classList.toggle('collapsed', !isOpen);
+                toggler.setAttribute('aria-expanded', String(isOpen));
+            }
 
-                event.preventDefault();
+            function toggleMenu() {
+                if (hasBootstrapCollapse()) {
+                    window.jQuery(menu).collapse(menu.classList.contains('show') ? 'hide' : 'show');
+                    return;
+                }
 
                 var isOpen = menu.classList.contains('show');
                 menu.classList.toggle('show', !isOpen);
-                toggler.classList.toggle('collapsed', isOpen);
-                // Ενημέρωση του aria-expanded για accessibility.
-                toggler.setAttribute('aria-expanded', String(!isOpen));
+                setExpandedState(!isOpen);
+            }
+
+            if (hasBootstrapCollapse()) {
+                window.jQuery(menu).on('shown.bs.collapse', function () {
+                    setExpandedState(true);
+                });
+
+                window.jQuery(menu).on('hidden.bs.collapse', function () {
+                    setExpandedState(false);
+                });
+            }
+
+            toggler.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleMenu();
             });
+
+            setExpandedState(menu.classList.contains('show'));
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bindFallbackNavbarToggle);
+            document.addEventListener('DOMContentLoaded', bindNavbarToggle);
             return;
         }
 
-        bindFallbackNavbarToggle();
+        bindNavbarToggle();
     })();
 </script>

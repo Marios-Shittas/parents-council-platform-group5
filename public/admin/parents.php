@@ -31,6 +31,11 @@ function parentsAdminUrl($value)
     return trim((string)$value);
 }
 
+function parentsAdminFixedPageHeaderIcon()
+{
+    return 'fas fa-users';
+}
+
 function parentsAdminTextareaToList($value)
 {
     $lines = explode("\n", parentsAdminTextarea($value));
@@ -235,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     [
                         'public_eyebrow' => parentsAdminTrim($_POST['public_eyebrow'] ?? ''),
                         'parent_eyebrow' => parentsAdminTrim($_POST['parent_eyebrow'] ?? ''),
-                        'icon' => parentsAdminTrim($_POST['icon'] ?? ''),
+                        'icon' => parentsAdminFixedPageHeaderIcon(),
                     ]
                 );
                 break;
@@ -343,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $_SESSION['flash_message'] = $saved
-            ? 'Το περιεχόμενο της σελίδας Συνδεσμος Γωνεων ενημερώθηκε επιτυχώς.'
+            ? 'Το περιεχόμενο της σελίδας Σύνδεσμος Γονέων ενημερώθηκε επιτυχώς.'
             : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $parentsPageService->getLastError();
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
@@ -368,7 +373,7 @@ $boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
 );
 $boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
 $parentsContentTabs = [
-    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
     'attendance_portal_section' => ['label' => 'Επιπρόσθετα Στοιχεία', 'icon' => 'fas fa-folder-open'],
@@ -386,7 +391,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Διαχείριση Σελίδας Συνδεσμος Γωνεων - Admin</title>
+    <title>Διαχείριση Σελίδας Σύνδεσμος Γονέων - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -402,13 +407,13 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i>
-            Πίσω στο Dashboard
+            Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
             <h1>
                 <i class="fas fa-users"></i>
-                Διαχείριση Σελίδας Συνδεσμος Γωνεων
+                Διαχείριση Σελίδας Σύνδεσμος Γονέων
             </h1>
         </div>
 
@@ -448,7 +453,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Page Header</h3>
+                            <h3>Κεφαλίδα Σελίδας</h3>
                             <p>Τίτλος, υπότιτλος και διαφορετικός μικρός τίτλος για δημόσια και γονική προβολή.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
@@ -462,11 +467,6 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             <div class="form-group">
                                 <label for="page-header-title">Τίτλος</label>
                                 <input type="text" class="form-control" id="page-header-title" name="title" value="<?php echo htmlspecialchars($pageHeaderSection['title']); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="page-header-icon">Icon class</label>
-                                <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-users'); ?>">
                             </div>
 
                             <div class="form-group">
@@ -487,7 +487,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Header
+                                <i class="fas fa-save"></i> Αποθήκευση Κεφαλίδας
                             </button>
                         </div>
                     </form>
@@ -534,8 +534,8 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'association_section' ? 'show active' : ''; ?>" id="tab-association_section" role="tabpanel" aria-labelledby="tab-association_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
-                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδεσμου Γωνεων.</p>
+                            <h3>Σύνδεσμος Γονέων</h3>
+                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδέσμου Γονέων.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-handshake"></i></span>
                     </div>
@@ -609,7 +609,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Συνδεσμου Γωνεων
+                                <i class="fas fa-save"></i> Αποθήκευση Συνδέσμου Γονέων
                             </button>
                         </div>
                     </form>
@@ -729,7 +729,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'board_section' ? 'show active' : ''; ?>" id="tab-board_section" role="tabpanel" aria-labelledby="tab-board_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
+                            <h3>Σύνδεσμος Γονέων</h3>
                             <p>Lead paragraph, labels πίνακα και μέλη Δ.Σ. Μορφή γραμμής: <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-user-friends"></i></span>

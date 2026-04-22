@@ -297,7 +297,7 @@ $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_u
                        <h5 class="footer-brand-title">Σύνδεσμος Γονέων &amp; Κηδεμόνων<br>Γυμνασίου Αγίου Αθανασίου</h5>
                    </div>
                    <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΧΡΙΣΤΟΥ ΠΑΠΑΔΟΥΡΗ 50, 4105 ΑΓΙΟΣ ΑΘΑΝΑΣΙΟΣ, Λεμεσός</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg-gym-ag-athanasios-lem@schools.ac.cy</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg.ag.athanasiou@gmail.com</span></div>
                </div>
 
 

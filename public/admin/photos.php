@@ -285,7 +285,7 @@ $photosCount = count($galleryImages);
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i>
-            Πίσω στο Dashboard
+            Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
@@ -304,7 +304,7 @@ $photosCount = count($galleryImages);
 
         <section class="photos-admin-overview">
             <div class="photos-admin-overview__content">
-                <p class="photos-admin-overview__kicker">Gallery Admin</p>
+                <p class="photos-admin-overview__kicker">Διαχείριση Γκαλερί</p>
                 <h2>Οργάνωσε τη σελίδα φωτογραφιών με απλό τρόπο</h2>
                 <p>Από εδώ ρυθμίζεις τα βασικά κείμενα, ανεβάζεις νέες εικόνες και διαχειρίζεσαι τη βιβλιοθήκη που εμφανίζεται στους γονείς.</p>
             </div>

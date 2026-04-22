@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (!empty($contactInfo['subtitle'])): ?>
                     <p class="section-subtitle"><?php echo htmlspecialchars($contactInfo['subtitle']); ?></p>
                 <?php endif; ?>
-                <div class="row">
+                <div class="row contact-cards-grid">
                     <?php foreach (($contactInfo['content']['cards'] ?? []) as $card): ?>
                         <?php
                         $iconClass = trim((string)($card['icon'] ?? '')) ?: 'fas fa-info-circle';
