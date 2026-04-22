@@ -211,13 +211,13 @@ $registrationSchedules = $usersService->getSystemSchedules();
                     <div class="col-md-6 mb-3">
                         <div class="mb-2">
                             <strong>🗑️ Διαγραφή Χρηστών:</strong>
-                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών που έχουν αναφερθεί ως ανενεργοί ή για καθαρισμό του συστήματος.</p>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών για καθαρισμό του συστήματος.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-2">
                             <strong>🧹 Καθαρισμός Υποβολών:</strong>
-                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματο καθαρισμό παλαιών υποβολών και δεδομένων που δεν χρειάζονται πλέον.</p>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματο καθαρισμό παλαιών υποβολών.</p>
                         </div>
                     </div>
                 </div>
