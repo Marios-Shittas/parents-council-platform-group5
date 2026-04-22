@@ -94,17 +94,39 @@ if (site_is_parent()) {
         var faviconHref = '<?php echo site_asset_url('img/logo-icon.png'); ?>';
         var head = document.head || document.getElementsByTagName('head')[0];
         if (!head) return;
+        var img = new Image();
 
-        var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
-        existingIcons.forEach(function (icon) {
-            icon.parentNode.removeChild(icon);
-        });
+        img.onload = function () {
+            var size = 128;
+            var canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
 
-        var icon = document.createElement('link');
-        icon.rel = 'icon';
-        icon.type = 'image/png';
-        icon.href = faviconHref;
-        head.appendChild(icon);
+            var context = canvas.getContext('2d');
+            if (!context) {
+                return;
+            }
+
+            context.clearRect(0, 0, size, size);
+            context.beginPath();
+            context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            context.closePath();
+            context.clip();
+            context.drawImage(img, 0, 0, size, size);
+
+            var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+            existingIcons.forEach(function (icon) {
+                icon.parentNode.removeChild(icon);
+            });
+
+            var icon = document.createElement('link');
+            icon.rel = 'icon';
+            icon.type = 'image/png';
+            icon.href = canvas.toDataURL('image/png');
+            head.appendChild(icon);
+        };
+
+        img.src = faviconHref;
     })();
 </script>
 <style>
@@ -192,7 +214,7 @@ if (site_is_parent()) {
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            background: #ffffff;
+            background: transparent;
             border: 3px solid rgba(255, 255, 255, 0.92);
             box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
         }
