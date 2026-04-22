@@ -253,14 +253,14 @@ if (site_is_parent()) {
             font-family: 'Lato', sans-serif;
             font-weight: 600;
             color: #ffffff !important;
-            padding: .5rem .95rem;
+            padding: .52rem 1.02rem;
             border-radius: .65rem;
             transition: all .2s ease;
             position: relative;
             border: 0 !important;
             box-shadow: none !important;
             background: transparent;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         /* Ίδιο πλάτος στο icon ώστε να φαίνονται όλα ευθυγραμμισμένα. */
@@ -445,23 +445,10 @@ if (site_is_parent()) {
             width: 100%;
         }
 
-        .navbar-brand::after {
-            content: "";
-            position: absolute;
-            left: calc(50% - 50vw);
-            bottom: -.45rem;
-            width: 100vw;
-            height: 2px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
-            opacity: .65;
-            pointer-events: none;
-        }
-
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
         .navbar-collapse {
             width: 100%;
-            min-width: max-content;
+            min-width: 0;
             justify-content: center;
             align-items: center;
             gap: 1rem;
@@ -481,7 +468,7 @@ if (site_is_parent()) {
             align-items: center;
             margin: 0;
             gap: .25rem;
-            min-width: max-content;
+            min-width: 0;
             overflow: visible;
         }
 
@@ -506,8 +493,8 @@ if (site_is_parent()) {
         }
 
         .navbar-parent .navbar-nav .nav-link {
-            padding: .46rem .72rem;
-            font-size: .91rem;
+            padding: .5rem .84rem;
+            font-size: .96rem;
         }
 
         .navbar-parent .navbar-nav .nav-link--icon-only {
@@ -540,11 +527,49 @@ if (site_is_parent()) {
             padding-left: .7rem;
         }
 
+        @media (min-width: 1200px) {
+            .navbar-parent .navbar-collapse {
+                justify-content: space-between;
+                gap: .45rem;
+                padding: .9rem .95rem;
+            }
+
+            .navbar-parent .navbar-nav {
+                flex: 1 1 auto;
+                min-width: 0;
+                gap: .08rem;
+                padding-right: 0;
+            }
+
+            .navbar-parent .navbar-nav .nav-item {
+                margin: 0 .03rem;
+            }
+
+            .navbar-parent .navbar-nav .nav-link {
+                padding: .44rem .66rem;
+                font-size: .9rem;
+            }
+
+            .navbar-parent .navbar-tools {
+                flex: 0 0 auto;
+                margin-left: .35rem;
+                padding-left: .5rem;
+                gap: .4rem;
+            }
+
+            .navbar-parent .login-btn,
+            .navbar-parent .login-btn.btn,
+            .navbar-parent .login-btn.btn-sm {
+                padding: .26rem .68rem !important;
+                font-size: .88rem !important;
+            }
+        }
+
         .navbar .container {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            max-width: 1560px;
+            max-width: 1640px;
             overflow: visible;
             position: relative;
             z-index: 1;
@@ -596,6 +621,10 @@ if (site_is_parent()) {
         @media (max-width: 991.98px) {
             .navbar {
                 padding: .65rem 0;
+            }
+
+            .logo-stack {
+                transform: none;
             }
 
             .navbar-collapse.collapse {
@@ -714,6 +743,135 @@ if (site_is_parent()) {
                 align-self: flex-start;
             }
         }
+
+        /*
+         * Desktop zoom mode:
+         * If zoom goes above 125%, force burger behavior even on large widths.
+         */
+        .navbar.zoom-burger-mode {
+            padding: .65rem 0;
+        }
+
+        .navbar.zoom-burger-mode .navbar-toggler {
+            display: block !important;
+            margin-left: auto;
+        }
+
+        .navbar.zoom-burger-mode .navbar-brand {
+            margin: 0;
+            flex: 0 1 auto;
+            justify-content: flex-start;
+            max-width: calc(100% - 78px);
+            gap: .7rem;
+        }
+
+        .navbar.zoom-burger-mode .logo-stack {
+            transform: none;
+        }
+
+        .navbar.zoom-burger-mode .navbar-brand img {
+            width: 58px;
+            height: 58px;
+        }
+
+        .navbar.zoom-burger-mode .brand-text {
+            display: inline-block;
+            max-width: calc(100vw - 150px);
+            font-size: 1.22rem;
+            line-height: 1.1;
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+        }
+
+        .navbar.zoom-burger-mode .brand-line {
+            display: block;
+            width: 100%;
+        }
+
+        .navbar.zoom-burger-mode .brand-line + .brand-line {
+            margin-left: 0;
+            margin-top: .1rem;
+        }
+
+        .navbar.zoom-burger-mode .navbar-collapse.collapse {
+            display: block !important;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transform: translateY(-6px);
+            pointer-events: none;
+            margin-top: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            transition: max-height .32s ease, opacity .26s ease, transform .26s ease, margin-top .26s ease, padding-top .26s ease, padding-bottom .26s ease;
+        }
+
+        .navbar.zoom-burger-mode .navbar-collapse.collapse.show {
+            max-height: 84vh;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            overflow-y: auto;
+            margin-top: .7rem;
+            padding-top: .85rem;
+            padding-bottom: .85rem;
+        }
+
+        .navbar.zoom-burger-mode .navbar-collapse.collapsing {
+            display: block !important;
+            overflow: hidden;
+            opacity: .45;
+            transform: translateY(-2px);
+            transition: height .32s ease, opacity .2s ease;
+        }
+
+        .navbar.zoom-burger-mode .navbar-collapse {
+            margin-top: .7rem;
+            padding: .85rem 1rem;
+            min-width: 0;
+        }
+
+        .navbar.zoom-burger-mode .navbar-nav {
+            margin-top: .75rem;
+            flex: 1 1 auto;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: .1rem;
+            min-width: 0;
+            overflow: visible;
+        }
+
+        .navbar.zoom-burger-mode .navbar-nav .nav-link {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .navbar.zoom-burger-mode .navbar-nav .nav-item {
+            margin: .15rem 0;
+        }
+
+        .navbar.zoom-burger-mode .navbar-tools {
+            margin-top: .75rem;
+            margin-left: 0;
+            padding-top: .5rem;
+            padding-left: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 0;
+            gap: .5rem;
+            min-width: 100%;
+            justify-content: flex-start;
+        }
+
+        .navbar.zoom-burger-mode .navbar-tools .btn {
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .navbar.zoom-burger-mode .navbar-tools .utility-icon-link {
+            align-self: flex-start;
+        }
     </style>
 
 <header class="site-header">
@@ -800,6 +958,63 @@ if (site_is_parent()) {
 <script>
     // Ενιαίος χειρισμός toggle για σταθερό άνοιγμα/κλείσιμο του mobile menu.
     (function () {
+        function getZoomSignals() {
+            var visualScale = 1;
+            var outerInnerScale = 1;
+
+            if (window.visualViewport && typeof window.visualViewport.scale === 'number') {
+                visualScale = window.visualViewport.scale;
+            }
+
+            if (window.outerWidth && window.innerWidth) {
+                outerInnerScale = window.outerWidth / window.innerWidth;
+            }
+
+            return {
+                visualScale: visualScale,
+                outerInnerScale: outerInnerScale
+            };
+        }
+
+        function forceBurgerMode(shouldForce) {
+            var navbar = document.querySelector('.site-header .navbar');
+            var menu = document.getElementById('mainNavbar');
+            var toggler = document.querySelector('[data-target="#mainNavbar"]');
+            if (!navbar || !menu || !toggler) return;
+
+            if (shouldForce) {
+                navbar.classList.add('zoom-burger-mode');
+
+                if (menu.classList.contains('show')) {
+                    if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function') {
+                        window.jQuery(menu).collapse('hide');
+                    } else {
+                        menu.classList.remove('show');
+                    }
+                }
+
+                toggler.setAttribute('aria-expanded', 'false');
+                toggler.classList.add('collapsed');
+                return;
+            }
+
+            navbar.classList.remove('zoom-burger-mode');
+            menu.classList.remove('collapsing');
+            menu.style.height = '';
+            toggler.setAttribute('aria-expanded', menu.classList.contains('show') ? 'true' : 'false');
+            toggler.classList.toggle('collapsed', !menu.classList.contains('show'));
+        }
+
+        function applyZoomMode() {
+            var desktopView = window.matchMedia('(min-width: 992px)').matches;
+            var signals = getZoomSignals();
+            var threshold = 1.49; // 150% with small tolerance for browser rounding.
+            var isAtLeast150 = signals.visualScale >= threshold
+                || signals.outerInnerScale >= threshold;
+            var shouldForceBurger = desktopView && isAtLeast150;
+            forceBurgerMode(shouldForceBurger);
+        }
+
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
         }
@@ -846,11 +1061,38 @@ if (site_is_parent()) {
             setExpandedState(menu.classList.contains('show'));
         }
 
+        function bindZoomListeners() {
+            var rafId = null;
+            function onZoomOrResize() {
+                if (rafId) {
+                    window.cancelAnimationFrame(rafId);
+                }
+
+                rafId = window.requestAnimationFrame(function () {
+                    applyZoomMode();
+                });
+
+                // Some browsers update zoom metrics asynchronously.
+                window.setTimeout(applyZoomMode, 120);
+            }
+
+            window.addEventListener('resize', onZoomOrResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onZoomOrResize);
+            }
+
+            applyZoomMode();
+        }
+
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bindNavbarToggle);
+            document.addEventListener('DOMContentLoaded', function () {
+                bindNavbarToggle();
+                bindZoomListeners();
+            });
             return;
         }
 
         bindNavbarToggle();
+        bindZoomListeners();
     })();
 </script>
