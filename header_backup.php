@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
@@ -14,12 +14,12 @@ $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
 
-$site_title = 'Σύνδεσμος Γονέων & Κηδεμόνων';
+$site_title = '╬ú╧ì╬╜╬┤╬╡╧â╬╝╬┐╧é ╬ô╬┐╬╜╬¡╧ë╬╜ & ╬Ü╬╖╬┤╬╡╬╝╧î╬╜╧ë╬╜';
 $current_page = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
-$portal_label = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
+$portal_label = site_is_parent() ? '╬º╧Ä╧ü╬┐╧é ╬ô╬┐╬╜╬¡╬▒' : '╬ö╬╖╬╝╧î╧â╬╣╬▒ ╬á╧ì╬╗╬╖';
 
 $profile_item = [
-    'label' => 'Το Προφίλ Μου',
+    'label' => '╬ñ╬┐ ╬á╧ü╬┐╧å╬»╬╗ ╬£╬┐╧à',
     'href' => site_section_url('profile.php'),
     'icon' => 'fas fa-user-circle',
     'match' => ['profile.php'],
@@ -27,37 +27,37 @@ $profile_item = [
 
 $nav_items = [
     [
-        'label' => 'Αρχική',
+        'label' => '╬æ╧ü╧ç╬╣╬║╬«',
         'href' => site_section_url('home.php'),
         'icon' => 'fas fa-home',
         'match' => ['home.php', 'index.php', ''],
     ],
     [
-        'label' => 'Σύνδεσμος Γονέων',
+        'label' => '╬ú╧ì╬╜╬┤╬╡╧â╬╝╬┐╧é ╬ô╬┐╬╜╬¡╧ë╬╜',
         'href' => site_section_url('parents.php'),
         'icon' => 'fas fa-users',
         'match' => ['parents.php'],
     ],
     [
-        'label' => 'Ανακοινώσεις',
+        'label' => '╬æ╬╜╬▒╬║╬┐╬╣╬╜╧Ä╧â╬╡╬╣╧é',
         'href' => site_section_url('announcements.php'),
         'icon' => 'fas fa-bullhorn',
         'match' => ['announcements.php'],
     ],
     [
-        'label' => 'Εκδηλώσεις',
+        'label' => '╬ò╬║╬┤╬╖╬╗╧Ä╧â╬╡╬╣╧é',
         'href' => site_section_url('events.php'),
         'icon' => 'fas fa-calendar-alt',
         'match' => ['events.php', 'event.php'],
     ],
     [
-        'label' => 'Χρήσιμες Πληροφορίες',
+        'label' => '╬º╧ü╬«╧â╬╣╬╝╬╡╧é ╬á╬╗╬╖╧ü╬┐╧å╬┐╧ü╬»╬╡╧é',
         'href' => site_section_url('useful-information.php'),
         'icon' => 'fas fa-info-circle',
         'match' => ['useful-information.php'],
     ],
     [
-        'label' => 'Αιτήσεις',
+        'label' => '╬æ╬╣╧ä╬«╧â╬╡╬╣╧é',
         'href' => site_section_url('applications.php'),
         'icon' => 'fas fa-file-alt',
         'match' => ['applications.php'],
@@ -66,7 +66,7 @@ $nav_items = [
 
 if (site_is_parent()) {
     $nav_items[] = [
-        'label' => 'Κατάστημα',
+        'label' => '╬Ü╬▒╧ä╬¼╧â╧ä╬╖╬╝╬▒',
         'href' => site_section_url('eshop.php'),
         'icon' => 'fas fa-store',
         'match' => ['eshop.php'],
@@ -74,7 +74,7 @@ if (site_is_parent()) {
 }
 
 $nav_items[] = [
-    'label' => 'Επικοινωνία',
+    'label' => '╬ò╧Ç╬╣╬║╬┐╬╣╬╜╧ë╬╜╬»╬▒',
     'href' => site_section_url('epikoinonia.php'),
     'icon' => 'fas fa-envelope',
     'match' => ['epikoinonia.php'],
@@ -82,7 +82,7 @@ $nav_items[] = [
 
 if (site_is_parent()) {
     $nav_items[] = [
-        'label' => 'Φωτογραφίες',
+        'label' => '╬ª╧ë╧ä╬┐╬│╧ü╬▒╧å╬»╬╡╧é',
         'href' => site_section_url('photos.php'),
         'icon' => 'fas fa-camera',
         'match' => ['photos.php'],
@@ -109,27 +109,27 @@ if (site_is_parent()) {
     })();
 </script>
 <style>
-        /* Βασικά χρώματα για ενιαίο design. */
+        /* ╬Æ╬▒╧â╬╣╬║╬¼ ╧ç╧ü╧Ä╬╝╬▒╧ä╬▒ ╬│╬╣╬▒ ╬╡╬╜╬╣╬▒╬»╬┐ design. */
         :root {
-            /* Χρώμα φόντου του header. */
+            /* ╬º╧ü╧Ä╬╝╬▒ ╧å╧î╬╜╧ä╬┐╧à ╧ä╬┐╧à header. */
             --header-bg: rgba(248, 249, 250, 0.95);
-            /* Λεπτή γραμμή/περίγραμμα του header. */
+            /* ╬¢╬╡╧Ç╧ä╬« ╬│╧ü╬▒╬╝╬╝╬«/╧Ç╬╡╧ü╬»╬│╧ü╬▒╬╝╬╝╬▒ ╧ä╬┐╧à header. */
             --header-border: rgba(0, 0, 0, 0.06);
-            /* Κύριο μπλε χρώμα brand. */
+            /* ╬Ü╧ì╧ü╬╣╬┐ ╬╝╧Ç╬╗╬╡ ╧ç╧ü╧Ä╬╝╬▒ brand. */
             --brand-color: #1a3a5c;
-            /* Βασικό χρώμα κειμένου. */
+            /* ╬Æ╬▒╧â╬╣╬║╧î ╧ç╧ü╧Ä╬╝╬▒ ╬║╬╡╬╣╬╝╬¡╬╜╬┐╧à. */
             --text-main: #3f4a56;
-            /* Πιο έντονο χρώμα για hover/active. */
+            /* ╬á╬╣╬┐ ╬¡╬╜╧ä╬┐╬╜╬┐ ╧ç╧ü╧Ä╬╝╬▒ ╬│╬╣╬▒ hover/active. */
             --text-strong: #152536;
-            /* Απαλό hover φόντο στα links. */
+            /* ╬æ╧Ç╬▒╬╗╧î hover ╧å╧î╬╜╧ä╬┐ ╧â╧ä╬▒ links. */
             --link-hover-bg: #eef3f8;
-            /* Απαλό active φόντο (κρατήθηκε για πιθανή χρήση). */
+            /* ╬æ╧Ç╬▒╬╗╧î active ╧å╧î╬╜╧ä╬┐ (╬║╧ü╬▒╧ä╬«╬╕╬╖╬║╬╡ ╬│╬╣╬▒ ╧Ç╬╣╬╕╬▒╬╜╬« ╧ç╧ü╬«╧â╬╖). */
             --link-active-bg: #e6edf5;
-            /* Μπλε gradient ίδιο με το hero panel. */
+            /* ╬£╧Ç╬╗╬╡ gradient ╬»╬┤╬╣╬┐ ╬╝╬╡ ╧ä╬┐ hero panel. */
             --nav-row-bg: linear-gradient(135deg, #102f52 0%, #1a3a5c 55%, #0057a8 100%);
         }
 
-        /* Scoped βάση για να μη βασίζεται το header σε global κανόνες της main.css. */
+        /* Scoped ╬▓╬¼╧â╬╖ ╬│╬╣╬▒ ╬╜╬▒ ╬╝╬╖ ╬▓╬▒╧â╬»╬╢╬╡╧ä╬▒╬╣ ╧ä╬┐ header ╧â╬╡ global ╬║╬▒╬╜╧î╬╜╬╡╧é ╧ä╬╖╧é main.css. */
         .site-header,
         .site-header * {
             box-sizing: border-box;
@@ -148,7 +148,7 @@ if (site_is_parent()) {
             font-family: 'Lato', sans-serif;
         }
 
-        /* Κολλάει πάνω όταν κάνουμε scroll και μένει πάντα ορατό. */
+        /* ╬Ü╬┐╬╗╬╗╬¼╬╡╬╣ ╧Ç╬¼╬╜╧ë ╧î╧ä╬▒╬╜ ╬║╬¼╬╜╬┐╧à╬╝╬╡ scroll ╬║╬▒╬╣ ╬╝╬¡╬╜╬╡╬╣ ╧Ç╬¼╬╜╧ä╬▒ ╬┐╧ü╬▒╧ä╧î. */
         .navbar {
             position: sticky;
             top: 0;
@@ -163,7 +163,7 @@ if (site_is_parent()) {
             overflow-y: visible;
         }
 
-        /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
+        /* ╬è╬┤╬╣╬▒ ╬┤╬╣╬▒╬║╧ü╬╣╧ä╬╣╬║╬« ╬╝╧Ç╬╗╬╡ ╬│╧ü╬▒╬╝╬╝╬« ╬║╬▒╬╣ ╬║╬¼╧ä╧ë ╬▒╧Ç╧î ╧ä╬┐ navbar. */
         .navbar::after {
             content: "";
             position: absolute;
@@ -177,7 +177,7 @@ if (site_is_parent()) {
             pointer-events: none;
         }
 
-        /* Στυλ λογοτύπου. */
+        /* ╬ú╧ä╧à╬╗ ╬╗╬┐╬│╬┐╧ä╧ì╧Ç╬┐╧à. */
         .logo-stack {
             display: inline-flex;
             flex-direction: column;
@@ -199,7 +199,7 @@ if (site_is_parent()) {
             box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
         }
 
-        /* Κείμενο δίπλα στο λογότυπο. */
+        /* ╬Ü╬╡╬»╬╝╬╡╬╜╬┐ ╬┤╬»╧Ç╬╗╬▒ ╧â╧ä╬┐ ╬╗╬┐╬│╧î╧ä╧à╧Ç╬┐. */
         .brand-text {
             display: block;
             flex: 0 1 auto;
@@ -226,13 +226,13 @@ if (site_is_parent()) {
             margin-left: .35rem;
         }
 
-        /* Λίγο κενό ανάμεσα στα menu items. */
+        /* ╬¢╬»╬│╬┐ ╬║╬╡╬╜╧î ╬▒╬╜╬¼╬╝╬╡╧â╬▒ ╧â╧ä╬▒ menu items. */
         .navbar-nav .nav-item {
             margin: 0 .18rem;
             flex: 0 0 auto;
         }
 
-        /* Βασικό στυλ links menu. */
+        /* ╬Æ╬▒╧â╬╣╬║╧î ╧â╧ä╧à╬╗ links menu. */
         .navbar-nav .nav-link {
             font-family: 'Lato', sans-serif;
             font-weight: 600;
@@ -247,7 +247,7 @@ if (site_is_parent()) {
             font-size: 0.95rem;
         }
 
-        /* Ίδιο πλάτος στο icon ώστε να φαίνονται όλα ευθυγραμμισμένα. */
+        /* ╬è╬┤╬╣╬┐ ╧Ç╬╗╬¼╧ä╬┐╧é ╧â╧ä╬┐ icon ╧Ä╧â╧ä╬╡ ╬╜╬▒ ╧å╬▒╬»╬╜╬┐╬╜╧ä╬▒╬╣ ╧î╬╗╬▒ ╬╡╧à╬╕╧à╬│╧ü╬▒╬╝╬╝╬╣╧â╬╝╬¡╬╜╬▒. */
         .navbar-nav .nav-link i {
             width: 1rem;
             text-align: center;
@@ -270,22 +270,22 @@ if (site_is_parent()) {
             font-size: 1rem;
         }
 
-        /* Hover κατάσταση για πιο καθαρό feedback στον χρήστη. */
+        /* Hover ╬║╬▒╧ä╬¼╧â╧ä╬▒╧â╬╖ ╬│╬╣╬▒ ╧Ç╬╣╬┐ ╬║╬▒╬╕╬▒╧ü╧î feedback ╧â╧ä╬┐╬╜ ╧ç╧ü╬«╧â╧ä╬╖. */
         .navbar-nav .nav-link:hover {
             background: rgba(255, 255, 255, 0.14);
             color: #ffffff !important;
-            /* Μικρή κίνηση για πιο "ζωντανό" αποτέλεσμα. */
+            /* ╬£╬╣╬║╧ü╬« ╬║╬»╬╜╬╖╧â╬╖ ╬│╬╣╬▒ ╧Ç╬╣╬┐ "╬╢╧ë╬╜╧ä╬▒╬╜╧î" ╬▒╧Ç╬┐╧ä╬¡╬╗╬╡╧â╬╝╬▒. */
             transform: translateY(-1px);
         }
 
-        /* Όταν η σελίδα είναι ενεργή, φαίνεται καθαρά. */
+        /* ╬î╧ä╬▒╬╜ ╬╖ ╧â╬╡╬╗╬»╬┤╬▒ ╬╡╬»╬╜╬▒╬╣ ╬╡╬╜╬╡╧ü╬│╬«, ╧å╬▒╬»╬╜╬╡╧ä╬▒╬╣ ╬║╬▒╬╕╬▒╧ü╬¼. */
         .navbar-nav .active > .nav-link {
             background: rgba(255, 255, 255, 0.08);
             color: #ffffff !important;
             font-weight: 700;
         }
 
-        /* Μικρή μπλε μπάρα κάτω από το ενεργό link. */
+        /* ╬£╬╣╬║╧ü╬« ╬╝╧Ç╬╗╬╡ ╬╝╧Ç╬¼╧ü╬▒ ╬║╬¼╧ä╧ë ╬▒╧Ç╧î ╧ä╬┐ ╬╡╬╜╬╡╧ü╬│╧î link. */
         .navbar-nav .nav-link-content {
             position: relative;
             display: inline-flex;
@@ -303,7 +303,7 @@ if (site_is_parent()) {
             background: rgba(255, 255, 255, 0.82);
         }
 
-        /* Κουμπί login. */
+        /* ╬Ü╬┐╧à╬╝╧Ç╬» login. */
         .site-header .login-btn,
         .site-header .login-btn.btn,
         .site-header .login-btn.btn-sm {
@@ -424,7 +424,7 @@ if (site_is_parent()) {
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         }
 
-        /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
+        /* ╬£╬╣╬║╧ü╧î╧ä╬╡╧ü╬┐ ╬║╬╡╬╜╧î ╬▒╬╜╬¼╬╝╬╡╧â╬▒ ╧â╧ä╬┐ ╬╗╬┐╬│╧î╧ä╧à╧Ç╬┐ ╬║╬▒╬╣ ╧ä╬┐ menu. */
         .navbar-brand {
             position: relative;
             margin: 0 0 1rem;
@@ -452,10 +452,10 @@ if (site_is_parent()) {
             background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
             opacity: .65;
             pointer-events: none;
-            margin-top: 18px; /* προσθέτει εμφανές κενό πάνω από τη γραμμή */
+            margin-top: 18px; /* ╧Ç╧ü╬┐╧â╬╕╬¡╧ä╬╡╬╣ ╬╡╬╝╧å╬▒╬╜╬¡╧é ╬║╬╡╬╜╧î ╧Ç╬¼╬╜╧ë ╬▒╧Ç╧î ╧ä╬╖ ╬│╧ü╬▒╬╝╬╝╬« */
         }
 
-        /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
+        /* ╬ñ╬┐ menu ╧Ç╬╣╬¼╬╜╬╡╬╣ ╧î╬╗╬┐ ╧ä╬┐ ╬┤╬╣╬▒╬╕╬¡╧â╬╣╬╝╬┐ ╧Ç╬╗╬¼╧ä╬┐╧é ╧Ç╬╣╬┐ ╬╣╧â╬┐╧ü╧ü╬┐╧Ç╬╖╬╝╬¡╬╜╬▒. */
         .navbar-collapse {
             width: 100%;
             min-width: 0;
@@ -571,7 +571,7 @@ if (site_is_parent()) {
             white-space: nowrap;
         }
 
-        /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
+        /* ╬Æ╬╡╬╗╧ä╬»╧ë╧â╬╖ ╧Ç╧ü╬┐╧â╬▓╬▒╧â╬╣╬╝╧î╧ä╬╖╧ä╬▒╧é ╬│╬╣╬▒ ╧Ç╬╗╬╖╬║╧ä╧ü╬┐╬╗╧î╬│╬╣╬┐ (Tab). */
         .navbar-nav .nav-link:focus-visible,
         .login-btn:focus-visible,
         .utility-icon-link:focus-visible,
@@ -681,7 +681,7 @@ if (site_is_parent()) {
             }
         }
 
-        /* Ρυθμίσεις για κινητό/tablet. */
+        /* ╬í╧à╬╕╬╝╬»╧â╬╡╬╣╧é ╬│╬╣╬▒ ╬║╬╣╬╜╬╖╧ä╧î/tablet. */
         @media (max-width: 1199.98px) {
             .navbar {
                 padding: .65rem 0;
@@ -809,23 +809,23 @@ if (site_is_parent()) {
     </style>
 
 <header class="site-header">
-<!-- Κύριο navigation όλου του site. -->
+<!-- ╬Ü╧ì╧ü╬╣╬┐ navigation ╧î╬╗╬┐╧à ╧ä╬┐╧à site. -->
 <nav class="navbar navbar-expand-xl navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
     <div class="container">
 
-        <!-- Λογότυπο + τίτλος σχολείου. -->
+        <!-- ╬¢╬┐╬│╧î╧ä╧à╧Ç╬┐ + ╧ä╬»╧ä╬╗╬┐╧é ╧â╧ç╬┐╬╗╬╡╬»╬┐╧à. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <span class="logo-stack mr-2">
                 <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo">
             </span>
             <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">
-                <span class="brand-line">Σύνδεσμος Γονέων &amp;</span>
-                <span class="brand-line">Κηδεμόνων Γυμνασίου</span>
-                <span class="brand-line">Αγίου Αθανασίου</span>
+                <span class="brand-line">╬ú╧ì╬╜╬┤╬╡╧â╬╝╬┐╧é ╬ô╬┐╬╜╬¡╧ë╬╜ &amp;</span>
+                <span class="brand-line">╬Ü╬╖╬┤╬╡╬╝╧î╬╜╧ë╬╜ ╬ô╧à╬╝╬╜╬▒╧â╬»╬┐╧à</span>
+                <span class="brand-line">╬æ╬│╬»╬┐╧à ╬æ╬╕╬▒╬╜╬▒╧â╬»╬┐╧à</span>
             </span>
         </a>
 
-        <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->
+        <!-- ╬Ü╬┐╧à╬╝╧Ç╬» ╧Ç╬┐╧à ╬▒╬╜╬┐╬»╬│╬╡╬╣ ╧ä╬┐ menu ╧â╬╡ ╬║╬╣╬╜╬╖╧ä╬¡╧é ╧â╧à╧â╬║╬╡╧à╬¡╧é. -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar"
                 aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -833,14 +833,14 @@ if (site_is_parent()) {
 
         <div class="collapse navbar-collapse" id="mainNavbar">
 
-            <!-- Τα βασικά links του site στο κέντρο. -->
+            <!-- ╬ñ╬▒ ╬▓╬▒╧â╬╣╬║╬¼ links ╧ä╬┐╧à site ╧â╧ä╬┐ ╬║╬¡╬╜╧ä╧ü╬┐. -->
             <ul class="navbar-nav text-center">
-                <!-- Κάνουμε loop στο $nav_items για να αποφύγουμε επαναλαμβανόμενο HTML. -->
+                <!-- ╬Ü╬¼╬╜╬┐╧à╬╝╬╡ loop ╧â╧ä╬┐ $nav_items ╬│╬╣╬▒ ╬╜╬▒ ╬▒╧Ç╬┐╧å╧ì╬│╬┐╧à╬╝╬╡ ╬╡╧Ç╬▒╬╜╬▒╬╗╬▒╬╝╬▓╬▒╬╜╧î╬╝╬╡╬╜╬┐ HTML. -->
                 <?php foreach ($nav_items as $item): ?>
-                    <!-- Ελέγχουμε αν το link αντιστοιχεί στην τωρινή σελίδα. -->
+                    <!-- ╬ò╬╗╬¡╬│╧ç╬┐╧à╬╝╬╡ ╬▒╬╜ ╧ä╬┐ link ╬▒╬╜╧ä╬╣╧â╧ä╬┐╬╣╧ç╬╡╬» ╧â╧ä╬╖╬╜ ╧ä╧ë╧ü╬╣╬╜╬« ╧â╬╡╬╗╬»╬┤╬▒. -->
                     <?php $is_active = in_array($current_page, $item['match'], true); ?>
                     <li class="nav-item<?php echo $is_active ? ' active' : ''; ?>">
-                        <!-- aria-current βοηθάει accessibility (screen readers). -->
+                        <!-- aria-current ╬▓╬┐╬╖╬╕╬¼╬╡╬╣ accessibility (screen readers). -->
                         <a class="nav-link<?php echo !empty($item['icon_only']) ? ' nav-link--icon-only' : ''; ?>"
                            href="<?php echo $item['href']; ?>"
                            aria-label="<?php echo htmlspecialchars($item['label']); ?>"
@@ -859,7 +859,7 @@ if (site_is_parent()) {
                 <?php endforeach; ?>
             </ul>
 
-            <!-- Δεξιά εργαλεία: login + shortcut. -->
+            <!-- ╬ö╬╡╬╛╬╣╬¼ ╬╡╧ü╬│╬▒╬╗╬╡╬»╬▒: login + shortcut. -->
             <div class="d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center navbar-tools">
 
                 <?php if (site_is_parent()): ?>
@@ -892,7 +892,7 @@ if (site_is_parent()) {
 </header>
 
 <script>
-    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
+    // Fallback ╬╝╧î╬╜╬┐ ╧î╧ä╬▒╬╜ ╧ä╬╡╬╗╬╡╬╣╧Ä╧â╬╡╬╣ ╧ä╬┐ ╧å╧î╧ü╧ä╧ë╬╝╬▒ ╬║╬▒╬╣ ╬┤╬╡╬╜ ╧à╧Ç╬¼╧ü╧ç╬╡╬╣ ╬║╬▒╬╕╧î╬╗╬┐╧à Bootstrap collapse.
     (function () {
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
@@ -901,16 +901,16 @@ if (site_is_parent()) {
         function bindFallbackNavbarToggle() {
             if (hasBootstrapCollapse()) return;
 
-            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+            // ╬Æ╧ü╬»╧â╬║╬┐╧à╬╝╬╡ ╧ä╬▒ ╧â╧ä╬┐╬╣╧ç╬╡╬»╬▒ ╧Ç╬┐╧à ╧ç╧ü╬╡╬╣╬¼╬╢╬┐╬╜╧ä╬▒╬╣ ╬│╬╣╬▒ ╧ä╬┐ fallback.
             var toggler = document.querySelector('[data-target="#mainNavbar"]');
             var menu = document.getElementById('mainNavbar');
             if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
 
             toggler.dataset.fallbackBound = 'true';
 
-            // Εναλλαγή open/close όταν πατάμε το hamburger.
+            // ╬ò╬╜╬▒╬╗╬╗╬▒╬│╬« open/close ╧î╧ä╬▒╬╜ ╧Ç╬▒╧ä╬¼╬╝╬╡ ╧ä╬┐ hamburger.
             toggler.addEventListener('click', function (event) {
-                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
+                // ╬æ╬╜ ╧å╬┐╧ü╧ä╧Ä╬╕╬╖╬║╬╡ ╧â╧ä╬┐ ╬╝╬╡╧ä╬▒╬╛╧ì Bootstrap, ╬▒╧å╬«╬╜╬┐╧à╬╝╬╡ ╬╡╬║╬╡╬»╬╜╬┐ ╬╜╬▒ ╧ç╬╡╬╣╧ü╬╣╧â╧ä╬╡╬» ╧ä╬┐ toggle.
                 if (hasBootstrapCollapse()) return;
 
                 event.preventDefault();
@@ -918,7 +918,7 @@ if (site_is_parent()) {
                 var isOpen = menu.classList.contains('show');
                 menu.classList.toggle('show', !isOpen);
                 toggler.classList.toggle('collapsed', isOpen);
-                // Ενημέρωση του aria-expanded για accessibility.
+                // ╬ò╬╜╬╖╬╝╬¡╧ü╧ë╧â╬╖ ╧ä╬┐╧à aria-expanded ╬│╬╣╬▒ accessibility.
                 toggler.setAttribute('aria-expanded', String(!isOpen));
             });
         }
