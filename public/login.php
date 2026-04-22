@@ -32,7 +32,7 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
         <link rel="stylesheet" href="assets/css/login.css">
         <script>
             (function () {
-                var faviconHref = 'assets/img/logo-icon.png';
+                var faviconHref = 'assets/img/primary-school-logo.png';
                 var head = document.head || document.getElementsByTagName('head')[0];
                 if (!head) return;
 

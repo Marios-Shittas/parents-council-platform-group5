@@ -68,21 +68,6 @@ class UsersService
             return ['success' => false, 'message' => 'Μη έγκυρο email ή κωδικός πρόσβασης.'];
         }
 
-        $token = bin2hex(random_bytes(32));
-        $expiresAt = date('Y-m-d H:i:s', time() + (10 * 60));
-
-        $stmt = $this->conn->prepare("
-            UPDATE Users
-            SET token = ?, token_expiry = ?
-            WHERE user_id = ?
-        ");
-        if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία δημιουργίας διακριτικού.'];
-        }
-        $stmt->bind_param("ssi", $token, $expiresAt, $user['user_id']);
-        $stmt->execute();
-        $stmt->close();
-
         $role = strtolower((string)($user['role'] ?? ''));
         if ($role === 'parent') {
             $loginDescription = sprintf(
@@ -97,7 +82,6 @@ class UsersService
             'success' => true,
             'user' => $user,
             'role' => $user['role'],
-            'token' => $token,
             'message' => 'Η σύνδεση ολοκληρώθηκε επιτυχώς.'
         ];
     }

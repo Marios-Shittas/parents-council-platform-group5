@@ -17,7 +17,6 @@ if($result['success']) {
     $_SESSION['user_id'] = $result['user']['user_id'];
     $_SESSION['email'] = $result['user']['email'];
     $_SESSION['role'] = $result['user']['role'];
-    unset($_SESSION['temp_user_id'], $_SESSION['temp_email'], $_SESSION['temp_role'], $_SESSION['temp_name'], $_SESSION['temp_token'], $_SESSION['pending_2fa'], $_SESSION['2fa_verified']);
 }
 
 echo json_encode($result);
