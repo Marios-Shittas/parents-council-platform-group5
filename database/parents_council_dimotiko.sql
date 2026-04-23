@@ -271,12 +271,15 @@ DROP TABLE IF EXISTS `OrderItems`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `OrderItems` (
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `price_at_purchase` decimal(10,2) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `size` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`order_id`,`product_id`),
+  PRIMARY KEY (`order_item_id`),
+  UNIQUE KEY `uq_order_item_variant` (`order_id`,`product_id`,`size`),
+  KEY `idx_order_items_order_id` (`order_id`),
   KEY `fk_oi_product` (`product_id`),
   CONSTRAINT `fk_oi_order` FOREIGN KEY (`order_id`) REFERENCES `Orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_oi_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON UPDATE CASCADE
@@ -287,10 +290,18 @@ DROP TABLE IF EXISTS `Orders`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Orders` (
   `order_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `total_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `order_status` enum('pending','paid','cancelled') NOT NULL DEFAULT 'pending',
+  `customer_type` enum('parent','public') NOT NULL DEFAULT 'parent',
+  `customer_name` varchar(100) DEFAULT NULL,
+  `customer_surname` varchar(100) DEFAULT NULL,
+  `customer_email` varchar(150) DEFAULT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `student_name` varchar(150) DEFAULT NULL,
+  `student_class` varchar(100) DEFAULT NULL,
+  `portal_context` enum('public','parent') NOT NULL DEFAULT 'parent',
   PRIMARY KEY (`order_id`),
   KEY `fk_order_user` (`user_id`),
   CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON UPDATE CASCADE
@@ -328,15 +339,20 @@ DROP TABLE IF EXISTS `Payments`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Payments` (
   `payment_id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `payment_date` datetime NOT NULL DEFAULT current_timestamp(),
   `payment_status` enum('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
   `payment_type` enum('membership','insurance','product') NOT NULL,
   `transaction_id` varchar(255) DEFAULT NULL,
+  `gateway_order_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`payment_id`),
+  UNIQUE KEY `uq_payments_gateway_order_id` (`gateway_order_id`),
   KEY `idx_payments_transaction_id` (`transaction_id`),
+  KEY `idx_payments_order_id` (`order_id`),
   KEY `fk_pay_user` (`user_id`),
+  CONSTRAINT `fk_pay_order` FOREIGN KEY (`order_id`) REFERENCES `Orders` (`order_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_pay_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -349,7 +365,7 @@ CREATE TABLE `PaymentsDetails` (
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `price_at_purchase` decimal(10,2) NOT NULL,
-  `size` varchar(10) DEFAULT NULL,
+  `size` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`payment_item_id`),
   KEY `fk_pd_payment` (`payment_id`),
   KEY `fk_pd_product` (`product_id`),

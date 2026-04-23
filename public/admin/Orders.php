@@ -18,7 +18,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Πληρωμένες Παραγγελίες - Admin</title>
+	<title>Πληρωμένες Παραγγελίες E-shop - Admin</title>
 
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -38,7 +38,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 			</a>
 
 			<div class="admin-header">
-				<h1><i class="fas fa-cash-register mr-2"></i>Πληρωμένες Παραγγελίες</h1>
+				<h1><i class="fas fa-cash-register mr-2"></i>Πληρωμένες Παραγγελίες E-shop</h1>
 			</div>
 
 			<div id="orders-root"></div>

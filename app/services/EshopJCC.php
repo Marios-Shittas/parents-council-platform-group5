@@ -10,16 +10,19 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/EshopSettingsService.php';
 require_once __DIR__ . '/PaymentReceiptService.php';
+require_once __DIR__ . '/PublicCartService.php';
 
 class EshopJccService
 {
     private mysqli $conn;
     private EshopSettingsService $eshopSettingsService;
+    private PublicCartService $publicCartService;
 
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->eshopSettingsService = new EshopSettingsService($conn);
+        $this->publicCartService = new PublicCartService($conn);
     }
 
     public function handleRequest(): void
@@ -50,17 +53,35 @@ class EshopJccService
 
     private function handleCheckoutRegistration(bool $respondWithJson): void
     {
-        auth_require_role('parent', [
-            'mode' => $respondWithJson ? 'json' : 'redirect',
-            'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
-        ]);
+        $portalContext = $this->resolveRequestedPortalContext();
 
         if (!$this->eshopSettingsService->isShopVisible()) {
-            $this->respondCheckoutError($respondWithJson, 'Το κατάστημα είναι προσωρινά μη διαθέσιμο. Coming soon.', 403);
+            $this->respondCheckoutError(
+                $respondWithJson,
+                'Το κατάστημα είναι προσωρινά μη διαθέσιμο. Coming soon.',
+                403,
+                $portalContext
+            );
             return;
         }
 
-        $userId = (int) ($_SESSION['user_id'] ?? 0);
+        if ($this->isAuthenticatedParent()) {
+            $this->handleParentCheckoutRegistration($respondWithJson, $portalContext);
+            return;
+        }
+
+        $this->handlePublicCheckoutRegistration($respondWithJson, $portalContext);
+    }
+
+    private function handleParentCheckoutRegistration(bool $respondWithJson, string $portalContext): void
+    {
+        auth_require_role('parent', [
+            'mode' => $respondWithJson ? 'json' : 'redirect',
+            'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
+            'redirect_to' => APP_BASE_URL . '/public/parent/eshop.php',
+        ]);
+
+        $userId = auth_user_id();
         $transactionStarted = false;
 
         try {
@@ -80,32 +101,38 @@ class EshopJccService
                 throw new RuntimeException('Το καλάθι είναι κενό ή το ποσό πληρωμής δεν είναι έγκυρο.');
             }
 
-            $customerEmail = $this->getUserEmail($userId);
-            $paymentId = $this->insertPayment($userId, $totalPrice, 'product');
+            $customer = $this->loadParentCustomerSnapshot($userId);
+            $this->syncOrderCustomerSnapshotForParent($orderId, $userId, $portalContext, $customer);
+
+            $paymentId = $this->insertPayment($userId, $orderId, $totalPrice, 'product');
             $this->insertPaymentDetailsFromOrder($paymentId, $orderId);
-            $orderNumber = $this->generateOrderNumber($userId, $orderId, $paymentId);
-            $returnUrl = $this->buildCallbackUrl($paymentId, $orderId, false);
-            $failUrl = $this->buildCallbackUrl($paymentId, $orderId, true);
+
+            $orderNumber = $this->generateOrderNumber('parent', $userId, $orderId, $paymentId);
+            $returnUrl = $this->buildCallbackUrl($paymentId, $orderId, false, $portalContext);
+            $failUrl = $this->buildCallbackUrl($paymentId, $orderId, true, $portalContext);
 
             $jccResponse = $this->registerJccOrder(
                 $orderNumber,
                 $totalPrice,
                 $returnUrl,
                 $failUrl,
-                $customerEmail
+                $customer['email']
             );
 
+            $this->attachGatewayOrderId($paymentId, (string) $jccResponse['orderId']);
             $this->insertLog(
                 $userId,
                 'PAYMENT_CREATED',
-                'User created eshop payment (ID: ' . $paymentId . ') for order ID: ' . $orderId . '; JCC orderId: ' . $jccResponse['orderId']
+                'Parent created eshop payment (ID: ' . $paymentId . ') for order ID: ' . $orderId . '; JCC orderId: ' . $jccResponse['orderId']
             );
 
             $this->storeCheckoutContext(
                 (string) $jccResponse['orderId'],
                 $userId,
                 $orderId,
-                $paymentId
+                $paymentId,
+                $portalContext,
+                'parent'
             );
 
             $this->conn->commit();
@@ -120,13 +147,84 @@ class EshopJccService
                 return;
             }
 
-            $this->redirectToExternalUrl($jccResponse['formUrl']);
+            $this->redirectToExternalUrl((string) $jccResponse['formUrl']);
         } catch (Throwable $e) {
             if ($transactionStarted) {
                 $this->conn->rollback();
             }
 
-            $this->respondCheckoutError($respondWithJson, $e->getMessage(), 500);
+            $this->respondCheckoutError($respondWithJson, $e->getMessage(), 500, $portalContext);
+        }
+    }
+
+    private function handlePublicCheckoutRegistration(bool $respondWithJson, string $portalContext): void
+    {
+        $transactionStarted = false;
+
+        try {
+            $customer = $this->validatePublicCheckoutPayload($_POST);
+            $cart = $this->publicCartService->getCart();
+            $items = array_values($cart['items'] ?? []);
+            $totalPrice = (float) ($cart['total'] ?? 0);
+
+            if (empty($items) || $totalPrice <= 0) {
+                throw new RuntimeException('Το καλάθι είναι κενό ή το ποσό πληρωμής δεν είναι έγκυρο.');
+            }
+
+            $this->conn->begin_transaction();
+            $transactionStarted = true;
+
+            $orderId = $this->createPublicOrderFromCart($customer, $portalContext, $items, $totalPrice);
+            $paymentId = $this->insertPayment(null, $orderId, $totalPrice, 'product');
+            $this->insertPaymentDetailsFromOrder($paymentId, $orderId);
+
+            $orderNumber = $this->generateOrderNumber('public', 0, $orderId, $paymentId);
+            $returnUrl = $this->buildCallbackUrl($paymentId, $orderId, false, $portalContext);
+            $failUrl = $this->buildCallbackUrl($paymentId, $orderId, true, $portalContext);
+
+            $jccResponse = $this->registerJccOrder(
+                $orderNumber,
+                $totalPrice,
+                $returnUrl,
+                $failUrl,
+                $customer['email']
+            );
+
+            $this->attachGatewayOrderId($paymentId, (string) $jccResponse['orderId']);
+            $this->insertLog(
+                null,
+                'PAYMENT_CREATED',
+                'Public customer created eshop payment (ID: ' . $paymentId . ') for order ID: ' . $orderId . '; JCC orderId: ' . $jccResponse['orderId']
+            );
+
+            $this->storeCheckoutContext(
+                (string) $jccResponse['orderId'],
+                null,
+                $orderId,
+                $paymentId,
+                $portalContext,
+                'public'
+            );
+
+            $this->conn->commit();
+
+            if ($respondWithJson) {
+                $this->respond(200, [
+                    'success' => true,
+                    'payment_id' => $paymentId,
+                    'order_id' => $orderId,
+                    'redirect_url' => $jccResponse['formUrl'],
+                ]);
+                return;
+            }
+
+            $this->redirectToExternalUrl((string) $jccResponse['formUrl']);
+        } catch (Throwable $e) {
+            if ($transactionStarted) {
+                $this->conn->rollback();
+            }
+
+            $this->respondCheckoutError($respondWithJson, $e->getMessage(), 500, $portalContext);
         }
     }
 
@@ -135,17 +233,34 @@ class EshopJccService
         $gatewayOrderId = trim((string) ($_GET['orderId'] ?? $_GET['mdOrder'] ?? ''));
         $paymentId = (int) ($_GET['pid'] ?? 0);
         $orderId = (int) ($_GET['oid'] ?? 0);
+        $portalContext = $this->sanitizePortalContext((string) ($_GET['ctx'] ?? ''));
 
-        if ($gatewayOrderId !== '' && ($paymentId <= 0 || $orderId <= 0)) {
+        $storedContext = null;
+        if ($gatewayOrderId !== '') {
             $storedContext = $this->getStoredCheckoutContext($gatewayOrderId);
-            if ($storedContext !== null) {
+            if (($paymentId <= 0 || $orderId <= 0) && $storedContext !== null) {
                 $paymentId = (int) ($storedContext['payment_id'] ?? 0);
                 $orderId = (int) ($storedContext['order_id'] ?? 0);
             }
+
+            if (($paymentId <= 0 || $orderId <= 0)) {
+                $databaseContext = $this->getCheckoutContextByGatewayOrderId($gatewayOrderId);
+                if ($databaseContext !== null) {
+                    $paymentId = (int) ($databaseContext['payment_id'] ?? 0);
+                    $orderId = (int) ($databaseContext['order_id'] ?? 0);
+                    if ($portalContext === '') {
+                        $portalContext = $this->sanitizePortalContext((string) ($databaseContext['portal_context'] ?? ''));
+                    }
+                }
+            }
         }
 
-        if ($gatewayOrderId === '' || $paymentId <= 0 || $orderId <= 0) {
-            $this->redirectToEshop('failed', 'Λείπουν απαραίτητα στοιχεία πληρωμής.');
+        if ($portalContext === '') {
+            $portalContext = $this->sanitizePortalContext((string) ($storedContext['portal_context'] ?? ''));
+        }
+
+        if ($paymentId <= 0 || $orderId <= 0) {
+            $this->redirectToEshop('failed', 'Λείπουν απαραίτητα στοιχεία πληρωμής.', $portalContext ?: 'public');
             return;
         }
 
@@ -157,8 +272,14 @@ class EshopJccService
                 throw new RuntimeException('Δεν βρέθηκε η πληρωμή ή η παραγγελία.');
             }
 
-            $userId = (int) $paymentContext['user_id'];
-            $statusResponse = $this->getJccOrderStatus($gatewayOrderId);
+            if ($portalContext === '') {
+                $portalContext = $this->sanitizePortalContext((string) ($paymentContext['portal_context'] ?? ''));
+            }
+
+            $customerType = (string) ($paymentContext['customer_type'] ?? 'parent');
+            $userId = (int) ($paymentContext['user_id'] ?? 0);
+
+            $statusResponse = $this->getJccOrderStatus($gatewayOrderId !== '' ? $gatewayOrderId : (string) ($paymentContext['gateway_order_id'] ?? ''));
             $orderStatusCode = (int) ($statusResponse['orderStatus'] ?? -1);
             $paymentStatus = $this->mapOrderStatusToPaymentStatus($orderStatusCode);
             $paymentStatus = $this->resolveFinalPaymentStatus(
@@ -168,39 +289,42 @@ class EshopJccService
             $transactionId = $this->resolveTransactionId($statusResponse, $gatewayOrderId);
             $nextOrderStatus = $this->resolveFinalOrderStatus(
                 (string) ($paymentContext['order_status'] ?? 'pending'),
-                $paymentStatus
+                $paymentStatus,
+                $customerType
             );
 
             $this->conn->begin_transaction();
             $transactionStarted = true;
 
-            $this->updatePaymentStatus($paymentId, $userId, $paymentStatus, $transactionId);
-            $this->updateOrderStatus($orderId, $userId, $nextOrderStatus);
+            $this->updatePaymentStatus($paymentId, $paymentStatus, $transactionId);
+            $this->updateOrderStatus($orderId, $nextOrderStatus);
 
             if ($paymentStatus === 'completed') {
                 $this->insertLog(
-                    $userId,
+                    $userId > 0 ? $userId : null,
                     'PAYMENT_COMPLETED',
                     'Eshop JCC payment completed. Order ID: ' . $orderId . ', Payment ID: ' . $paymentId . ', Transaction ID: ' . $transactionId
                 );
 
-                $newPendingOrderId = $this->createPendingOrderIfMissing($userId);
-                if ($newPendingOrderId !== null) {
-                    $this->insertLog(
-                        $userId,
-                        'ORDER_CREATED',
-                        'Created new pending eshop order ID: ' . $newPendingOrderId . ' after payment for order ID: ' . $orderId
-                    );
+                if ($customerType === 'parent' && $userId > 0) {
+                    $newPendingOrderId = $this->createPendingOrderIfMissing($userId);
+                    if ($newPendingOrderId !== null) {
+                        $this->insertLog(
+                            $userId,
+                            'ORDER_CREATED',
+                            'Created new pending eshop order ID: ' . $newPendingOrderId . ' after payment for order ID: ' . $orderId
+                        );
+                    }
                 }
             } elseif ($paymentStatus === 'pending') {
                 $this->insertLog(
-                    $userId,
+                    $userId > 0 ? $userId : null,
                     'PAYMENT_PENDING',
                     'Eshop JCC payment pending. Order ID: ' . $orderId . ', Payment ID: ' . $paymentId . ', Transaction ID: ' . $transactionId
                 );
             } else {
                 $this->insertLog(
-                    $userId,
+                    $userId > 0 ? $userId : null,
                     'PAYMENT_FAILED',
                     'Eshop JCC payment failed. Order ID: ' . $orderId . ', Payment ID: ' . $paymentId . ', Transaction ID: ' . $transactionId
                 );
@@ -210,18 +334,24 @@ class EshopJccService
             $this->clearStoredCheckoutContext($gatewayOrderId);
 
             if ($paymentStatus === 'completed') {
+                if ($customerType === 'public') {
+                    $this->publicCartService->clearCart();
+                }
+
                 try {
-                    $receiptSummary = (new PaymentReceiptService($this->conn))
-                        ->sendReceiptForPayments($userId, [$paymentId], 'JCC e-shop');
+                    $receiptService = new PaymentReceiptService($this->conn);
+                    $receiptSummary = $userId > 0
+                        ? $receiptService->sendReceiptForPayments($userId, [$paymentId], 'JCC e-shop')
+                        : $receiptService->sendReceiptForProductOrderPayment($paymentId, 'JCC e-shop');
 
                     $this->insertLog(
-                        $userId,
+                        $userId > 0 ? $userId : null,
                         'PAYMENT_RECEIPT_SENT',
                         'Receipt email sent for payment ID: ' . $paymentId . ' to ' . $receiptSummary['email']
                     );
                 } catch (Throwable $receiptError) {
                     $this->insertLog(
-                        $userId,
+                        $userId > 0 ? $userId : null,
                         'PAYMENT_RECEIPT_FAILED',
                         'Receipt email failed for payment ID: ' . $paymentId . '. Error: ' . $receiptError->getMessage()
                     );
@@ -229,13 +359,270 @@ class EshopJccService
             }
 
             $message = $this->buildRedirectMessage($paymentStatus);
-            $this->redirectToEshop($paymentStatus, $message);
+            $this->redirectToEshop($paymentStatus, $message, $portalContext);
         } catch (Throwable $e) {
             if ($transactionStarted) {
                 $this->conn->rollback();
             }
 
-            $this->redirectToEshop('failed', $e->getMessage());
+            $this->redirectToEshop('failed', $e->getMessage(), $portalContext ?: 'public');
+        }
+    }
+
+    private function isAuthenticatedParent(): bool
+    {
+        return auth_user_id() > 0 && auth_user_role() === 'parent';
+    }
+
+    private function resolveRequestedPortalContext(): string
+    {
+        $requested = $this->sanitizePortalContext((string) ($_POST['return_context'] ?? $_GET['return_context'] ?? ''));
+        if ($requested !== '') {
+            return $requested;
+        }
+
+        return $this->isAuthenticatedParent() ? 'parent' : 'public';
+    }
+
+    private function sanitizePortalContext(string $portalContext): string
+    {
+        $normalized = strtolower(trim($portalContext));
+        if ($normalized === 'parent') {
+            return 'parent';
+        }
+
+        if ($normalized === 'public') {
+            return 'public';
+        }
+
+        return '';
+    }
+
+    private function validatePublicCheckoutPayload(array $payload): array
+    {
+        $name = $this->normalizeTextField((string) ($payload['customer_name'] ?? ''));
+        $surname = $this->normalizeTextField((string) ($payload['customer_surname'] ?? ''));
+        $studentName = $this->normalizeTextField((string) ($payload['student_name'] ?? ''));
+        $studentClass = $this->normalizeTextField((string) ($payload['student_class'] ?? ''));
+        $email = trim((string) ($payload['customer_email'] ?? ''));
+        $phone = $this->normalizeTextField((string) ($payload['customer_phone'] ?? ''));
+
+        if ($name === '') {
+            throw new RuntimeException('Συμπληρώστε το όνομα πελάτη.');
+        }
+
+        if ($surname === '') {
+            throw new RuntimeException('Συμπληρώστε το επώνυμο πελάτη.');
+        }
+
+        if ($studentName === '') {
+            throw new RuntimeException('Συμπληρώστε το ονοματεπώνυμο μαθητή/τριας.');
+        }
+
+        if ($studentClass === '') {
+            throw new RuntimeException('Συμπληρώστε το τμήμα του/της μαθητή/τριας.');
+        }
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('Συμπληρώστε έγκυρο email επικοινωνίας.');
+        }
+
+        if ($phone === '') {
+            throw new RuntimeException('Συμπληρώστε τηλέφωνο επικοινωνίας.');
+        }
+
+        return [
+            'name' => $name,
+            'surname' => $surname,
+            'student_name' => $studentName,
+            'student_class' => $studentClass,
+            'email' => $email,
+            'phone' => $phone,
+        ];
+    }
+
+    private function normalizeTextField(string $value): string
+    {
+        $normalized = preg_replace('/\s+/u', ' ', trim($value));
+        if (!is_string($normalized)) {
+            return '';
+        }
+
+        return substr($normalized, 0, 150);
+    }
+
+    private function loadParentCustomerSnapshot(int $userId): array
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT name, surname, email, phone_number
+             FROM Users
+             WHERE user_id = ?
+             LIMIT 1'
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to load parent customer details.');
+        }
+
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        if (!is_array($row)) {
+            throw new RuntimeException('Δεν βρέθηκαν τα στοιχεία του λογαριασμού γονέα.');
+        }
+
+        $email = trim((string) ($row['email'] ?? ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('Ο λογαριασμός γονέα δεν έχει έγκυρο email για την πληρωμή.');
+        }
+
+        return [
+            'name' => trim((string) ($row['name'] ?? '')),
+            'surname' => trim((string) ($row['surname'] ?? '')),
+            'email' => $email,
+            'phone' => trim((string) ($row['phone_number'] ?? '')),
+        ];
+    }
+
+    private function syncOrderCustomerSnapshotForParent(int $orderId, int $userId, string $portalContext, array $customer): void
+    {
+        $stmt = $this->conn->prepare(
+            'UPDATE Orders
+             SET user_id = ?,
+                 customer_type = ?,
+                 customer_name = ?,
+                 customer_surname = ?,
+                 customer_email = ?,
+                 customer_phone = ?,
+                 portal_context = ?
+             WHERE order_id = ?
+             LIMIT 1'
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to update parent order customer snapshot.');
+        }
+
+        $customerType = 'parent';
+        $stmt->bind_param(
+            'issssssi',
+            $userId,
+            $customerType,
+            $customer['name'],
+            $customer['surname'],
+            $customer['email'],
+            $customer['phone'],
+            $portalContext,
+            $orderId
+        );
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to save parent checkout details.');
+        }
+        $stmt->close();
+    }
+
+    private function createPublicOrderFromCart(array $customer, string $portalContext, array $items, float $totalPrice): int
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO Orders (
+                user_id,
+                total_price,
+                created_at,
+                order_status,
+                customer_type,
+                customer_name,
+                customer_surname,
+                customer_email,
+                customer_phone,
+                student_name,
+                student_class,
+                portal_context
+            )
+            VALUES (
+                NULL,
+                ?,
+                NOW(),
+                'pending',
+                'public',
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
+            )"
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to create public order.');
+        }
+
+        $stmt->bind_param(
+            'dssssss',
+            $totalPrice,
+            $customer['name'],
+            $customer['surname'],
+            $customer['email'],
+            $customer['phone'],
+            $customer['student_name'],
+            $customer['student_class'],
+            $portalContext
+        );
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to insert public order.');
+        }
+        $orderId = (int) $stmt->insert_id;
+        $stmt->close();
+
+        if ($orderId <= 0) {
+            throw new RuntimeException('Δεν ήταν δυνατή η δημιουργία παραγγελίας.');
+        }
+
+        $this->insertOrderItemsForOrder($orderId, $items);
+        return $orderId;
+    }
+
+    private function insertOrderItemsForOrder(int $orderId, array $items): void
+    {
+        $stmt = $this->conn->prepare(
+            'INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to prepare public order items insert.');
+        }
+
+        $insertedAny = false;
+
+        foreach ($items as $item) {
+            $productId = (int) ($item['product_id'] ?? 0);
+            $quantity = (int) ($item['quantity'] ?? 0);
+            $priceAtPurchase = (float) ($item['price_at_purchase'] ?? 0);
+            $size = trim((string) ($item['size'] ?? ''));
+
+            if ($productId <= 0 || $quantity <= 0 || $priceAtPurchase <= 0) {
+                continue;
+            }
+
+            $stmt->bind_param('iidis', $orderId, $productId, $priceAtPurchase, $quantity, $size);
+            if (!$stmt->execute()) {
+                $stmt->close();
+                throw new RuntimeException('Failed to insert public order item.');
+            }
+            $insertedAny = true;
+        }
+
+        $stmt->close();
+
+        if (!$insertedAny) {
+            throw new RuntimeException('Δεν βρέθηκαν έγκυρα προϊόντα για την παραγγελία.');
         }
     }
 
@@ -264,48 +651,85 @@ class EshopJccService
         return $row ?: null;
     }
 
-    private function getUserEmail(int $userId): string
+    private function insertPayment(?int $userId, ?int $orderId, float $amount, string $paymentType): int
     {
-        $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
-        if ($stmt === false) {
-            throw new RuntimeException('Failed to load user email.');
+        if ($userId !== null && $userId > 0) {
+            $stmt = $this->conn->prepare(
+                "INSERT INTO Payments (user_id, order_id, amount, payment_status, payment_type)
+                 VALUES (?, ?, ?, 'pending', ?)"
+            );
+
+            if ($stmt === false) {
+                throw new RuntimeException('Failed to prepare payment insert.');
+            }
+
+            $stmt->bind_param('iids', $userId, $orderId, $amount, $paymentType);
+        } else {
+            $stmt = $this->conn->prepare(
+                "INSERT INTO Payments (user_id, order_id, amount, payment_status, payment_type)
+                 VALUES (NULL, ?, ?, 'pending', ?)"
+            );
+
+            if ($stmt === false) {
+                throw new RuntimeException('Failed to prepare public payment insert.');
+            }
+
+            $stmt->bind_param('ids', $orderId, $amount, $paymentType);
         }
 
-        $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result ? $result->fetch_assoc() : null;
-        $stmt->close();
-
-        return trim((string) ($row['email'] ?? ''));
-    }
-
-    private function insertPayment(int $userId, float $amount, string $paymentType): int
-    {
-        $stmt = $this->conn->prepare(
-            "INSERT INTO Payments (user_id, amount, payment_status, payment_type)
-             VALUES (?, ?, 'pending', ?)"
-        );
-
-        if ($stmt === false) {
-            throw new RuntimeException('Failed to prepare payment insert.');
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to insert payment.');
         }
-
-        $stmt->bind_param('ids', $userId, $amount, $paymentType);
-        $stmt->execute();
         $paymentId = (int) $stmt->insert_id;
         $stmt->close();
 
+        if ($paymentId <= 0) {
+            throw new RuntimeException('Δεν ήταν δυνατή η δημιουργία πληρωμής.');
+        }
+
         return $paymentId;
+    }
+
+    private function attachGatewayOrderId(int $paymentId, string $gatewayOrderId): void
+    {
+        $stmt = $this->conn->prepare(
+            'UPDATE Payments
+             SET gateway_order_id = ?
+             WHERE payment_id = ?
+             LIMIT 1'
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to update payment gateway order ID.');
+        }
+
+        $stmt->bind_param('si', $gatewayOrderId, $paymentId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to store JCC gateway order ID.');
+        }
+        $stmt->close();
     }
 
     private function getPaymentContext(int $paymentId, int $orderId): ?array
     {
         $stmt = $this->conn->prepare(
-            "SELECT p.payment_id, p.user_id, p.payment_status, o.order_id, o.order_status
+            "SELECT
+                p.payment_id,
+                p.user_id,
+                p.order_id,
+                p.payment_status,
+                p.gateway_order_id,
+                o.order_status,
+                o.customer_type,
+                o.portal_context,
+                o.customer_email
              FROM Payments p
-             INNER JOIN Orders o ON o.user_id = p.user_id
-             WHERE p.payment_id = ? AND o.order_id = ? AND p.payment_type = 'product'
+             INNER JOIN Orders o ON o.order_id = p.order_id
+             WHERE p.payment_id = ?
+               AND o.order_id = ?
+               AND p.payment_type = 'product'
              LIMIT 1"
         );
 
@@ -314,6 +738,34 @@ class EshopJccService
         }
 
         $stmt->bind_param('ii', $paymentId, $orderId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return $row ?: null;
+    }
+
+    private function getCheckoutContextByGatewayOrderId(string $gatewayOrderId): ?array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT
+                p.payment_id,
+                p.order_id,
+                o.portal_context,
+                o.customer_type
+             FROM Payments p
+             INNER JOIN Orders o ON o.order_id = p.order_id
+             WHERE p.gateway_order_id = ?
+               AND p.payment_type = 'product'
+             LIMIT 1"
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to load payment by gateway order ID.');
+        }
+
+        $stmt->bind_param('s', $gatewayOrderId);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result ? $result->fetch_assoc() : null;
@@ -359,14 +811,18 @@ class EshopJccService
             $productId = (int) ($row['product_id'] ?? 0);
             $quantity = (int) ($row['quantity'] ?? 0);
             $priceAtPurchase = (float) ($row['price_at_purchase'] ?? 0);
-            $size = isset($row['size']) ? (string) $row['size'] : null;
+            $size = trim((string) ($row['size'] ?? ''));
 
             if ($productId <= 0 || $quantity <= 0 || $priceAtPurchase <= 0) {
                 continue;
             }
 
             $insertStmt->bind_param('iiids', $paymentId, $productId, $quantity, $priceAtPurchase, $size);
-            $insertStmt->execute();
+            if (!$insertStmt->execute()) {
+                $insertStmt->close();
+                $itemsStmt->close();
+                throw new RuntimeException('Failed to insert payment detail item.');
+            }
         }
 
         $insertStmt->close();
@@ -377,22 +833,26 @@ class EshopJccService
         }
     }
 
-    private function updatePaymentStatus(int $paymentId, int $userId, string $status, string $transactionId): void
+    private function updatePaymentStatus(int $paymentId, string $status, string $transactionId): void
     {
         $stmt = $this->conn->prepare(
             'UPDATE Payments
              SET payment_status = ?, transaction_id = ?
-             WHERE payment_id = ? AND user_id = ? LIMIT 1'
+             WHERE payment_id = ?
+             LIMIT 1'
         );
 
         if ($stmt === false) {
             throw new RuntimeException('Failed to prepare payment update.');
         }
 
-        $stmt->bind_param('ssii', $status, $transactionId, $paymentId, $userId);
-        $stmt->execute();
+        $stmt->bind_param('ssi', $status, $transactionId, $paymentId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to update payment status.');
+        }
 
-        if ($stmt->affected_rows === 0 && !$this->paymentExistsForUser($paymentId, $userId)) {
+        if ($stmt->affected_rows === 0 && !$this->paymentExists($paymentId)) {
             $stmt->close();
             throw new RuntimeException('Payment not found for update.');
         }
@@ -400,14 +860,14 @@ class EshopJccService
         $stmt->close();
     }
 
-    private function paymentExistsForUser(int $paymentId, int $userId): bool
+    private function paymentExists(int $paymentId): bool
     {
-        $stmt = $this->conn->prepare('SELECT 1 FROM Payments WHERE payment_id = ? AND user_id = ? LIMIT 1');
+        $stmt = $this->conn->prepare('SELECT 1 FROM Payments WHERE payment_id = ? LIMIT 1');
         if ($stmt === false) {
             throw new RuntimeException('Failed to verify payment existence.');
         }
 
-        $stmt->bind_param('ii', $paymentId, $userId);
+        $stmt->bind_param('i', $paymentId);
         $stmt->execute();
         $result = $stmt->get_result();
         $exists = (bool) ($result && $result->fetch_assoc());
@@ -416,22 +876,26 @@ class EshopJccService
         return $exists;
     }
 
-    private function updateOrderStatus(int $orderId, int $userId, string $status): void
+    private function updateOrderStatus(int $orderId, string $status): void
     {
         $stmt = $this->conn->prepare(
             'UPDATE Orders
              SET order_status = ?
-             WHERE order_id = ? AND user_id = ? LIMIT 1'
+             WHERE order_id = ?
+             LIMIT 1'
         );
 
         if ($stmt === false) {
             throw new RuntimeException('Failed to prepare order update.');
         }
 
-        $stmt->bind_param('sii', $status, $orderId, $userId);
-        $stmt->execute();
+        $stmt->bind_param('si', $status, $orderId);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to update order status.');
+        }
 
-        if ($stmt->affected_rows === 0 && !$this->orderExistsForUser($orderId, $userId)) {
+        if ($stmt->affected_rows === 0 && !$this->orderExists($orderId)) {
             $stmt->close();
             throw new RuntimeException('Order not found for update.');
         }
@@ -439,14 +903,14 @@ class EshopJccService
         $stmt->close();
     }
 
-    private function orderExistsForUser(int $orderId, int $userId): bool
+    private function orderExists(int $orderId): bool
     {
-        $stmt = $this->conn->prepare('SELECT 1 FROM Orders WHERE order_id = ? AND user_id = ? LIMIT 1');
+        $stmt = $this->conn->prepare('SELECT 1 FROM Orders WHERE order_id = ? LIMIT 1');
         if ($stmt === false) {
             throw new RuntimeException('Failed to verify order existence.');
         }
 
-        $stmt->bind_param('ii', $orderId, $userId);
+        $stmt->bind_param('i', $orderId);
         $stmt->execute();
         $result = $stmt->get_result();
         $exists = (bool) ($result && $result->fetch_assoc());
@@ -455,12 +919,14 @@ class EshopJccService
         return $exists;
     }
 
-    private function buildCallbackUrl(int $paymentId, int $orderId, bool $failed): string
+    private function buildCallbackUrl(int $paymentId, int $orderId, bool $failed, string $portalContext): string
     {
         $base = APP_BASE_URL . '/app/services/EshopJCC.php';
+        $safePortalContext = $this->sanitizePortalContext($portalContext) ?: 'public';
         $params = [
             'pid' => (string) $paymentId,
             'oid' => (string) $orderId,
+            'ctx' => $safePortalContext,
         ];
 
         if ($failed) {
@@ -470,8 +936,14 @@ class EshopJccService
         return $base . '?' . http_build_query($params);
     }
 
-    private function storeCheckoutContext(string $gatewayOrderId, int $userId, int $orderId, int $paymentId): void
-    {
+    private function storeCheckoutContext(
+        string $gatewayOrderId,
+        ?int $userId,
+        int $orderId,
+        int $paymentId,
+        string $portalContext,
+        string $customerType
+    ): void {
         if (!isset($_SESSION['eshop_checkout_context']) || !is_array($_SESSION['eshop_checkout_context'])) {
             $_SESSION['eshop_checkout_context'] = [];
         }
@@ -480,6 +952,8 @@ class EshopJccService
             'user_id' => $userId,
             'order_id' => $orderId,
             'payment_id' => $paymentId,
+            'portal_context' => $portalContext,
+            'customer_type' => $customerType,
             'stored_at' => time(),
         ];
     }
@@ -492,15 +966,16 @@ class EshopJccService
 
     private function clearStoredCheckoutContext(string $gatewayOrderId): void
     {
-        if (isset($_SESSION['eshop_checkout_context'][$gatewayOrderId])) {
+        if ($gatewayOrderId !== '' && isset($_SESSION['eshop_checkout_context'][$gatewayOrderId])) {
             unset($_SESSION['eshop_checkout_context'][$gatewayOrderId]);
         }
     }
 
-    private function generateOrderNumber(int $userId, int $orderId, int $paymentId): string
+    private function generateOrderNumber(string $customerType, int $userId, int $orderId, int $paymentId): string
     {
         $randomPart = bin2hex(random_bytes(5));
-        return sprintf('ESHOP-%d-%d-%d-%s', $userId, $orderId, $paymentId, $randomPart);
+        $prefix = $customerType === 'public' ? 'ESHOP-PUB' : 'ESHOP-PAR';
+        return sprintf('%s-%d-%d-%d-%s', $prefix, $userId, $orderId, $paymentId, $randomPart);
     }
 
     private function registerJccOrder(
@@ -586,6 +1061,10 @@ class EshopJccService
 
     private function getJccOrderStatus(string $gatewayOrderId): array
     {
+        if ($gatewayOrderId === '') {
+            throw new RuntimeException('Missing JCC order ID.');
+        }
+
         if (!function_exists('curl_init')) {
             throw new RuntimeException('cURL extension is required for JCC integration.');
         }
@@ -656,19 +1135,6 @@ class EshopJccService
         return 'failed';
     }
 
-    private function mapPaymentStatusToOrderStatus(string $paymentStatus): string
-    {
-        if ($paymentStatus === 'completed') {
-            return 'paid';
-        }
-
-        if ($paymentStatus === 'refunded') {
-            return 'cancelled';
-        }
-
-        return 'pending';
-    }
-
     private function createPendingOrderIfMissing(int $userId): ?int
     {
         $existingStmt = $this->conn->prepare(
@@ -694,8 +1160,8 @@ class EshopJccService
         }
 
         $insertStmt = $this->conn->prepare(
-            "INSERT INTO Orders (user_id, total_price, created_at, order_status)
-             VALUES (?, 0.00, NOW(), 'pending')"
+            "INSERT INTO Orders (user_id, total_price, created_at, order_status, customer_type, portal_context)
+             VALUES (?, 0.00, NOW(), 'pending', 'parent', 'parent')"
         );
 
         if ($insertStmt === false) {
@@ -703,7 +1169,10 @@ class EshopJccService
         }
 
         $insertStmt->bind_param('i', $userId);
-        $insertStmt->execute();
+        if (!$insertStmt->execute()) {
+            $insertStmt->close();
+            throw new RuntimeException('Failed to create the next pending order.');
+        }
         $newOrderId = (int) $insertStmt->insert_id;
         $insertStmt->close();
 
@@ -719,13 +1188,25 @@ class EshopJccService
         return $incomingStatus;
     }
 
-    private function resolveFinalOrderStatus(string $currentStatus, string $paymentStatus): string
+    private function resolveFinalOrderStatus(string $currentStatus, string $paymentStatus, string $customerType): string
     {
         if ($currentStatus === 'paid' && $paymentStatus !== 'refunded') {
             return 'paid';
         }
 
-        return $this->mapPaymentStatusToOrderStatus($paymentStatus);
+        if ($paymentStatus === 'completed') {
+            return 'paid';
+        }
+
+        if ($paymentStatus === 'refunded') {
+            return 'cancelled';
+        }
+
+        if ($paymentStatus === 'failed' && $customerType === 'public') {
+            return 'cancelled';
+        }
+
+        return 'pending';
     }
 
     private function resolveTransactionId(array $statusResponse, string $fallbackOrderId): string
@@ -766,15 +1247,33 @@ class EshopJccService
         return $fallbackOrderId;
     }
 
-    private function insertLog(int $userId, string $action, string $description): void
+    private function insertLog(?int $userId, string $action, string $description): void
     {
-        $stmt = $this->conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)');
-        if ($stmt === false) {
-            throw new RuntimeException('Failed to prepare log insert.');
+        if ($userId !== null && $userId > 0) {
+            $stmt = $this->conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)');
+            if ($stmt === false) {
+                throw new RuntimeException('Failed to prepare log insert.');
+            }
+
+            $stmt->bind_param('iss', $userId, $action, $description);
+            if (!$stmt->execute()) {
+                $stmt->close();
+                throw new RuntimeException('Failed to write user log entry.');
+            }
+            $stmt->close();
+            return;
         }
 
-        $stmt->bind_param('iss', $userId, $action, $description);
-        $stmt->execute();
+        $stmt = $this->conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (NULL, ?, ?)');
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to prepare public log insert.');
+        }
+
+        $stmt->bind_param('ss', $action, $description);
+        if (!$stmt->execute()) {
+            $stmt->close();
+            throw new RuntimeException('Failed to write public log entry.');
+        }
         $stmt->close();
     }
 
@@ -795,9 +1294,13 @@ class EshopJccService
         return 'Η πληρωμή σας δεν ολοκληρώθηκε.';
     }
 
-    private function redirectToEshop(string $paymentStatus, string $message): void
+    private function redirectToEshop(string $paymentStatus, string $message, string $portalContext): void
     {
-        $url = APP_BASE_URL . '/public/parent/eshop.php?' . http_build_query([
+        $target = $portalContext === 'parent'
+            ? APP_BASE_URL . '/public/parent/eshop.php'
+            : APP_BASE_URL . '/public/eshop.php';
+
+        $url = $target . '?' . http_build_query([
             'payment_status' => $paymentStatus,
             'payment_message' => $message,
         ]);
@@ -812,7 +1315,7 @@ class EshopJccService
         exit;
     }
 
-    private function respondCheckoutError(bool $respondWithJson, string $message, int $statusCode): void
+    private function respondCheckoutError(bool $respondWithJson, string $message, int $statusCode, string $portalContext): void
     {
         if ($respondWithJson) {
             $this->respond($statusCode, [
@@ -822,7 +1325,7 @@ class EshopJccService
             return;
         }
 
-        $this->redirectToEshop('failed', $message);
+        $this->redirectToEshop('failed', $message, $portalContext !== '' ? $portalContext : 'public');
     }
 
     private function wantsJsonResponse(): bool
@@ -845,6 +1348,7 @@ try {
     $service = new EshopJccService($conn);
     $service->handleRequest();
 } catch (Throwable $e) {
+    header('Content-Type: application/json; charset=utf-8');
     http_response_code(500);
     echo json_encode([
         'success' => false,

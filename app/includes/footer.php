@@ -10,11 +10,8 @@ $footer_links = [
     ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
     ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')],
     ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')],
+    ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')],
 ];
-
-if (site_is_parent()) {
-    $footer_links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
-}
 
 $footer_links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
 $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_url('photos.php')];

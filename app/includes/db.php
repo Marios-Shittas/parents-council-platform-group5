@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $password = "";     // XAMPP default
-$database = "parents_council";
+$database = "parents_council_dimotiko";
 
 $conn = new mysqli($host, $user, $password, $database);
 

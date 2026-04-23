@@ -34,32 +34,37 @@ class PaymentReceiptService
 
         $subject = 'Απόδειξη πληρωμής - Parents Council';
         $textBody = $this->buildReceiptTextBody($recipient, $payments, $sourceLabel, $totalAmount);
-
-        try {
-            $mailer = new ApprovalMailer([
-                'host' => SMTP_HOST,
-                'port' => SMTP_PORT,
-                'encryption' => SMTP_ENCRYPTION,
-                'username' => SMTP_USER,
-                'password' => SMTP_PASS,
-                'from_email' => SMTP_FROM_EMAIL,
-                'from_name' => SMTP_FROM_NAME,
-            ]);
-
-            $mailer->sendTextEmail($recipient['email'], $subject, $textBody);
-        } catch (Throwable $smtpError) {
-            $fallbackBody = str_replace("\r\n", "\n", $textBody);
-
-            $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
-            if (!mail($recipient['email'], $subject, $fallbackBody, $headers)) {
-                throw new RuntimeException('Failed to send payment receipt email: ' . $smtpError->getMessage());
-            }
-        }
+        $this->dispatchReceiptEmail($recipient['email'], $subject, $textBody);
 
         return [
             'email' => $recipient['email'],
             'payment_count' => count($payments),
             'total_amount' => $totalAmount,
+        ];
+    }
+
+    public function sendReceiptForProductOrderPayment(int $paymentId, string $sourceLabel = 'JCC'): array
+    {
+        $paymentId = (int) $paymentId;
+        if ($paymentId <= 0) {
+            throw new InvalidArgumentException('Receipt requires a valid payment ID.');
+        }
+
+        $payment = $this->getProductOrderPayment($paymentId);
+        if ($payment === null) {
+            throw new RuntimeException('No product payment found to include in receipt email.');
+        }
+
+        $recipient = $this->resolveOrderPaymentRecipient($payment);
+        $amount = (float) ($payment['amount'] ?? 0);
+        $subject = 'Απόδειξη πληρωμής - Parents Council';
+        $textBody = $this->buildReceiptTextBody($recipient, [$payment], $sourceLabel, $amount);
+        $this->dispatchReceiptEmail($recipient['email'], $subject, $textBody);
+
+        return [
+            'email' => $recipient['email'],
+            'payment_count' => 1,
+            'total_amount' => $amount,
         ];
     }
 
@@ -128,6 +133,110 @@ class PaymentReceiptService
         return $payments;
     }
 
+    private function getProductOrderPayment(int $paymentId): ?array
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT
+                p.payment_id,
+                p.user_id,
+                p.order_id,
+                p.amount,
+                p.payment_date,
+                p.payment_status,
+                p.payment_type,
+                p.transaction_id,
+                o.customer_name,
+                o.customer_surname,
+                o.customer_email,
+                o.customer_phone,
+                o.student_name,
+                o.student_class
+             FROM Payments p
+             LEFT JOIN Orders o ON o.order_id = p.order_id
+             WHERE p.payment_id = ?
+               AND p.payment_type = ? 
+             LIMIT 1'
+        );
+
+        if ($stmt === false) {
+            throw new RuntimeException('Failed to prepare product payment receipt query.');
+        }
+
+        $paymentType = 'product';
+        $stmt->bind_param('is', $paymentId, $paymentType);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        if (!is_array($row)) {
+            return null;
+        }
+
+        return [
+            'payment_id' => (int) ($row['payment_id'] ?? 0),
+            'user_id' => isset($row['user_id']) ? (int) $row['user_id'] : 0,
+            'order_id' => isset($row['order_id']) ? (int) $row['order_id'] : 0,
+            'amount' => (float) ($row['amount'] ?? 0),
+            'payment_date' => (string) ($row['payment_date'] ?? ''),
+            'payment_status' => (string) ($row['payment_status'] ?? ''),
+            'payment_type' => (string) ($row['payment_type'] ?? ''),
+            'transaction_id' => trim((string) ($row['transaction_id'] ?? '')),
+            'customer_name' => trim((string) ($row['customer_name'] ?? '')),
+            'customer_surname' => trim((string) ($row['customer_surname'] ?? '')),
+            'customer_email' => trim((string) ($row['customer_email'] ?? '')),
+            'customer_phone' => trim((string) ($row['customer_phone'] ?? '')),
+            'student_name' => trim((string) ($row['student_name'] ?? '')),
+            'student_class' => trim((string) ($row['student_class'] ?? '')),
+        ];
+    }
+
+    private function resolveOrderPaymentRecipient(array $payment): array
+    {
+        $email = trim((string) ($payment['customer_email'] ?? ''));
+        $name = trim((string) ($payment['customer_name'] ?? ''));
+        $surname = trim((string) ($payment['customer_surname'] ?? ''));
+
+        if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return [
+                'name' => $name,
+                'surname' => $surname,
+                'email' => $email,
+            ];
+        }
+
+        $userId = (int) ($payment['user_id'] ?? 0);
+        if ($userId > 0) {
+            return $this->getReceiptRecipient($userId);
+        }
+
+        throw new RuntimeException('Receipt recipient email is invalid.');
+    }
+
+    private function dispatchReceiptEmail(string $recipientEmail, string $subject, string $textBody): void
+    {
+        try {
+            $mailer = new ApprovalMailer([
+                'host' => SMTP_HOST,
+                'port' => SMTP_PORT,
+                'encryption' => SMTP_ENCRYPTION,
+                'username' => SMTP_USER,
+                'password' => SMTP_PASS,
+                'from_email' => SMTP_FROM_EMAIL,
+                'from_name' => SMTP_FROM_NAME,
+            ]);
+
+            $mailer->sendTextEmail($recipientEmail, $subject, $textBody);
+        } catch (Throwable $smtpError) {
+            $fallbackBody = str_replace("\r\n", "\n", $textBody);
+
+            $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
+            if (!mail($recipientEmail, $subject, $fallbackBody, $headers)) {
+                throw new RuntimeException('Failed to send payment receipt email: ' . $smtpError->getMessage());
+            }
+        }
+    }
+
     private function buildReceiptTextBody(array $recipient, array $payments, string $sourceLabel, float $totalAmount): string
     {
         $fullName = trim(($recipient['name'] ?? '') . ' ' . ($recipient['surname'] ?? ''));
@@ -140,10 +249,21 @@ class PaymentReceiptService
             $transactionId = trim((string) ($payment['transaction_id'] ?? ''));
             $paymentDate = (string) ($payment['payment_date'] ?? '');
             $description = $this->buildPaymentDescription($payment);
+            $studentName = trim((string) ($payment['student_name'] ?? ''));
+            $studentClass = trim((string) ($payment['student_class'] ?? ''));
+
+            $studentLines = '';
+            if ($studentName !== '') {
+                $studentLines .= "\r\n" . 'Μαθητής/τρια: ' . $studentName;
+            }
+            if ($studentClass !== '') {
+                $studentLines .= "\r\n" . 'Τμήμα: ' . $studentClass;
+            }
 
             $lines[] =
                 'Payment ID: #' . $paymentId . "\r\n" .
                 'Περιγραφή: ' . $description . "\r\n" .
+                ltrim($studentLines . "\r\n", "\r\n") .
                 'Ποσό: €' . number_format($amount, 2) . "\r\n" .
                 'Ημερομηνία: ' . $this->formatDate($paymentDate) . "\r\n" .
                 'Transaction ID: ' . ($transactionId !== '' ? $transactionId : 'N/A');

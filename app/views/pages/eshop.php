@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
+require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../services/EshopSettingsService.php';
+
+auth_start_session();
 
 $paymentsScriptPath = __DIR__ . '/../../../public/assets/js/payments.jsx';
 $paymentsScriptVersion = file_exists($paymentsScriptPath) ? (string) filemtime($paymentsScriptPath) : (string) time();
@@ -8,6 +11,16 @@ $paymentsCssPath = __DIR__ . '/../../../public/assets/css/user_css/payments.css'
 $paymentsCssVersion = file_exists($paymentsCssPath) ? (string) filemtime($paymentsCssPath) : (string) time();
 $eshopSettingsService = new EshopSettingsService();
 $isShopVisible = $eshopSettingsService->isShopVisible();
+$isAuthenticatedParent = auth_user_id() > 0 && auth_user_role() === 'parent';
+$eshopClientConfig = [
+    'cartMode' => $isAuthenticatedParent ? 'parent' : 'public',
+    'returnContext' => site_is_parent() ? 'parent' : 'public',
+    'isAuthenticatedParent' => $isAuthenticatedParent,
+    'cartUrl' => site_public_url('cart.php'),
+    'checkoutUrl' => site_project_url() . '/app/services/EshopJCC.php',
+    'loginUrl' => site_login_url(),
+    'currentUserEmail' => $isAuthenticatedParent ? trim((string) ($_SESSION['email'] ?? '')) : '',
+];
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -24,7 +37,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
 
     <title>Αγορές</title>
 </head>
-<body>
+<body data-eshop-mode="<?php echo htmlspecialchars((string) $eshopClientConfig['cartMode']); ?>">
     <?php include __DIR__ . '/../../includes/header.php'; ?>
 
     <?php
@@ -53,6 +66,9 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.__ESHOP_CONTEXT__ = <?php echo json_encode($eshopClientConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    </script>
     <?php if ($isShopVisible): ?>
         <script type="text/babel" src="<?php echo site_asset_url('js/payments.jsx'); ?>?v=<?php echo urlencode($paymentsScriptVersion); ?>"></script>
     <?php endif; ?>
