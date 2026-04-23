@@ -291,6 +291,7 @@ CREATE TABLE `Orders` (
   `total_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `order_status` enum('pending','paid','cancelled') NOT NULL DEFAULT 'pending',
+  `admin_seen_at` datetime DEFAULT NULL,
   PRIMARY KEY (`order_id`),
   KEY `fk_order_user` (`user_id`),
   CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON UPDATE CASCADE
