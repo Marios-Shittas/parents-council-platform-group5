@@ -1,4 +1,10 @@
 function Payments() {
+    const eshopContext = window.__ESHOP_CONTEXT__ || {};
+    const cartMode = eshopContext.cartMode === 'parent' ? 'parent' : 'public';
+    const returnContext = eshopContext.returnContext === 'parent' ? 'parent' : 'public';
+    const isAuthenticatedParent = Boolean(eshopContext.isAuthenticatedParent) && cartMode === 'parent';
+    const isPublicCheckout = !isAuthenticatedParent;
+
     const [products, setProducts] = React.useState([]);
     const [cart, setCart] = React.useState([]);
     const [selectedSizes, setSelectedSizes] = React.useState({});
@@ -6,16 +12,25 @@ function Payments() {
     const [cartLoading, setCartLoading] = React.useState(true);
     const [checkoutLoading, setCheckoutLoading] = React.useState(false);
     const [paymentFeedback, setPaymentFeedback] = React.useState(null);
+    const [paymentResultStatus, setPaymentResultStatus] = React.useState('');
     const [notice, setNotice] = React.useState({
         open: false,
         title: '',
         message: '',
         variant: 'warning'
     });
+    const [checkoutForm, setCheckoutForm] = React.useState({
+        customer_name: '',
+        customer_surname: '',
+        student_name: '',
+        student_class: '',
+        customer_email: '',
+        customer_phone: ''
+    });
 
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
-    const cartUrl = "/parents-council-platform-group5/public/cart.php";
-    const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+    const cartUrl = eshopContext.cartUrl || "/parents-council-platform-group5/public/cart.php";
+    const checkoutUrl = eshopContext.checkoutUrl || "/parents-council-platform-group5/app/services/EshopJCC.php";
 
     function getPaymentFeedback(status, message) {
         const normalizedStatus = (status || '').toLowerCase();
@@ -72,6 +87,7 @@ function Payments() {
         }
 
         setPaymentFeedback(getPaymentFeedback(paymentStatus, paymentMessage));
+        setPaymentResultStatus((paymentStatus || '').toLowerCase());
         clearPaymentResultParams();
         return true;
     }, [clearPaymentResultParams]);
@@ -104,9 +120,9 @@ function Payments() {
 
     React.useEffect(() => {
         fetch(productsUrl)
-            .then(res => res.json())
-            .then(data => setProducts(data))
-            .catch(err => console.error("Fetch products error:", err));
+            .then((res) => res.json())
+            .then((data) => setProducts(Array.isArray(data) ? data : []))
+            .catch((err) => console.error("Fetch products error:", err));
     }, []);
 
     const loadCart = React.useCallback(() => {
@@ -123,7 +139,7 @@ function Payments() {
                 const items = (data.cart && data.cart.items) ? data.cart.items : [];
                 setCart(items);
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error("Fetch cart error:", err);
                 setCart([]);
             })
@@ -154,6 +170,29 @@ function Payments() {
         };
     }, [consumePaymentResult, loadCart]);
 
+    React.useEffect(() => {
+        if (paymentResultStatus !== 'completed' || !isPublicCheckout) {
+            return;
+        }
+
+        fetch(cartUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            body: new URLSearchParams({ action: 'clear' }).toString()
+        })
+        .then(async (res) => {
+            const data = await res.json();
+            if (res.ok && data.success && data.cart && Array.isArray(data.cart.items)) {
+                setCart(data.cart.items);
+            }
+        })
+        .catch((err) => {
+            console.error("Clear public cart after payment error:", err);
+        });
+    }, [paymentResultStatus, isPublicCheckout, cartUrl]);
+
     function postCartAction(formData) {
         return fetch(cartUrl, {
             method: "POST",
@@ -176,24 +215,31 @@ function Payments() {
     }
 
     function updateSelectedSize(productId, size) {
-        setSelectedSizes(prev => ({
+        setSelectedSizes((prev) => ({
             ...prev,
             [productId]: size
         }));
 
         if (size) {
-            setSizeErrors(prev => ({
+            setSizeErrors((prev) => ({
                 ...prev,
                 [productId]: ''
             }));
         }
     }
 
+    function updateCheckoutField(field, value) {
+        setCheckoutForm((prev) => ({
+            ...prev,
+            [field]: value
+        }));
+    }
+
     function addToCart(product) {
         const selectedSize = selectedSizes[product.product_id];
 
         if (!selectedSize || selectedSize.trim() === '') {
-            setSizeErrors(prev => ({
+            setSizeErrors((prev) => ({
                 ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
             }));
@@ -207,12 +253,12 @@ function Payments() {
             size: selectedSize
         })
         .then(() => {
-            setSizeErrors(prev => ({
+            setSizeErrors((prev) => ({
                 ...prev,
                 [product.product_id]: ''
             }));
         })
-        .catch(err => {
+        .catch((err) => {
             console.error("Add to cart error:", err);
             showNotice(err.message || 'Σφάλμα κατά την προσθήκη στο καλάθι.', {
                 title: 'Αποτυχία προσθήκης',
@@ -227,7 +273,7 @@ function Payments() {
             product_id: productId,
             size: size || ''
         })
-        .catch(err => {
+        .catch((err) => {
             console.error("Remove from cart error:", err);
             showNotice(err.message || 'Σφάλμα κατά την αφαίρεση από το καλάθι.', {
                 title: 'Αποτυχία αφαίρεσης',
@@ -245,7 +291,7 @@ function Payments() {
             size: size || '',
             quantity: newQuantity
         })
-        .catch(err => {
+        .catch((err) => {
             console.error("Update cart error:", err);
             showNotice(err.message || 'Σφάλμα κατά την ενημέρωση ποσότητας.', {
                 title: 'Αποτυχία ενημέρωσης',
@@ -268,6 +314,41 @@ function Payments() {
         setPaymentFeedback(null);
     }
 
+    function validatePublicCheckout() {
+        const name = (checkoutForm.customer_name || '').trim();
+        const surname = (checkoutForm.customer_surname || '').trim();
+        const studentName = (checkoutForm.student_name || '').trim();
+        const studentClass = (checkoutForm.student_class || '').trim();
+        const email = (checkoutForm.customer_email || '').trim();
+        const phone = (checkoutForm.customer_phone || '').trim();
+
+        if (!name) {
+            return 'Συμπληρώστε το όνομα πελάτη.';
+        }
+
+        if (!surname) {
+            return 'Συμπληρώστε το επώνυμο πελάτη.';
+        }
+
+        if (!studentName) {
+            return 'Συμπληρώστε το ονοματεπώνυμο μαθητή/τριας.';
+        }
+
+        if (!studentClass) {
+            return 'Συμπληρώστε το τμήμα του/της μαθητή/τριας.';
+        }
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return 'Συμπληρώστε έγκυρο email επικοινωνίας.';
+        }
+
+        if (!phone) {
+            return 'Συμπληρώστε τηλέφωνο επικοινωνίας.';
+        }
+
+        return '';
+    }
+
     function handleCheckout() {
         if (cart.length === 0) {
             showNotice('Το καλάθι είναι κενό!', {
@@ -281,7 +362,32 @@ function Payments() {
             return;
         }
 
+        if (isPublicCheckout) {
+            const validationMessage = validatePublicCheckout();
+            if (validationMessage) {
+                showNotice(validationMessage, {
+                    title: 'Ελλιπή στοιχεία παραγγελίας',
+                    variant: 'warning'
+                });
+                return;
+            }
+        }
+
         setCheckoutLoading(true);
+
+        const payload = {
+            action: 'checkout',
+            return_context: returnContext
+        };
+
+        if (isPublicCheckout) {
+            payload.customer_name = checkoutForm.customer_name.trim();
+            payload.customer_surname = checkoutForm.customer_surname.trim();
+            payload.student_name = checkoutForm.student_name.trim();
+            payload.student_class = checkoutForm.student_class.trim();
+            payload.customer_email = checkoutForm.customer_email.trim();
+            payload.customer_phone = checkoutForm.customer_phone.trim();
+        }
 
         fetch(checkoutUrl, {
             method: "POST",
@@ -290,7 +396,7 @@ function Payments() {
                 "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
                 "X-Requested-With": "XMLHttpRequest"
             },
-            body: new URLSearchParams({ action: 'checkout' }).toString()
+            body: new URLSearchParams(payload).toString()
         })
         .then(async (res) => {
             const data = await res.json();
@@ -305,7 +411,7 @@ function Payments() {
 
             window.location.assign(data.redirect_url);
         })
-        .catch(err => {
+        .catch((err) => {
             console.error("Checkout error:", err);
             setCheckoutLoading(false);
             showNotice(err.message || 'Παρουσιάστηκε σφάλμα κατά τη μετάβαση στην πληρωμή.', {
@@ -313,6 +419,120 @@ function Payments() {
                 variant: 'error'
             });
         });
+    }
+
+    function renderCheckoutModeCard() {
+        if (isAuthenticatedParent) {
+            return (
+                <div className="eshop-mode-card eshop-mode-card--parent">
+                    <div className="eshop-mode-card__icon">
+                        <i className="fas fa-user-check"></i>
+                    </div>
+                    <div className="eshop-mode-card__copy">
+                        <strong>Αγορά ως γονέας</strong>
+                        <span>Θα χρησιμοποιηθούν τα στοιχεία του λογαριασμού σας για την παραγγελία και την απόδειξη πληρωμής.</span>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="eshop-mode-card eshop-mode-card--public">
+                <div className="eshop-mode-card__icon">
+                    <i className="fas fa-user"></i>
+                </div>
+                <div className="eshop-mode-card__copy">
+                    <strong>Αγορά ως επισκέπτης</strong>
+                    <span>Μπορείτε να ολοκληρώσετε την παραγγελία σας χωρίς σύνδεση σε λογαριασμό. Πριν από τη μετάβαση στη JCC θα συμπληρώσετε τα στοιχεία επικοινωνίας και τα στοιχεία του/της μαθητή/τριας για την παραγγελία και την απόδειξη πληρωμής.</span>
+                </div>
+            </div>
+        );
+    }
+
+    function renderPublicCheckoutForm() {
+        if (!isPublicCheckout) {
+            return null;
+        }
+
+        return (
+            <section className="checkout-customer-card">
+                <div className="checkout-customer-card__head">
+                    <div>
+                        <span className="checkout-customer-card__eyebrow">Αγορά ως επισκέπτης</span>
+                        <h3>Στοιχεία παραγγελίας</h3>
+                    </div>
+                    <p>Συμπληρώστε τα στοιχεία επικοινωνίας και τα στοιχεία του/της μαθητή/τριας που θα καταχωριστούν στην παραγγελία και θα χρησιμοποιηθούν για την απόδειξη πληρωμής.</p>
+                </div>
+
+                <div className="checkout-customer-grid">
+                    <label className="checkout-field">
+                        <span>Όνομα</span>
+                        <input
+                            type="text"
+                            value={checkoutForm.customer_name}
+                            onChange={(event) => updateCheckoutField('customer_name', event.target.value)}
+                            placeholder="π.χ. Μαρία"
+                            autoComplete="given-name"
+                        />
+                    </label>
+
+                    <label className="checkout-field">
+                        <span>Επώνυμο</span>
+                        <input
+                            type="text"
+                            value={checkoutForm.customer_surname}
+                            onChange={(event) => updateCheckoutField('customer_surname', event.target.value)}
+                            placeholder="π.χ. Αντωνίου"
+                            autoComplete="family-name"
+                        />
+                    </label>
+
+                    <label className="checkout-field">
+                        <span>Ονοματεπώνυμο μαθητή/τριας</span>
+                        <input
+                            type="text"
+                            value={checkoutForm.student_name}
+                            onChange={(event) => updateCheckoutField('student_name', event.target.value)}
+                            placeholder="π.χ. Άννα Αντωνίου"
+                            autoComplete="off"
+                        />
+                    </label>
+
+                    <label className="checkout-field">
+                        <span>Τμήμα</span>
+                        <input
+                            type="text"
+                            value={checkoutForm.student_class}
+                            onChange={(event) => updateCheckoutField('student_class', event.target.value)}
+                            placeholder="π.χ. Α2"
+                            autoComplete="off"
+                        />
+                    </label>
+
+                    <label className="checkout-field">
+                        <span>Email</span>
+                        <input
+                            type="email"
+                            value={checkoutForm.customer_email}
+                            onChange={(event) => updateCheckoutField('customer_email', event.target.value)}
+                            placeholder="name@example.com"
+                            autoComplete="email"
+                        />
+                    </label>
+
+                    <label className="checkout-field">
+                        <span>Τηλέφωνο</span>
+                        <input
+                            type="text"
+                            value={checkoutForm.customer_phone}
+                            onChange={(event) => updateCheckoutField('customer_phone', event.target.value)}
+                            placeholder="99XXXXXX"
+                            autoComplete="tel"
+                        />
+                    </label>
+                </div>
+            </section>
+        );
     }
 
     return (
@@ -336,8 +556,10 @@ function Payments() {
                         </div>
                     )}
 
+                    {renderCheckoutModeCard()}
+
                     <div className="row">
-                        {products.map(product => (
+                        {products.map((product) => (
                             <div className="col-md-4" key={product.product_id}>
                                 <div className="card m-4 mb-4">
                                     <div className="card-body">
@@ -386,7 +608,7 @@ function Payments() {
                                             <select
                                                 className="size-select"
                                                 value={selectedSizes[product.product_id] || ''}
-                                                onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
+                                                onChange={(event) => updateSelectedSize(product.product_id, event.target.value)}
                                             >
                                                 <option value="">Επιλέξτε μέγεθος</option>
                                                 <option value="x-small">X-Small</option>
@@ -475,7 +697,7 @@ function Payments() {
                                                         type="number"
                                                         className="quantity-input"
                                                         value={item.quantity}
-                                                        onChange={(e) => updateQuantity(item.product_id, item.size, parseInt(e.target.value, 10) || 1)}
+                                                        onChange={(event) => updateQuantity(item.product_id, item.size, parseInt(event.target.value, 10) || 1)}
                                                     />
 
                                                     <button
@@ -504,11 +726,17 @@ function Payments() {
                                     </div>
                                 ))}
 
+                                {renderPublicCheckoutForm()}
+
                                 <div className="cart-footer mt-4">
                                     <div className="cart-total-card">
                                         <span className="cart-total-label">Συνολικό ποσό</span>
                                         <h4>€{calculateTotal()}</h4>
-                                        <p className="cart-total-note">Οι αλλαγές στην ποσότητα ενημερώνονται άμεσα.</p>
+                                        <p className="cart-total-note">
+                                            {isPublicCheckout
+                                                ? 'Θα μεταφερθείτε στην JCC μόλις επιβεβαιωθούν τα στοιχεία παραγγελίας.'
+                                                : 'Οι αλλαγές στην ποσότητα ενημερώνονται άμεσα.'}
+                                        </p>
                                     </div>
 
                                     <button

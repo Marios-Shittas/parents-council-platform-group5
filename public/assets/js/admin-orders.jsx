@@ -25,6 +25,14 @@ function formatDateTime(dateValue) {
     }).format(date);
 }
 
+function formatCustomerType(customerType) {
+    return customerType === 'public' ? 'Επισκέπτης' : 'Γονέας';
+}
+
+function formatPortalContext(portalContext) {
+    return portalContext === 'public' ? 'Δημόσια προβολή' : 'Γονική προβολή';
+}
+
 function AdminOrdersPage() {
     const [payload, setPayload] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
@@ -153,8 +161,13 @@ function AdminOrdersPage() {
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Ημερομηνία</th>
-                                    <th>Γονέας</th>
+                                    <th>Πελάτης</th>
+                                    <th>Μαθητής/τρια</th>
+                                    <th>Τμήμα</th>
                                     <th>Email</th>
+                                    <th>Τηλέφωνο</th>
+                                    <th>Τύπος</th>
+                                    <th>View</th>
                                     <th>Τεμάχια</th>
                                     <th>Σύνολο</th>
                                 </tr>
@@ -164,8 +177,13 @@ function AdminOrdersPage() {
                                     <tr key={order.order_id}>
                                         <td>#{order.order_id}</td>
                                         <td>{formatDateTime(order.created_at)}</td>
-                                        <td>{order.parent_name || '-'}</td>
-                                        <td>{order.parent_email || '-'}</td>
+                                        <td>{order.customer_name || order.parent_name || '-'}</td>
+                                        <td>{order.student_name || '-'}</td>
+                                        <td>{order.student_class || '-'}</td>
+                                        <td>{order.customer_email || order.parent_email || '-'}</td>
+                                        <td>{order.customer_phone || '-'}</td>
+                                        <td>{formatCustomerType(order.customer_type)}</td>
+                                        <td>{formatPortalContext(order.portal_context)}</td>
                                         <td>{order.total_items}</td>
                                         <td>{formatCurrency(order.total_price)}</td>
                                     </tr>

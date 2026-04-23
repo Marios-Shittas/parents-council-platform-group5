@@ -5,19 +5,26 @@ ini_set('display_errors', 1);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../app/services/CartService.php';
+require_once __DIR__ . '/../app/services/PublicCartService.php';
 require_once __DIR__ . '/../app/services/EshopSettingsService.php';
 require_once __DIR__ . '/../app/includes/auth.php';
 
-auth_require_role('parent', [
-    'mode' => 'json',
-    'message' => 'Μόνο λογαριασμοί γονέα μπορούν να χρησιμοποιήσουν το καλάθι.'
-]);
+auth_start_session();
 
-$userId = (int)$_SESSION['user_id'];
-$cartService = new CartService();
+$userId = auth_user_id();
+$userRole = auth_user_role();
+$isAuthenticatedParent = $userId > 0 && $userRole === 'parent';
+
+$cartService = $isAuthenticatedParent ? new CartService() : new PublicCartService();
 $eshopSettingsService = new EshopSettingsService();
 
 $action = $_POST['action'] ?? $_GET['action'] ?? 'get';
+
+$loadCart = static function () use ($cartService, $isAuthenticatedParent, $userId) {
+    return $isAuthenticatedParent
+        ? $cartService->getCart($userId)
+        : $cartService->getCart();
+};
 
 if (!$eshopSettingsService->isShopVisible()) {
     http_response_code(403);
@@ -30,7 +37,7 @@ if (!$eshopSettingsService->isShopVisible()) {
 
 switch ($action) {
     case 'get':
-        $cart = $cartService->getCart($userId);
+        $cart = $loadCart();
 
         if ($cart === false) {
             http_response_code(500);
@@ -62,7 +69,9 @@ switch ($action) {
             exit;
         }
 
-        $added = $cartService->addToCart($userId, $productId, $quantity, $size);
+        $added = $isAuthenticatedParent
+            ? $cartService->addToCart($userId, $productId, $quantity, $size)
+            : $cartService->addToCart($productId, $quantity, $size);
 
         if (!$added) {
             http_response_code(500);
@@ -73,7 +82,7 @@ switch ($action) {
             exit;
         }
 
-        $cart = $cartService->getCart($userId);
+        $cart = $loadCart();
 
         echo json_encode([
             'success' => true,
@@ -96,7 +105,9 @@ switch ($action) {
             exit;
         }
 
-        $updated = $cartService->updateCartItem($userId, $productId, $size, $quantity);
+        $updated = $isAuthenticatedParent
+            ? $cartService->updateCartItem($userId, $productId, $size, $quantity)
+            : $cartService->updateCartItem($productId, $size, $quantity);
 
         if (!$updated) {
             http_response_code(500);
@@ -107,7 +118,7 @@ switch ($action) {
             exit;
         }
 
-        $cart = $cartService->getCart($userId);
+        $cart = $loadCart();
 
         echo json_encode([
             'success' => true,
@@ -129,7 +140,9 @@ switch ($action) {
             exit;
         }
 
-        $removed = $cartService->removeFromCart($userId, $productId, $size);
+        $removed = $isAuthenticatedParent
+            ? $cartService->removeFromCart($userId, $productId, $size)
+            : $cartService->removeFromCart($productId, $size);
 
         if (!$removed) {
             http_response_code(500);
@@ -140,7 +153,7 @@ switch ($action) {
             exit;
         }
 
-        $cart = $cartService->getCart($userId);
+        $cart = $loadCart();
 
         echo json_encode([
             'success' => true,
@@ -150,7 +163,9 @@ switch ($action) {
         exit;
 
     case 'clear':
-        $cleared = $cartService->clearCart($userId);
+        $cleared = $isAuthenticatedParent
+            ? $cartService->clearCart($userId)
+            : $cartService->clearCart();
 
         if (!$cleared) {
             http_response_code(500);
@@ -161,7 +176,7 @@ switch ($action) {
             exit;
         }
 
-        $cart = $cartService->getCart($userId);
+        $cart = $loadCart();
 
         echo json_encode([
             'success' => true,

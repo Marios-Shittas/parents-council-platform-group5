@@ -39,8 +39,15 @@ class OrdersService
             $ordersPayload[] = [
                 'order_id' => $orderId,
                 'created_at' => $order['created_at'],
-                'parent_name' => trim((string) ($order['parent_name'] ?? '')),
-                'parent_email' => (string) ($order['parent_email'] ?? ''),
+                'customer_type' => (string) ($order['customer_type'] ?? 'parent'),
+                'portal_context' => (string) ($order['portal_context'] ?? 'parent'),
+                'customer_name' => trim((string) ($order['customer_name'] ?? '')),
+                'customer_email' => (string) ($order['customer_email'] ?? ''),
+                'customer_phone' => (string) ($order['customer_phone'] ?? ''),
+                'student_name' => trim((string) ($order['student_name'] ?? '')),
+                'student_class' => trim((string) ($order['student_class'] ?? '')),
+                'parent_name' => trim((string) ($order['customer_name'] ?? '')),
+                'parent_email' => (string) ($order['customer_email'] ?? ''),
                 'total_price' => (float) $order['total_price'],
                 'total_items' => (int) $order['total_items'],
                 'items' => $items,
@@ -78,14 +85,39 @@ class OrdersService
                 o.order_id,
                 o.created_at,
                 o.total_price,
-                CONCAT(COALESCE(u.name, ''), ' ', COALESCE(u.surname, '')) AS parent_name,
-                u.email AS parent_email,
+                o.customer_type,
+                o.portal_context,
+                TRIM(
+                    COALESCE(
+                        NULLIF(CONCAT(COALESCE(o.customer_name, ''), ' ', COALESCE(o.customer_surname, '')), ' '),
+                        CONCAT(COALESCE(u.name, ''), ' ', COALESCE(u.surname, ''))
+                    )
+                ) AS customer_name,
+                COALESCE(NULLIF(o.customer_email, ''), u.email, '') AS customer_email,
+                COALESCE(NULLIF(o.customer_phone, ''), u.phone_number, '') AS customer_phone,
+                o.student_name,
+                o.student_class,
                 COALESCE(SUM(oi.quantity), 0) AS total_items
             FROM Orders o
-            INNER JOIN Users u ON u.user_id = o.user_id
+            LEFT JOIN Users u ON u.user_id = o.user_id
             LEFT JOIN OrderItems oi ON oi.order_id = o.order_id
             WHERE o.order_status = 'paid'
-            GROUP BY o.order_id, o.created_at, o.total_price, u.name, u.surname, u.email
+            GROUP BY
+                o.order_id,
+                o.created_at,
+                o.total_price,
+                o.customer_type,
+                o.portal_context,
+                o.customer_name,
+                o.customer_surname,
+                o.customer_email,
+                o.customer_phone,
+                o.student_name,
+                o.student_class,
+                u.name,
+                u.surname,
+                u.email,
+                u.phone_number
             ORDER BY o.created_at DESC
         ";
 

@@ -10,7 +10,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-USE `parents_council`;
+USE `parents_council_dimotiko`;
 SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -21,7 +21,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `parents_council`
+-- Database: `parents_council_dimotiko`
 --
 
 
@@ -156,8 +156,8 @@ INSERT INTO `Logs` (`log_id`, `user_id`, `action`, `description`, `created_at`) 
 -- Dumping data for table `Orders`
 --
 
-INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order_status`) VALUES
-(1, 2, 0.00, '2026-04-11 22:21:41', 'pending');
+INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order_status`, `customer_type`, `customer_name`, `customer_surname`, `customer_email`, `customer_phone`, `student_name`, `student_class`, `portal_context`) VALUES
+(1, 2, 0.00, '2026-04-11 22:21:41', 'pending', 'parent', NULL, NULL, NULL, NULL, NULL, NULL, 'parent');
 
 --
 -- Dumping data for table `ParentsPageGalleryImages`

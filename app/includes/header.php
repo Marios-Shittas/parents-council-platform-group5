@@ -63,16 +63,13 @@ $nav_items = [
         'icon' => 'fas fa-file-alt',
         'match' => ['applications.php'],
     ],
-];
-
-if (site_is_parent()) {
-    $nav_items[] = [
+    [
         'label' => 'Κατάστημα',
         'href' => site_section_url('eshop.php'),
         'icon' => 'fas fa-store',
         'match' => ['eshop.php'],
-    ];
-}
+    ],
+];
 
 $nav_items[] = [
     'label' => 'Επικοινωνία',
