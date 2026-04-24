@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: application/json; charset=utf-8');
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -16,6 +14,39 @@ class OrdersService
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
+    }
+
+    /**
+     * Get count of paid orders not yet seen by admin
+     * @return int Count of unseen paid orders
+     */
+    public function getPendingPaidOrdersCount(): int
+    {
+        $sql = "SELECT COUNT(*) AS count FROM Orders WHERE order_status = 'paid' AND admin_seen_at IS NULL";
+        $result = $this->conn->query($sql);
+        if (!$result) {
+            return 0;
+        }
+
+        $row = $result->fetch_assoc();
+        return (int)($row['count'] ?? 0);
+    }
+
+    /**
+     * Mark an order as seen by admin
+     * @param int $orderId Order ID
+     * @return bool True when query executes successfully
+     */
+    public function markOrderAsSeen(int $orderId): bool
+    {
+        $sql = "UPDATE Orders SET admin_seen_at = NOW() WHERE order_id = ? AND order_status = 'paid' AND admin_seen_at IS NULL";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $orderId);
+        return $stmt->execute();
     }
 
     public function handleRequest(): void
@@ -36,6 +67,8 @@ class OrdersService
         foreach ($paidOrders as $order) {
             $orderId = (int) $order['order_id'];
             $items = $itemsByOrderId[$orderId] ?? [];
+            $isUnseen = $order['admin_seen_at'] === null || $order['admin_seen_at'] === '';
+            
             $ordersPayload[] = [
                 'order_id' => $orderId,
                 'created_at' => $order['created_at'],
@@ -44,6 +77,7 @@ class OrdersService
                 'total_price' => (float) $order['total_price'],
                 'total_items' => (int) $order['total_items'],
                 'items' => $items,
+                'is_unseen' => $isUnseen,
             ];
         }
 
@@ -78,6 +112,7 @@ class OrdersService
                 o.order_id,
                 o.created_at,
                 o.total_price,
+                o.admin_seen_at,
                 CONCAT(COALESCE(u.name, ''), ' ', COALESCE(u.surname, '')) AS parent_name,
                 u.email AS parent_email,
                 COALESCE(SUM(oi.quantity), 0) AS total_items
@@ -85,7 +120,7 @@ class OrdersService
             INNER JOIN Users u ON u.user_id = o.user_id
             LEFT JOIN OrderItems oi ON oi.order_id = o.order_id
             WHERE o.order_status = 'paid'
-            GROUP BY o.order_id, o.created_at, o.total_price, u.name, u.surname, u.email
+            GROUP BY o.order_id, o.created_at, o.total_price, o.admin_seen_at, u.name, u.surname, u.email
             ORDER BY o.created_at DESC
         ";
 
@@ -193,20 +228,8 @@ class OrdersService
 
     private function respond(int $statusCode, array $payload): void
     {
+        header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     }
 }
-
-try {
-    $service = new OrdersService($conn);
-    $service->handleRequest();
-} catch (Throwable $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage(),
-    ], JSON_UNESCAPED_UNICODE);
-}
-
-$conn->close();
