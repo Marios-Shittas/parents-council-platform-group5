@@ -29,6 +29,17 @@ try {
     $pendingApplicationSubmissions = 0;
 }
 
+$pendingPaidOrders = 0;
+try {
+    require_once __DIR__ . '/../services/OrdersService.php';
+    if (isset($conn) && $conn instanceof mysqli) {
+        $ordersService = new OrdersService($conn);
+        $pendingPaidOrders = max(0, (int)$ordersService->getPendingPaidOrdersCount());
+    }
+} catch (Throwable $exception) {
+    $pendingPaidOrders = 0;
+}
+
 $epikoinoniaBadgeText = '';
 if ($unreadContactMessages > 0) {
     $epikoinoniaBadgeText = $unreadContactMessages > 10 ? '10+' : (string)$unreadContactMessages;
@@ -42,6 +53,11 @@ if ($pendingUserRegistrations > 0) {
 $applicationsBadgeText = '';
 if ($pendingApplicationSubmissions > 0) {
     $applicationsBadgeText = $pendingApplicationSubmissions > 10 ? '10+' : (string)$pendingApplicationSubmissions;
+}
+
+$ordersBadgeText = '';
+if ($pendingPaidOrders > 0) {
+    $ordersBadgeText = $pendingPaidOrders > 10 ? '10+' : (string)$pendingPaidOrders;
 }
 ?>
 <script>
@@ -170,6 +186,9 @@ if ($pendingApplicationSubmissions > 0) {
             <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
                 <i class="fas fa-receipt"></i>
                 <span class="admin-nav-label">Παραγγελίες</span>
+                <?php if ($ordersBadgeText !== ''): ?>
+                    <span class="admin-notification-badge" aria-label="Νέες πληρωμένες παραγγελίες: <?php echo htmlspecialchars($ordersBadgeText); ?>"><?php echo htmlspecialchars($ordersBadgeText); ?></span>
+                <?php endif; ?>
             </a>
         </li>
 

@@ -294,6 +294,7 @@ CREATE TABLE `Orders` (
   `total_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `order_status` enum('pending','paid','cancelled') NOT NULL DEFAULT 'pending',
+  `admin_seen_at` datetime DEFAULT NULL,
   `customer_type` enum('parent','public') NOT NULL DEFAULT 'parent',
   `customer_name` varchar(100) DEFAULT NULL,
   `customer_surname` varchar(100) DEFAULT NULL,

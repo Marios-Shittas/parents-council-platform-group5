@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: application/json; charset=utf-8');
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,6 +10,7 @@ require_once __DIR__ . '/../config/db.php';
 class OrdersService
 {
     private mysqli $conn;
+    private ?bool $hasAdminSeenAtColumn = null;
 
     public function __construct(mysqli $conn)
     {
@@ -28,6 +27,14 @@ class OrdersService
             return;
         }
 
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $action = trim((string) ($_POST['action'] ?? $_GET['action'] ?? ''));
+
+        if ($method === 'POST' && $action === 'mark_order_seen') {
+            $this->handleMarkOrderSeen();
+            return;
+        }
+
         $paidOrders = $this->getPaidOrders();
         $orderIds = array_map(static fn(array $order): int => (int) $order['order_id'], $paidOrders);
         $itemsByOrderId = $this->getItemsByOrderIds($orderIds);
@@ -36,6 +43,7 @@ class OrdersService
         foreach ($paidOrders as $order) {
             $orderId = (int) $order['order_id'];
             $items = $itemsByOrderId[$orderId] ?? [];
+            $isUnseen = !isset($order['admin_seen_at']) || $order['admin_seen_at'] === null || $order['admin_seen_at'] === '';
             $ordersPayload[] = [
                 'order_id' => $orderId,
                 'created_at' => $order['created_at'],
@@ -51,10 +59,12 @@ class OrdersService
                 'total_price' => (float) $order['total_price'],
                 'total_items' => (int) $order['total_items'],
                 'items' => $items,
+                'is_unseen' => $isUnseen,
             ];
         }
 
         $totalsByProduct = $this->getTotalsByProduct();
+        $pendingPaidOrdersCount = $this->getPendingPaidOrdersCount();
 
         $summary = [
             'paid_orders_count' => count($ordersPayload),
@@ -74,17 +84,90 @@ class OrdersService
             'success' => true,
             'summary' => $summary,
             'totals_by_product' => $totalsByProduct,
+            'pending_paid_orders_count' => $pendingPaidOrdersCount,
             'orders' => $ordersPayload,
         ]);
     }
 
+    private function handleMarkOrderSeen(): void
+    {
+        $orderId = (int) ($_POST['order_id'] ?? 0);
+        if ($orderId <= 0) {
+            $this->respond(400, [
+                'success' => false,
+                'message' => 'Missing or invalid order ID.',
+            ]);
+            return;
+        }
+
+        $updated = $this->markOrderAsSeen($orderId);
+        if (!$updated) {
+            $this->respond(500, [
+                'success' => false,
+                'message' => 'Failed to mark order as seen.',
+            ]);
+            return;
+        }
+
+        $this->respond(200, [
+            'success' => true,
+            'pending_paid_orders_count' => $this->getPendingPaidOrdersCount(),
+        ]);
+    }
+
+    public function getPendingPaidOrdersCount(): int
+    {
+        if (!$this->ensureAdminSeenAtColumn()) {
+            return 0;
+        }
+
+        $sql = "SELECT COUNT(*) AS count FROM Orders WHERE order_status = 'paid' AND admin_seen_at IS NULL";
+        $result = $this->conn->query($sql);
+
+        if ($result === false) {
+            return 0;
+        }
+
+        $row = $result->fetch_assoc();
+        return (int) ($row['count'] ?? 0);
+    }
+
+    public function markOrderAsSeen(int $orderId): bool
+    {
+        if (!$this->ensureAdminSeenAtColumn()) {
+            return true;
+        }
+
+        $stmt = $this->conn->prepare(
+            "UPDATE Orders
+             SET admin_seen_at = NOW()
+             WHERE order_id = ?
+               AND order_status = 'paid'
+               AND admin_seen_at IS NULL"
+        );
+
+        if ($stmt === false) {
+            return false;
+        }
+
+        $stmt->bind_param('i', $orderId);
+        $ok = $stmt->execute();
+        $stmt->close();
+
+        return $ok;
+    }
+
     private function getPaidOrders(): array
     {
+        $adminSeenSelect = $this->ensureAdminSeenAtColumn() ? 'o.admin_seen_at' : 'NULL AS admin_seen_at';
+        $adminSeenGroupBy = $this->ensureAdminSeenAtColumn() ? "                o.admin_seen_at,\n" : '';
+
         $sql = "
             SELECT
                 o.order_id,
                 o.created_at,
                 o.total_price,
+                {$adminSeenSelect},
                 o.customer_type,
                 o.portal_context,
                 TRIM(
@@ -106,6 +189,7 @@ class OrdersService
                 o.order_id,
                 o.created_at,
                 o.total_price,
+{$adminSeenGroupBy}
                 o.customer_type,
                 o.portal_context,
                 o.customer_name,
@@ -223,22 +307,48 @@ class OrdersService
         return $totals;
     }
 
+    private function ensureAdminSeenAtColumn(): bool
+    {
+        if ($this->hasAdminSeenAtColumn !== null) {
+            return $this->hasAdminSeenAtColumn;
+        }
+
+        $check = $this->conn->query("SHOW COLUMNS FROM Orders LIKE 'admin_seen_at'");
+        if ($check && (int) $check->num_rows > 0) {
+            $this->hasAdminSeenAtColumn = true;
+            return true;
+        }
+
+        $alterSql = "ALTER TABLE Orders ADD COLUMN admin_seen_at DATETIME NULL DEFAULT NULL AFTER order_status";
+        if (!$this->conn->query($alterSql)) {
+            $this->hasAdminSeenAtColumn = false;
+            return false;
+        }
+
+        $this->hasAdminSeenAtColumn = true;
+        return true;
+    }
+
     private function respond(int $statusCode, array $payload): void
     {
+        header('Content-Type: application/json; charset=utf-8');
         http_response_code($statusCode);
         echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     }
 }
 
-try {
-    $service = new OrdersService($conn);
-    $service->handleRequest();
-} catch (Throwable $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage(),
-    ], JSON_UNESCAPED_UNICODE);
-}
+if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
+    try {
+        $service = new OrdersService($conn);
+        $service->handleRequest();
+    } catch (Throwable $e) {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], JSON_UNESCAPED_UNICODE);
+    }
 
-$conn->close();
+    $conn->close();
+}

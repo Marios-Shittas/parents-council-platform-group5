@@ -63,6 +63,129 @@
     background: #fff6f7;
 }
 
+.orders-table tbody tr:not(.order-details-row) {
+    cursor: pointer;
+}
+
+.orders-table tbody tr:not(.order-details-row):focus {
+    outline: 2px solid #7db2e8;
+    outline-offset: -2px;
+}
+
+.order-row-unseen {
+    background: #fff6f6;
+    box-shadow: inset 4px 0 0 #dc3545;
+}
+
+.order-row-unseen td {
+    border-top-color: #f2c7c7;
+}
+
+.orders-expand-cell {
+    width: 42px;
+    text-align: center;
+    color: #486581;
+}
+
+.orders-id {
+    font-weight: 800;
+    color: #163a63;
+}
+
+.order-new-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0;
+    box-shadow: none;
+    vertical-align: middle;
+}
+
+.order-details-row td {
+    padding: 0 !important;
+    background: #f7fafd;
+}
+
+.order-details-panel {
+    padding: 30px 22px 34px;
+    border-top: 1px solid #e1eaf5;
+    border-bottom: 1px solid #e1eaf5;
+}
+
+.order-details-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.order-details-head h4 {
+    margin: 0;
+    color: #163a63;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+}
+
+.order-details-head strong {
+    color: #163a63;
+    font-size: 1rem;
+}
+
+.order-details-empty {
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #dae4f2;
+    border-radius: 8px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.order-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #dae4f2;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.order-items-table th,
+.order-items-table td {
+    padding: 24px 14px;
+    border-bottom: 1px solid #e7edf6;
+    text-align: left;
+    white-space: nowrap;
+    line-height: 3.0;
+}
+
+.order-items-table th {
+    background: #eef4fb;
+    color: #334e68;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.order-items-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.order-size-text {
+    color: #164a7a;
+    font-weight: 800;
+}
+
 @media (max-width: 992px) {
     .orders-summary-grid {
         grid-template-columns: 1fr;
@@ -84,6 +207,14 @@
     }
 
     .orders-panel .admin-table {
+        min-width: 980px;
+    }
+
+    .order-details-panel {
+        padding: 16px;
+    }
+
+    .order-items-table {
         min-width: 640px;
     }
 }
