@@ -249,14 +249,14 @@ if (site_is_parent()) {
             font-family: 'Lato', sans-serif;
             font-weight: 600;
             color: #ffffff !important;
-            padding: .5rem .95rem;
+            padding: .52rem 1.02rem;
             border-radius: .65rem;
             transition: all .2s ease;
             position: relative;
             border: 0 !important;
             box-shadow: none !important;
             background: transparent;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         /* Ίδιο πλάτος στο icon ώστε να φαίνονται όλα ευθυγραμμισμένα. */
@@ -508,8 +508,8 @@ if (site_is_parent()) {
         }
 
         .navbar-parent .navbar-nav .nav-link {
-            padding: .46rem .72rem;
-            font-size: .91rem;
+            padding: .5rem .84rem;
+            font-size: .96rem;
         }
 
         .navbar-parent .navbar-nav .nav-link--icon-only {
@@ -542,6 +542,44 @@ if (site_is_parent()) {
             gap: .55rem;
             margin-left: .55rem;
             padding-left: .7rem;
+        }
+
+        @media (min-width: 1200px) {
+            .navbar-parent .navbar-collapse {
+                justify-content: space-between;
+                gap: .45rem;
+                padding: .9rem .95rem;
+            }
+
+            .navbar-parent .navbar-nav {
+                flex: 1 1 auto;
+                min-width: 0;
+                gap: .08rem;
+                padding-right: 0;
+            }
+
+            .navbar-parent .navbar-nav .nav-item {
+                margin: 0 .03rem;
+            }
+
+            .navbar-parent .navbar-nav .nav-link {
+                padding: .44rem .66rem;
+                font-size: .9rem;
+            }
+
+            .navbar-parent .navbar-tools {
+                flex: 0 0 auto;
+                margin-left: .35rem;
+                padding-left: .5rem;
+                gap: .4rem;
+            }
+
+            .navbar-parent .login-btn,
+            .navbar-parent .login-btn.btn,
+            .navbar-parent .login-btn.btn-sm {
+                padding: .26rem .68rem !important;
+                font-size: .88rem !important;
+            }
         }
 
         .navbar .container {
@@ -686,7 +724,9 @@ if (site_is_parent()) {
             .logo-stack {
                 margin-left: .15rem;
             }
+        }
 
+        @media (max-width: 767.98px) {
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;

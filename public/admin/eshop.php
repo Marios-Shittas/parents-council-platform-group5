@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../../app/services/ProductsService.php';
 require_once __DIR__ . '/../../app/services/EshopSettingsService.php';
+require_once __DIR__ . '/../../app/includes/product_sizes.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -24,6 +25,7 @@ $eshopSettingsService = new EshopSettingsService();
 $message = '';
 $messageType = '';
 $editProduct = null;
+$availableSizeOptions = product_sizes_allowed_options();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -32,11 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['product_name'] ?? '');
         $description = trim($_POST['product_description'] ?? '');
         $price = trim($_POST['price'] ?? '');
+        $hasSizes = isset($_POST['has_sizes']) && $_POST['has_sizes'] === '1';
+        $sizeOptions = $_POST['size_options'] ?? [];
+
+        if (!is_array($sizeOptions)) {
+            $sizeOptions = [];
+        }
 
         if ($name !== '' && $price !== '') {
             $productId = $productsService->createProduct($name, $description, $price);
 
             if ($productId) {
+                product_sizes_set_for_product((int)$productId, $hasSizes, $sizeOptions);
+
                 if (!empty($_FILES['product_image']['name'])) {
                     $uploadDir = __DIR__ . '/../assets/Products_img/';
 
@@ -110,11 +120,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['product_name'] ?? '');
         $description = trim($_POST['product_description'] ?? '');
         $price = trim($_POST['price'] ?? '');
+        $hasSizes = isset($_POST['has_sizes']) && $_POST['has_sizes'] === '1';
+        $sizeOptions = $_POST['size_options'] ?? [];
+
+        if (!is_array($sizeOptions)) {
+            $sizeOptions = [];
+        }
 
         if ($id > 0 && $name !== '' && $price !== '') {
             $updated = $productsService->updateProduct($id, $name, $description, $price);
 
             if ($updated) {
+                product_sizes_set_for_product($id, $hasSizes, $sizeOptions);
+
                 if (!empty($_FILES['product_image']['name'])) {
                     $uploadDir = __DIR__ . '/../assets/Products_img/';
 
@@ -204,6 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $deleted = $productsService->deleteProduct($id);
 
                 if ($deleted) {
+                    product_sizes_remove_for_product($id);
                     $_SESSION['flash_message'] = 'Το προϊόν διαγράφηκε επιτυχώς.';
                     $_SESSION['flash_message_type'] = 'success';
                 } else {
@@ -253,7 +272,14 @@ if (isset($_GET['edit'])) {
     }
 }
 
+if (is_array($editProduct)) {
+    $sizeMeta = product_sizes_get_for_product((int)($editProduct['product_id'] ?? 0));
+    $editProduct['has_sizes'] = $sizeMeta['has_sizes'];
+    $editProduct['size_options'] = $sizeMeta['size_options'];
+}
+
 $products = $productsService->getAllProducts();
+$productSizesMap = product_sizes_read_all();
 $isShopVisible = $eshopSettingsService->isShopVisible();
 ?>
 
@@ -336,6 +362,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                         <th>Εικόνα</th>
                                         <th>Τίτλος</th>
                                         <th>Τιμή</th>
+                                        <th>Μεγέθη</th>
                                         <th>Περιγραφή</th>
                                         <th style="width: 170px;">Ενέργειες</th>
                                     </tr>
@@ -361,6 +388,28 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                             </td>
                                             <td>
                                                 €<?php echo htmlspecialchars($product['price']); ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $productIdKey = (string)((int)$product['product_id']);
+                                                $sizeMeta = $productSizesMap[$productIdKey] ?? null;
+                                                $sizeValues = [];
+
+                                                if (is_array($sizeMeta) && !empty($sizeMeta['has_sizes']) && !empty($sizeMeta['size_options']) && is_array($sizeMeta['size_options'])) {
+                                                    foreach ($sizeMeta['size_options'] as $sizeValue) {
+                                                        $sizeValue = (string)$sizeValue;
+                                                        if (isset($availableSizeOptions[$sizeValue])) {
+                                                            $sizeValues[] = $availableSizeOptions[$sizeValue];
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+
+                                                <?php if (!empty($sizeValues)): ?>
+                                                    <span><?php echo htmlspecialchars(implode(', ', $sizeValues)); ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">Χωρίς μέγεθος</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php
@@ -448,6 +497,32 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                 Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF, WEBP | Μέγιστο μέγεθος: 5MB
                             </small>
                         </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input js-has-sizes-toggle" id="create_has_sizes" name="has_sizes" value="1">
+                                <label class="custom-control-label" for="create_has_sizes"><strong>Το προϊόν έχει διαθέσιμα μεγέθη</strong></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group js-size-options-group" style="display:none;">
+                            <label><strong>Διαθέσιμα Μεγέθη στον parent</strong></label>
+                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                                <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
+                                    <div class="custom-control custom-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input js-size-option"
+                                            id="create_size_<?php echo htmlspecialchars($sizeValue); ?>"
+                                            name="size_options[]"
+                                            value="<?php echo htmlspecialchars($sizeValue); ?>"
+                                        >
+                                        <label class="custom-control-label" for="create_size_<?php echo htmlspecialchars($sizeValue); ?>"><?php echo htmlspecialchars($sizeLabel); ?></label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <small class="text-muted d-block mt-2">Επίλεξε ποια μεγέθη θα βλέπουν οι γονείς σε αυτό το προϊόν.</small>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -526,6 +601,40 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                             </small>
                         </div>
 
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    type="checkbox"
+                                    class="custom-control-input js-has-sizes-toggle"
+                                    id="edit_has_sizes"
+                                    name="has_sizes"
+                                    value="1"
+                                    <?php echo (!empty($editProduct['has_sizes'])) ? 'checked' : ''; ?>
+                                >
+                                <label class="custom-control-label" for="edit_has_sizes"><strong>Το προϊόν έχει διαθέσιμα μεγέθη</strong></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group js-size-options-group" style="display:<?php echo (!empty($editProduct['has_sizes'])) ? 'block' : 'none'; ?>;">
+                            <label><strong>Διαθέσιμα Μεγέθη στον parent</strong></label>
+                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                                <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
+                                    <div class="custom-control custom-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input js-size-option"
+                                            id="edit_size_<?php echo htmlspecialchars($sizeValue); ?>"
+                                            name="size_options[]"
+                                            value="<?php echo htmlspecialchars($sizeValue); ?>"
+                                            <?php echo (!empty($editProduct['size_options']) && is_array($editProduct['size_options']) && in_array($sizeValue, $editProduct['size_options'], true)) ? 'checked' : ''; ?>
+                                        >
+                                        <label class="custom-control-label" for="edit_size_<?php echo htmlspecialchars($sizeValue); ?>"><?php echo htmlspecialchars($sizeLabel); ?></label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <small class="text-muted d-block mt-2">Επίλεξε ποια μεγέθη θα βλέπουν οι γονείς σε αυτό το προϊόν.</small>
+                        </div>
+
                         <?php if (!empty($editProduct['product_image'])): ?>
                             <div class="form-group">
                                 <label><strong>Τρέχουσα Εικόνα</strong></label>
@@ -602,6 +711,37 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
             const deleteButtons = document.querySelectorAll('.delete-product-btn');
             const deleteProductIdInput = document.getElementById('deleteProductId');
             const deleteProductName = document.getElementById('deleteProductName');
+
+            function bindSizeVisibility(scopeEl) {
+                if (!scopeEl) {
+                    return;
+                }
+
+                const toggle = scopeEl.querySelector('.js-has-sizes-toggle');
+                const optionsGroup = scopeEl.querySelector('.js-size-options-group');
+                const options = scopeEl.querySelectorAll('.js-size-option');
+
+                if (!toggle || !optionsGroup) {
+                    return;
+                }
+
+                const sync = function() {
+                    const enabled = toggle.checked;
+                    optionsGroup.style.display = enabled ? 'block' : 'none';
+
+                    if (!enabled) {
+                        options.forEach(function(option) {
+                            option.checked = false;
+                        });
+                    }
+                };
+
+                toggle.addEventListener('change', sync);
+                sync();
+            }
+
+            bindSizeVisibility(document.querySelector('#createProductModal form'));
+            bindSizeVisibility(document.querySelector('#editProductModal form'));
 
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function () {

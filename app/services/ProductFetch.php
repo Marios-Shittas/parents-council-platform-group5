@@ -6,6 +6,7 @@ header("Access-Control-Allow-Origin: *");
 
 include "../config/db.php";
 require_once __DIR__ . '/EshopSettingsService.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 $eshopSettingsService = new EshopSettingsService($conn);
 
@@ -66,6 +67,9 @@ if ($result->num_rows > 0) {
             $images[] = getDefaultProductImagePath();
         }
 
+        $sizeMeta = product_sizes_get_for_product((int)$product_id);
+        $row['has_sizes'] = $sizeMeta['has_sizes'];
+        $row['size_options'] = $sizeMeta['size_options'];
         $row['images'] = $images;
         $products[] = $row;      
     }

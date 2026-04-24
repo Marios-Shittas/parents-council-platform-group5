@@ -1,0 +1,19 @@
+{
+    "2": {
+        "has_sizes": true,
+        "size_options": [
+            "small",
+            "medium",
+            "large"
+        ]
+    },
+    "1": {
+        "has_sizes": true,
+        "size_options": [
+            "small",
+            "medium",
+            "large",
+            "x-large"
+        ]
+    }
+}
