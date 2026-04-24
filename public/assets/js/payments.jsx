@@ -16,6 +16,22 @@ function Payments() {
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+    const sizeLabels = {
+        'x-small': 'X-Small',
+        'small': 'Small',
+        'medium': 'Medium',
+        'large': 'Large',
+        'x-large': 'X-Large',
+        'one-size': 'One Size'
+    };
+
+    function getSizeLabel(sizeValue) {
+        if (!sizeValue) {
+            return '';
+        }
+
+        return sizeLabels[sizeValue] || sizeValue;
+    }
 
     function getPaymentFeedback(status, message) {
         const normalizedStatus = (status || '').toLowerCase();
@@ -190,9 +206,11 @@ function Payments() {
     }
 
     function addToCart(product) {
+        const availableSizes = Array.isArray(product.size_options) ? product.size_options : [];
+        const requiresSize = Boolean(product.has_sizes) && availableSizes.length > 0;
         const selectedSize = selectedSizes[product.product_id];
 
-        if (!selectedSize || selectedSize.trim() === '') {
+        if (requiresSize && (!selectedSize || selectedSize.trim() === '')) {
             setSizeErrors(prev => ({
                 ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
@@ -204,7 +222,7 @@ function Payments() {
             action: 'add',
             product_id: product.product_id,
             quantity: 1,
-            size: selectedSize
+            size: requiresSize ? selectedSize : ''
         })
         .then(() => {
             setSizeErrors(prev => ({
@@ -382,24 +400,30 @@ function Payments() {
                                         </div>
 
                                         <div className="size-selector mt-3">
-                                            <label className="size-label">Επιλέξτε μέγεθος:</label>
-                                            <select
-                                                className="size-select"
-                                                value={selectedSizes[product.product_id] || ''}
-                                                onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
-                                            >
-                                                <option value="">Επιλέξτε μέγεθος</option>
-                                                <option value="x-small">X-Small</option>
-                                                <option value="small">Small</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="large">Large</option>
-                                                <option value="x-large">X-Large</option>
-                                            </select>
+                                            {Boolean(product.has_sizes) && Array.isArray(product.size_options) && product.size_options.length > 0 ? (
+                                                <>
+                                                    <label className="size-label">Επιλέξτε μέγεθος:</label>
+                                                    <select
+                                                        className="size-select"
+                                                        value={selectedSizes[product.product_id] || ''}
+                                                        onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
+                                                    >
+                                                        <option value="">Επιλέξτε μέγεθος</option>
+                                                        {product.size_options.map((sizeValue) => (
+                                                            <option key={sizeValue} value={sizeValue}>
+                                                                {getSizeLabel(sizeValue)}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
-                                            {sizeErrors[product.product_id] && (
-                                                <div className="size-error-text">
-                                                    {sizeErrors[product.product_id]}
-                                                </div>
+                                                    {sizeErrors[product.product_id] && (
+                                                        <div className="size-error-text">
+                                                            {sizeErrors[product.product_id]}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="text-muted small">Δεν απαιτείται επιλογή μεγέθους για αυτό το προϊόν.</div>
                                             )}
                                         </div>
 
@@ -453,7 +477,7 @@ function Payments() {
                                                 <div>{item.product_name}</div>
                                                 {item.size && (
                                                     <small className="cart-size-badge">
-                                                        {item.size.toUpperCase()}
+                                                        {getSizeLabel(item.size)}
                                                     </small>
                                                 )}
                                             </div>
