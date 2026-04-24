@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
+require_once __DIR__ . '/../../includes/HomeViewHelper.php';
 require_once __DIR__ . '/../../services/HomePageService.php';
 
 $homePageService = new HomePageService();
@@ -26,33 +27,6 @@ $announcementsBlockButton = (string)($announcementsSection['content']['button_la
 $eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Εκδηλώσεις');
 $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
 
-if (!function_exists('home_public_content_url_exists')) {
-    function home_public_content_url_exists(string $url): bool
-    {
-        $path = (string)parse_url($url, PHP_URL_PATH);
-        if ($path === '') {
-            return true;
-        }
-
-        $publicPrefix = '/parents-council-platform-group5/public/';
-        if (strpos($path, $publicPrefix) !== 0) {
-            return true;
-        }
-
-        $relativePath = urldecode(substr($path, strlen($publicPrefix)));
-        if ($relativePath === '' || strpos(str_replace('\\', '/', $relativePath), '..') !== false) {
-            return false;
-        }
-
-        $publicRoot = realpath(__DIR__ . '/../../../public');
-        if ($publicRoot === false) {
-            return false;
-        }
-
-        $filePath = $publicRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
-        return is_file($filePath);
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -63,8 +37,8 @@ if (!function_exists('home_public_content_url_exists')) {
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-        <link rel="stylesheet" href="<?php echo site_asset_url('css/home.css'); ?>">
+        <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+        <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/home.css'); ?>">
         <title>Αρχική - <?php echo htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     </head>
 
@@ -74,9 +48,9 @@ if (!function_exists('home_public_content_url_exists')) {
     <main class="home-page">
         <?php
         $defaultHomeBannerSlides = [
-            ['src' => site_asset_url('img/home-school-banner.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1'],
-            ['src' => site_asset_url('img/home-school-banner-2.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2'],
-            ['src' => site_asset_url('img/home-school-banner-3.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3'],
+            ['src' => SiteContext::assetUrl('img/home-school-banner.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1'],
+            ['src' => SiteContext::assetUrl('img/home-school-banner-2.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2'],
+            ['src' => SiteContext::assetUrl('img/home-school-banner-3.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3'],
         ];
         $storedHomeBannerSlides = is_array($bannerSection['content']['slides'] ?? null) ? $bannerSection['content']['slides'] : [];
         $homeBannerSlides = [];
@@ -113,10 +87,10 @@ if (!function_exists('home_public_content_url_exists')) {
 
             $storedSrc = trim((string)($storedSlide['src'] ?? ''));
             $defaultSrc = (string)$defaultSlide['src'];
-            $resolvedSrc = site_resolve_content_url($storedSrc !== '' ? $storedSrc : $defaultSrc);
+            $resolvedSrc = SiteContext::resolveContentUrl($storedSrc !== '' ? $storedSrc : $defaultSrc);
 
             if (!$isRenderableBannerAsset($resolvedSrc)) {
-                $resolvedSrc = site_resolve_content_url($defaultSrc);
+                $resolvedSrc = SiteContext::resolveContentUrl($defaultSrc);
             }
 
             if (trim($resolvedSrc) === '') {
@@ -159,11 +133,11 @@ if (!function_exists('home_public_content_url_exists')) {
                     <h1><?php echo htmlspecialchars($heroTitle, ENT_QUOTES, 'UTF-8'); ?></h1>
                     <p class="hero-description"><?php echo htmlspecialchars($heroDescription, ENT_QUOTES, 'UTF-8'); ?></p>
                     <div class="hero-actions">
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn hero-outline-btn">
+                        <a href="<?php echo SiteContext::sectionUrl('announcements.php'); ?>" class="btn hero-outline-btn">
                             <i class="fas fa-bullhorn"></i>
                             <?php echo htmlspecialchars($heroAnnouncementsButtonLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </a>
-                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn hero-outline-btn">
+                        <a href="<?php echo SiteContext::sectionUrl('events.php'); ?>" class="btn hero-outline-btn">
                             <i class="fas fa-calendar-check"></i>
                             <?php echo htmlspecialchars($heroEventsButtonLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </a>
@@ -189,7 +163,7 @@ if (!function_exists('home_public_content_url_exists')) {
                             <h5 class="block-title"><i class="fas fa-bullhorn mr-2"></i><?php echo htmlspecialchars($announcementsBlockTitle, ENT_QUOTES, 'UTF-8'); ?></h5>
                         </div>
                         <div id="announcements-root"></div>
-                        <a href="<?php echo site_section_url('announcements.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($announcementsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a href="<?php echo SiteContext::sectionUrl('announcements.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($announcementsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
@@ -198,7 +172,7 @@ if (!function_exists('home_public_content_url_exists')) {
                             <h5 class="block-title"><i class="fas fa-star mr-2"></i><?php echo htmlspecialchars($eventsBlockTitle, ENT_QUOTES, 'UTF-8'); ?></h5>
                         </div>
                         <div id="upcoming-events-root"></div>
-                        <a href="<?php echo site_section_url('events.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($eventsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
+                        <a href="<?php echo SiteContext::sectionUrl('events.php'); ?>" class="btn btn-primary home-cta-btn"><?php echo htmlspecialchars($eventsBlockButton, ENT_QUOTES, 'UTF-8'); ?></a>
                     </div>
                 </div>
             </div>
@@ -207,32 +181,13 @@ if (!function_exists('home_public_content_url_exists')) {
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.home-school-banner__carousel').forEach(function (carousel) {
-                var slides = carousel.querySelectorAll('.home-school-banner__image');
-
-                if (slides.length <= 1) {
-                    return;
-                }
-
-                var currentIndex = 0;
-                var intervalMs = parseInt(carousel.getAttribute('data-interval'), 10) || 15000;
-
-                window.setInterval(function () {
-                    slides[currentIndex].classList.remove('is-active');
-                    currentIndex = (currentIndex + 1) % slides.length;
-                    slides[currentIndex].classList.add('is-active');
-                }, intervalMs);
-            });
-        });
-    </script>
+    <script src="<?php echo SiteContext::assetUrl('js/home-banner-carousel.js'); ?>"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/home-page-calendar.jsx'); ?>"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/home-page-announcements.jsx'); ?>"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/home-page-upcoming-events.jsx'); ?>"></script>
+    <script type="text/babel" src="<?php echo SiteContext::assetUrl('js/home-page-calendar.jsx'); ?>"></script>
+    <script type="text/babel" src="<?php echo SiteContext::assetUrl('js/home-page-announcements.jsx'); ?>"></script>
+    <script type="text/babel" src="<?php echo SiteContext::assetUrl('js/home-page-upcoming-events.jsx'); ?>"></script>
     </body>
 </html>

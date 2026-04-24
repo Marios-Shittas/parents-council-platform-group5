@@ -4,29 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../app/config/db.php';
-
-function clearUserTokenOnLogout(mysqli $conn, ?int $userId, ?string $email): void
-{
-    if ($userId !== null && $userId > 0) {
-        $stmt = $conn->prepare('UPDATE Users SET token = NULL, token_expiry = NULL WHERE user_id = ?');
-        if ($stmt) {
-            $stmt->bind_param('i', $userId);
-            $stmt->execute();
-            $stmt->close();
-        }
-        return;
-    }
-
-    $normalizedEmail = trim((string) $email);
-    if ($normalizedEmail !== '') {
-        $stmt = $conn->prepare('UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?');
-        if ($stmt) {
-            $stmt->bind_param('s', $normalizedEmail);
-            $stmt->execute();
-            $stmt->close();
-        }
-    }
-}
+require_once __DIR__ . '/../app/includes/PublicLogoutHelper.php';
 
 // Get the user role before destroying the session
 $role = $_SESSION['role'] ?? 'public';
@@ -42,7 +20,7 @@ if (($logoutEmail === null || $logoutEmail === '') && isset($_SESSION['temp_emai
     $logoutEmail = (string) $_SESSION['temp_email'];
 }
 
-clearUserTokenOnLogout($conn, $logoutUserId, $logoutEmail);
+PublicLogoutHelper::clearUserTokenOnLogout($conn, $logoutUserId, $logoutEmail);
 
 // Log the logout event before destroying the session (only for parents, not admins)
 if ($logoutUserId !== null && $logoutUserId > 0 && strtolower((string)$role) === 'parent') {
@@ -87,29 +65,7 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
     <title>Logging out...</title>
 </head>
 <body>
-    <script>
-        // Clear all possible ways to go back to protected pages
-        (function() {
-            // Clear session and local storage
-            try {
-                sessionStorage.clear();
-                localStorage.clear();
-            } catch(e) {}
-            
-            // Replace current state multiple times to bury history
-            for (let i = 0; i < 10; i++) {
-                window.history.replaceState(null, null, window.location.href);
-            }
-            
-            // Push many forward states
-            for (let i = 0; i < 50; i++) {
-                window.history.pushState({state: i}, null, window.location.href);
-            }
-            
-            // Redirect without adding to history
-            window.location.replace('<?php echo $redirectUrl; ?>');
-        })();
-    </script>
+    <script src="assets/js/logout-redirect.js" data-redirect-url="<?php echo htmlspecialchars($redirectUrl, ENT_QUOTES, 'UTF-8'); ?>"></script>
     <noscript>
         Redirecting...
         <meta http-equiv="refresh" content="0;url=<?php echo $redirectUrl; ?>">

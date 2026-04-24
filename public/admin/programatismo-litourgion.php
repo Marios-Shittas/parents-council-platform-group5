@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminProgramSchedulerHelper.php';
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -12,76 +13,6 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: /parents-council-platform-group5/public/login.php');
-    exit;
-}
-
-function normalizeScheduleStatus(string $status): string
-{
-    return in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
-}
-
-function normalizeScheduleFeature(string $feature): string
-{
-    $normalized = trim((string)$feature);
-    if ($normalized === 'cleanup_applications' || $normalized === 'cleanuo_submissions') {
-        $normalized = 'cleanup_submissions';
-    }
-
-    $allowed = ['registration', 'delete_users', 'cleanup_submissions'];
-    return in_array($normalized, $allowed, true) ? $normalized : 'registration';
-}
-
-function scheduleFeatureLabel(string $feature): string
-{
-    $map = [
-        'registration' => 'Εγγραφές',
-        'delete_users' => 'Διαγραφή Χρηστών',
-        'cleanup_submissions' => 'Καθαρισμός Υποβολών',
-    ];
-
-    return $map[$feature] ?? $feature;
-}
-
-function normalizeDateTimeLocalInput(string $value): ?string
-{
-    $trimmed = trim($value);
-    if ($trimmed === '') {
-        return null;
-    }
-
-    $dateTime = DateTime::createFromFormat('d/m/Y H:i', $trimmed);
-
-    if (!$dateTime instanceof DateTime) {
-        $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', $trimmed);
-        if (!$dateTime instanceof DateTime) {
-            return null;
-        }
-    }
-
-    return $dateTime->format('Y-m-d H:i:s');
-}
-
-function toDateTimeLocalValue(?string $value): string
-{
-    if (!is_string($value) || trim($value) === '') {
-        return '';
-    }
-
-    $timestamp = strtotime($value);
-    return $timestamp ? date('Y-m-d\\TH:i', $timestamp) : '';
-}
-
-function redirectWithFlash(string $message, string $type = 'info', string $email = ''): void
-{
-    $_SESSION['flash_message'] = $message;
-    $_SESSION['flash_message_type'] = $type;
-
-    $redirectUrl = 'programatismo-litourgion.php';
-    if ($email !== '') {
-        $redirectUrl .= '?email=' . urlencode($email);
-    }
-
-    header('Location: ' . $redirectUrl);
     exit;
 }
 
@@ -102,17 +33,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     if ($action === 'update_registration_schedule') {
         $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
-        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
-        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
-        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
-        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+        $feature = AdminProgramSchedulerHelper::normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = AdminProgramSchedulerHelper::normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = AdminProgramSchedulerHelper::normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = AdminProgramSchedulerHelper::normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
 
         if ($scheduleId <= 0 || $startDate === null || $endDate === null) {
-            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για το πρόγραμμα λειτουργιών.', 'danger', $searchEmail);
+            AdminProgramSchedulerHelper::redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για το πρόγραμμα λειτουργιών.', 'danger', $searchEmail);
         }
 
         $result = $usersService->updateSystemSchedule($scheduleId, $feature, $startDate, $endDate, $status, $currentAdminId);
-        redirectWithFlash(
+        AdminProgramSchedulerHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $searchEmail
@@ -120,17 +51,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 
     if ($action === 'add_registration_schedule') {
-        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
-        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
-        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
-        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+        $feature = AdminProgramSchedulerHelper::normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = AdminProgramSchedulerHelper::normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = AdminProgramSchedulerHelper::normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = AdminProgramSchedulerHelper::normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
 
         if ($startDate === null || $endDate === null) {
-            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για τη νέα περίοδο λειτουργιών.', 'danger', $searchEmail);
+            AdminProgramSchedulerHelper::redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για τη νέα περίοδο λειτουργιών.', 'danger', $searchEmail);
         }
 
         $result = $usersService->createSystemSchedule($feature, $startDate, $endDate, $status, $currentAdminId);
-        redirectWithFlash(
+        AdminProgramSchedulerHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $searchEmail
@@ -140,11 +71,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if ($action === 'delete_registration_schedule') {
         $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
         if ($scheduleId <= 0) {
-            redirectWithFlash('Μη έγκυρο πρόγραμμα.', 'danger', $searchEmail);
+            AdminProgramSchedulerHelper::redirectWithFlash('Μη έγκυρο πρόγραμμα.', 'danger', $searchEmail);
         }
 
         $result = $usersService->deleteSystemSchedule($scheduleId, $currentAdminId);
-        redirectWithFlash(
+        AdminProgramSchedulerHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $searchEmail
@@ -245,22 +176,22 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                 $scheduleId = (int)($schedule['ss_id'] ?? 0);
                                 $scheduleFormId = 'registration-schedule-form-' . $scheduleId;
                                 $scheduleDeleteFormId = 'registration-schedule-delete-form-' . $scheduleId;
-                                $rowFeature = normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration'));
-                                $rowStatus = normalizeScheduleStatus((string)($schedule['ss_status'] ?? 'inactive'));
+                                $rowFeature = AdminProgramSchedulerHelper::normalizeScheduleFeature((string)($schedule['feature'] ?? 'registration'));
+                                $rowStatus = AdminProgramSchedulerHelper::normalizeScheduleStatus((string)($schedule['ss_status'] ?? 'inactive'));
                             ?>
                             <tr>
                                 <td>
                                     <select name="schedule_feature" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
-                                        <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
-                                        <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                        <option value="cleanup_submissions" <?php echo $rowFeature === 'cleanup_submissions' ? 'selected' : ''; ?>><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
+                                        <option value="registration" <?php echo $rowFeature === 'registration' ? 'selected' : ''; ?>><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('registration')); ?></option>
+                                        <option value="delete_users" <?php echo $rowFeature === 'delete_users' ? 'selected' : ''; ?>><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('delete_users')); ?></option>
+                                        <option value="cleanup_submissions" <?php echo $rowFeature === 'cleanup_submissions' ? 'selected' : ''; ?>><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('cleanup_submissions')); ?></option>
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="datetime-local" name="registration_start_date" class="form-control" value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['start_date'] ?? null)); ?>" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
+                                    <input type="datetime-local" name="registration_start_date" class="form-control" value="<?php echo htmlspecialchars(AdminProgramSchedulerHelper::toDateTimeLocalValue($schedule['start_date'] ?? null)); ?>" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
                                 </td>
                                 <td>
-                                    <input type="datetime-local" name="registration_end_date" class="form-control" value="<?php echo htmlspecialchars(toDateTimeLocalValue($schedule['end_date'] ?? null)); ?>" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
+                                    <input type="datetime-local" name="registration_end_date" class="form-control" value="<?php echo htmlspecialchars(AdminProgramSchedulerHelper::toDateTimeLocalValue($schedule['end_date'] ?? null)); ?>" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
                                 </td>
                                 <td>
                                     <select name="registration_status" class="form-select" form="<?php echo htmlspecialchars($scheduleFormId); ?>" required>
@@ -272,7 +203,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                     <button type="submit" class="btn btn-primary-custom" form="<?php echo htmlspecialchars($scheduleFormId); ?>">
                                         <i class="fas fa-save me-1"></i>Αποθήκευση
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteScheduleModal" data-schedule-id="<?php echo $scheduleId; ?>" data-schedule-feature="<?php echo htmlspecialchars(scheduleFeatureLabel($rowFeature), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-start="<?php echo htmlspecialchars((string)($schedule['start_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-end="<?php echo htmlspecialchars((string)($schedule['end_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-delete-form-id="<?php echo htmlspecialchars($scheduleDeleteFormId, ENT_QUOTES, 'UTF-8'); ?>">
+                                    <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteScheduleModal" data-schedule-id="<?php echo $scheduleId; ?>" data-schedule-feature="<?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel($rowFeature), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-start="<?php echo htmlspecialchars((string)($schedule['start_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-end="<?php echo htmlspecialchars((string)($schedule['end_date'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-schedule-delete-form-id="<?php echo htmlspecialchars($scheduleDeleteFormId, ENT_QUOTES, 'UTF-8'); ?>">
                                         <i class="fas fa-trash-alt me-1"></i>Διαγραφή
                                     </button>
                                 </td>
@@ -284,9 +215,9 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <?php $newScheduleFormId = 'registration-schedule-form-new'; ?>
                         <td>
                             <select name="schedule_feature" class="form-select" form="<?php echo $newScheduleFormId; ?>" required>
-                                <option value="registration" selected><?php echo htmlspecialchars(scheduleFeatureLabel('registration')); ?></option>
-                                <option value="delete_users"><?php echo htmlspecialchars(scheduleFeatureLabel('delete_users')); ?></option>
-                                <option value="cleanup_submissions"><?php echo htmlspecialchars(scheduleFeatureLabel('cleanup_submissions')); ?></option>
+                                <option value="registration" selected><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('registration')); ?></option>
+                                <option value="delete_users"><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('delete_users')); ?></option>
+                                <option value="cleanup_submissions"><?php echo htmlspecialchars(AdminProgramSchedulerHelper::scheduleFeatureLabel('cleanup_submissions')); ?></option>
                             </select>
                         </td>
                         <td>
@@ -370,59 +301,6 @@ $registrationSchedules = $usersService->getSystemSchedules();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel" src="../assets/js/admin-programatismo-litourgion.jsx"></script>
-<script>
-    (function () {
-        var deleteScheduleModal = document.getElementById('deleteScheduleModal');
-        if (!deleteScheduleModal) {
-            return;
-        }
-
-        deleteScheduleModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
-            var startDate = button.getAttribute('data-schedule-start') || '';
-            var endDate = button.getAttribute('data-schedule-end') || '';
-            var formId = button.getAttribute('data-schedule-delete-form-id') || '';
-
-            var featureEl = document.getElementById('delete_schedule_feature');
-            var datesEl = document.getElementById('delete_schedule_dates');
-            var formIdEl = document.getElementById('delete_schedule_form_id');
-
-            if (featureEl) {
-                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
-            }
-
-            if (datesEl) {
-                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
-            }
-
-            if (formIdEl) {
-                formIdEl.value = formId;
-            }
-        });
-
-        var confirmDeleteScheduleButton = document.getElementById('confirmDeleteScheduleButton');
-        if (confirmDeleteScheduleButton) {
-            confirmDeleteScheduleButton.addEventListener('click', function () {
-                var formIdEl = document.getElementById('delete_schedule_form_id');
-                var formId = formIdEl ? formIdEl.value : '';
-                if (!formId) {
-                    return;
-                }
-
-                var form = document.getElementById(formId);
-                if (!form) {
-                    return;
-                }
-
-                form.submit();
-            });
-        }
-    })();
-</script>
+<script src="../assets/js/admin-programatismo-delete-schedule.js"></script>
 </body>
 </html>

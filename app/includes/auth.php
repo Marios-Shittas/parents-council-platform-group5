@@ -1,34 +1,41 @@
 <?php
 
-if (!function_exists('auth_start_session')) {
-    function auth_start_session(): void
+final class AuthHelper
+{
+    /**
+     * Starts a PHP session when needed.
+     */
+    public static function startSession(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
     }
-}
 
-if (!function_exists('auth_user_id')) {
-    function auth_user_id(): int
+    /**
+     * Returns current authenticated user id from session.
+     */
+    public static function userId(): int
     {
-        auth_start_session();
-        return (int) ($_SESSION['user_id'] ?? 0);
+        self::startSession();
+        return (int)($_SESSION['user_id'] ?? 0);
     }
-}
 
-if (!function_exists('auth_user_role')) {
-    function auth_user_role(): string
+    /**
+     * Returns current authenticated role from session.
+     */
+    public static function userRole(): string
     {
-        auth_start_session();
-        return (string) ($_SESSION['role'] ?? '');
+        self::startSession();
+        return (string)($_SESSION['role'] ?? '');
     }
-}
 
-if (!function_exists('auth_redirect_url_for_current_role')) {
-    function auth_redirect_url_for_current_role(): string
+    /**
+     * Provides default redirect URL based on current role.
+     */
+    public static function redirectUrlForCurrentRole(): string
     {
-        $role = auth_user_role();
+        $role = self::userRole();
 
         if ($role === 'admin') {
             return '/parents-council-platform-group5/public/admin/home.php';
@@ -40,22 +47,23 @@ if (!function_exists('auth_redirect_url_for_current_role')) {
 
         return '/parents-council-platform-group5/public/login.php';
     }
-}
 
-if (!function_exists('auth_require_role')) {
-    function auth_require_role(string $requiredRole, array $options = []): void
+    /**
+     * Enforces required role, returning JSON or redirect on failure.
+     */
+    public static function requireRole(string $requiredRole, array $options = []): void
     {
-        auth_start_session();
+        self::startSession();
 
-        $userId = auth_user_id();
-        $userRole = auth_user_role();
+        $userId = self::userId();
+        $userRole = self::userRole();
 
         if ($userId > 0 && $userRole === $requiredRole) {
             return;
         }
 
-        $mode = (string) ($options['mode'] ?? 'redirect');
-        $message = (string) ($options['message'] ?? 'Unauthorized access.');
+        $mode = (string)($options['mode'] ?? 'redirect');
+        $message = (string)($options['message'] ?? 'Unauthorized access.');
         $statusCode = $userId > 0 ? 403 : 401;
 
         if ($mode === 'json') {
@@ -67,7 +75,7 @@ if (!function_exists('auth_require_role')) {
             exit;
         }
 
-        $redirectTo = (string) ($options['redirect_to'] ?? auth_redirect_url_for_current_role());
+        $redirectTo = (string)($options['redirect_to'] ?? self::redirectUrlForCurrentRole());
         header('Location: ' . $redirectTo);
         exit;
     }

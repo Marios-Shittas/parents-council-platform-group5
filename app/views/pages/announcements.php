@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
 
 $announcementsService = new AnnouncementsService();
 $announcements = $announcementsService->getAllAnnouncements();
-$defaultImage = site_asset_url('img/placeholder.jpg');
+$defaultImage = SiteContext::assetUrl('img/placeholder.jpg');
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -15,9 +15,9 @@ $defaultImage = site_asset_url('img/placeholder.jpg');
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/announcements.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/public-page-header.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/announcements.css'); ?>">
     <title>Ανακοινώσεις - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
 
@@ -63,22 +63,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var params = new URLSearchParams(window.location.search);
-        var openId = params.get('open');
-
-        if (!openId) {
-            return;
-        }
-
-        var modalElement = document.getElementById('announcementModal' + openId);
-        if (!modalElement || typeof window.jQuery === 'undefined') {
-            return;
-        }
-
-        window.jQuery(modalElement).modal('show');
-    });
-</script>
+<script src="<?php echo SiteContext::assetUrl('js/announcements-open-modal.js'); ?>"></script>
 </body>
 </html>

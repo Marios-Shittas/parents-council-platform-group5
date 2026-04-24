@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminEpikoinoniaHelper.php';
 require_once __DIR__ . '/../../app/services/EpikoinoniaService.php';
 require_once __DIR__ . '/../../app/services/EpikoinoniaPageService.php';
 
@@ -16,22 +17,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-function epikoinoniaAdminTrim($value)
-{
-    return trim((string)$value);
-}
-
-function epikoinoniaAdminTextarea($value)
-{
-    $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
-    return trim($value);
-}
-
-function epikoinoniaAdminFixedPageHeaderIcon()
-{
-    return 'fas fa-envelope';
-}
-
 $service = new EpikoinoniaService();
 $pageService = new EpikoinoniaPageService();
 
@@ -47,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             case 'page_header':
                 $saved = $pageService->updateSection(
                     'page_header',
-                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
-                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['title'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => epikoinoniaAdminTrim($_POST['eyebrow'] ?? ''),
-                        'icon' => epikoinoniaAdminFixedPageHeaderIcon(),
+                        'eyebrow' => AdminEpikoinoniaHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'icon' => AdminEpikoinoniaHelper::fixedPageHeaderIcon(),
                     ]
                 );
                 break;
@@ -65,18 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 for ($i = 1; $i <= 4; $i++) {
                     $existingCard = is_array($existingCards[$i - 1] ?? null) ? $existingCards[$i - 1] : [];
                     $cards[] = [
-                        'title' => epikoinoniaAdminTrim($_POST["card_{$i}_title"] ?? ''),
-                        'text' => epikoinoniaAdminTextarea($_POST["card_{$i}_text"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($existingCard['icon'] ?? ''),
-                        'link_label' => epikoinoniaAdminTrim($_POST["card_{$i}_link_label"] ?? ''),
-                        'link_url' => epikoinoniaAdminTrim($_POST["card_{$i}_link_url"] ?? ''),
+                        'title' => AdminEpikoinoniaHelper::trimText($_POST["card_{$i}_title"] ?? ''),
+                        'text' => AdminEpikoinoniaHelper::textareaText($_POST["card_{$i}_text"] ?? ''),
+                        'icon' => AdminEpikoinoniaHelper::trimText($existingCard['icon'] ?? ''),
+                        'link_label' => AdminEpikoinoniaHelper::trimText($_POST["card_{$i}_link_label"] ?? ''),
+                        'link_url' => AdminEpikoinoniaHelper::trimText($_POST["card_{$i}_link_url"] ?? ''),
                     ];
                 }
 
                 $saved = $pageService->updateSection(
                     'contact_info',
-                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
-                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['title'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['subtitle'] ?? ''),
                     ['cards' => $cards]
                 );
                 break;
@@ -84,10 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             case 'map_section':
                 $saved = $pageService->updateSection(
                     'map_section',
-                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
-                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['title'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'embed_url' => epikoinoniaAdminTrim($_POST['embed_url'] ?? ''),
+                        'embed_url' => AdminEpikoinoniaHelper::trimText($_POST['embed_url'] ?? ''),
                     ]
                 );
                 break;
@@ -95,12 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             case 'form_section':
                 $saved = $pageService->updateSection(
                     'form_section',
-                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
-                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['title'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'description' => epikoinoniaAdminTextarea($_POST['description'] ?? ''),
-                        'button_text' => epikoinoniaAdminTrim($_POST['button_text'] ?? ''),
-                        'success_message' => epikoinoniaAdminTrim($_POST['success_message'] ?? ''),
+                        'description' => AdminEpikoinoniaHelper::textareaText($_POST['description'] ?? ''),
+                        'button_text' => AdminEpikoinoniaHelper::trimText($_POST['button_text'] ?? ''),
+                        'success_message' => AdminEpikoinoniaHelper::trimText($_POST['success_message'] ?? ''),
                     ]
                 );
                 break;
@@ -114,16 +99,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 for ($i = 1; $i <= 3; $i++) {
                     $existingSocialItem = is_array($existingSocialItems[$i - 1] ?? null) ? $existingSocialItems[$i - 1] : [];
                     $items[] = [
-                        'title' => epikoinoniaAdminTrim($_POST["social_{$i}_title"] ?? ''),
-                        'url' => epikoinoniaAdminTrim($_POST["social_{$i}_url"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($existingSocialItem['icon'] ?? ''),
+                        'title' => AdminEpikoinoniaHelper::trimText($_POST["social_{$i}_title"] ?? ''),
+                        'url' => AdminEpikoinoniaHelper::trimText($_POST["social_{$i}_url"] ?? ''),
+                        'icon' => AdminEpikoinoniaHelper::trimText($existingSocialItem['icon'] ?? ''),
                     ];
                 }
 
                 $saved = $pageService->updateSection(
                     'social_section',
-                    epikoinoniaAdminTrim($_POST['title'] ?? ''),
-                    epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['title'] ?? ''),
+                    AdminEpikoinoniaHelper::trimText($_POST['subtitle'] ?? ''),
                     ['items' => $items]
                 );
                 break;
@@ -956,39 +941,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     
-    <script>
-        let pendingDeleteForm = null;
-        
-        // Show delete confirmation modal
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('.delete-form');
-                pendingDeleteForm = form;
-                document.getElementById('deleteModal').classList.add('active');
-            });
-        });
-        
-        // Cancel deletion
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            document.getElementById('deleteModal').classList.remove('active');
-            pendingDeleteForm = null;
-        });
-        
-        // Confirm deletion
-        document.getElementById('confirmBtn').addEventListener('click', function() {
-            if (pendingDeleteForm) {
-                pendingDeleteForm.submit();
-            }
-        });
-        
-        // Close modal when clicking outside
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-                pendingDeleteForm = null;
-            }
-        });
-    </script>
+    <script src="../assets/js/admin-epikoinonia-delete-modal.js"></script>
 </body>
 </html>

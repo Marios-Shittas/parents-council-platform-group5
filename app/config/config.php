@@ -1,16 +1,20 @@
 <?php
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Europe/Athens');
 
-if (!function_exists('app_detect_request_value')) {
-    function app_detect_request_value(string $primaryKey, string $fallbackKey = ''): string
+final class AppConfigHelper
+{
+    /**
+     * Returns prioritized request/server value for a primary key and optional fallback key.
+     */
+    public static function detectRequestValue(string $primaryKey, string $fallbackKey = ''): string
     {
-        $value = trim((string) ($_SERVER[$primaryKey] ?? ''));
+        $value = trim((string)($_SERVER[$primaryKey] ?? ''));
         if ($value !== '') {
             return explode(',', $value)[0];
         }
 
         if ($fallbackKey !== '') {
-            $fallbackValue = trim((string) ($_SERVER[$fallbackKey] ?? ''));
+            $fallbackValue = trim((string)($_SERVER[$fallbackKey] ?? ''));
             if ($fallbackValue !== '') {
                 return explode(',', $fallbackValue)[0];
             }
@@ -18,28 +22,29 @@ if (!function_exists('app_detect_request_value')) {
 
         return '';
     }
-}
 
-if (!function_exists('app_detect_base_url')) {
-    function app_detect_base_url(): string
+    /**
+     * Detects base application URL from environment and incoming request metadata.
+     */
+    public static function detectBaseUrl(): string
     {
-        $configuredBaseUrl = trim((string) getenv('APP_BASE_URL'));
+        $configuredBaseUrl = trim((string)getenv('APP_BASE_URL'));
         if ($configuredBaseUrl !== '') {
             return rtrim($configuredBaseUrl, '/');
         }
 
-        $scheme = app_detect_request_value('HTTP_X_FORWARDED_PROTO');
+        $scheme = self::detectRequestValue('HTTP_X_FORWARDED_PROTO');
         if ($scheme === '') {
-            $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+            $https = strtolower((string)($_SERVER['HTTPS'] ?? ''));
             $scheme = ($https !== '' && $https !== 'off') ? 'https' : 'http';
         }
 
-        $host = app_detect_request_value('HTTP_X_FORWARDED_HOST', 'HTTP_HOST');
+        $host = self::detectRequestValue('HTTP_X_FORWARDED_HOST', 'HTTP_HOST');
         if ($host === '') {
-            $host = trim((string) ($_SERVER['SERVER_NAME'] ?? 'localhost'));
+            $host = trim((string)($_SERVER['SERVER_NAME'] ?? 'localhost'));
         }
 
-        $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+        $scriptName = (string)($_SERVER['SCRIPT_NAME'] ?? '');
         $basePath = '/parents-council-platform-group5';
 
         if (preg_match('#^(.*?)/public(?:/|$)#', $scriptName, $matches)) {
@@ -57,7 +62,7 @@ define('DB_NAME', 'parents_council');  // Όνομα βάσης
 define('DB_USER', 'root');             // XAMPP default user
 define('DB_PASS', '');                  // XAMPP default password
 define('DB_CHARSET', 'utf8mb4');       // Κωδικοποίηση
-define('APP_BASE_URL', app_detect_base_url());
+define('APP_BASE_URL', AppConfigHelper::detectBaseUrl());
 
 define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
 define('SMTP_PORT', (int) (getenv('SMTP_PORT') ?: 587));

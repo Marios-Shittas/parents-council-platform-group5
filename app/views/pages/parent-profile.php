@@ -1,31 +1,6 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
-
-function parentProfileFormatPhoneNumber($phone): string
-{
-    $rawPhone = trim((string)$phone);
-    if ($rawPhone === '') {
-        return '—';
-    }
-
-    $digits = preg_replace('/\D+/', '', $rawPhone);
-    if (!is_string($digits) || $digits === '') {
-        return $rawPhone;
-    }
-
-    if (strpos($digits, '357') === 0) {
-        $localNumber = substr($digits, 3);
-        if ($localNumber !== '') {
-            return '+357 ' . $localNumber;
-        }
-    }
-
-    if (strlen($digits) === 8) {
-        return '+357 ' . $digits;
-    }
-
-    return $rawPhone;
-}
+require_once __DIR__ . '/../../includes/ParentProfileViewHelper.php';
 
 $profileCssPath = __DIR__ . '/../../../public/assets/css/user_css/parent-profile.css';
 $profileCssVersion = file_exists($profileCssPath) ? (string) filemtime($profileCssPath) : (string) time();
@@ -71,9 +46,9 @@ if (trim($initials) === '') {
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/parent-profile.css'); ?>?v=<?php echo urlencode($profileCssVersion); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/public-page-header.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/parent-profile.css'); ?>?v=<?php echo urlencode($profileCssVersion); ?>">
 
     <title>Το Προφίλ Μου</title>
 </head>
@@ -97,11 +72,11 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     <p class="profile-kicker">Προσωπικός Χώρος</p>
                     <h1><?php echo htmlspecialchars($fullName); ?></h1>
                     <div class="profile-meta-strip">
-                        <span class="<?php echo htmlspecialchars(parentProfileAccountStatusClass($accountStatus)); ?>">
-                            <?php echo htmlspecialchars(parentProfileFormatAccountStatusLabel($accountStatus)); ?>
+                        <span class="<?php echo htmlspecialchars(ParentProfilePageHelper::accountStatusClass($accountStatus)); ?>">
+                            <?php echo htmlspecialchars(ParentProfilePageHelper::formatAccountStatusLabel($accountStatus)); ?>
                         </span>
                         <span><i class="fas fa-envelope mr-2"></i><?php echo htmlspecialchars((string)($parentUser['email'] ?? '—')); ?></span>
-                        <span><i class="fas fa-phone-alt mr-2"></i><?php echo htmlspecialchars(parentProfileFormatPhoneNumber($parentUser['phone_number'] ?? '')); ?></span>
+                        <span><i class="fas fa-phone-alt mr-2"></i><?php echo htmlspecialchars(ParentProfileViewHelper::formatPhoneNumber($parentUser['phone_number'] ?? '')); ?></span>
                     </div>
                 </div>
             </div>
@@ -181,7 +156,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                         </div>
                         <div class="info-tile">
                             <span class="info-label">Τηλέφωνο</span>
-                            <strong><?php echo htmlspecialchars(parentProfileFormatPhoneNumber($parentUser['phone_number'] ?? '')); ?></strong>
+                            <strong><?php echo htmlspecialchars(ParentProfileViewHelper::formatPhoneNumber($parentUser['phone_number'] ?? '')); ?></strong>
                         </div>
                         <div class="info-tile">
                             <span class="info-label">Τελευταία Πληρωμή</span>
@@ -253,8 +228,8 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     <div class="history-summary-main">
                                         <div class="history-card-top">
                                             <strong>Παραγγελία #<?php echo $orderId; ?></strong>
-                                            <span class="<?php echo htmlspecialchars(parentProfileOrderStatusClass((string)($order['order_status'] ?? 'pending'))); ?>">
-                                                <?php echo htmlspecialchars(parentProfileFormatOrderStatusLabel((string)($order['order_status'] ?? 'pending'))); ?>
+                                            <span class="<?php echo htmlspecialchars(ParentProfilePageHelper::orderStatusClass((string)($order['order_status'] ?? 'pending'))); ?>">
+                                                <?php echo htmlspecialchars(ParentProfilePageHelper::formatOrderStatusLabel((string)($order['order_status'] ?? 'pending'))); ?>
                                             </span>
                                         </div>
                                         <div class="history-card-meta">
@@ -314,14 +289,14 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                     <div class="history-summary-main">
                                         <div class="history-card-top">
                                             <strong>Πληρωμή #<?php echo (int)($payment['payment_id'] ?? 0); ?></strong>
-                                            <span class="<?php echo htmlspecialchars(parentProfilePaymentStatusClass((string)($payment['payment_status'] ?? 'pending'))); ?>">
-                                                <?php echo htmlspecialchars(parentProfileFormatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending'))); ?>
+                                            <span class="<?php echo htmlspecialchars(ParentProfilePageHelper::paymentStatusClass((string)($payment['payment_status'] ?? 'pending'))); ?>">
+                                                <?php echo htmlspecialchars(ParentProfilePageHelper::formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending'))); ?>
                                             </span>
                                         </div>
                                         <div class="history-card-meta">
                                             <span><i class="far fa-calendar-alt mr-2"></i><?php echo !empty($payment['payment_date']) ? htmlspecialchars(date('d/m/Y H:i', strtotime((string)$payment['payment_date']))) : '—'; ?></span>
                                             <span><i class="fas fa-euro-sign mr-2"></i><?php echo number_format((float)($payment['amount'] ?? 0), 2); ?></span>
-                                            <span><i class="fas fa-tag mr-2"></i><?php echo htmlspecialchars(parentProfileFormatPaymentTypeLabel((string)($payment['payment_type'] ?? 'product'))); ?></span>
+                                            <span><i class="fas fa-tag mr-2"></i><?php echo htmlspecialchars(ParentProfilePageHelper::formatPaymentTypeLabel((string)($payment['payment_type'] ?? 'product'))); ?></span>
                                         </div>
                                     </div>
                                     <span class="history-expand-icon" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>

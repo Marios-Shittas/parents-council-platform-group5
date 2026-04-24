@@ -29,9 +29,7 @@ $paramsJson = json_encode($paramsPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPE
 <body>
     <div id="subscription-result-root"></div>
 
-    <script>
-        window.SUBSCRIPTION_RESULT_PARAMS = <?php echo $paramsJson ?: '{}'; ?>;
-    </script>
+    <script src="assets/js/subscription-result-config.js" data-params="<?php echo htmlspecialchars($paramsJson ?: '{}', ENT_QUOTES, 'UTF-8'); ?>"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>

@@ -18,39 +18,48 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
-function adminCalendarIsValidIsoDate($value)
+final class AdminHomeCalendarHelper
 {
+    // Validates YYYY-MM-DD date values used by calendar actions.
+    public static function adminCalendarIsValidIsoDate($value)
+    {
     return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1;
 }
 
-function adminCalendarNormalizeTime($value)
+        // Normalizes incoming time values to HH:MM with a safe default.
+public static function adminCalendarNormalizeTime($value)
 {
     $value = trim((string)$value);
     return preg_match('/^\d{2}:\d{2}$/', $value) ? $value : '09:00';
 }
 
-function adminHomeTrim($value)
+        // Trims plain text inputs from request payloads.
+public static function adminHomeTrim($value)
 {
     return trim((string)$value);
 }
 
-function adminHomeTextarea($value)
+        // Normalizes textarea line endings and trims the final content.
+public static function adminHomeTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
-function adminHomeGetBannerUploadDir()
+        // Returns the filesystem directory for managed home banner uploads.
+public static function adminHomeGetBannerUploadDir()
 {
     return dirname(__DIR__) . '/assets/Home_img/';
 }
 
-function adminHomeBuildBannerWebPath($fileName)
+        // Builds the public URL path for a banner file name.
+public static function adminHomeBuildBannerWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Home_img/' . $fileName;
 }
 
-function adminHomeDeleteManagedBannerImage($path)
+        // Deletes an existing managed banner image when replaced or removed.
+public static function adminHomeDeleteManagedBannerImage($path)
 {
     $trimmed = trim((string)$path);
     $managedPrefix = '/parents-council-platform-group5/public/assets/Home_img/';
@@ -59,13 +68,14 @@ function adminHomeDeleteManagedBannerImage($path)
         return;
     }
 
-    $filePath = adminHomeGetBannerUploadDir() . basename($trimmed);
+    $filePath = AdminHomeCalendarHelper::adminHomeGetBannerUploadDir() . basename($trimmed);
     if (is_file($filePath)) {
         @unlink($filePath);
     }
 }
 
-function adminHomePublicContentUrlExists($url)
+        // Checks whether an internal public URL points to an existing file.
+public static function adminHomePublicContentUrlExists($url)
 {
     $path = (string)parse_url((string)$url, PHP_URL_PATH);
     if ($path === '') {
@@ -86,7 +96,8 @@ function adminHomePublicContentUrlExists($url)
     return is_file($filePath);
 }
 
-function adminHomeUploadBannerImage($fileField, $existingPath)
+        // Uploads and validates a single home banner image file.
+public static function adminHomeUploadBannerImage($fileField, $existingPath)
 {
     $upload = $_FILES[$fileField] ?? null;
     if (!is_array($upload) || (int)($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -122,7 +133,7 @@ function adminHomeUploadBannerImage($fileField, $existingPath)
         return [$existingPath, "Το αρχείο '{$fileName}' δεν έχει έγκυρο τύπο εικόνας."];
     }
 
-    $uploadDir = adminHomeGetBannerUploadDir();
+    $uploadDir = AdminHomeCalendarHelper::adminHomeGetBannerUploadDir();
     if (!is_dir($uploadDir)) {
         @mkdir($uploadDir, 0777, true);
     }
@@ -145,52 +156,61 @@ function adminHomeUploadBannerImage($fileField, $existingPath)
         return [$existingPath, "Αποτυχία μεταφόρτωσης του αρχείου '{$fileName}'."];
     }
 
-    adminHomeDeleteManagedBannerImage($existingPath);
+    AdminHomeCalendarHelper::adminHomeDeleteManagedBannerImage($existingPath);
 
-    return [adminHomeBuildBannerWebPath($newFileName), ''];
+    return [AdminHomeCalendarHelper::adminHomeBuildBannerWebPath($newFileName), ''];
 }
 
-function adminCalendarGetEventImageUploadDir()
+        // Returns the event image upload directory.
+public static function adminCalendarGetEventImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Events_img/';
 }
 
-function adminCalendarBuildEventImageWebPath($fileName)
+        // Builds the public URL for an event image file.
+public static function adminCalendarBuildEventImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Events_img/' . $fileName;
 }
 
-function adminCalendarGetAnnouncementImageUploadDir()
+        // Returns the announcement image upload directory.
+public static function adminCalendarGetAnnouncementImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_img/';
 }
 
-function adminCalendarBuildAnnouncementImageWebPath($fileName)
+        // Builds the public URL for an announcement image file.
+public static function adminCalendarBuildAnnouncementImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
 }
 
-function adminCalendarGetAnnouncementAttachmentUploadDir()
+        // Returns the upload directory for announcement attachments.
+public static function adminCalendarGetAnnouncementAttachmentUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_docs/';
 }
 
-function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
+        // Builds the public URL for an announcement attachment file.
+public static function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
 }
 
-function adminCalendarGetDefaultAnnouncementGdprNotice()
+        // Provides default GDPR text for announcement submissions.
+public static function adminCalendarGetDefaultAnnouncementGdprNotice()
 {
     return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
 }
 
-function adminCalendarGetDefaultEventGdprNotice()
+        // Provides default GDPR text for event submissions.
+public static function adminCalendarGetDefaultEventGdprNotice()
 {
     return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
 }
 
-function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
+        // Uploads and persists multiple image files for events or announcements.
+public static function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
 {
     $uploadedCount = 0;
     $uploadErrors = [];
@@ -292,7 +312,8 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
     return [$uploadedCount, $uploadErrors];
 }
 
-function adminCalendarUploadAnnouncementAttachments($announcementsService, $announcementId)
+        // Uploads and links announcement attachment files to the given announcement.
+public static function adminCalendarUploadAnnouncementAttachments($announcementsService, $announcementId)
 {
     $uploadedCount = 0;
     $uploadErrors = [];
@@ -301,7 +322,7 @@ function adminCalendarUploadAnnouncementAttachments($announcementsService, $anno
         return [$uploadedCount, $uploadErrors];
     }
 
-    $uploadDir = adminCalendarGetAnnouncementAttachmentUploadDir();
+    $uploadDir = AdminHomeCalendarHelper::adminCalendarGetAnnouncementAttachmentUploadDir();
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -357,7 +378,7 @@ function adminCalendarUploadAnnouncementAttachments($announcementsService, $anno
             continue;
         }
 
-        $attachmentPath = adminCalendarBuildAnnouncementAttachmentWebPath($newFileName);
+        $attachmentPath = AdminHomeCalendarHelper::adminCalendarBuildAnnouncementAttachmentWebPath($newFileName);
         if ($announcementsService->addAttachment($announcementId, $attachmentPath, $fileName)) {
             $uploadedCount++;
             continue;
@@ -378,7 +399,8 @@ function adminCalendarUploadAnnouncementAttachments($announcementsService, $anno
     return [$uploadedCount, $uploadErrors];
 }
 
-function adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService)
+        // Aggregates events, announcements, and holidays into a unified calendar feed.
+public static function adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService)
 {
     $items = [];
     $typeOrder = [
@@ -408,7 +430,7 @@ function adminCalendarBuildItems($eventsService, $announcementsService, $usefulI
 
     foreach ($announcementsService->getAllAnnouncements() as $announcement) {
         $announcementDate = (string)($announcement['announcement_date'] ?? $announcement['publish_date'] ?? '');
-        if (!adminCalendarIsValidIsoDate($announcementDate)) {
+        if (!AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($announcementDate)) {
             continue;
         }
 
@@ -474,13 +496,15 @@ function adminCalendarBuildItems($eventsService, $announcementsService, $usefulI
     return $items;
 }
 
+}
+
 $eventsService = new EventsService();
 $announcementsService = new AnnouncementsService();
 $homePageService = new HomePageService();
 $usefulInformationService = new UsefulInformationService();
 
 $selectedDate = $_GET['date'] ?? date('Y-m-d');
-if (!adminCalendarIsValidIsoDate($selectedDate)) {
+if (!AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($selectedDate)) {
     $selectedDate = date('Y-m-d');
 }
 
@@ -492,7 +516,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $redirectDate = $_POST['redirect_date'] ?? $selectedDate;
     $redirectHomeTab = trim((string)($_POST['home_tab'] ?? ($_GET['home_tab'] ?? 'hero_section')));
-    if (!adminCalendarIsValidIsoDate($redirectDate)) {
+    if (!AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($redirectDate)) {
         $redirectDate = date('Y-m-d');
     }
 
@@ -502,11 +526,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create_event_from_calendar') {
         $title = trim((string)($_POST['title'] ?? ''));
         $description = trim((string)($_POST['description'] ?? ''));
-        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? adminCalendarGetDefaultEventGdprNotice()));
+        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? AdminHomeCalendarHelper::adminCalendarGetDefaultEventGdprNotice()));
         $eventDate = trim((string)($_POST['event_date'] ?? ''));
-        $eventTime = adminCalendarNormalizeTime($_POST['event_time'] ?? '09:00');
+        $eventTime = AdminHomeCalendarHelper::adminCalendarNormalizeTime($_POST['event_time'] ?? '09:00');
 
-        if ($title === '' || !adminCalendarIsValidIsoDate($eventDate)) {
+        if ($title === '' || !AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($eventDate)) {
             $flashMessage = 'Ο τίτλος και η ημερομηνία της εκδήλωσης είναι υποχρεωτικά.';
             $flashType = 'danger';
         } else {
@@ -515,10 +539,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $eventId = $eventsService->createEvent($title, $description, $eventDateTime, $publishDate, $gdprNotice);
 
             if ($eventId) {
-                [$uploadedCount, $uploadErrors] = adminCalendarUploadImages(
+                [$uploadedCount, $uploadErrors] = AdminHomeCalendarHelper::adminCalendarUploadImages(
                     'images',
-                    adminCalendarGetEventImageUploadDir(),
-                    'adminCalendarBuildEventImageWebPath',
+                    AdminHomeCalendarHelper::adminCalendarGetEventImageUploadDir(),
+                    [AdminHomeCalendarHelper::class, 'adminCalendarBuildEventImageWebPath'],
                     static function ($imagePath) use ($eventsService, $eventId) {
                         return $eventsService->addImage($eventId, $imagePath);
                     },
@@ -564,17 +588,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 for ($i = 1; $i <= 3; $i++) {
                     $existingSlide = is_array($existingSlides[$i - 1] ?? null) ? $existingSlides[$i - 1] : [];
-                    $existingPath = adminHomeTrim($_POST["current_banner_{$i}_src"] ?? ($existingSlide['src'] ?? ''));
+                    $existingPath = AdminHomeCalendarHelper::adminHomeTrim($_POST["current_banner_{$i}_src"] ?? ($existingSlide['src'] ?? ''));
                     $hideSlide = isset($_POST["banner_{$i}_hide"]) && $_POST["banner_{$i}_hide"] === '1';
                     $deleteSlide = isset($_POST["banner_{$i}_delete"]) && $_POST["banner_{$i}_delete"] === '1';
-                    [$uploadedPath, $uploadError] = adminHomeUploadBannerImage("banner_{$i}_image", $existingPath);
+                    [$uploadedPath, $uploadError] = AdminHomeCalendarHelper::adminHomeUploadBannerImage("banner_{$i}_image", $existingPath);
 
                     if ($uploadError !== '') {
                         $bannerErrors[] = $uploadError;
                     }
 
                     if ($deleteSlide) {
-                        adminHomeDeleteManagedBannerImage($uploadedPath);
+                        AdminHomeCalendarHelper::adminHomeDeleteManagedBannerImage($uploadedPath);
                         $updatedSlides[] = [
                             'src' => '',
                             'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
@@ -596,7 +620,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $saved = $homePageService->updateSection(
                     'banner_section',
-                    adminHomeTrim($_POST['title'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTrim($_POST['title'] ?? ''),
                     '',
                     [
                         'slides' => $updatedSlides,
@@ -612,12 +636,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'hero_section':
                 $saved = $homePageService->updateSection(
                     'hero_section',
-                    adminHomeTrim($_POST['title'] ?? ''),
-                    adminHomeTextarea($_POST['subtitle'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTrim($_POST['title'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTextarea($_POST['subtitle'] ?? ''),
                     [
-                        'kicker' => adminHomeTrim($_POST['kicker'] ?? ''),
-                        'announcements_button_label' => adminHomeTrim($_POST['announcements_button_label'] ?? ''),
-                        'events_button_label' => adminHomeTrim($_POST['events_button_label'] ?? ''),
+                        'kicker' => AdminHomeCalendarHelper::adminHomeTrim($_POST['kicker'] ?? ''),
+                        'announcements_button_label' => AdminHomeCalendarHelper::adminHomeTrim($_POST['announcements_button_label'] ?? ''),
+                        'events_button_label' => AdminHomeCalendarHelper::adminHomeTrim($_POST['events_button_label'] ?? ''),
                     ]
                 );
                 break;
@@ -625,7 +649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'calendar_section':
                 $saved = $homePageService->updateSection(
                     'calendar_section',
-                    adminHomeTrim($_POST['title'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTrim($_POST['title'] ?? ''),
                     '',
                     []
                 );
@@ -634,10 +658,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'announcements_section':
                 $saved = $homePageService->updateSection(
                     'announcements_section',
-                    adminHomeTrim($_POST['title'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTrim($_POST['title'] ?? ''),
                     '',
                     [
-                        'button_label' => adminHomeTrim($_POST['button_label'] ?? ''),
+                        'button_label' => AdminHomeCalendarHelper::adminHomeTrim($_POST['button_label'] ?? ''),
                     ]
                 );
                 break;
@@ -645,10 +669,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'events_section':
                 $saved = $homePageService->updateSection(
                     'events_section',
-                    adminHomeTrim($_POST['title'] ?? ''),
+                    AdminHomeCalendarHelper::adminHomeTrim($_POST['title'] ?? ''),
                     '',
                     [
-                        'button_label' => adminHomeTrim($_POST['button_label'] ?? ''),
+                        'button_label' => AdminHomeCalendarHelper::adminHomeTrim($_POST['button_label'] ?? ''),
                     ]
                 );
                 break;
@@ -671,15 +695,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create_announcement_from_calendar') {
         $title = trim((string)($_POST['title'] ?? ''));
         $description = trim((string)($_POST['description'] ?? ''));
-        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? adminCalendarGetDefaultAnnouncementGdprNotice()));
+        $gdprNotice = trim((string)($_POST['gdpr_notice'] ?? AdminHomeCalendarHelper::adminCalendarGetDefaultAnnouncementGdprNotice()));
         $announcementDate = trim((string)($_POST['announcement_date'] ?? ''));
         $publishDate = trim((string)($_POST['publish_date'] ?? date('Y-m-d')));
 
-        if ($title === '' || !adminCalendarIsValidIsoDate($announcementDate)) {
+        if ($title === '' || !AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($announcementDate)) {
             $flashMessage = 'Ο τίτλος και η ημερομηνία της ανακοίνωσης είναι υποχρεωτικά.';
             $flashType = 'danger';
         } else {
-            if (!adminCalendarIsValidIsoDate($publishDate)) {
+            if (!AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($publishDate)) {
                 $publishDate = date('Y-m-d');
             }
 
@@ -692,10 +716,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             if ($announcementId) {
-                [$uploadedCount, $uploadErrors] = adminCalendarUploadImages(
+                [$uploadedCount, $uploadErrors] = AdminHomeCalendarHelper::adminCalendarUploadImages(
                     'images',
-                    adminCalendarGetAnnouncementImageUploadDir(),
-                    'adminCalendarBuildAnnouncementImageWebPath',
+                    AdminHomeCalendarHelper::adminCalendarGetAnnouncementImageUploadDir(),
+                    [AdminHomeCalendarHelper::class, 'adminCalendarBuildAnnouncementImageWebPath'],
                     static function ($imagePath) use ($announcementsService, $announcementId) {
                         return $announcementsService->addImage($announcementId, $imagePath);
                     },
@@ -704,7 +728,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         return $announcementsService->getLastOperationError();
                     }
                 );
-                [$uploadedAttachmentsCount, $attachmentErrors] = adminCalendarUploadAnnouncementAttachments(
+                [$uploadedAttachmentsCount, $attachmentErrors] = AdminHomeCalendarHelper::adminCalendarUploadAnnouncementAttachments(
                     $announcementsService,
                     $announcementId
                 );
@@ -742,7 +766,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $holidayName = trim((string)($_POST['title'] ?? ''));
         $holidayDate = trim((string)($_POST['holiday_date'] ?? ''));
 
-        if ($holidayName === '' || !adminCalendarIsValidIsoDate($holidayDate)) {
+        if ($holidayName === '' || !AdminHomeCalendarHelper::adminCalendarIsValidIsoDate($holidayDate)) {
             $flashMessage = 'Το όνομα και η ημερομηνία της αργίας είναι υποχρεωτικά.';
             $flashType = 'danger';
         } else {
@@ -801,7 +825,7 @@ for ($i = 0; $i < 3; $i++) {
     $storedSlide = is_array($bannerContentSection['content']['slides'][$i] ?? null) ? $bannerContentSection['content']['slides'][$i] : [];
     $defaultSlide = $defaultBannerSlides[$i];
     $slideSrc = trim((string)($storedSlide['src'] ?? $defaultSlide['src']));
-    if ($slideSrc === '' || !adminHomePublicContentUrlExists($slideSrc)) {
+    if ($slideSrc === '' || !AdminHomeCalendarHelper::adminHomePublicContentUrlExists($slideSrc)) {
         $slideSrc = $defaultSlide['src'];
     }
 
@@ -812,7 +836,7 @@ for ($i = 0; $i < 3; $i++) {
     ];
 }
 
-$calendarItems = adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService);
+$calendarItems = AdminHomeCalendarHelper::adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService);
 $summary = [
     'total' => count($calendarItems),
     'events' => count(array_filter($calendarItems, static fn ($item) => ($item['type'] ?? '') === 'event')),
@@ -1160,7 +1184,7 @@ $calendarPayload = [
 
                     <div class="form-group">
                         <label for="calendar_event_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
-                        <textarea class="form-control form-control-custom" id="calendar_event_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(adminCalendarGetDefaultEventGdprNotice()); ?></textarea>
+                        <textarea class="form-control form-control-custom" id="calendar_event_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(AdminHomeCalendarHelper::adminCalendarGetDefaultEventGdprNotice()); ?></textarea>
                     </div>
 
                     <div class="form-group">
@@ -1222,7 +1246,7 @@ $calendarPayload = [
 
                     <div class="form-group">
                         <label for="calendar_announcement_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
-                        <textarea class="form-control form-control-custom" id="calendar_announcement_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(adminCalendarGetDefaultAnnouncementGdprNotice()); ?></textarea>
+                        <textarea class="form-control form-control-custom" id="calendar_announcement_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(AdminHomeCalendarHelper::adminCalendarGetDefaultAnnouncementGdprNotice()); ?></textarea>
                     </div>
 
                     <div class="form-group">
@@ -1290,355 +1314,11 @@ $calendarPayload = [
     </div>
 </div>
 
-<script>
-window.adminCalendarData = <?php echo json_encode(
-    $calendarPayload,
-    JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-); ?>;
-</script>
+<script src="../assets/js/admin-home-calendar-config.js" data-calendar-payload="<?php echo htmlspecialchars(json_encode($calendarPayload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/admin-home-calendar.js"></script>
-<script>
-function ensureDashboardNoticeElements() {
-    if (document.getElementById('page-notice-overlay')) {
-        return;
-    }
-
-    const overlay = document.createElement('div');
-    overlay.id = 'page-notice-overlay';
-    overlay.className = 'page-notice-overlay';
-    overlay.innerHTML = '' +
-        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
-        '</div>';
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        }
-    });
-
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('page-notice-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        });
-    }
-}
-
-function showDashboardNotice(message, options) {
-    ensureDashboardNoticeElements();
-
-    const overlay = document.getElementById('page-notice-overlay');
-    const card = document.getElementById('page-notice-card');
-    const title = document.getElementById('page-notice-title');
-    const body = document.getElementById('page-notice-message');
-    const opts = options || {};
-
-    if (!overlay || !card || !title || !body) {
-        console.error(message);
-        return;
-    }
-
-    card.classList.remove('is-error', 'is-warning');
-    if (opts.variant === 'error') card.classList.add('is-error');
-    if (opts.variant === 'warning') card.classList.add('is-warning');
-
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
-
-    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
-    document.body.style.overflow = 'hidden';
-    overlay.classList.add('is-open');
-}
-
-function truncateDashboardPreviewFileName(fileName, maxLength) {
-    if (fileName.length <= maxLength) {
-        return fileName;
-    }
-
-    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
-}
-
-function getDashboardFileKey(file) {
-    return [file.name, file.size, file.lastModified, file.type].join('::');
-}
-
-function syncDashboardInputFiles(input, stagedFiles) {
-    if (typeof DataTransfer === 'undefined') {
-        return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    stagedFiles.forEach((file) => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-}
-
-function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const item = document.createElement('div');
-        item.className = 'image-preview-item';
-
-        const image = document.createElement('img');
-        image.alt = file.name;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        const caption = document.createElement('div');
-        caption.className = 'preview-file-caption';
-        caption.textContent = truncateDashboardPreviewFileName(file.name, 18);
-
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            image.src = String(event.target && event.target.result ? event.target.result : '');
-        };
-        reader.readAsDataURL(file);
-
-        item.appendChild(image);
-        item.appendChild(deleteBtn);
-        item.appendChild(caption);
-        preview.appendChild(item);
-    });
-}
-
-function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-        const item = document.createElement('div');
-        item.className = 'attachment-preview-item';
-
-        const info = document.createElement('div');
-        info.className = 'attachment-preview-info';
-
-        const icon = document.createElement('i');
-        icon.className = fileExt === 'pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
-
-        const text = document.createElement('span');
-        text.className = 'attachment-preview-name';
-        text.textContent = truncateDashboardPreviewFileName(file.name, 40);
-
-        const size = document.createElement('span');
-        size.className = 'attachment-preview-size';
-        size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'attachment-remove-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        info.appendChild(icon);
-        info.appendChild(text);
-        info.appendChild(size);
-        item.appendChild(info);
-        item.appendChild(deleteBtn);
-        preview.appendChild(item);
-    });
-}
-
-function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function updateInputState() {
-        if (existingCount + stagedFiles.length >= imageLimit) {
-            input.disabled = true;
-        } else if (existingCount < imageLimit) {
-            input.disabled = false;
-        }
-    }
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-        const maxFileSize = 5 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-        let reachedLimit = false;
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        if (existingCount >= imageLimit) {
-            warnings.push(`Έχει ήδη συμπληρωθεί το όριο των ${imageLimit} εικόνων.`);
-        } else {
-            incomingFiles.forEach((file) => {
-                const fileKey = getDashboardFileKey(file);
-                const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-
-                if (!allowedExtensions.includes(fileExt)) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-                    return;
-                }
-
-                if (file.size > maxFileSize) {
-                    warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-                    return;
-                }
-
-                if (!String(file.type || '').startsWith('image/')) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-                    return;
-                }
-
-                if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
-                    return;
-                }
-
-                if (existingCount + stagedFiles.length >= imageLimit) {
-                    if (!reachedLimit) {
-                        const remainingSlots = Math.max(0, imageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες.`);
-                        reachedLimit = true;
-                    }
-                    return;
-                }
-
-                stagedFiles.push(file);
-                stagedKeys.add(fileKey);
-            });
-        }
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-
-    updateInputState();
-}
-
-function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-        const maxFileSize = 8 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        incomingFiles.forEach((file) => {
-            const fileKey = getDashboardFileKey(file);
-            const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-            const fileType = String(file.type || '');
-
-            if (!allowedExtensions.includes(fileExt)) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
-                return;
-            }
-
-            if (file.size > maxFileSize) {
-                warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
-                return;
-            }
-
-            if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
-                return;
-            }
-
-            if (stagedKeys.has(fileKey)) {
-                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
-                return;
-            }
-
-            stagedFiles.push(file);
-            stagedKeys.add(fileKey);
-        });
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-}
-
-setupDashboardImageInput(document.getElementById('calendar_event_images'), 'calendarEventImagePreview', 6, 'Έλεγχος εικόνων εκδήλωσης');
-setupDashboardImageInput(document.getElementById('calendar_announcement_images'), 'calendarAnnouncementImagePreview', 6, 'Έλεγχος εικόνων ανακοίνωσης');
-setupDashboardAttachmentInput(document.getElementById('calendar_announcement_attachments'), 'calendarAnnouncementAttachmentPreview', 'Έλεγχος συνημμένων ανακοίνωσης');
-</script>
+<script src="../assets/js/admin-home-dashboard.js"></script>
 </body>
 </html>

@@ -4,82 +4,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../app/config/db.php';
+require_once __DIR__ . '/../app/includes/PublicRegisterHelper.php';
 
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 
-function registrationWindowState(mysqli $conn): array
-{
-    $stmt = $conn->prepare(
-        "SELECT start_date, end_date, ss_status
-         FROM SystemSchedule
-         WHERE feature = 'registration'
-         ORDER BY start_date ASC, ss_id ASC"
-    );
-
-    if (!$stmt) {
-        return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
-            'periods' => [],
-        ];
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $schedules = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-
-    if (empty($schedules)) {
-        return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
-            'periods' => [],
-        ];
-    }
-    $now = time();
-
-    $formattedPeriods = [];
-    foreach ($schedules as $schedule) {
-        $status = (string)($schedule['ss_status'] ?? 'inactive');
-        if ($status !== 'active') {
-            continue;
-        }
-
-        $start = !empty($schedule['start_date']) ? strtotime((string)$schedule['start_date']) : false;
-        $end = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : false;
-        if ($start === false || $end === false) {
-            continue;
-        }
-
-        $formattedPeriods[] = date('d/m/Y H:i', $start) . ' - ' . date('d/m/Y H:i', $end);
-
-        if ($now >= $start && $now <= $end) {
-            return [
-                'is_open' => true,
-                'message' => '',
-                'periods' => $formattedPeriods,
-            ];
-        }
-    }
-
-    if (empty($formattedPeriods)) {
-        return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
-            'periods' => [],
-        ];
-    }
-
-    return [
-        'is_open' => false,
-        'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
-        'periods' => $formattedPeriods,
-    ];
-}
-
-$registrationState = registrationWindowState($conn);
+$registrationState = PublicRegisterHelper::registrationWindowState($conn);
 $isRegistrationOpen = (bool)($registrationState['is_open'] ?? false);
 $registrationClosedMessage = (string)($registrationState['message'] ?? 'Η περίοδος εγγραφών είναι κλειστή.');
 $registrationPeriods = is_array($registrationState['periods'] ?? null) ? $registrationState['periods'] : [];

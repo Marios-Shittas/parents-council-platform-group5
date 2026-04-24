@@ -102,12 +102,7 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-            
-            <script>
-                window.RESET_EMAIL = <?php echo $emailJson ?: '""'; ?>;
-                window.RESET_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
-                window.RESET_PASSWORD_SERVICE_URL = <?php echo json_encode($resetPasswordServiceUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
-            </script>
+            <script src="assets/js/reset-password-config.js" data-reset-email="<?php echo htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>" data-reset-token="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>" data-service-url="<?php echo htmlspecialchars($resetPasswordServiceUrl, ENT_QUOTES, 'UTF-8'); ?>"></script>
             
             <script type="text/javascript" src="assets/js/reset-password.jsx"></script>
         <?php endif; ?>

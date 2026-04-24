@@ -271,7 +271,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css?v=13">
 </head>
-<body>
+<body data-edit-product-open="<?php echo $editProduct ? '1' : '0'; ?>">
     <div class="admin-wrapper">
         <?php include __DIR__ . '/../../app/includes/admin_sidebar.php'; ?>
 
@@ -597,28 +597,6 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const deleteButtons = document.querySelectorAll('.delete-product-btn');
-            const deleteProductIdInput = document.getElementById('deleteProductId');
-            const deleteProductName = document.getElementById('deleteProductName');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const productId = this.getAttribute('data-id');
-                    const productName = this.getAttribute('data-name');
-
-                    deleteProductIdInput.value = productId;
-                    deleteProductName.textContent = productName;
-
-                    $('#deleteConfirmModal').modal('show');
-                });
-            });
-
-            <?php if ($editProduct): ?>
-                $('#editProductModal').modal('show');
-            <?php endif; ?>
-        });
-    </script>
+    <script src="../assets/js/admin-eshop.js"></script>
 </body>
 </html>

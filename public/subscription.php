@@ -64,9 +64,7 @@ class SubscriptionPage
         <!-- Babel -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-        <script>
-            window.APPROVAL_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
-        </script>
+        <script src="assets/js/subscription-config.js" data-approval-token="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>"></script>
 
         <script type="text/babel" src="assets/js/subscription.jsx"></script>
     <?php endif; ?>

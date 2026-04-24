@@ -39,7 +39,7 @@ class InsuranceJccService
 
     private function startCheckout(): void
     {
-        auth_require_role('parent', [
+        AuthHelper::requireRole('parent', [
             'mode' => 'redirect',
             'redirect' => APP_BASE_URL . '/public/login.php',
         ]);

@@ -1,7 +1,11 @@
 <?php
 
-if (!function_exists('site_context')) {
-    function site_context(): string
+final class SiteContext
+{
+    /**
+     * Returns active site context (public or parent).
+     */
+    public static function context(): string
     {
         global $siteContext;
 
@@ -9,76 +13,84 @@ if (!function_exists('site_context')) {
             return $siteContext;
         }
 
-        $requestPath = (string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        $requestPath = (string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
         return strpos($requestPath, '/public/parent/') !== false ? 'parent' : 'public';
     }
-}
 
-if (!function_exists('site_is_parent')) {
-    function site_is_parent(): bool
+    /**
+     * Tells whether current request is in parent context.
+     */
+    public static function isParent(): bool
     {
-        return site_context() === 'parent';
+        return self::context() === 'parent';
     }
-}
 
-if (!function_exists('site_base_url')) {
-    function site_base_url(): string
+    /**
+     * Returns base URL for public entrypoint.
+     */
+    public static function baseUrl(): string
     {
         return '/parents-council-platform-group5/public';
     }
-}
 
-if (!function_exists('site_project_url')) {
-    function site_project_url(): string
+    /**
+     * Returns project root URL.
+     */
+    public static function projectUrl(): string
     {
         return '/parents-council-platform-group5';
     }
-}
 
-if (!function_exists('site_section_url')) {
-    function site_section_url(string $path = ''): string
+    /**
+     * Builds URL to a public or parent section path.
+     */
+    public static function sectionUrl(string $path = ''): string
     {
-        $prefix = site_is_parent() ? '/parent' : '';
+        $prefix = self::isParent() ? '/parent' : '';
         $normalized = ltrim($path, '/');
 
         if ($normalized === '') {
-            return site_base_url() . $prefix;
+            return self::baseUrl() . $prefix;
         }
 
-        return site_base_url() . $prefix . '/' . $normalized;
+        return self::baseUrl() . $prefix . '/' . $normalized;
     }
-}
 
-if (!function_exists('site_public_url')) {
-    function site_public_url(string $path = ''): string
+    /**
+     * Builds URL under public root.
+     */
+    public static function publicUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
-        return $normalized === '' ? site_base_url() : site_base_url() . '/' . $normalized;
+        return $normalized === '' ? self::baseUrl() : self::baseUrl() . '/' . $normalized;
     }
-}
 
-if (!function_exists('site_asset_url')) {
-    function site_asset_url(string $path = ''): string
+    /**
+     * Builds URL under public assets root.
+     */
+    public static function assetUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
         return $normalized === ''
-            ? site_base_url() . '/assets'
-            : site_base_url() . '/assets/' . $normalized;
+            ? self::baseUrl() . '/assets'
+            : self::baseUrl() . '/assets/' . $normalized;
     }
-}
 
-if (!function_exists('site_login_url')) {
-    function site_login_url(): string
+    /**
+     * Returns login page URL.
+     */
+    public static function loginUrl(): string
     {
-        return site_public_url('login.php');
+        return self::publicUrl('login.php');
     }
-}
 
-if (!function_exists('site_storage_url')) {
-    function site_storage_url(string $path = ''): string
+    /**
+     * Builds URL under project storage root.
+     */
+    public static function storageUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
-        $root = site_project_url() . '/storage';
+        $root = self::projectUrl() . '/storage';
 
         if ($normalized === '' || $normalized === 'storage') {
             return $root;
@@ -90,10 +102,11 @@ if (!function_exists('site_storage_url')) {
 
         return $root . '/' . $normalized;
     }
-}
 
-if (!function_exists('site_resolve_content_url')) {
-    function site_resolve_content_url(string $path): string
+    /**
+     * Resolves relative content paths to accessible URLs.
+     */
+    public static function resolveContentUrl(string $path): string
     {
         $trimmed = trim($path);
 
@@ -106,17 +119,17 @@ if (!function_exists('site_resolve_content_url')) {
         }
 
         if (strpos($trimmed, 'storage/') === 0 || strpos($trimmed, '/storage/') === 0) {
-            return site_storage_url($trimmed);
+            return self::storageUrl($trimmed);
         }
 
         if (strpos($trimmed, 'public/') === 0) {
-            return site_project_url() . '/' . ltrim($trimmed, '/');
+            return self::projectUrl() . '/' . ltrim($trimmed, '/');
         }
 
         if ($trimmed[0] === '/') {
             return $trimmed;
         }
 
-        return site_public_url($trimmed);
+        return self::publicUrl($trimmed);
     }
 }

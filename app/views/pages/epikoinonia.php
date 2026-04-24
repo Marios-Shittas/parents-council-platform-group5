@@ -91,9 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/epikoinonia.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/public-page-header.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/epikoinonia.css'); ?>">
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/header.php'; ?>
@@ -270,6 +270,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-    <script type="text/babel" src="<?php echo site_asset_url('js/epikoinonia.jsx'); ?>"></script>
+    <script type="text/babel" src="<?php echo SiteContext::assetUrl('js/epikoinonia.jsx'); ?>"></script>
 </body>
 </html>

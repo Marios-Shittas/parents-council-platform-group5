@@ -1,0 +1,21 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid #cbd5e1;
+    padding: 8px;
+    vertical-align: top;
+    text-align: left;
+}
+
+th {
+    background: #eaf3ff;
+    font-weight: 700;
+}
+
+td {
+    white-space: pre-line;
+}

@@ -9,15 +9,21 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/UsersService.php';
 
-function adminLogsRespond(int $statusCode, array $payload): void
+final class AdminLogsResponder
 {
-    http_response_code($statusCode);
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    /**
+     * Sends a JSON response with the provided status code and payload.
+     */
+    public static function respond(int $statusCode, array $payload): void
+    {
+        http_response_code($statusCode);
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
 }
 
 try {
     if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-        adminLogsRespond(403, [
+        AdminLogsResponder::respond(403, [
             'success' => false,
             'message' => 'Unauthorized access.',
         ]);
@@ -28,7 +34,7 @@ try {
     $email = trim((string)($_GET['email'] ?? ''));
     $lookup = $usersService->getParentLogsByEmail($email);
 
-    adminLogsRespond(200, [
+    AdminLogsResponder::respond(200, [
         'success' => true,
         'parent' => $lookup['parent'] ?? null,
         'logs' => $lookup['logs'] ?? [],
@@ -36,7 +42,7 @@ try {
         'searched_email' => $email,
     ]);
 } catch (Throwable $exception) {
-    adminLogsRespond(500, [
+    AdminLogsResponder::respond(500, [
         'success' => false,
         'message' => $exception->getMessage(),
     ]);

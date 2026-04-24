@@ -207,7 +207,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                                 $attachmentName = trim((string)($attachment['original_name'] ?? '')) !== ''
                                     ? (string)$attachment['original_name']
                                     : basename((string)($attachment['file_path'] ?? ''));
-                                $attachmentUrl = site_resolve_content_url((string)($attachment['file_path'] ?? ''));
+                                $attachmentUrl = SiteContext::resolveContentUrl((string)($attachment['file_path'] ?? ''));
                                 ?>
                                 <a class="action-link" href="<?php echo htmlspecialchars($attachmentUrl); ?>" target="_blank" rel="noopener noreferrer">
                                     <i class="fas fa-paperclip"></i>

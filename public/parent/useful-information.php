@@ -6,7 +6,7 @@ header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
-auth_require_role('parent');
+AuthHelper::requireRole('parent');
 
 $siteContext = 'parent';
 require __DIR__ . '/../../app/views/pages/useful-information.php';

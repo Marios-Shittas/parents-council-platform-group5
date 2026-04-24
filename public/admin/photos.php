@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminPhotosHelper.php';
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -15,155 +16,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-function photosAdminTrim($value)
-{
-    return trim((string)$value);
-}
-
-function getPhotosGalleryUploadDir()
-{
-    return dirname(__DIR__) . '/assets/Parents_img/';
-}
-
-function buildPhotosGalleryWebPath($fileName)
-{
-    return '/parents-council-platform-group5/public/assets/Parents_img/' . $fileName;
-}
-
-function isLocalPhotosGalleryPath($imagePath)
-{
-    return str_starts_with((string)$imagePath, '/parents-council-platform-group5/public/assets/Parents_img/');
-}
-
-function resolvePhotosGalleryFilePath($imagePath)
-{
-    return getPhotosGalleryUploadDir() . basename((string)$imagePath);
-}
-
-function deletePhotosGalleryFileIfExists($imagePath)
-{
-    if (!isLocalPhotosGalleryPath($imagePath)) {
-        return;
-    }
-
-    $filePath = resolvePhotosGalleryFilePath($imagePath);
-    if (file_exists($filePath)) {
-        unlink($filePath);
-    }
-}
-
-function uploadPhotosGalleryImages($service)
-{
-    $uploadedCount = 0;
-    $uploadErrors = [];
-
-    if (empty($_FILES['gallery_images']['name'][0])) {
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $uploadDir = getPhotosGalleryUploadDir();
-    if (!is_dir($uploadDir)) {
-        if (!mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
-            $uploadErrors[] = "Αδυναμία δημιουργίας του φακέλου ανεβάσματος: {$uploadDir}";
-            return [$uploadedCount, $uploadErrors];
-        }
-    }
-
-    @chmod($uploadDir, 0777);
-    clearstatcache(true, $uploadDir);
-
-    if (!is_writable($uploadDir)) {
-        $uploadErrors[] = "Ο φάκελος ανεβάσματος δεν είναι εγγράψιμος: {$uploadDir}";
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    $maxFileSize = 5 * 1024 * 1024;
-
-    foreach ($_FILES['gallery_images']['tmp_name'] as $key => $tmpName) {
-        $fileName = basename($_FILES['gallery_images']['name'][$key] ?? '');
-        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-        $uploadError = $_FILES['gallery_images']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
-
-        if ($uploadError !== UPLOAD_ERR_OK) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$uploadError})";
-            continue;
-        }
-
-        $fileSize = $_FILES['gallery_images']['size'][$key] ?? 0;
-        $fileMime = mime_content_type($tmpName);
-        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        if (!in_array($fileExt, $allowedExtensions, true)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
-            continue;
-        }
-
-        if ($fileSize > $maxFileSize) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο. Μέγιστο: 5MB";
-            continue;
-        }
-
-        if (!getimagesize($tmpName)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα.";
-            continue;
-        }
-
-        if (!in_array($fileMime, $allowedTypes, true) && !str_starts_with((string)$fileMime, 'image/')) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο MIME type ({$fileMime}).";
-            continue;
-        }
-
-        $newFileName = uniqid('parents_', true) . '.' . $fileExt;
-        $targetPath = $uploadDir . $newFileName;
-
-        if (!move_uploaded_file($tmpName, $targetPath)) {
-            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του '{$safeFileName}'.";
-            continue;
-        }
-
-        $imagePath = buildPhotosGalleryWebPath($newFileName);
-        if ($service->addGalleryImage($imagePath, $imagePath, 'Φωτογραφικό υλικό σχολείου')) {
-            $uploadedCount++;
-        } else {
-            if (file_exists($targetPath)) {
-                unlink($targetPath);
-            }
-            $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων.";
-        }
-    }
-
-    return [$uploadedCount, $uploadErrors];
-}
-
-function addPhotosGalleryImageFromUrl($service)
-{
-    $imageUrl = photosAdminTrim($_POST['image_url'] ?? '');
-
-    if ($imageUrl === '') {
-        return [false, 'Δώστε το URL της εικόνας.'];
-    }
-
-    if (filter_var($imageUrl, FILTER_VALIDATE_URL) === false) {
-        return [false, 'Το URL της εικόνας δεν είναι έγκυρο.'];
-    }
-
-    $imagePath = parse_url($imageUrl, PHP_URL_PATH) ?? '';
-    $imageExt = strtolower(pathinfo((string)$imagePath, PATHINFO_EXTENSION));
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-    if (!in_array($imageExt, $allowedExtensions, true)) {
-        return [false, 'Βάλτε direct URL εικόνας που να οδηγεί κατευθείαν σε αρχείο JPG, JPEG, PNG, GIF ή WEBP.'];
-    }
-
-    if ($service->addGalleryImage($imageUrl, $imageUrl, 'Φωτογραφικό υλικό σχολείου')) {
-        return [true, 'Η φωτογραφία από εξωτερικό σύνδεσμο προστέθηκε επιτυχώς.'];
-    }
-
-    return [false, 'Αποτυχία αποθήκευσης της φωτογραφίας. ' . $service->getLastError()];
-}
-
 $parentsPageService = new ParentsPageService();
 $flashMessage = $_SESSION['flash_message'] ?? '';
 $flashType = $_SESSION['flash_type'] ?? 'success';
@@ -177,11 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $gallerySection = $parentsPageService->getSection('gallery_section') ?? ['content' => []];
         $saved = $parentsPageService->updateSection(
             'gallery_section',
-            photosAdminTrim($_POST['title'] ?? 'Φωτογραφίες'),
-            photosAdminTrim($_POST['subtitle'] ?? ''),
+            AdminPhotosHelper::trimText($_POST['title'] ?? 'Φωτογραφίες'),
+            AdminPhotosHelper::trimText($_POST['subtitle'] ?? ''),
             [
-                'eyebrow' => photosAdminTrim($_POST['eyebrow'] ?? ''),
-                'empty_message' => photosAdminTrim($_POST['empty_message'] ?? ''),
+                'eyebrow' => AdminPhotosHelper::trimText($_POST['eyebrow'] ?? ''),
+                'empty_message' => AdminPhotosHelper::trimText($_POST['empty_message'] ?? ''),
             ]
         );
 
@@ -191,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectUrl .= '#content-management';
     } elseif ($action === 'upload_gallery_images') {
-        [$uploadedCount, $uploadErrors] = uploadPhotosGalleryImages($parentsPageService);
+        [$uploadedCount, $uploadErrors] = AdminPhotosHelper::uploadGalleryImages($parentsPageService);
 
         if ($uploadedCount > 0) {
             $message = "Ανέβηκαν επιτυχώς {$uploadedCount} φωτογραφία/ες.";
@@ -209,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['flash_type'] = $type;
         $redirectUrl .= '#content-management';
     } elseif ($action === 'add_gallery_image_url') {
-        [$saved, $message] = addPhotosGalleryImageFromUrl($parentsPageService);
+        [$saved, $message] = AdminPhotosHelper::addGalleryImageFromUrl($parentsPageService);
         $_SESSION['flash_message'] = $message;
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectUrl .= '#content-management';
@@ -218,11 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $image = $parentsPageService->getGalleryImageById($imageId);
 
         if ($image && $parentsPageService->deleteGalleryImage($imageId)) {
-            deletePhotosGalleryFileIfExists($image['full_image_path'] ?? '');
+            AdminPhotosHelper::deleteGalleryFileIfExists($image['full_image_path'] ?? '');
 
             $thumbImagePath = $image['thumb_image_path'] ?? '';
             if ($thumbImagePath !== ($image['full_image_path'] ?? '')) {
-                deletePhotosGalleryFileIfExists($thumbImagePath);
+                AdminPhotosHelper::deleteGalleryFileIfExists($thumbImagePath);
             }
 
             $_SESSION['flash_message'] = 'Η φωτογραφία διαγράφηκε επιτυχώς.';
@@ -254,7 +106,7 @@ foreach ($galleryImages as $image) {
     }
 
     $validGalleryImages[] = $image;
-    if (isLocalPhotosGalleryPath($fullPath)) {
+    if (AdminPhotosHelper::isLocalGalleryPath($fullPath)) {
         $localImagesCount++;
     } else {
         $externalImagesCount++;
@@ -387,7 +239,7 @@ $photosCount = count($galleryImages);
                                         <div class="parents-gallery-admin-card__meta">
                                             <span class="parents-gallery-admin-card__badge">#<?php echo (int)$image['image_id']; ?></span>
                                             <span class="parents-gallery-admin-card__badge">
-                                                <?php echo isLocalPhotosGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'; ?>
+                                                <?php echo AdminPhotosHelper::isLocalGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'; ?>
                                             </span>
                                         </div>
 
@@ -404,7 +256,7 @@ $photosCount = count($galleryImages);
                                                 data-image-label="<?php echo htmlspecialchars('Φωτογραφία #' . (int)$image['image_id']); ?>"
                                                 data-image-path="<?php echo htmlspecialchars($fullPath); ?>"
                                                 data-image-thumb="<?php echo htmlspecialchars($thumbPath); ?>"
-                                                data-image-source="<?php echo htmlspecialchars(isLocalPhotosGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'); ?>"
+                                                data-image-source="<?php echo htmlspecialchars(AdminPhotosHelper::isLocalGalleryPath($fullPath) ? 'Τοπικό αρχείο' : 'Εξωτερικό URL'); ?>"
                                             >
                                                 <input type="hidden" name="action" value="delete_gallery_image">
                                                 <input type="hidden" name="image_id" value="<?php echo (int)$image['image_id']; ?>">
@@ -594,102 +446,6 @@ $photosCount = count($galleryImages);
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('gallery-images');
-    var preview = document.getElementById('parents-upload-preview');
-    var status = document.getElementById('parents-upload-status');
-    var dropzone = document.getElementById('parents-upload-dropzone');
-
-    if (input && preview && status && dropzone) {
-        function renderPreview(files) {
-            preview.innerHTML = '';
-
-            if (!files || files.length === 0) {
-                status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
-                dropzone.classList.remove('is-active');
-                return;
-            }
-
-            status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
-            dropzone.classList.add('is-active');
-
-            Array.prototype.forEach.call(files, function (file) {
-                var item = document.createElement('div');
-                item.className = 'parents-upload-preview__item';
-
-                var thumb = document.createElement('img');
-                thumb.className = 'parents-upload-preview__thumb';
-                thumb.alt = file.name;
-                thumb.src = URL.createObjectURL(file);
-                thumb.onload = function () {
-                    URL.revokeObjectURL(thumb.src);
-                };
-
-                var meta = document.createElement('div');
-                meta.className = 'parents-upload-preview__meta';
-
-                var name = document.createElement('strong');
-                name.textContent = file.name;
-
-                var size = document.createElement('span');
-                size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-
-                meta.appendChild(name);
-                meta.appendChild(size);
-                item.appendChild(thumb);
-                item.appendChild(meta);
-                preview.appendChild(item);
-            });
-        }
-
-        input.addEventListener('change', function () {
-            renderPreview(input.files);
-        });
-    }
-
-    var galleryDeleteForms = document.querySelectorAll('.parents-gallery-delete-form');
-    var galleryDeleteLabel = document.getElementById('deleteGalleryImageLabel');
-    var galleryDeletePath = document.getElementById('deleteGalleryImagePath');
-    var galleryDeleteThumb = document.getElementById('deleteGalleryImageThumb');
-    var galleryDeleteSource = document.getElementById('deleteGalleryImageSource');
-    var galleryDeleteConfirmButton = document.getElementById('confirmDeleteGalleryImageButton');
-    var pendingGalleryDeleteForm = null;
-
-    if (galleryDeleteForms.length > 0 && galleryDeleteLabel && galleryDeletePath && galleryDeleteThumb && galleryDeleteSource && galleryDeleteConfirmButton && window.jQuery) {
-        Array.prototype.forEach.call(galleryDeleteForms, function (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                pendingGalleryDeleteForm = form;
-                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeletePath.textContent = form.getAttribute('data-image-path') || '';
-                galleryDeleteThumb.src = form.getAttribute('data-image-thumb') || '';
-                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeleteSource.textContent = form.getAttribute('data-image-source') || '';
-                jQuery('#deleteGalleryImageConfirmModal').modal('show');
-            });
-        });
-
-        galleryDeleteConfirmButton.addEventListener('click', function () {
-            if (!pendingGalleryDeleteForm) {
-                return;
-            }
-
-            var formToSubmit = pendingGalleryDeleteForm;
-            pendingGalleryDeleteForm = null;
-            jQuery('#deleteGalleryImageConfirmModal').modal('hide');
-            formToSubmit.submit();
-        });
-
-        jQuery('#deleteGalleryImageConfirmModal').on('hidden.bs.modal', function () {
-            pendingGalleryDeleteForm = null;
-            galleryDeletePath.textContent = '';
-            galleryDeleteThumb.src = '';
-            galleryDeleteThumb.alt = '';
-            galleryDeleteSource.textContent = '';
-        });
-    }
-});
-</script>
+<script src="../assets/js/admin-photos-gallery.js"></script>
 </body>
 </html>

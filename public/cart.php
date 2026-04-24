@@ -8,7 +8,7 @@ require_once __DIR__ . '/../app/services/CartService.php';
 require_once __DIR__ . '/../app/services/EshopSettingsService.php';
 require_once __DIR__ . '/../app/includes/auth.php';
 
-auth_require_role('parent', [
+AuthHelper::requireRole('parent', [
     'mode' => 'json',
     'message' => 'Μόνο λογαριασμοί γονέα μπορούν να χρησιμοποιήσουν το καλάθι.'
 ]);

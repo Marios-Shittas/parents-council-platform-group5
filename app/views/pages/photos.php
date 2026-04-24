@@ -31,7 +31,7 @@ $photosSectionEyebrow = trim((string)($gallerySection['content']['eyebrow'] ?? '
 $pageHeaderTitle = 'Φωτογραφίες';
 $pageHeaderSubtitle = 'Δείτε το φωτογραφικό υλικό από δράσεις, εκδηλώσεις και στιγμές της σχολικής κοινότητας.';
 $pageHeaderIcon = 'fas fa-camera';
-$pageHeaderEyebrow = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
+$pageHeaderEyebrow = SiteContext::isParent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη';
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -42,9 +42,9 @@ $pageHeaderEyebrow = site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσι�
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/photos.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/public-page-header.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/photos.css'); ?>">
     <title>Φωτογραφίες - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
 <body>

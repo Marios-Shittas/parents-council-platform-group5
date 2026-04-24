@@ -18,9 +18,9 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/main.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
-    <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/payments.css'); ?>?v=<?php echo urlencode($paymentsCssVersion); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/main.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/public-page-header.css'); ?>">
+    <link rel="stylesheet" href="<?php echo SiteContext::assetUrl('css/user_css/payments.css'); ?>?v=<?php echo urlencode($paymentsCssVersion); ?>">
 
     <title>Αγορές</title>
 </head>
@@ -54,7 +54,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php if ($isShopVisible): ?>
-        <script type="text/babel" src="<?php echo site_asset_url('js/payments.jsx'); ?>?v=<?php echo urlencode($paymentsScriptVersion); ?>"></script>
+        <script type="text/babel" src="<?php echo SiteContext::assetUrl('js/payments.jsx'); ?>?v=<?php echo urlencode($paymentsScriptVersion); ?>"></script>
     <?php endif; ?>
 </body>
 </html>

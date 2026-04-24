@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
+require_once __DIR__ . '/../../app/includes/AdminAnnouncementsHelper.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -23,214 +24,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 const ANNOUNCEMENT_IMAGE_LIMIT = 6;
 
-function getDefaultAnnouncementGdprNotice() {
-    return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
-}
-
-function getAnnouncementImageUploadDir() {
-    return dirname(__DIR__) . '/assets/Announcements_img/';
-}
-
-function buildAnnouncementImageWebPath($fileName) {
-    return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
-}
-
-function getAnnouncementAttachmentUploadDir() {
-    return dirname(__DIR__) . '/assets/Announcements_docs/';
-}
-
-function buildAnnouncementAttachmentWebPath($fileName) {
-    return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
-}
-
-function ensureAnnouncementUploadDir($uploadDir, $permissions = 0777) {
-    if (!is_dir($uploadDir)) {
-        @mkdir($uploadDir, $permissions, true);
-    }
-
-    clearstatcache(true, $uploadDir);
-
-    if (is_dir($uploadDir) && !is_writable($uploadDir)) {
-        @chmod($uploadDir, $permissions);
-        clearstatcache(true, $uploadDir);
-    }
-
-    return is_dir($uploadDir) && is_writable($uploadDir);
-}
-
-function resolveAnnouncementAssetFilePath($filePath, $type = 'image') {
-    $baseDir = $type === 'attachment' ? getAnnouncementAttachmentUploadDir() : getAnnouncementImageUploadDir();
-    return $baseDir . basename((string)$filePath);
-}
-
-function uploadAnnouncementImages($announcementsService, $announcementId) {
-    $uploadedCount = 0;
-    $uploadErrors = [];
-
-    if (empty($_FILES['images']['name'][0])) {
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $uploadDir = getAnnouncementImageUploadDir();
-    ensureAnnouncementUploadDir($uploadDir);
-
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-    $maxFileSize = 5 * 1024 * 1024;
-    $existingImagesCount = $announcementsService->countImages($announcementId);
-    $availableSlots = max(0, ANNOUNCEMENT_IMAGE_LIMIT - $existingImagesCount);
-    $selectedFilesCount = is_array($_FILES['images']['name'] ?? null) ? count($_FILES['images']['name']) : 0;
-
-    if ($availableSlots === 0) {
-        $uploadErrors[] = 'Η ανακοίνωση έχει ήδη τον μέγιστο επιτρεπόμενο αριθμό εικόνων (' . ANNOUNCEMENT_IMAGE_LIMIT . ').';
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    if ($selectedFilesCount > $availableSlots) {
-        $uploadErrors[] = 'Επιλέχθηκαν ' . $selectedFilesCount . ' αρχεία, αλλά μπορούν να αποθηκευτούν μόνο ' . $availableSlots . ' ακόμη εικόνες για αυτή την ανακοίνωση.';
-    }
-
-    foreach ($_FILES['images']['tmp_name'] as $key => $tmpName) {
-        if ($uploadedCount >= $availableSlots) {
-            $uploadErrors[] = 'Μπορούν να αποθηκευτούν έως ' . ANNOUNCEMENT_IMAGE_LIMIT . ' εικόνες ανά ανακοίνωση.';
-            break;
-        }
-
-        $fileName = basename($_FILES['images']['name'][$key] ?? '');
-        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-
-        if (($_FILES['images']['error'][$key] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' απέτυχε να ανέβει (Error: {$_FILES['images']['error'][$key]})";
-            continue;
-        }
-
-        $fileSize = $_FILES['images']['size'][$key];
-        $fileMime = mime_content_type($tmpName);
-        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        if (!in_array($fileExt, $allowedExtensions, true)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
-            continue;
-        }
-
-        if ($fileSize > $maxFileSize) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 5MB";
-            continue;
-        }
-
-        if (!getimagesize($tmpName)) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν είναι έγκυρη εικόνα";
-            continue;
-        }
-
-        if (!in_array($fileMime, $allowedTypes, true) && !str_starts_with($fileMime, 'image/')) {
-            $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν έχει έγκυρο τύπο εικόνας (MIME: {$fileMime})";
-            continue;
-        }
-
-        $newFileName = uniqid() . '_' . time() . '.' . $fileExt;
-        $targetPath = $uploadDir . $newFileName;
-
-        if (!file_exists($tmpName)) {
-            $uploadErrors[] = "Το προσωρινό αρχείο για '{$safeFileName}' δεν βρέθηκε";
-            continue;
-        }
-
-        if (!is_writable($uploadDir)) {
-            $uploadErrors[] = "Ο φάκελος δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα (chmod 777 {$uploadDir})";
-            continue;
-        }
-
-        if (move_uploaded_file($tmpName, $targetPath)) {
-            $imagePath = buildAnnouncementImageWebPath($newFileName);
-            if ($announcementsService->addImage($announcementId, $imagePath)) {
-                $uploadedCount++;
-            } else {
-                if (file_exists($targetPath)) {
-                    unlink($targetPath);
-                }
-
-                $serviceError = trim((string)$announcementsService->getLastOperationError());
-                if ($serviceError !== '') {
-                    $uploadErrors[] = "Το αρχείο '{$safeFileName}' δεν αποθηκεύτηκε. {$serviceError}";
-                } else {
-                    $uploadErrors[] = "Αποτυχία αποθήκευσης του '{$safeFileName}' στη βάση δεδομένων";
-                }
-            }
-        } else {
-            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του αρχείου '{$safeFileName}' - Έλεγξε δικαιώματα φακέλου: " . substr(sprintf('%o', fileperms($uploadDir)), -4);
-        }
-    }
-
-    return [$uploadedCount, $uploadErrors];
-}
-
-function uploadAnnouncementAttachments($announcementsService, $announcementId) {
-    $uploadedCount = 0;
-    $uploadErrors = [];
-
-    if (empty($_FILES['attachments']['name'][0])) {
-        return [$uploadedCount, $uploadErrors];
-    }
-
-    $uploadDir = getAnnouncementAttachmentUploadDir();
-    ensureAnnouncementUploadDir($uploadDir);
-
-    $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-    $maxFileSize = 8 * 1024 * 1024;
-
-    foreach ($_FILES['attachments']['tmp_name'] as $key => $tmpName) {
-        $fileName = basename($_FILES['attachments']['name'][$key] ?? '');
-        $safeFileName = htmlspecialchars($fileName, ENT_QUOTES, 'UTF-8');
-        $errorCode = $_FILES['attachments']['error'][$key] ?? UPLOAD_ERR_NO_FILE;
-
-        if ($errorCode !== UPLOAD_ERR_OK) {
-            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' απέτυχε να ανέβει (Error: {$errorCode})";
-            continue;
-        }
-
-        $fileSize = (int)($_FILES['attachments']['size'][$key] ?? 0);
-        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        if (!in_array($fileExt, $allowedExtensions, true)) {
-            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' δεν έχει έγκυρη επέκταση. Επιτρέπονται: " . implode(', ', $allowedExtensions);
-            continue;
-        }
-
-        if ($fileSize > $maxFileSize) {
-            $uploadErrors[] = "Το συνημμένο '{$safeFileName}' είναι πολύ μεγάλο (" . round($fileSize / 1024 / 1024, 2) . "MB). Μέγιστο: 8MB";
-            continue;
-        }
-
-        if (!file_exists($tmpName)) {
-            $uploadErrors[] = "Το προσωρινό αρχείο για το συνημμένο '{$safeFileName}' δεν βρέθηκε";
-            continue;
-        }
-
-        if (!is_writable($uploadDir)) {
-            $uploadErrors[] = "Ο φάκελος συνημμένων δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα του {$uploadDir}";
-            continue;
-        }
-
-        $newFileName = uniqid('announcement_attachment_', true) . '.' . $fileExt;
-        $targetPath = $uploadDir . $newFileName;
-
-        if (move_uploaded_file($tmpName, $targetPath)) {
-            $attachmentPath = buildAnnouncementAttachmentWebPath($newFileName);
-            if ($announcementsService->addAttachment($announcementId, $attachmentPath, $fileName)) {
-                $uploadedCount++;
-            } else {
-                @unlink($targetPath);
-                $uploadErrors[] = "Αποτυχία αποθήκευσης του συνημμένου '{$safeFileName}' στη βάση δεδομένων";
-            }
-        } else {
-            $uploadErrors[] = "Αποτυχία μεταφόρτωσης του συνημμένου '{$safeFileName}'.";
-        }
-    }
-
-    return [$uploadedCount, $uploadErrors];
-}
-
 $announcementsService = new AnnouncementsService();
 $message = $_SESSION['flash_message'] ?? '';
 $messageType = $_SESSION['flash_message_type'] ?? '';
@@ -244,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice());
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? AdminAnnouncementsHelper::getDefaultGdprNotice());
         $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
@@ -252,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $announcementId = $announcementsService->createAnnouncement($title, $description, $announcementDate, $publishDate, $gdprNotice);
             
             if ($announcementId) {
-                [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $announcementId);
-                [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $announcementId);
+                [$uploadedCount, $uploadErrors] = AdminAnnouncementsHelper::uploadImages($announcementsService, $announcementId, ANNOUNCEMENT_IMAGE_LIMIT);
+                [$uploadedAttachmentsCount, $attachmentErrors] = AdminAnnouncementsHelper::uploadAttachments($announcementsService, $announcementId);
                 
                 // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
                 if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
@@ -292,14 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $gdprNotice = trim($_POST['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice());
+        $gdprNotice = trim($_POST['gdpr_notice'] ?? AdminAnnouncementsHelper::getDefaultGdprNotice());
         $announcementDate = $_POST['announcement_date'] ?? date('Y-m-d');
         $publishDate = $_POST['publish_date'] ?? date('Y-m-d');
         
         if ($id > 0 && !empty($title)) {
             if ($announcementsService->updateAnnouncement($id, $title, $description, $announcementDate, $publishDate, $gdprNotice)) {
-                [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $id);
-                [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $id);
+                [$uploadedCount, $uploadErrors] = AdminAnnouncementsHelper::uploadImages($announcementsService, $id, ANNOUNCEMENT_IMAGE_LIMIT);
+                [$uploadedAttachmentsCount, $attachmentErrors] = AdminAnnouncementsHelper::uploadAttachments($announcementsService, $id);
                 
                 // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
                 if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
@@ -339,14 +132,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($id > 0 && $announcementsService->deleteAnnouncement($id)) {
             foreach ($imagesToDelete as $image) {
-                $filePath = resolveAnnouncementAssetFilePath($image['image_path'] ?? '', 'image');
+                $filePath = AdminAnnouncementsHelper::resolveAssetFilePath($image['image_path'] ?? '', 'image');
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
             }
 
             foreach ($attachmentsToDelete as $attachment) {
-                $filePath = resolveAnnouncementAssetFilePath($attachment['file_path'] ?? '', 'attachment');
+                $filePath = AdminAnnouncementsHelper::resolveAssetFilePath($attachment['file_path'] ?? '', 'attachment');
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
@@ -378,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($imageId > 0 && $announcementsService->deleteImage($imageId)) {
             if ($imageToDelete) {
-                $filePath = resolveAnnouncementAssetFilePath($imageToDelete['image_path'] ?? '', 'image');
+                $filePath = AdminAnnouncementsHelper::resolveAssetFilePath($imageToDelete['image_path'] ?? '', 'image');
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
@@ -396,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $attachment = $attachmentId > 0 ? $announcementsService->getAttachmentById($attachmentId) : null;
 
         if ($attachment && $announcementsService->deleteAttachment($attachmentId)) {
-            $filePath = resolveAnnouncementAssetFilePath($attachment['file_path'] ?? '', 'attachment');
+            $filePath = AdminAnnouncementsHelper::resolveAssetFilePath($attachment['file_path'] ?? '', 'attachment');
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
@@ -476,7 +269,7 @@ $announcements = $announcementsService->getAllAnnouncements();
     <title>Διαχείριση Ανακοινώσεων - Admin</title>
 </head>
 
-<body>
+<body data-announcement-image-limit="<?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?>">
 
 <div class="admin-wrapper">
     <?php include __DIR__ . '/../../app/includes/admin_sidebar.php'; ?>
@@ -540,7 +333,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 
                     <div class="form-group">
                         <label for="edit_gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
-                        <textarea class="form-control form-control-custom" id="edit_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars($editAnnouncement['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice()); ?></textarea>
+                        <textarea class="form-control form-control-custom" id="edit_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars($editAnnouncement['gdpr_notice'] ?? AdminAnnouncementsHelper::getDefaultGdprNotice()); ?></textarea>
                     </div>
                     
                     <!-- Οι εικόνες που υπάρχουν ήδη -->
@@ -750,7 +543,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 
                     <div class="form-group">
                         <label for="gdpr_notice"><strong>Ενημέρωση GDPR για φωτογραφικό υλικό</strong></label>
-                        <textarea class="form-control form-control-custom" id="gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(getDefaultAnnouncementGdprNotice()); ?></textarea>
+                        <textarea class="form-control form-control-custom" id="gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars(AdminAnnouncementsHelper::getDefaultGdprNotice()); ?></textarea>
                     </div>
                     
                     <div class="form-group">
@@ -801,509 +594,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-function ensureNoticeElements() {
-    if (document.getElementById('page-notice-overlay')) {
-        return;
-    }
-
-    const overlay = document.createElement('div');
-    overlay.id = 'page-notice-overlay';
-    overlay.className = 'page-notice-overlay';
-    overlay.innerHTML = '' +
-        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
-        '</div>';
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        }
-    });
-
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('page-notice-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        });
-    }
-}
-
-function showNotice(message, options) {
-    ensureNoticeElements();
-
-    const overlay = document.getElementById('page-notice-overlay');
-    const card = document.getElementById('page-notice-card');
-    const title = document.getElementById('page-notice-title');
-    const body = document.getElementById('page-notice-message');
-    const opts = options || {};
-
-    if (!overlay || !card || !title || !body) {
-        console.error(message);
-        return;
-    }
-
-    card.classList.remove('is-error', 'is-warning');
-    if (opts.variant === 'error') card.classList.add('is-error');
-    if (opts.variant === 'warning') card.classList.add('is-warning');
-
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
-
-    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
-    document.body.style.overflow = 'hidden';
-    overlay.classList.add('is-open');
-}
-
-function showConfirm(message, onConfirm, options) {
-    const opts = options || {};
-    const overlay = document.createElement('div');
-    const previousOverflow = document.body.style.overflow || '';
-
-    overlay.className = 'page-confirm-overlay is-open';
-
-    overlay.innerHTML = '' +
-        '<div class="page-confirm-card" role="dialog" aria-modal="true">' +
-            '<h3 class="page-confirm-title">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
-            '<div class="page-confirm-message">' + (message || 'Είστε σίγουροι;') + '</div>' +
-            '<div class="page-confirm-actions">' +
-                '<button type="button" data-action="cancel" class="page-confirm-btn page-confirm-btn--cancel">Όχι</button>' +
-                '<button type="button" data-action="confirm" class="page-confirm-btn page-confirm-btn--confirm">Ναι</button>' +
-            '</div>' +
-        '</div>';
-
-    function closeOverlay() {
-        document.body.style.overflow = previousOverflow;
-        overlay.remove();
-    }
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            closeOverlay();
-        }
-    });
-
-    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
-    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeOverlay);
-    }
-
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function () {
-            closeOverlay();
-            if (typeof onConfirm === 'function') {
-                onConfirm();
-            }
-        });
-    }
-
-    document.body.style.overflow = 'hidden';
-    document.body.appendChild(overlay);
-}
-
-// Κάνει διαγραφή εικόνας με ξεχωριστό POST, χωρίς να χαλάει η φόρμα επεξεργασίας
-function deleteAnnouncementImage(imageId, announcementId) {
-    showConfirm('Διαγραφή εικόνας;', function () {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '';
-
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'delete_image';
-
-        const imageIdInput = document.createElement('input');
-        imageIdInput.type = 'hidden';
-        imageIdInput.name = 'image_id';
-        imageIdInput.value = String(imageId);
-
-        const announcementIdInput = document.createElement('input');
-        announcementIdInput.type = 'hidden';
-        announcementIdInput.name = 'announcement_id';
-        announcementIdInput.value = String(announcementId);
-
-        form.appendChild(actionInput);
-        form.appendChild(imageIdInput);
-        form.appendChild(announcementIdInput);
-        document.body.appendChild(form);
-        form.submit();
-    }, {
-        title: 'Επιβεβαίωση διαγραφής'
-    });
-}
-
-function deleteAnnouncementAttachment(attachmentId, announcementId) {
-    showConfirm('Διαγραφή συνημμένου;', function () {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '';
-
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'delete_attachment';
-
-        const attachmentIdInput = document.createElement('input');
-        attachmentIdInput.type = 'hidden';
-        attachmentIdInput.name = 'attachment_id';
-        attachmentIdInput.value = String(attachmentId);
-
-        const announcementIdInput = document.createElement('input');
-        announcementIdInput.type = 'hidden';
-        announcementIdInput.name = 'announcement_id';
-        announcementIdInput.value = String(announcementId);
-
-        form.appendChild(actionInput);
-        form.appendChild(attachmentIdInput);
-        form.appendChild(announcementIdInput);
-        document.body.appendChild(form);
-        form.submit();
-    }, {
-        title: 'Επιβεβαίωση διαγραφής'
-    });
-}
-
-function getAnnouncementImageLimit() {
-    return <?php echo ANNOUNCEMENT_IMAGE_LIMIT; ?>;
-}
-
-function getAnnouncementImageFileKey(file) {
-    return [file.name, file.size, file.lastModified, file.type].join('::');
-}
-
-function truncatePreviewFileName(fileName, maxLength) {
-    if (fileName.length <= maxLength) {
-        return fileName;
-    }
-
-    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
-}
-
-function validateAnnouncementImageFile(file) {
-    const warnings = [];
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-    const maxFileSize = 5 * 1024 * 1024;
-    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-
-    if (!allowedExtensions.includes(fileExt)) {
-        warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-    }
-
-    if (file.size > maxFileSize) {
-        warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-    }
-
-    if (!String(file.type || '').startsWith('image/')) {
-        warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-    }
-
-    return warnings;
-}
-
-function syncAnnouncementImageInputFiles(input, stagedFiles) {
-    if (typeof DataTransfer === 'undefined') {
-        return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    stagedFiles.forEach((file) => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-}
-
-function renderAnnouncementImagePreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const item = document.createElement('div');
-        item.className = 'image-preview-item';
-
-        const image = document.createElement('img');
-        image.alt = file.name;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        const caption = document.createElement('div');
-        caption.className = 'preview-file-caption';
-        caption.textContent = truncatePreviewFileName(file.name, 18);
-
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            image.src = String(event.target && event.target.result ? event.target.result : '');
-        };
-        reader.readAsDataURL(file);
-
-        item.appendChild(image);
-        item.appendChild(deleteBtn);
-        item.appendChild(caption);
-        preview.appendChild(item);
-    });
-}
-
-function setupAnnouncementImageInput(input, previewId) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const announcementImageLimit = getAnnouncementImageLimit();
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function updateInputState() {
-        if (existingCount + stagedFiles.length >= announcementImageLimit) {
-            input.disabled = true;
-        } else if (existingCount < announcementImageLimit) {
-            input.disabled = false;
-        }
-    }
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getAnnouncementImageFileKey(removedFile));
-        syncAnnouncementImageInputFiles(input, stagedFiles);
-        renderAnnouncementImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-    }
-
-    input.addEventListener('change', function () {
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-        let reachedLimit = false;
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        if (existingCount >= announcementImageLimit) {
-            warnings.push(`Η ανακοίνωση έχει ήδη ${announcementImageLimit} εικόνες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
-        } else {
-            incomingFiles.forEach((file) => {
-                const fileKey = getAnnouncementImageFileKey(file);
-                const validationWarnings = validateAnnouncementImageFile(file);
-
-                if (validationWarnings.length > 0) {
-                    warnings.push(...validationWarnings);
-                    return;
-                }
-
-                if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
-                    return;
-                }
-
-                if (existingCount + stagedFiles.length >= announcementImageLimit) {
-                    if (!reachedLimit) {
-                        const remainingSlots = Math.max(0, announcementImageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες σε αυτή την ανακοίνωση.`);
-                        reachedLimit = true;
-                    }
-                    return;
-                }
-
-                stagedFiles.push(file);
-                stagedKeys.add(fileKey);
-            });
-        }
-
-        syncAnnouncementImageInputFiles(input, stagedFiles);
-        renderAnnouncementImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-
-        if (warnings.length > 0) {
-            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: 'Έλεγχος αρχείων',
-                variant: 'warning'
-            });
-        }
-    });
-
-    updateInputState();
-}
-
-function getAnnouncementAttachmentFileKey(file) {
-    return [file.name, file.size, file.lastModified, file.type].join('::');
-}
-
-function validateAnnouncementAttachmentFile(file) {
-    const warnings = [];
-    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-    const maxFileSize = 8 * 1024 * 1024;
-    const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-    const fileType = String(file.type || '');
-
-    if (!allowedExtensions.includes(fileExt)) {
-        warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
-    }
-
-    if (file.size > maxFileSize) {
-        warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
-    }
-
-    if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
-        warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
-    }
-
-    return warnings;
-}
-
-function renderAnnouncementAttachmentPreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-        const item = document.createElement('div');
-        item.className = 'attachment-preview-item';
-
-        const info = document.createElement('div');
-        info.className = 'attachment-preview-info';
-
-        const icon = document.createElement('i');
-        icon.className = fileExt === 'pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
-
-        const text = document.createElement('span');
-        text.className = 'attachment-preview-name';
-        text.textContent = truncatePreviewFileName(file.name, 40);
-
-        const size = document.createElement('span');
-        size.className = 'attachment-preview-size';
-        size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'attachment-remove-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        info.appendChild(icon);
-        info.appendChild(text);
-        info.appendChild(size);
-        item.appendChild(info);
-        item.appendChild(deleteBtn);
-        preview.appendChild(item);
-    });
-}
-
-function setupAnnouncementAttachmentInput(input, previewId) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function syncFiles() {
-        if (typeof DataTransfer === 'undefined') {
-            return;
-        }
-
-        const dataTransfer = new DataTransfer();
-        stagedFiles.forEach((file) => dataTransfer.items.add(file));
-        input.files = dataTransfer.files;
-    }
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getAnnouncementAttachmentFileKey(removedFile));
-        syncFiles();
-        renderAnnouncementAttachmentPreview(preview, stagedFiles, removeStagedFile);
-    }
-
-    input.addEventListener('change', function () {
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        incomingFiles.forEach((file) => {
-            const fileKey = getAnnouncementAttachmentFileKey(file);
-            const validationWarnings = validateAnnouncementAttachmentFile(file);
-
-            if (validationWarnings.length > 0) {
-                warnings.push(...validationWarnings);
-                return;
-            }
-
-            if (stagedKeys.has(fileKey)) {
-                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
-                return;
-            }
-
-            stagedFiles.push(file);
-            stagedKeys.add(fileKey);
-        });
-
-        syncFiles();
-        renderAnnouncementAttachmentPreview(preview, stagedFiles, removeStagedFile);
-
-        if (warnings.length > 0) {
-            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: 'Έλεγχος συνημμένων',
-                variant: 'warning'
-            });
-        }
-    });
-}
-
-setupAnnouncementImageInput(document.getElementById('images'), 'imagePreview');
-setupAnnouncementImageInput(document.getElementById('edit_images'), 'editPreview');
-setupAnnouncementAttachmentInput(document.getElementById('attachments'), 'attachmentPreview');
-setupAnnouncementAttachmentInput(document.getElementById('edit_attachments'), 'editAttachmentPreview');
-
-document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const message = form.getAttribute('data-confirm-message') || 'Είστε σίγουροι;';
-        const title = form.getAttribute('data-confirm-title') || 'Επιβεβαίωση';
-
-        showConfirm(message, function () {
-            form.submit();
-        }, {
-            title: title
-        });
-    });
-});
-</script>
+<script src="../assets/js/admin-announcements.js"></script>
 
 </body>
 </html>

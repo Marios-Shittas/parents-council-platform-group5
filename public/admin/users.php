@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminUsersHelper.php';
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -13,351 +14,6 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
-}
-
-function isPrimaryProtectedAdmin(int $userId): bool
-{
-    return $userId === 1;
-}
-
-function normalizeUserRole(string $role): string
-{
-    return in_array($role, ['admin', 'parent'], true) ? $role : 'parent';
-}
-
-function normalizeUserStatus(string $status): string
-{
-    $allowed = ['pending', 'approved', 'rejected', 'waiting_payment', 'active'];
-    return in_array($status, $allowed, true) ? $status : 'pending';
-}
-
-function normalizeUserSort(string $sort): string
-{
-    $allowed = ['pending_first', 'newest', 'oldest', 'name_az', 'status_az'];
-    return in_array($sort, $allowed, true) ? $sort : 'pending_first';
-}
-
-function normalizeScheduleStatus(string $status): string
-{
-    return in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
-}
-
-function normalizeScheduleFeature(string $feature): string
-{
-    $normalized = trim((string)$feature);
-    if ($normalized === 'cleanup_applications' || $normalized === 'cleanuo_submissions') {
-        $normalized = 'cleanup_submissions';
-    }
-
-    $allowed = ['registration', 'delete_users', 'cleanup_submissions'];
-    return in_array($normalized, $allowed, true) ? $normalized : 'registration';
-}
-
-function scheduleFeatureLabel(string $feature): string
-{
-    $map = [
-        'registration' => 'Εγγραφές',
-        'delete_users' => 'Διαγραφή Χρηστών',
-        'cleanup_submissions' => 'Καθαρισμός Υποβολών',
-    ];
-
-    return $map[$feature] ?? $feature;
-}
-
-function normalizeDateTimeLocalInput(string $value): ?string
-{
-    $trimmed = trim($value);
-    if ($trimmed === '') {
-        return null;
-    }
-
-    $dateTime = DateTime::createFromFormat('d/m/Y H:i', $trimmed);
-
-    if (!$dateTime instanceof DateTime) {
-        // Keep backward compatibility in case the browser still submits datetime-local format.
-        $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', $trimmed);
-        if (!$dateTime instanceof DateTime) {
-            return null;
-        }
-    }
-
-    return $dateTime->format('Y-m-d H:i:s');
-}
-
-function toDateTimeLocalValue(?string $value): string
-{
-    if (!is_string($value) || trim($value) === '') {
-        return '';
-    }
-
-    $timestamp = strtotime($value);
-    return $timestamp ? date('Y-m-d\\TH:i', $timestamp) : '';
-}
-
-function redirectWithFlash(string $message, string $type = 'info', int $manageChildrenUserId = 0): void
-{
-    $_SESSION['flash_message'] = $message;
-    $_SESSION['flash_message_type'] = $type;
-    $redirectUrl = 'users.php';
-    if ($manageChildrenUserId > 0) {
-        $redirectUrl .= '?manage_children=' . $manageChildrenUserId;
-    }
-
-    header('Location: ' . $redirectUrl);
-    exit;
-}
-
-function formatRoleLabel(string $role): string
-{
-    return $role === 'admin' ? 'Διαχειριστής' : 'Γονέας';
-}
-
-function formatStatusLabel(string $status): string
-{
-    $map = [
-        'pending' => 'Σε Αναμονή',
-        'approved' => 'Εγκεκριμένος',
-        'rejected' => 'Απορριφθείς',
-        'waiting_payment' => 'Αναμονή Πληρωμής',
-        'active' => 'Ενεργός',
-    ];
-
-    return $map[$status] ?? ucfirst($status);
-}
-
-function roleBadgeClass(string $role): string
-{
-    return $role === 'admin'
-        ? 'status-pill status-pill--accent'
-        : 'status-pill status-pill--neutral';
-}
-
-function statusBadgeClass(string $status): string
-{
-    switch ($status) {
-        case 'active':
-            return 'status-pill status-pill--success';
-        case 'approved':
-            return 'status-pill status-pill--info';
-        case 'waiting_payment':
-            return 'status-pill status-pill--warning';
-        case 'rejected':
-            return 'status-pill status-pill--danger';
-        default:
-            return 'status-pill status-pill--neutral';
-    }
-}
-
-function formatOrderStatusLabel(string $status): string
-{
-    $map = [
-        'pending' => 'Σε Αναμονή',
-        'paid' => 'Πληρωμένη',
-        'cancelled' => 'Ακυρωμένη',
-    ];
-
-    return $map[$status] ?? ucfirst($status);
-}
-
-function orderStatusBadgeClass(string $status): string
-{
-    switch ($status) {
-        case 'paid':
-            return 'badge bg-success-subtle text-success-emphasis';
-        case 'cancelled':
-            return 'badge bg-danger-subtle text-danger-emphasis';
-        default:
-            return 'badge bg-warning-subtle text-warning-emphasis';
-    }
-}
-
-function formatPaymentStatusLabel(string $status): string
-{
-    $map = [
-        'pending' => 'Σε Αναμονή',
-        'completed' => 'Ολοκληρωμένη',
-        'failed' => 'Αποτυχημένη',
-        'refunded' => 'Επιστροφή',
-    ];
-
-    return $map[$status] ?? ucfirst($status);
-}
-
-function paymentStatusBadgeClass(string $status): string
-{
-    switch ($status) {
-        case 'completed':
-            return 'badge bg-success-subtle text-success-emphasis';
-        case 'failed':
-            return 'badge bg-danger-subtle text-danger-emphasis';
-        case 'refunded':
-            return 'badge bg-info-subtle text-info-emphasis';
-        default:
-            return 'badge bg-warning-subtle text-warning-emphasis';
-    }
-}
-
-function formatPaymentTypeLabel(string $type): string
-{
-    $map = [
-        'membership' => 'Συνδρομή',
-        'insurance' => 'Ασφάλεια',
-        'product' => 'Προϊόν',
-    ];
-
-    return $map[$type] ?? ucfirst($type);
-}
-
-function exportCellText(string $value): string
-{
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-}
-
-function formatExportDate(?string $value): string
-{
-    if (!is_string($value) || trim($value) === '') {
-        return '—';
-    }
-
-    $timestamp = strtotime($value);
-    return $timestamp ? date('d/m/Y H:i', $timestamp) : (string)$value;
-}
-
-function buildChildExportSummary(array $children): string
-{
-    if (empty($children)) {
-        return '—';
-    }
-
-    $parts = [];
-    foreach ($children as $child) {
-        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
-        $dob = !empty($child['date_of_birth']) ? date('d/m/Y', strtotime((string)$child['date_of_birth'])) : '—';
-        $schoolClass = trim((string)($child['school_class'] ?? ''));
-        $parts[] = trim($name) . ' | Γεν.: ' . $dob . ' | Τάξη: ' . ($schoolClass !== '' ? $schoolClass : '—');
-    }
-
-    return implode(" \n", $parts);
-}
-
-function buildInsuredChildrenSummary(array $children, array $insuredChildIds, bool $hasCompletedInsurance): string
-{
-    if (empty($children)) {
-        return '—';
-    }
-
-    $resolvedInsuredChildIds = $insuredChildIds;
-    if ($hasCompletedInsurance && empty($resolvedInsuredChildIds)) {
-        foreach ($children as $child) {
-            $childId = (int)($child['child_id'] ?? 0);
-            if ($childId > 0) {
-                $resolvedInsuredChildIds[] = $childId;
-            }
-        }
-    }
-
-    $insuredLookup = array_flip(array_map('intval', $resolvedInsuredChildIds));
-    $parts = [];
-
-    foreach ($children as $child) {
-        $childId = (int)($child['child_id'] ?? 0);
-        $name = trim(((string)($child['name'] ?? '')) . ' ' . ((string)($child['surname'] ?? '')));
-        $parts[] = $name . ': ' . (isset($insuredLookup[$childId]) ? 'Ναι' : 'Όχι');
-    }
-
-    return implode(" \n", $parts);
-}
-
-function buildPaymentSummary(array $payments, string $paymentType): string
-{
-    $filtered = array_values(array_filter($payments, static function ($payment) use ($paymentType) {
-        return (string)($payment['payment_type'] ?? '') === $paymentType;
-    }));
-
-    if (empty($filtered)) {
-        return '—';
-    }
-
-    $parts = [];
-    foreach ($filtered as $payment) {
-        $parts[] = sprintf(
-            '#%d | %s | %s | %s | ποσό: %s | JCC: %s',
-            (int)($payment['payment_id'] ?? 0),
-            formatPaymentTypeLabel((string)($payment['payment_type'] ?? '')),
-            formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending')),
-            formatExportDate($payment['payment_date'] ?? null),
-            number_format((float)($payment['amount'] ?? 0), 2),
-            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
-        );
-    }
-
-    return implode(" \n", $parts);
-}
-
-function buildProductTransactionSummary(array $payments): string
-{
-    $filtered = array_values(array_filter($payments, static function ($payment) {
-        return (string)($payment['payment_type'] ?? '') === 'product'
-            && trim((string)($payment['transaction_id'] ?? '')) !== '';
-    }));
-
-    if (empty($filtered)) {
-        return '—';
-    }
-
-    $parts = [];
-    foreach ($filtered as $payment) {
-        $parts[] = sprintf(
-            '#%d: %s',
-            (int)($payment['payment_id'] ?? 0),
-            trim((string)($payment['transaction_id'] ?? '')) !== '' ? (string)$payment['transaction_id'] : '—'
-        );
-    }
-
-    return implode(" \n", $parts);
-}
-
-function buildOrdersExportSummary(array $orders, array $orderItemsByOrderId): string
-{
-    if (empty($orders)) {
-        return '—';
-    }
-
-    $parts = [];
-    foreach ($orders as $order) {
-        $orderId = (int)($order['order_id'] ?? 0);
-        $items = $orderItemsByOrderId[$orderId] ?? [];
-        if (empty($items)) {
-            continue;
-        }
-
-        $itemParts = [];
-
-        foreach ($items as $item) {
-            $size = trim((string)($item['size'] ?? ''));
-            $itemParts[] = sprintf(
-                '%s x%d%s',
-                (string)($item['product_name'] ?? 'Προϊόν'),
-                (int)($item['quantity'] ?? 0),
-                $size !== '' ? ' [' . $size . ']' : ''
-            );
-        }
-
-        $parts[] = sprintf(
-            '#%d | %s | %s | σύνολο: %s | είδη: %s',
-            $orderId,
-            formatOrderStatusLabel((string)($order['order_status'] ?? 'pending')),
-            formatExportDate($order['created_at'] ?? null),
-            number_format((float)($order['total_price'] ?? 0), 2),
-            !empty($itemParts) ? implode(', ', $itemParts) : '—'
-        );
-    }
-
-    if (empty($parts)) {
-        return '—';
-    }
-
-    return implode(" \n", $parts);
 }
 
 $usersService = new UsersService();
@@ -377,10 +33,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'phone_number' => trim((string)($_POST['phone_number'] ?? '')),
             'password' => (string)($_POST['password'] ?? ''),
             'role' => 'parent',
-            'account_status' => normalizeUserStatus((string)($_POST['account_status'] ?? 'active')),
+            'account_status' => AdminUsersHelper::normalizeUserStatus((string)($_POST['account_status'] ?? 'active')),
         ], $currentAdminId);
 
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger'
         );
@@ -395,7 +51,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'school_class' => trim((string)($_POST['child_school_class'] ?? '')),
         ], $currentAdminId);
 
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $parentUserId
@@ -412,7 +68,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'school_class' => trim((string)($_POST['child_school_class'] ?? '')),
         ], $currentAdminId);
 
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $parentUserId
@@ -424,7 +80,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $childId = (int)($_POST['child_id'] ?? 0);
         $result = $usersService->deleteChildForParent($childId, $parentUserId, $currentAdminId);
 
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger',
             $parentUserId
@@ -434,13 +90,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if ($action === 'update_user') {
         $userId = (int)($_POST['user_id'] ?? 0);
         if ($userId <= 0) {
-            redirectWithFlash('Μη έγκυρος χρήστης.', 'danger');
+            AdminUsersHelper::redirectWithFlash('Μη έγκυρος χρήστης.', 'danger');
         }
 
-        $requestedRole = normalizeUserRole((string)($_POST['role'] ?? 'parent'));
-        $requestedStatus = normalizeUserStatus((string)($_POST['account_status'] ?? 'pending'));
+        $requestedRole = AdminUsersHelper::normalizeUserRole((string)($_POST['role'] ?? 'parent'));
+        $requestedStatus = AdminUsersHelper::normalizeUserStatus((string)($_POST['account_status'] ?? 'pending'));
 
-        if (isPrimaryProtectedAdmin($userId)) {
+        if (AdminUsersHelper::isPrimaryProtectedAdmin($userId)) {
             $requestedRole = 'admin';
             $requestedStatus = 'active';
         }
@@ -469,7 +125,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $flashMessage = 'Στάλθηκε email απόρριψης στο ' . $result['rejection_email'] . '.';
         }
 
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $flashMessage,
             !empty($result['success']) ? 'success' : 'danger'
         );
@@ -479,19 +135,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $userId = (int)($_POST['user_id'] ?? 0);
 
         if ($userId <= 0) {
-            redirectWithFlash('Μη έγκυρος χρήστης.', 'danger');
+            AdminUsersHelper::redirectWithFlash('Μη έγκυρος χρήστης.', 'danger');
         }
 
-        if (isPrimaryProtectedAdmin($userId)) {
-            redirectWithFlash('Ο admin 1 είναι προστατευμένος και δεν μπορεί να διαγραφεί.', 'warning');
+        if (AdminUsersHelper::isPrimaryProtectedAdmin($userId)) {
+            AdminUsersHelper::redirectWithFlash('Ο admin 1 είναι προστατευμένος και δεν μπορεί να διαγραφεί.', 'warning');
         }
 
         if ($userId === $currentAdminId) {
-            redirectWithFlash('Δεν μπορείς να διαγράψεις τον λογαριασμό με τον οποίο είσαι συνδεδεμένος.', 'warning');
+            AdminUsersHelper::redirectWithFlash('Δεν μπορείς να διαγράψεις τον λογαριασμό με τον οποίο είσαι συνδεδεμένος.', 'warning');
         }
 
         $result = $usersService->deleteUserByAdmin($userId, $currentAdminId);
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger'
         );
@@ -499,34 +155,34 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     if ($action === 'update_registration_schedule') {
         $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
-        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
-        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
-        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
-        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+        $feature = AdminUsersHelper::normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = AdminUsersHelper::normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = AdminUsersHelper::normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = AdminUsersHelper::normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
 
         if ($scheduleId <= 0 || $startDate === null || $endDate === null) {
-            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για το πρόγραμμα εγγραφών.', 'danger');
+            AdminUsersHelper::redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για το πρόγραμμα εγγραφών.', 'danger');
         }
 
         $result = $usersService->updateSystemSchedule($scheduleId, $feature, $startDate, $endDate, $status, $currentAdminId);
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger'
         );
     }
 
     if ($action === 'add_registration_schedule') {
-        $feature = normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
-        $startDate = normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
-        $endDate = normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
-        $status = normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
+        $feature = AdminUsersHelper::normalizeScheduleFeature((string)($_POST['schedule_feature'] ?? 'registration'));
+        $startDate = AdminUsersHelper::normalizeDateTimeLocalInput((string)($_POST['registration_start_date'] ?? ''));
+        $endDate = AdminUsersHelper::normalizeDateTimeLocalInput((string)($_POST['registration_end_date'] ?? ''));
+        $status = AdminUsersHelper::normalizeScheduleStatus((string)($_POST['registration_status'] ?? 'active'));
 
         if ($startDate === null || $endDate === null) {
-            redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για τη νέα περίοδο εγγραφών.', 'danger');
+            AdminUsersHelper::redirectWithFlash('Συμπλήρωσε έγκυρες ημερομηνίες για τη νέα περίοδο εγγραφών.', 'danger');
         }
 
         $result = $usersService->createSystemSchedule($feature, $startDate, $endDate, $status, $currentAdminId);
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger'
         );
@@ -535,18 +191,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if ($action === 'delete_registration_schedule') {
         $scheduleId = (int)($_POST['registration_schedule_id'] ?? 0);
         if ($scheduleId <= 0) {
-            redirectWithFlash('Μη έγκυρο πρόγραμμα.', 'danger');
+            AdminUsersHelper::redirectWithFlash('Μη έγκυρο πρόγραμμα.', 'danger');
         }
 
         $result = $usersService->deleteSystemSchedule($scheduleId, $currentAdminId);
-        redirectWithFlash(
+        AdminUsersHelper::redirectWithFlash(
             $result['message'] ?? 'Η ενέργεια ολοκληρώθηκε.',
             !empty($result['success']) ? 'success' : 'danger'
         );
     }
 }
 
-$selectedSort = normalizeUserSort((string)($_GET['sort'] ?? 'pending_first'));
+$selectedSort = AdminUsersHelper::normalizeUserSort((string)($_GET['sort'] ?? 'pending_first'));
 $users = $usersService->getAllUsersForAdmin($selectedSort);
 $managedParentId = (int)($_GET['manage_children'] ?? 0);
 $allUserIds = [];
@@ -601,12 +257,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     <html lang="el">
     <head>
         <meta charset="UTF-8">
-        <style>
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; text-align: left; }
-            th { background: #eaf3ff; font-weight: 700; }
-            td { white-space: pre-line; }
-        </style>
+        <link rel="stylesheet" href="../assets/css/admin_users_export.css">
     </head>
     <body>
     <table>
@@ -645,23 +296,23 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             }));
             ?>
             <tr>
-                <td><?php echo exportCellText((string)$userId); ?></td>
-                <td><?php echo exportCellText((string)($user['name'] ?? '')); ?></td>
-                <td><?php echo exportCellText((string)($user['surname'] ?? '')); ?></td>
-                <td><?php echo exportCellText((string)($user['email'] ?? '')); ?></td>
-                <td><?php echo exportCellText((string)($user['phone_number'] ?? '')); ?></td>
-                <td><?php echo exportCellText(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?></td>
-                <td><?php echo exportCellText(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?></td>
-                <td><?php echo exportCellText(formatExportDate($user['created_at'] ?? null)); ?></td>
-                <td><?php echo exportCellText((string)count($userChildren)); ?></td>
-                <td><?php echo exportCellText(buildChildExportSummary($userChildren)); ?></td>
-                <td><?php echo exportCellText(buildInsuredChildrenSummary($userChildren, $insuredChildIds, $hasCompletedInsurance)); ?></td>
-                <td><?php echo exportCellText($hasCompletedInsurance ? 'Ναι' : 'Όχι'); ?></td>
-                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance')); ?></td>
-                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'membership')); ?></td>
-                <td><?php echo exportCellText(buildOrdersExportSummary($userOrders, $orderItemsByOrderId)); ?></td>
-                <td><?php echo exportCellText(buildProductTransactionSummary($userPayments)); ?></td>
-                <td><?php echo exportCellText(buildPaymentSummary($userPayments, 'insurance') . " \n" . buildPaymentSummary($userPayments, 'membership') . " \n" . buildPaymentSummary($userPayments, 'product')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)$userId); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)($user['name'] ?? '')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)($user['surname'] ?? '')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)($user['email'] ?? '')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)($user['phone_number'] ?? '')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::formatRoleLabel((string)($user['role'] ?? 'parent'))); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::formatExportDate($user['created_at'] ?? null)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText((string)count($userChildren)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildChildExportSummary($userChildren)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildInsuredChildrenSummary($userChildren, $insuredChildIds, $hasCompletedInsurance)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText($hasCompletedInsurance ? 'Ναι' : 'Όχι'); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildPaymentSummary($userPayments, 'insurance')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildPaymentSummary($userPayments, 'membership')); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildOrdersExportSummary($userOrders, $orderItemsByOrderId)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildProductTransactionSummary($userPayments)); ?></td>
+                <td><?php echo AdminUsersHelper::exportCellText(AdminUsersHelper::buildPaymentSummary($userPayments, 'insurance') . " \n" . AdminUsersHelper::buildPaymentSummary($userPayments, 'membership') . " \n" . AdminUsersHelper::buildPaymentSummary($userPayments, 'product')); ?></td>
             </tr>
         <?php endforeach; ?>
         </tbody>
@@ -809,7 +460,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                                     <?php
                                         $userId = (int)($user['user_id'] ?? 0);
                                         $isCurrentUser = $userId === $currentAdminId;
-                                        $isProtected = isPrimaryProtectedAdmin($userId);
+                                        $isProtected = AdminUsersHelper::isPrimaryProtectedAdmin($userId);
                                         $isNewRegistration = (($user['role'] ?? '') === 'parent') && (($user['account_status'] ?? '') === 'pending');
                                         $hasHistory = ((int)($user['order_count'] ?? 0) > 0) || ((int)($user['payment_count'] ?? 0) > 0);
                                         $orderHistory = $ordersByUserId[$userId] ?? [];
@@ -852,13 +503,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                                             </div>
                                         </td>
                                         <td class="text-center">
-                                            <span class="<?php echo htmlspecialchars(roleBadgeClass((string)($user['role'] ?? 'parent'))); ?>">
-                                                <?php echo htmlspecialchars(formatRoleLabel((string)($user['role'] ?? 'parent'))); ?>
+                                            <span class="<?php echo htmlspecialchars(AdminUsersHelper::roleBadgeClass((string)($user['role'] ?? 'parent'))); ?>">
+                                                <?php echo htmlspecialchars(AdminUsersHelper::formatRoleLabel((string)($user['role'] ?? 'parent'))); ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="<?php echo htmlspecialchars(statusBadgeClass((string)($user['account_status'] ?? 'pending'))); ?>">
-                                                <?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?>
+                                            <span class="<?php echo htmlspecialchars(AdminUsersHelper::statusBadgeClass((string)($user['account_status'] ?? 'pending'))); ?>">
+                                                <?php echo htmlspecialchars(AdminUsersHelper::formatStatusLabel((string)($user['account_status'] ?? 'pending'))); ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
@@ -940,7 +591,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                                                         data-user-name="<?php echo htmlspecialchars(trim((string)($user['name'] ?? '') . ' ' . (string)($user['surname'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-user-email="<?php echo htmlspecialchars((string)($user['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-user-status="<?php echo htmlspecialchars((string)($user['account_status'] ?? 'pending'), ENT_QUOTES, 'UTF-8'); ?>"
-                                                        data-user-status-label="<?php echo htmlspecialchars(formatStatusLabel((string)($user['account_status'] ?? 'pending')), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        data-user-status-label="<?php echo htmlspecialchars(AdminUsersHelper::formatStatusLabel((string)($user['account_status'] ?? 'pending')), ENT_QUOTES, 'UTF-8'); ?>"
                                                         data-user-order-count="<?php echo (int)($user['order_count'] ?? 0); ?>"
                                                         data-user-payment-count="<?php echo (int)($user['payment_count'] ?? 0); ?>"
                                                     >
@@ -983,8 +634,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                                                                         <article class="history-item">
                                                                             <div class="history-item-top">
                                                                                 <strong>Παραγγελία #<?php echo (int)($order['order_id'] ?? 0); ?></strong>
-                                                                                <span class="<?php echo htmlspecialchars(orderStatusBadgeClass((string)($order['order_status'] ?? 'pending'))); ?>">
-                                                                                    <?php echo htmlspecialchars(formatOrderStatusLabel((string)($order['order_status'] ?? 'pending'))); ?>
+                                                                                <span class="<?php echo htmlspecialchars(AdminUsersHelper::orderStatusBadgeClass((string)($order['order_status'] ?? 'pending'))); ?>">
+                                                                                    <?php echo htmlspecialchars(AdminUsersHelper::formatOrderStatusLabel((string)($order['order_status'] ?? 'pending'))); ?>
                                                                                 </span>
                                                                             </div>
                                                                             <div class="history-item-meta">
@@ -1011,14 +662,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                                                                         <article class="history-item">
                                                                             <div class="history-item-top">
                                                                                 <strong>Πληρωμή #<?php echo (int)($payment['payment_id'] ?? 0); ?></strong>
-                                                                                <span class="<?php echo htmlspecialchars(paymentStatusBadgeClass((string)($payment['payment_status'] ?? 'pending'))); ?>">
-                                                                                    <?php echo htmlspecialchars(formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending'))); ?>
+                                                                                <span class="<?php echo htmlspecialchars(AdminUsersHelper::paymentStatusBadgeClass((string)($payment['payment_status'] ?? 'pending'))); ?>">
+                                                                                    <?php echo htmlspecialchars(AdminUsersHelper::formatPaymentStatusLabel((string)($payment['payment_status'] ?? 'pending'))); ?>
                                                                                 </span>
                                                                             </div>
                                                                             <div class="history-item-meta">
                                                                                 <span><i class="far fa-calendar-alt me-1"></i><?php echo !empty($payment['payment_date']) ? htmlspecialchars(date('d/m/Y H:i', strtotime((string)$payment['payment_date']))) : '—'; ?></span>
                                                                                 <span><i class="fas fa-euro-sign me-1"></i><?php echo number_format((float)($payment['amount'] ?? 0), 2); ?></span>
-                                                                                <span><i class="fas fa-tag me-1"></i><?php echo htmlspecialchars(formatPaymentTypeLabel((string)($payment['payment_type'] ?? 'product'))); ?></span>
+                                                                                <span><i class="fas fa-tag me-1"></i><?php echo htmlspecialchars(AdminUsersHelper::formatPaymentTypeLabel((string)($payment['payment_type'] ?? 'product'))); ?></span>
                                                                             </div>
                                                                             <?php if (!empty($payment['transaction_id'])): ?>
                                                                                 <div class="history-transaction">
@@ -1414,510 +1065,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var searchInput = document.getElementById('usersSearchInput');
-    var tableRows = document.querySelectorAll('#usersTable tbody tr.user-data-row');
-    var urlParams = new URLSearchParams(window.location.search);
-    var managedParentId = urlParams.get('manage_children');
-    var seenNewUsersStorageKey = 'adminUsersSeenNewRegistrations';
-    var registrationScheduleCard = document.getElementById('registrationScheduleCard');
-    var registrationScheduleToggle = document.getElementById('registrationScheduleToggle');
-    var registrationScheduleContent = document.getElementById('registrationScheduleContent');
-
-    function formatDateTimeLocal(dateObj) {
-        var year = String(dateObj.getFullYear());
-        var month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        var day = String(dateObj.getDate()).padStart(2, '0');
-        var hours = String(dateObj.getHours()).padStart(2, '0');
-        var minutes = String(dateObj.getMinutes()).padStart(2, '0');
-        return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
-    }
-
-    function isSingleMomentFeature(featureValue) {
-        return featureValue === 'delete_users' || featureValue === 'cleanup_submissions';
-    }
-
-    function setRegistrationScheduleExpanded(shouldExpand) {
-        if (!registrationScheduleCard || !registrationScheduleToggle || !registrationScheduleContent) {
-            return;
-        }
-
-        registrationScheduleCard.classList.toggle('registration-schedule-card--collapsed', !shouldExpand);
-        registrationScheduleContent.classList.toggle('d-none', !shouldExpand);
-        registrationScheduleToggle.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
-    }
-
-    if (registrationScheduleToggle) {
-        registrationScheduleToggle.addEventListener('click', function () {
-            var isExpanded = registrationScheduleToggle.getAttribute('aria-expanded') === 'true';
-            setRegistrationScheduleExpanded(!isExpanded);
-        });
-    }
-
-    setRegistrationScheduleExpanded(false);
-
-    function syncScheduleRowInputs(formId) {
-        if (!formId) {
-            return;
-        }
-
-        var featureSelect = document.querySelector('select[name="schedule_feature"][form="' + formId + '"]');
-        var startInput = document.querySelector('input[name="registration_start_date"][form="' + formId + '"]');
-        var endInput = document.querySelector('input[name="registration_end_date"][form="' + formId + '"]');
-
-        if (!featureSelect || !startInput || !endInput) {
-            return;
-        }
-
-        var forceSameDate = isSingleMomentFeature(featureSelect.value);
-        endInput.readOnly = forceSameDate;
-
-        if (forceSameDate && startInput.value !== '') {
-            var startDate = new Date(startInput.value);
-            if (!isNaN(startDate.getTime())) {
-                startDate.setMinutes(startDate.getMinutes() + 10);
-                endInput.value = formatDateTimeLocal(startDate);
-            } else {
-                endInput.value = startInput.value;
-            }
-        }
-    }
-
-    function bindScheduleRowAutoSync() {
-        var featureSelects = document.querySelectorAll('select[name="schedule_feature"][form]');
-        featureSelects.forEach(function (featureSelect) {
-            var formId = featureSelect.getAttribute('form') || '';
-            if (!formId) {
-                return;
-            }
-
-            var startInput = document.querySelector('input[name="registration_start_date"][form="' + formId + '"]');
-            if (startInput) {
-                startInput.addEventListener('change', function () {
-                    syncScheduleRowInputs(formId);
-                });
-            }
-
-            featureSelect.addEventListener('change', function () {
-                syncScheduleRowInputs(formId);
-            });
-
-            syncScheduleRowInputs(formId);
-        });
-    }
-
-    bindScheduleRowAutoSync();
-
-    function getSeenNewUsers() {
-        try {
-            var raw = window.localStorage.getItem(seenNewUsersStorageKey);
-            var parsed = raw ? JSON.parse(raw) : [];
-            return Array.isArray(parsed) ? parsed.map(String) : [];
-        } catch (error) {
-            return [];
-        }
-    }
-
-    function saveSeenNewUsers(userIds) {
-        try {
-            window.localStorage.setItem(seenNewUsersStorageKey, JSON.stringify(userIds));
-        } catch (error) {
-            // Ignore storage failures and keep the page usable.
-        }
-    }
-
-    function updateUsersSidebarNotification() {
-        var usersNavLink = document.querySelector('#adminSidebar a[href="users.php"]');
-        if (!usersNavLink) {
-            return;
-        }
-
-        var unseenNewUsersCount = document.querySelectorAll('#usersTable tbody tr.user-data-row.new-user-row[data-is-new-registration="1"]').length;
-        var badge = usersNavLink.querySelector('.admin-notification-badge');
-
-        if (unseenNewUsersCount <= 0) {
-            if (badge) {
-                badge.remove();
-            }
-            return;
-        }
-
-        var badgeText = unseenNewUsersCount > 10 ? '10+' : String(unseenNewUsersCount);
-        if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'admin-notification-badge';
-            usersNavLink.appendChild(badge);
-        }
-
-        badge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + badgeText);
-        badge.textContent = badgeText;
-    }
-
-    function dismissNewUserRow(row, persistState) {
-        if (!row) {
-            return;
-        }
-
-        row.classList.remove('new-user-row');
-
-        var badge = row.querySelector('.js-new-user-badge');
-        if (badge) {
-            badge.remove();
-        }
-
-        updateUsersSidebarNotification();
-
-        if (!persistState) {
-            return;
-        }
-
-        var userId = String(row.getAttribute('data-user-id') || '');
-        if (!userId) {
-            return;
-        }
-
-        var seenUsers = getSeenNewUsers();
-        if (seenUsers.indexOf(userId) === -1) {
-            seenUsers.push(userId);
-            saveSeenNewUsers(seenUsers);
-        }
-    }
-
-    var seenNewUsers = getSeenNewUsers();
-    tableRows.forEach(function (row) {
-        if (row.getAttribute('data-is-new-registration') !== '1') {
-            return;
-        }
-
-        var userId = String(row.getAttribute('data-user-id') || '');
-        if (userId && seenNewUsers.indexOf(userId) !== -1) {
-            dismissNewUserRow(row, false);
-            return;
-        }
-
-        row.addEventListener('mouseenter', function handleNewUserHover() {
-            dismissNewUserRow(row, true);
-        }, { once: true });
-    });
-
-    updateUsersSidebarNotification();
-
-    function setPreviewState(button, targetRow, shouldExpand) {
-        if (!button || !targetRow) {
-            return;
-        }
-
-        targetRow.classList.toggle('d-none', !shouldExpand);
-        button.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
-    }
-
-    function collapseUserPreviewRows(userId) {
-        document.querySelectorAll('.user-preview-row[data-preview-for="' + userId + '"]').forEach(function (row) {
-            row.classList.add('d-none');
-            row.style.display = '';
-        });
-
-        document.querySelectorAll('[data-target="history-preview-' + userId + '"], [data-target="children-preview-' + userId + '"]').forEach(function (button) {
-            button.setAttribute('aria-expanded', 'false');
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            var query = (searchInput.value || '').trim().toLowerCase();
-
-            tableRows.forEach(function (row) {
-                var haystack = (row.getAttribute('data-search') || '').toLowerCase();
-                var isMatch = haystack.indexOf(query) !== -1;
-                var userId = row.getAttribute('data-user-id');
-                row.style.display = isMatch ? '' : 'none';
-
-                if (!isMatch && userId) {
-                    collapseUserPreviewRows(userId);
-                }
-            });
-        });
-    }
-
-    document.querySelectorAll('.js-toggle-history-preview').forEach(function (button) {
-        button.addEventListener('click', function () {
-            var targetId = button.getAttribute('data-target');
-            if (!targetId) {
-                return;
-            }
-
-            var targetRow = document.getElementById(targetId);
-            if (!targetRow) {
-                return;
-            }
-
-            var isExpanded = button.getAttribute('aria-expanded') === 'true';
-            setPreviewState(button, targetRow, !isExpanded);
-        });
-    });
-
-    document.querySelectorAll('.js-toggle-children-preview').forEach(function (button) {
-        button.addEventListener('click', function () {
-            var targetId = button.getAttribute('data-target');
-            if (!targetId) {
-                return;
-            }
-
-            var targetRow = document.getElementById(targetId);
-            if (!targetRow) {
-                return;
-            }
-
-            var isExpanded = button.getAttribute('aria-expanded') === 'true';
-            setPreviewState(button, targetRow, !isExpanded);
-        });
-    });
-
-    if (managedParentId) {
-        var managedButton = document.querySelector('.js-toggle-children-preview[data-target="children-preview-' + managedParentId + '"]');
-        var managedRow = document.getElementById('children-preview-' + managedParentId);
-        setPreviewState(managedButton, managedRow, true);
-
-        if (managedRow) {
-            managedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
-
-    var editModal = document.getElementById('editUserModal');
-    if (editModal) {
-        var statusSelect = document.getElementById('edit_status');
-        var rejectionGroup = document.getElementById('rejectionMessageGroup');
-        var rejectionInput = document.getElementById('edit_rejection_message');
-
-        function toggleRejectionMessageField() {
-            if (!statusSelect || !rejectionGroup || !rejectionInput) {
-                return;
-            }
-
-            var show = statusSelect.value === 'rejected' && !statusSelect.disabled;
-            rejectionGroup.classList.toggle('d-none', !show);
-            rejectionInput.required = show;
-
-            if (!show) {
-                rejectionInput.value = '';
-            }
-        }
-
-        editModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            var isProtected = button.getAttribute('data-user-protected') === '1';
-            var isSelf = button.getAttribute('data-user-self') === '1';
-
-            document.getElementById('edit_user_id').value = button.getAttribute('data-user-id') || '';
-            document.getElementById('edit_name').value = button.getAttribute('data-user-name') || '';
-            document.getElementById('edit_surname').value = button.getAttribute('data-user-surname') || '';
-            document.getElementById('edit_email').value = button.getAttribute('data-user-email') || '';
-            document.getElementById('edit_phone').value = button.getAttribute('data-user-phone') || '';
-            document.getElementById('edit_role').value = button.getAttribute('data-user-role') || 'parent';
-            statusSelect.value = button.getAttribute('data-user-status') || 'pending';
-            document.getElementById('edit_password').value = '';
-            if (rejectionInput) {
-                rejectionInput.value = '';
-            }
-
-            document.getElementById('edit_role').disabled = isProtected || isSelf;
-            statusSelect.disabled = isProtected || isSelf;
-
-            document.getElementById('editProtectedNotice').classList.toggle('d-none', !isProtected);
-            document.getElementById('editSelfNotice').classList.toggle('d-none', !isSelf);
-
-            toggleRejectionMessageField();
-        });
-
-        if (statusSelect) {
-            statusSelect.addEventListener('change', toggleRejectionMessageField);
-        }
-    }
-
-    var deleteModal = document.getElementById('deleteUserModal');
-    if (deleteModal) {
-        var deleteUserForm = document.getElementById('deleteUserForm');
-        var deleteUserStatusField = document.getElementById('delete_user_status');
-        var deleteUserStatusLabelField = document.getElementById('delete_user_status_label');
-        var deleteUserExtraWarning = document.getElementById('deleteUserExtraWarning');
-        var deleteUserWarningStatus = document.getElementById('delete_user_warning_status');
-        var deleteUserHistoryWarning = document.getElementById('delete_user_history_warning');
-        var deleteUserHistoryCounts = document.getElementById('delete_user_history_counts');
-        var deleteUserFinalConfirmModalElement = document.getElementById('deleteUserFinalConfirmModal');
-        var deleteUserFinalConfirmMessage = document.getElementById('deleteUserFinalConfirmMessage');
-        var deleteUserFinalConfirmButton = document.getElementById('deleteUserFinalConfirmButton');
-        var deleteUserFinalConfirmModal = deleteUserFinalConfirmModalElement
-            ? new bootstrap.Modal(deleteUserFinalConfirmModalElement)
-            : null;
-        var isDeleteUserFinalConfirmed = false;
-
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            isDeleteUserFinalConfirmed = false;
-
-            var status = button.getAttribute('data-user-status') || 'pending';
-            var statusLabel = button.getAttribute('data-user-status-label') || 'Σε Αναμονή';
-            var orderCount = parseInt(button.getAttribute('data-user-order-count') || '0', 10);
-            var paymentCount = parseInt(button.getAttribute('data-user-payment-count') || '0', 10);
-            var hasHistory = orderCount > 0 || paymentCount > 0;
-            var requiresExtraConfirmation = status === 'active' || status === 'rejected' || hasHistory;
-
-            document.getElementById('delete_user_id').value = button.getAttribute('data-user-id') || '';
-            document.getElementById('delete_user_name').textContent = button.getAttribute('data-user-name') || '—';
-            document.getElementById('delete_user_email').textContent = button.getAttribute('data-user-email') || '—';
-            deleteUserStatusField.value = status;
-            deleteUserStatusLabelField.value = statusLabel;
-
-            if (deleteUserExtraWarning && deleteUserWarningStatus && deleteUserHistoryWarning && deleteUserHistoryCounts) {
-                deleteUserWarningStatus.textContent = statusLabel;
-                deleteUserHistoryCounts.textContent = orderCount + ' παραγγελίες / ' + paymentCount + ' πληρωμές';
-                deleteUserExtraWarning.classList.toggle('d-none', !requiresExtraConfirmation);
-                deleteUserHistoryWarning.classList.toggle('d-none', !hasHistory);
-            }
-        });
-
-        if (deleteUserForm) {
-            deleteUserForm.addEventListener('submit', function (event) {
-                var status = deleteUserStatusField ? deleteUserStatusField.value : '';
-                var statusLabel = deleteUserStatusLabelField ? deleteUserStatusLabelField.value : 'άγνωστη';
-                var userName = document.getElementById('delete_user_name').textContent || 'τον χρήστη';
-                var hasHistory = deleteUserHistoryWarning && !deleteUserHistoryWarning.classList.contains('d-none');
-
-                if ((status === 'active' || status === 'rejected' || hasHistory) && !isDeleteUserFinalConfirmed) {
-                    event.preventDefault();
-
-                    var confirmMessage = 'Ο χρήστης "' + userName + '" είναι σε κατάσταση "' + statusLabel + '".';
-                    if (hasHistory) {
-                        confirmMessage += ' Θα διαγραφούν επίσης οι σχετικές παραγγελίες και πληρωμές του.';
-                    }
-                    confirmMessage += ' Η ενέργεια αυτή είναι οριστική.';
-
-                    if (deleteUserFinalConfirmMessage) {
-                        deleteUserFinalConfirmMessage.textContent = confirmMessage;
-                    }
-
-                    if (deleteUserFinalConfirmModal) {
-                        deleteUserFinalConfirmModal.show();
-                    }
-                }
-            });
-        }
-
-        if (deleteUserFinalConfirmButton) {
-            deleteUserFinalConfirmButton.addEventListener('click', function () {
-                isDeleteUserFinalConfirmed = true;
-
-                if (deleteUserFinalConfirmModal) {
-                    deleteUserFinalConfirmModal.hide();
-                }
-
-                deleteUserForm.requestSubmit();
-            });
-        }
-
-        if (deleteUserFinalConfirmModalElement) {
-            deleteUserFinalConfirmModalElement.addEventListener('hidden.bs.modal', function () {
-                if (!isDeleteUserFinalConfirmed) {
-                    return;
-                }
-            });
-        }
-    }
-
-    document.querySelectorAll('.js-open-create-child').forEach(function (button) {
-        button.addEventListener('click', function () {
-            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-child me-2"></i>Προσθήκη Παιδιού';
-            document.getElementById('child_form_action').value = 'create_child';
-            document.getElementById('child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
-            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || '—';
-            document.getElementById('child_id').value = '';
-            document.getElementById('child_name').value = '';
-            document.getElementById('child_surname').value = '';
-            document.getElementById('child_date_of_birth').value = '';
-            document.getElementById('child_school_class').value = '';
-        });
-    });
-
-    document.querySelectorAll('.js-open-edit-child').forEach(function (button) {
-        button.addEventListener('click', function () {
-            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Επεξεργασία Παιδιού';
-            document.getElementById('child_form_action').value = 'update_child';
-            document.getElementById('child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
-            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || '—';
-            document.getElementById('child_id').value = button.getAttribute('data-child-id') || '';
-            document.getElementById('child_name').value = button.getAttribute('data-child-name') || '';
-            document.getElementById('child_surname').value = button.getAttribute('data-child-surname') || '';
-            document.getElementById('child_date_of_birth').value = button.getAttribute('data-child-dob') || '';
-            document.getElementById('child_school_class').value = button.getAttribute('data-child-class') || '';
-        });
-    });
-
-    document.querySelectorAll('.js-open-delete-child').forEach(function (button) {
-        button.addEventListener('click', function () {
-            document.getElementById('delete_child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
-            document.getElementById('delete_child_id').value = button.getAttribute('data-child-id') || '';
-            document.getElementById('delete_child_name').textContent = button.getAttribute('data-child-name') || '—';
-        });
-    });
-
-    var deleteScheduleModal = document.getElementById('deleteScheduleModal');
-    if (deleteScheduleModal) {
-        deleteScheduleModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
-            var startDate = button.getAttribute('data-schedule-start') || '';
-            var endDate = button.getAttribute('data-schedule-end') || '';
-            var formId = button.getAttribute('data-schedule-delete-form-id') || '';
-
-            var featureEl = document.getElementById('delete_schedule_feature');
-            var datesEl = document.getElementById('delete_schedule_dates');
-            var formIdEl = document.getElementById('delete_schedule_form_id');
-
-            if (featureEl) {
-                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
-            }
-
-            if (datesEl) {
-                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
-            }
-
-            if (formIdEl) {
-                formIdEl.value = formId;
-            }
-        });
-
-        var confirmDeleteScheduleButton = document.getElementById('confirmDeleteScheduleButton');
-        if (confirmDeleteScheduleButton) {
-            confirmDeleteScheduleButton.addEventListener('click', function () {
-                var formIdEl = document.getElementById('delete_schedule_form_id');
-                var formId = formIdEl ? formIdEl.value : '';
-                if (!formId) {
-                    return;
-                }
-
-                var form = document.getElementById(formId);
-                if (!form) {
-                    return;
-                }
-
-                form.submit();
-            });
-        }
-    }
-});
-</script>
+<script src="../assets/js/admin-users.js"></script>
 </body>
 </html>

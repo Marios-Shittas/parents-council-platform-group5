@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminUsefulInformationHelper.php';
 require_once __DIR__ . '/../../app/services/UsefulInformationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -13,74 +14,6 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
-}
-
-function usefulInfoTrim($value)
-{
-    return trim((string)$value);
-}
-
-function usefulInfoTextareaToList($value)
-{
-    $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
-    $lines = explode("\n", $normalized);
-    $items = [];
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line !== '') {
-            $items[] = $line;
-        }
-    }
-
-    return $items;
-}
-
-function usefulInfoTextareaToPairs($value)
-{
-    $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
-    $lines = explode("\n", $normalized);
-    $rows = [];
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '' || strpos($line, '|') === false) {
-            continue;
-        }
-
-        [$left, $right] = array_pad(explode('|', $line, 2), 2, '');
-        $left = trim($left);
-        $right = trim($right);
-
-        if ($left !== '' && $right !== '') {
-            $rows[] = ['date' => $left, 'name' => $right];
-        }
-    }
-
-    return $rows;
-}
-
-function usefulInfoListToTextarea($items)
-{
-    return implode("\n", is_array($items) ? $items : []);
-}
-
-function usefulInfoPairsToTextarea($rows)
-{
-    if (!is_array($rows)) {
-        return '';
-    }
-
-    $lines = [];
-    foreach ($rows as $row) {
-        $date = trim((string)($row['date'] ?? ''));
-        $name = trim((string)($row['name'] ?? ''));
-        if ($date !== '' && $name !== '') {
-            $lines[] = $date . ' | ' . $name;
-        }
-    }
-
-    return implode("\n", $lines);
 }
 
 $usefulInformationService = new UsefulInformationService();
@@ -100,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'page_header':
                 $saved = $usefulInformationService->updateSection(
                     'page_header',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => usefulInfoTrim($_POST['eyebrow'] ?? ''),
+                        'eyebrow' => AdminUsefulInformationHelper::trimText($_POST['eyebrow'] ?? ''),
                     ]
                 );
                 break;
@@ -111,19 +44,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'quick_links':
                 $items = [];
                 for ($i = 1; $i <= 3; $i++) {
-                    $existingIcon = usefulInfoTrim($sections['quick_links']['content']['items'][$i - 1]['icon'] ?? 'fas fa-link');
+                    $existingIcon = AdminUsefulInformationHelper::trimText($sections['quick_links']['content']['items'][$i - 1]['icon'] ?? 'fas fa-link');
                     $items[] = [
-                        'title' => usefulInfoTrim($_POST["link_{$i}_title"] ?? ''),
-                        'description' => usefulInfoTrim($_POST["link_{$i}_description"] ?? ''),
-                        'url' => usefulInfoTrim($_POST["link_{$i}_url"] ?? ''),
+                        'title' => AdminUsefulInformationHelper::trimText($_POST["link_{$i}_title"] ?? ''),
+                        'description' => AdminUsefulInformationHelper::trimText($_POST["link_{$i}_description"] ?? ''),
+                        'url' => AdminUsefulInformationHelper::trimText($_POST["link_{$i}_url"] ?? ''),
                         'icon' => $existingIcon,
                     ];
                 }
 
                 $saved = $usefulInformationService->updateSection(
                     'quick_links',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     ['items' => $items]
                 );
                 break;
@@ -132,19 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $items = [];
                 for ($i = 1; $i <= 3; $i++) {
                     $items[] = [
-                        'label' => usefulInfoTrim($_POST["item_{$i}_label"] ?? ''),
-                        'date' => usefulInfoTrim($_POST["item_{$i}_date"] ?? ''),
-                        'description' => usefulInfoTrim($_POST["item_{$i}_description"] ?? ''),
+                        'label' => AdminUsefulInformationHelper::trimText($_POST["item_{$i}_label"] ?? ''),
+                        'date' => AdminUsefulInformationHelper::trimText($_POST["item_{$i}_date"] ?? ''),
+                        'description' => AdminUsefulInformationHelper::trimText($_POST["item_{$i}_description"] ?? ''),
                     ];
                 }
 
                 $saved = $usefulInformationService->updateSection(
                     'school_year',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     [
                         'items' => $items,
-                        'note' => usefulInfoTrim($_POST['note'] ?? ''),
+                        'note' => AdminUsefulInformationHelper::trimText($_POST['note'] ?? ''),
                     ]
                 );
                 break;
@@ -152,10 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'holidays':
                 $saved = $usefulInformationService->updateSection(
                     'holidays',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'rows' => usefulInfoTextareaToPairs($_POST['holiday_rows'] ?? ''),
+                        'rows' => AdminUsefulInformationHelper::textareaToPairs($_POST['holiday_rows'] ?? ''),
                     ]
                 );
                 break;
@@ -163,20 +96,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'safety':
                 $downloads = [];
                 for ($i = 1; $i <= 3; $i++) {
-                    $existingIcon = usefulInfoTrim($sections['safety']['content']['downloads'][$i - 1]['icon'] ?? 'fas fa-download');
+                    $existingIcon = AdminUsefulInformationHelper::trimText($sections['safety']['content']['downloads'][$i - 1]['icon'] ?? 'fas fa-download');
                     $downloads[] = [
-                        'title' => usefulInfoTrim($_POST["download_{$i}_title"] ?? ''),
-                        'url' => usefulInfoTrim($_POST["download_{$i}_url"] ?? ''),
+                        'title' => AdminUsefulInformationHelper::trimText($_POST["download_{$i}_title"] ?? ''),
+                        'url' => AdminUsefulInformationHelper::trimText($_POST["download_{$i}_url"] ?? ''),
                         'icon' => $existingIcon,
                     ];
                 }
 
                 $saved = $usefulInformationService->updateSection(
                     'safety',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     [
-                        'bullets' => usefulInfoTextareaToList($_POST['bullets'] ?? ''),
+                        'bullets' => AdminUsefulInformationHelper::textareaToList($_POST['bullets'] ?? ''),
                         'downloads' => $downloads,
                     ]
                 );
@@ -186,20 +119,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cards = [];
                 for ($i = 1; $i <= 3; $i++) {
                     $cards[] = [
-                        'title' => usefulInfoTrim($_POST["card_{$i}_title"] ?? ''),
-                        'items' => usefulInfoTextareaToList($_POST["card_{$i}_items"] ?? ''),
+                        'title' => AdminUsefulInformationHelper::trimText($_POST["card_{$i}_title"] ?? ''),
+                        'items' => AdminUsefulInformationHelper::textareaToList($_POST["card_{$i}_items"] ?? ''),
                     ];
                 }
 
                 $saved = $usefulInformationService->updateSection(
                     'uniform',
-                    usefulInfoTrim($_POST['title'] ?? ''),
-                    usefulInfoTrim($_POST['subtitle'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['title'] ?? ''),
+                    AdminUsefulInformationHelper::trimText($_POST['subtitle'] ?? ''),
                     [
                         'cards' => $cards,
-                        'note' => usefulInfoTrim($_POST['note'] ?? ''),
-                        'button_text' => usefulInfoTrim($_POST['button_text'] ?? ''),
-                        'button_url' => usefulInfoTrim($_POST['button_url'] ?? ''),
+                        'note' => AdminUsefulInformationHelper::trimText($_POST['note'] ?? ''),
+                        'button_text' => AdminUsefulInformationHelper::trimText($_POST['button_text'] ?? ''),
+                        'button_url' => AdminUsefulInformationHelper::trimText($_POST['button_url'] ?? ''),
                     ]
                 );
                 break;
@@ -459,7 +392,7 @@ $uniform = $sections['uniform'];
                         </div>
                         <div class="full-width">
                             <label><strong>Αργίες</strong></label>
-                            <textarea name="holiday_rows" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(usefulInfoPairsToTextarea($holidays['content']['rows'] ?? [])); ?></textarea>
+                            <textarea name="holiday_rows" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(AdminUsefulInformationHelper::pairsToTextarea($holidays['content']['rows'] ?? [])); ?></textarea>
                             <small class="editor-help">Παράδειγμα: <code>25 Μαρτίου 2026 | Εθνική Επέτειος</code></small>
                         </div>
                     </div>
@@ -495,7 +428,7 @@ $uniform = $sections['uniform'];
                         <div class="editor-subcard">
                             <h3>Σημεία Λίστας</h3>
                             <label><strong>Ένα στοιχείο ανά γραμμή</strong></label>
-                            <textarea name="bullets" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(usefulInfoListToTextarea($safety['content']['bullets'] ?? [])); ?></textarea>
+                            <textarea name="bullets" class="form-control form-control-custom textarea-xl"><?php echo htmlspecialchars(AdminUsefulInformationHelper::listToTextarea($safety['content']['bullets'] ?? [])); ?></textarea>
                         </div>
 
                         <div class="editor-subcard">
@@ -550,7 +483,7 @@ $uniform = $sections['uniform'];
                                 </div>
                                 <div class="form-group mb-0">
                                     <label><strong>Στοιχεία λίστας</strong></label>
-                                    <textarea name="card_<?php echo $i + 1; ?>_items" class="form-control form-control-custom textarea-tall"><?php echo htmlspecialchars(usefulInfoListToTextarea($card['items'] ?? [])); ?></textarea>
+                                    <textarea name="card_<?php echo $i + 1; ?>_items" class="form-control form-control-custom textarea-tall"><?php echo htmlspecialchars(AdminUsefulInformationHelper::listToTextarea($card['items'] ?? [])); ?></textarea>
                                     <small class="editor-help">Ένα item ανά γραμμή.</small>
                                 </div>
                             </div>

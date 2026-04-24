@@ -50,7 +50,7 @@ class EshopJccService
 
     private function handleCheckoutRegistration(bool $respondWithJson): void
     {
-        auth_require_role('parent', [
+        AuthHelper::requireRole('parent', [
             'mode' => $respondWithJson ? 'json' : 'redirect',
             'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
         ]);

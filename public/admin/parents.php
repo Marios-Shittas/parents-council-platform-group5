@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/AdminParentsHelper.php';
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -13,209 +14,6 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
-}
-
-function parentsAdminTrim($value)
-{
-    return trim((string)$value);
-}
-
-function parentsAdminTextarea($value)
-{
-    $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
-    return trim($value);
-}
-
-function parentsAdminUrl($value)
-{
-    return trim((string)$value);
-}
-
-function parentsAdminFixedPageHeaderIcon()
-{
-    return 'fas fa-users';
-}
-
-function parentsAdminTextareaToList($value)
-{
-    $lines = explode("\n", parentsAdminTextarea($value));
-    $items = [];
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line !== '') {
-            $items[] = $line;
-        }
-    }
-
-    return $items;
-}
-
-function parentsAdminTextareaToRows($value, array $keys)
-{
-    $lines = explode("\n", parentsAdminTextarea($value));
-    $rows = [];
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '') {
-            continue;
-        }
-
-        $parts = array_map('trim', array_pad(explode('|', $line), count($keys), ''));
-        $row = [];
-        $hasValue = false;
-
-        foreach ($keys as $index => $key) {
-            $row[$key] = $parts[$index] ?? '';
-            if ($row[$key] !== '') {
-                $hasValue = true;
-            }
-        }
-
-        if ($hasValue) {
-            $rows[] = $row;
-        }
-    }
-
-    return $rows;
-}
-
-function parentsAdminListToTextarea($items)
-{
-    return implode("\n", is_array($items) ? $items : []);
-}
-
-function parentsAdminRowsToTextarea($rows, array $keys)
-{
-    if (!is_array($rows)) {
-        return '';
-    }
-
-    $lines = [];
-    foreach ($rows as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-
-        $parts = [];
-        $hasValue = false;
-        foreach ($keys as $key) {
-            $value = trim((string)($row[$key] ?? ''));
-            $parts[] = $value;
-            if ($value !== '') {
-                $hasValue = true;
-            }
-        }
-
-        if ($hasValue) {
-            $lines[] = implode(' | ', $parts);
-        }
-    }
-
-    return implode("\n", $lines);
-}
-
-function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
-{
-    $mergedRows = is_array($rows) ? $rows : [];
-    $existingYears = [];
-
-    foreach ($mergedRows as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-
-        $year = trim((string)($row['year'] ?? ''));
-        if ($year !== '') {
-            $existingYears[(string)preg_replace('/\s*-\s*/', '-', $year)] = true;
-        }
-    }
-
-    foreach ($referenceRows as $referenceRow) {
-        if (!is_array($referenceRow)) {
-            continue;
-        }
-
-        $year = trim((string)($referenceRow['year'] ?? ''));
-        $normalizedYear = (string)preg_replace('/\s*-\s*/', '-', $year);
-        if ($year === '' || isset($existingYears[$normalizedYear])) {
-            continue;
-        }
-
-        foreach ($referenceRows as $candidateRow) {
-            if (is_array($candidateRow) && trim((string)($candidateRow['year'] ?? '')) === $year) {
-                $mergedRows[] = $candidateRow;
-            }
-        }
-
-        $existingYears[$normalizedYear] = true;
-    }
-
-    return $mergedRows;
-}
-
-function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
-{
-    $groupedRows = [];
-
-    foreach ($rows as $row) {
-        if (!is_array($row)) {
-            continue;
-        }
-
-        $year = trim((string)($row['year'] ?? ''));
-        if ($year === '') {
-            continue;
-        }
-
-        if (!isset($groupedRows[$year])) {
-            $groupedRows[$year] = [];
-        }
-
-        $groupedRows[$year][] = [
-            'role' => trim((string)($row['role'] ?? '')),
-            'name' => trim((string)($row['name'] ?? '')),
-        ];
-    }
-
-    return $groupedRows;
-}
-
-function parentsAdminBoardArchiveGroupToTextarea(array $rows)
-{
-    return parentsAdminRowsToTextarea($rows, ['role', 'name']);
-}
-
-function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
-{
-    $archiveRows = [];
-    $years = is_array($years) ? $years : [];
-    $rowsPerYear = is_array($rowsPerYear) ? $rowsPerYear : [];
-
-    foreach ($years as $index => $yearValue) {
-        $year = trim((string)$yearValue);
-        $rowsText = (string)($rowsPerYear[$index] ?? '');
-
-        if ($year === '' && trim($rowsText) === '') {
-            continue;
-        }
-
-        if ($year === '') {
-            continue;
-        }
-
-        $parsedRows = parentsAdminTextareaToRows($rowsText, ['role', 'name']);
-        foreach ($parsedRows as $row) {
-            $archiveRows[] = [
-                'year' => $year,
-                'role' => trim((string)($row['role'] ?? '')),
-                'name' => trim((string)($row['name'] ?? '')),
-            ];
-        }
-    }
-
-    return $archiveRows;
 }
 
 $parentsPageService = new ParentsPageService();
@@ -235,12 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'page_header':
                 $saved = $parentsPageService->updateSection(
                     'page_header',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
+                    AdminParentsHelper::textareaText($_POST['subtitle'] ?? ''),
                     [
-                        'public_eyebrow' => parentsAdminTrim($_POST['public_eyebrow'] ?? ''),
-                        'parent_eyebrow' => parentsAdminTrim($_POST['parent_eyebrow'] ?? ''),
-                        'icon' => parentsAdminFixedPageHeaderIcon(),
+                        'public_eyebrow' => AdminParentsHelper::trimText($_POST['public_eyebrow'] ?? ''),
+                        'parent_eyebrow' => AdminParentsHelper::trimText($_POST['parent_eyebrow'] ?? ''),
+                        'icon' => AdminParentsHelper::fixedPageHeaderIcon(),
                     ]
                 );
                 break;
@@ -248,11 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'history_section':
                 $saved = $parentsPageService->updateSection(
                     'history_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
                     '',
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'items' => parentsAdminTextareaToList($_POST['items'] ?? ''),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'items' => AdminParentsHelper::textareaToList($_POST['items'] ?? ''),
                     ]
                 );
                 break;
@@ -260,18 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'association_section':
                 $saved = $parentsPageService->updateSection(
                     'association_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
+                    AdminParentsHelper::textareaText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'greeting_title' => parentsAdminTrim($_POST['greeting_title'] ?? ''),
-                        'greeting_body' => parentsAdminTextarea($_POST['greeting_body'] ?? ''),
-                        'purpose_title' => parentsAdminTrim($_POST['purpose_title'] ?? ''),
-                        'purpose_body' => parentsAdminTextarea($_POST['purpose_body'] ?? ''),
-                        'history_title' => parentsAdminTrim($_POST['history_title'] ?? ''),
-                        'history_body' => parentsAdminTextarea($_POST['history_body'] ?? ''),
-                        'contact_label' => parentsAdminTrim($_POST['contact_label'] ?? ''),
-                        'contact_value' => parentsAdminTrim($_POST['contact_value'] ?? ''),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'greeting_title' => AdminParentsHelper::trimText($_POST['greeting_title'] ?? ''),
+                        'greeting_body' => AdminParentsHelper::textareaText($_POST['greeting_body'] ?? ''),
+                        'purpose_title' => AdminParentsHelper::trimText($_POST['purpose_title'] ?? ''),
+                        'purpose_body' => AdminParentsHelper::textareaText($_POST['purpose_body'] ?? ''),
+                        'history_title' => AdminParentsHelper::trimText($_POST['history_title'] ?? ''),
+                        'history_body' => AdminParentsHelper::textareaText($_POST['history_body'] ?? ''),
+                        'contact_label' => AdminParentsHelper::trimText($_POST['contact_label'] ?? ''),
+                        'contact_value' => AdminParentsHelper::trimText($_POST['contact_value'] ?? ''),
                     ]
                 );
                 break;
@@ -279,12 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'attendance_portal_section':
                 $saved = $parentsPageService->updateSection(
                     'attendance_portal_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
+                    AdminParentsHelper::textareaText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'link_label' => parentsAdminTrim($_POST['link_label'] ?? ''),
-                        'link_url' => parentsAdminTrim($_POST['link_url'] ?? ''),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'link_label' => AdminParentsHelper::trimText($_POST['link_label'] ?? ''),
+                        'link_url' => AdminParentsHelper::trimText($_POST['link_url'] ?? ''),
                     ]
                 );
                 break;
@@ -293,19 +91,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $blocks = [];
                 for ($index = 1; $index <= 2; $index++) {
                     $blocks[] = [
-                        'title' => parentsAdminTrim($_POST["block_{$index}_title"] ?? ''),
-                        'rows' => parentsAdminTextareaToRows($_POST["block_{$index}_rows"] ?? '', ['period', 'time']),
+                        'title' => AdminParentsHelper::trimText($_POST["block_{$index}_title"] ?? ''),
+                        'rows' => AdminParentsHelper::textareaToRows($_POST["block_{$index}_rows"] ?? '', ['period', 'time']),
                     ];
                 }
 
                 $saved = $parentsPageService->updateSection(
                     'schedule_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
                     '',
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'period_label' => parentsAdminTrim($_POST['period_label'] ?? ''),
-                        'time_label' => parentsAdminTrim($_POST['time_label'] ?? ''),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'period_label' => AdminParentsHelper::trimText($_POST['period_label'] ?? ''),
+                        'time_label' => AdminParentsHelper::trimText($_POST['time_label'] ?? ''),
                         'blocks' => $blocks,
                     ]
                 );
@@ -314,18 +112,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'board_section':
                 $saved = $parentsPageService->updateSection(
                     'board_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
+                    AdminParentsHelper::textareaText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'current_board_label' => parentsAdminTrim($_POST['current_board_label'] ?? ''),
-                        'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
-                        'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
-                        'committee_label' => parentsAdminTrim($_POST['committee_label'] ?? ''),
-                        'contact_email_label' => parentsAdminTrim($_POST['contact_email_label'] ?? ''),
-                        'contact_email_value' => parentsAdminTrim($_POST['contact_email_value'] ?? ''),
-                        'board_members' => parentsAdminTextareaToRows($_POST['board_members'] ?? '', ['role', 'name']),
-                        'committee_members' => parentsAdminTextareaToList($_POST['committee_members'] ?? ''),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'current_board_label' => AdminParentsHelper::trimText($_POST['current_board_label'] ?? ''),
+                        'position_label' => AdminParentsHelper::trimText($_POST['position_label'] ?? ''),
+                        'name_label' => AdminParentsHelper::trimText($_POST['name_label'] ?? ''),
+                        'committee_label' => AdminParentsHelper::trimText($_POST['committee_label'] ?? ''),
+                        'contact_email_label' => AdminParentsHelper::trimText($_POST['contact_email_label'] ?? ''),
+                        'contact_email_value' => AdminParentsHelper::trimText($_POST['contact_email_value'] ?? ''),
+                        'board_members' => AdminParentsHelper::textareaToRows($_POST['board_members'] ?? '', ['role', 'name']),
+                        'committee_members' => AdminParentsHelper::textareaToList($_POST['committee_members'] ?? ''),
                     ]
                 );
                 break;
@@ -333,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'board_archive_section':
                 $saved = $parentsPageService->updateSection(
                     'board_archive_section',
-                    parentsAdminTrim($_POST['title'] ?? ''),
-                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    AdminParentsHelper::trimText($_POST['title'] ?? ''),
+                    AdminParentsHelper::textareaText($_POST['subtitle'] ?? ''),
                     [
-                        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ''),
-                        'year_label' => parentsAdminTrim($_POST['year_label'] ?? ''),
-                        'position_label' => parentsAdminTrim($_POST['position_label'] ?? ''),
-                        'name_label' => parentsAdminTrim($_POST['name_label'] ?? ''),
-                        'rows' => parentsAdminBoardArchiveBlocksToRows($_POST['archive_years'] ?? [], $_POST['archive_rows'] ?? []),
+                        'eyebrow' => AdminParentsHelper::trimText($_POST['eyebrow'] ?? ''),
+                        'year_label' => AdminParentsHelper::trimText($_POST['year_label'] ?? ''),
+                        'position_label' => AdminParentsHelper::trimText($_POST['position_label'] ?? ''),
+                        'name_label' => AdminParentsHelper::trimText($_POST['name_label'] ?? ''),
+                        'rows' => AdminParentsHelper::boardArchiveBlocksToRows($_POST['archive_years'] ?? [], $_POST['archive_rows'] ?? []),
                     ]
                 );
                 break;
@@ -367,11 +165,11 @@ $attendancePortalSection = $sections['attendance_portal_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
-$boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
+$boardArchiveRowsForEditor = AdminParentsHelper::mergeBoardArchiveReferenceRows(
     $boardArchiveSection['content']['rows'] ?? [],
     $parentsPageService->getBoardArchiveReferenceRows()
 );
-$boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
+$boardArchiveGroupsForEditor = AdminParentsHelper::groupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
 $parentsContentTabs = [
     'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
@@ -519,7 +317,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                             <div class="form-group full-width">
                                 <label for="history-items">Bullets, μία γραμμή ανά στοιχείο</label>
-                                <textarea class="form-control content-textarea content-textarea--large" id="history-items" name="items"><?php echo htmlspecialchars(parentsAdminListToTextarea($historySection['content']['items'] ?? [])); ?></textarea>
+                                <textarea class="form-control content-textarea content-textarea--large" id="history-items" name="items"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($historySection['content']['items'] ?? [])); ?></textarea>
                             </div>
                         </div>
 
@@ -712,7 +510,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                                     <div class="form-group">
                                         <label for="schedule-block-<?php echo $blockNumber; ?>-rows">Γραμμές</label>
-                                        <textarea class="form-control content-textarea content-textarea--large" id="schedule-block-<?php echo $blockNumber; ?>-rows" name="block_<?php echo $blockNumber; ?>_rows"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($block['rows'] ?? [], ['period', 'time'])); ?></textarea>
+                                        <textarea class="form-control content-textarea content-textarea--large" id="schedule-block-<?php echo $blockNumber; ?>-rows" name="block_<?php echo $blockNumber; ?>_rows"><?php echo htmlspecialchars(AdminParentsHelper::rowsToTextarea($block['rows'] ?? [], ['period', 'time'])); ?></textarea>
                                     </div>
                                 </div>
                             <?php endfor; ?>
@@ -787,12 +585,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                             <div class="form-group full-width">
                                 <label for="board-members">Μέλη Δ.Σ.</label>
-                                <textarea class="form-control content-textarea content-textarea--large" id="board-members" name="board_members"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($boardSection['content']['board_members'] ?? [], ['role', 'name'])); ?></textarea>
+                                <textarea class="form-control content-textarea content-textarea--large" id="board-members" name="board_members"><?php echo htmlspecialchars(AdminParentsHelper::rowsToTextarea($boardSection['content']['board_members'] ?? [], ['role', 'name'])); ?></textarea>
                             </div>
 
                             <div class="form-group full-width">
                                 <label for="committee-members">Απλά μέλη, μία γραμμή ανά όνομα</label>
-                                <textarea class="form-control content-textarea" id="committee-members" name="committee_members"><?php echo htmlspecialchars(parentsAdminListToTextarea($boardSection['content']['committee_members'] ?? [])); ?></textarea>
+                                <textarea class="form-control content-textarea" id="committee-members" name="committee_members"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($boardSection['content']['committee_members'] ?? [])); ?></textarea>
                             </div>
                         </div>
 
@@ -859,7 +657,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                             </div>
                                             <div class="form-group mb-0">
                                                 <label>Μέλη για <?php echo htmlspecialchars($year); ?></label>
-                                                <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]"><?php echo htmlspecialchars(parentsAdminBoardArchiveGroupToTextarea($rows)); ?></textarea>
+                                                <textarea class="form-control content-textarea content-textarea--large" name="archive_rows[]"><?php echo htmlspecialchars(AdminParentsHelper::boardArchiveGroupToTextarea($rows)); ?></textarea>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -937,7 +735,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                             <div class="form-group full-width">
                                 <label for="class-rows">Γραμμές πίνακα</label>
-                                <textarea class="form-control content-textarea content-textarea--large" id="class-rows" name="rows"><?php echo htmlspecialchars(parentsAdminRowsToTextarea($classResponsiblesSection['content']['rows'] ?? [], ['class', 'responsible', 'assistant', 'room'])); ?></textarea>
+                                <textarea class="form-control content-textarea content-textarea--large" id="class-rows" name="rows"><?php echo htmlspecialchars(AdminParentsHelper::rowsToTextarea($classResponsiblesSection['content']['rows'] ?? [], ['class', 'responsible', 'assistant', 'room'])); ?></textarea>
                             </div>
                         </div>
 
@@ -993,7 +791,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                                 <div class="form-group">
                                     <label for="registration-steps">Βήματα</label>
-                                    <textarea class="form-control content-textarea content-textarea--large" id="registration-steps" name="registration_steps"><?php echo htmlspecialchars(parentsAdminListToTextarea($electronicAdminSection['content']['registration_steps'] ?? [])); ?></textarea>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="registration-steps" name="registration_steps"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($electronicAdminSection['content']['registration_steps'] ?? [])); ?></textarea>
                                 </div>
                             </div>
 
@@ -1007,7 +805,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                                 <div class="form-group">
                                     <label for="login-steps">Γενικά βήματα</label>
-                                    <textarea class="form-control content-textarea" id="login-steps" name="login_steps"><?php echo htmlspecialchars(parentsAdminListToTextarea($electronicAdminSection['content']['login_steps'] ?? [])); ?></textarea>
+                                    <textarea class="form-control content-textarea" id="login-steps" name="login_steps"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($electronicAdminSection['content']['login_steps'] ?? [])); ?></textarea>
                                 </div>
                             </div>
 
@@ -1021,7 +819,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                                 <div class="form-group">
                                     <label for="edge-steps">Βήματα</label>
-                                    <textarea class="form-control content-textarea content-textarea--large" id="edge-steps" name="edge_steps"><?php echo htmlspecialchars(parentsAdminListToTextarea($electronicAdminSection['content']['edge_steps'] ?? [])); ?></textarea>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="edge-steps" name="edge_steps"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($electronicAdminSection['content']['edge_steps'] ?? [])); ?></textarea>
                                 </div>
                             </div>
 
@@ -1035,7 +833,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                                 <div class="form-group">
                                     <label for="chrome-steps">Βήματα</label>
-                                    <textarea class="form-control content-textarea content-textarea--large" id="chrome-steps" name="chrome_steps"><?php echo htmlspecialchars(parentsAdminListToTextarea($electronicAdminSection['content']['chrome_steps'] ?? [])); ?></textarea>
+                                    <textarea class="form-control content-textarea content-textarea--large" id="chrome-steps" name="chrome_steps"><?php echo htmlspecialchars(AdminParentsHelper::listToTextarea($electronicAdminSection['content']['chrome_steps'] ?? [])); ?></textarea>
                                 </div>
                             </div>
 

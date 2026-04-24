@@ -8,40 +8,17 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
 
-function sendApprovalEmailMessage(string $email, string $link): void
+final class ApproveUserEmailHelper
 {
-    $smtpFailureMessage = '';
+    /**
+     * Sends the approval email using SMTP, fallback service, then native mail.
+     */
+    public static function sendApprovalEmailMessage(string $email, string $link): void
+    {
+        $smtpFailureMessage = '';
 
-    try {
-        $mailer = new ApprovalMailer([
-            'host' => SMTP_HOST,
-            'port' => SMTP_PORT,
-            'encryption' => SMTP_ENCRYPTION,
-            'username' => SMTP_USER,
-            'password' => SMTP_PASS,
-            'from_email' => SMTP_FROM_EMAIL,
-            'from_name' => SMTP_FROM_NAME,
-        ]);
-
-        $mailer->sendApprovalEmail($email, $link);
-        return;
-    } catch (Throwable $smtpException) {
-        $smtpFailureMessage = $smtpException->getMessage();
-        $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
-        if (file_exists($autoloadPath)) {
-            require_once $autoloadPath;
-        }
-
-        $emailApprovalPath = __DIR__ . '/EmailApproval.php';
-        if (file_exists($emailApprovalPath)) {
-            require_once $emailApprovalPath;
-        }
-
-        if (
-            class_exists('Kozzy\\ParentsCouncilPlatformGroup5\\services\\EmailApproval') &&
-            class_exists('PHPMailer\\PHPMailer\\PHPMailer')
-        ) {
-            $emailService = new \Kozzy\ParentsCouncilPlatformGroup5\services\EmailApproval([
+        try {
+            $mailer = new ApprovalMailer([
                 'host' => SMTP_HOST,
                 'port' => SMTP_PORT,
                 'encryption' => SMTP_ENCRYPTION,
@@ -51,21 +28,50 @@ function sendApprovalEmailMessage(string $email, string $link): void
                 'from_name' => SMTP_FROM_NAME,
             ]);
 
-            $emailService->sendApprovalEmail($email, $link);
+            $mailer->sendApprovalEmail($email, $link);
             return;
+        } catch (Throwable $smtpException) {
+            $smtpFailureMessage = $smtpException->getMessage();
+            $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+            if (file_exists($autoloadPath)) {
+                require_once $autoloadPath;
+            }
+
+            $emailApprovalPath = __DIR__ . '/EmailApproval.php';
+            if (file_exists($emailApprovalPath)) {
+                require_once $emailApprovalPath;
+            }
+
+            if (
+                class_exists('Kozzy\\ParentsCouncilPlatformGroup5\\services\\EmailApproval') &&
+                class_exists('PHPMailer\\PHPMailer\\PHPMailer')
+            ) {
+                $emailService = new \Kozzy\ParentsCouncilPlatformGroup5\services\EmailApproval([
+                    'host' => SMTP_HOST,
+                    'port' => SMTP_PORT,
+                    'encryption' => SMTP_ENCRYPTION,
+                    'username' => SMTP_USER,
+                    'password' => SMTP_PASS,
+                    'from_email' => SMTP_FROM_EMAIL,
+                    'from_name' => SMTP_FROM_NAME,
+                ]);
+
+                $emailService->sendApprovalEmail($email, $link);
+                return;
+            }
         }
-    }
 
-    $subject = ApprovalMailer::approvalEmailSubject();
-    $message = ApprovalMailer::approvalEmailHtmlBody($link);
-    $headers =
-        'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
-        "MIME-Version: 1.0\r\n" .
-        "Content-Type: text/html; charset=UTF-8";
+        $subject = ApprovalMailer::approvalEmailSubject();
+        $message = ApprovalMailer::approvalEmailHtmlBody($link);
+        $headers =
+            'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . ">\r\n" .
+            "MIME-Version: 1.0\r\n" .
+            "Content-Type: text/html; charset=UTF-8";
 
-    if (!mail($email, $subject, $message, $headers)) {
-        $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
-        throw new RuntimeException('Failed to send approval email.' . $suffix);
+        if (!mail($email, $subject, $message, $headers)) {
+            $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
+            throw new RuntimeException('Failed to send approval email.' . $suffix);
+        }
     }
 }
 
@@ -135,7 +141,7 @@ try {
 
     $stmt->close();
 
-    sendApprovalEmailMessage($email, $link);
+    ApproveUserEmailHelper::sendApprovalEmailMessage($email, $link);
 
     $logStmt = $conn->prepare(
         "INSERT INTO Logs (user_id, action, description)
