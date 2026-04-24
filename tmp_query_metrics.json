@@ -1,0 +1,2100 @@
+[
+  {
+    "query": "SELECT user_id FROM Users WHERE token = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/includes/TokenValidator.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET account_status = 'pending', token = NULL, token_expiry = NULL WHERE role = 'parent' AND account_status = 'waiting_payment' AND token_expiry IS NOT NULL AND token_expiry < NOW()",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/includes/TokenValidator.php",
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/InsertPayment.php",
+      "app/services/Subscription.php"
+    ]
+  },
+  {
+    "query": "SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/InsertPayment.php",
+      "app/services/Subscription.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM Users WHERE email = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM Users WHERE user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET token = ?, token_expiry = ? WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id FROM Users WHERE role <> 'admin'",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Submissions",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM ApplicationSubmissions",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET password = ? WHERE email = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT u.user_id, u.name, u.surname, u.email, u.phone_number, u.number_of_children, u.role, u.account_status, u.created_at, COALESCE(children.child_count, 0) AS child_count, COALESCE(orders.order_count, 0) AS order_count, COALESCE(payments.payment_count, 0) AS payment_count FROM Users u LEFT JOIN ( SELECT user_id, COUNT(*) AS child_count FROM Children GROUP BY user_id ) children ON children.user_id = u.user_id LEFT JOIN ( SELECT user_id, COUNT(*) AS order_count FROM Orders GROUP BY user_id ) orders ON orders.user_id = u.user_id LEFT JOIN ( SELECT user_id, COUNT(*) AS payment_count FROM Payments GROUP BY user_id ) payments ON payments.user_id = u.user_id WHERE u.email NOT LIKE 'public_guest%@guest.local' ORDER BY {$orderBy}",
+    "bucket": "very_high",
+    "score": 19,
+    "joins": 3,
+    "selects": 4,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS count FROM Users WHERE role = 'parent' AND account_status = 'pending'",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT ss_id, feature, start_date, end_date, ss_status FROM SystemSchedule ORDER BY feature ASC, start_date ASC, ss_id ASC",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id, name, surname, email, phone_number, account_status, created_at FROM Users WHERE email = ? AND role = 'parent' LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT log_id, action, description, created_at FROM Logs WHERE user_id = ? ORDER BY created_at DESC, log_id DESC LIMIT 200",
+    "bucket": "low",
+    "score": 4,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT start_date, end_date, ss_status FROM SystemSchedule WHERE feature = ? ORDER BY start_date ASC, ss_id ASC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE SystemSchedule SET feature = ?, start_date = ?, end_date = ?, ss_status = ? WHERE ss_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO SystemSchedule (feature, start_date, end_date, ss_status) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM SystemSchedule WHERE ss_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Users ( name, surname, email, password, phone_number, number_of_children, role, account_status ) VALUES (?, ?, ?, ?, ?, 0, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET name = ?, surname = ?, email = ?, phone_number = ?, role = ?, account_status = ?",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Users WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT file_path FROM Submissions WHERE user_id = ? AND file_path IS NOT NULL",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT uploaded_files FROM ApplicationSubmissions WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT payment_id FROM Payments WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT order_id FROM Orders WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM PaymentsDetails WHERE payment_id IN ({$placeholders})",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Payments WHERE payment_id IN ({$placeholders})",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM OrderItems WHERE order_id IN ({$placeholders})",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Orders WHERE order_id IN ({$placeholders})",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT child_id, user_id, name, surname, date_of_birth, school_class FROM Children WHERE user_id = ? ORDER BY date_of_birth ASC, child_id ASC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT child_id, user_id, name, surname, date_of_birth, school_class FROM Children WHERE user_id IN ({$placeholders}) ORDER BY user_id ASC, date_of_birth ASC, child_id ASC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT order_id, user_id, total_price, created_at, order_status FROM Orders WHERE user_id IN ({$placeholders}) ORDER BY user_id ASC, created_at DESC, order_id DESC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT payment_id, user_id, amount, payment_date, payment_status, payment_type, transaction_id FROM Payments WHERE user_id IN ({$placeholders}) ORDER BY user_id ASC, payment_date DESC, payment_id DESC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT DISTINCT ip.child_id FROM InsurancePayments ip INNER JOIN Payments p ON p.payment_id = ip.payment_id INNER JOIN Children c ON c.child_id = ip.child_id WHERE c.user_id = ? AND p.user_id = ? AND p.payment_type = 'insurance' AND p.payment_status = 'completed'",
+    "bucket": "average",
+    "score": 6,
+    "joins": 2,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT insurance_price FROM PricingSettings LIMIT 1",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/InsuranceJCC.php",
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT oi.order_id, oi.product_id, p.product_name, oi.quantity, oi.size, oi.price_at_purchase, (oi.quantity * oi.price_at_purchase) AS line_total FROM OrderItems oi INNER JOIN Products p ON p.product_id = oi.product_id WHERE oi.order_id IN ({$placeholders}) ORDER BY oi.order_id DESC, p.product_name ASC",
+    "bucket": "average",
+    "score": 5,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Children (user_id, name, surname, date_of_birth, school_class) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/RegisteringService.php",
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Children SET name = ?, surname = ?, date_of_birth = ?, school_class = ? WHERE child_id = ? AND user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Children WHERE child_id = ? AND user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT 1 FROM Users WHERE email = ? AND user_id <> ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT 1 FROM Users WHERE email = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM Orders WHERE user_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM Payments WHERE user_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopJCC.php",
+      "app/services/InsuranceJCC.php",
+      "app/services/RegisteringService.php",
+      "app/services/SubscriptionJcc.php",
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT child_id, user_id, name, surname, date_of_birth, school_class FROM Children WHERE child_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET number_of_children = ( SELECT COUNT(*) FROM Children WHERE user_id = ? ) WHERE user_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsersService.php"
+    ]
+  },
+  {
+    "query": "SELECT product_id, product_name, product_description, price FROM Products",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ProductFetch.php"
+    ]
+  },
+  {
+    "query": "SELECT image_path FROM ProductsImages WHERE product_id = $product_id",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ProductFetch.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET account_status = 'waiting_payment', token = ?, token_expiry = ? WHERE email = ? AND role = 'parent'",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApproveUserService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Logs (user_id, action, description) SELECT user_id, 'USER_APPROVED', CONCAT('Approval email sent to: ', email) FROM Users WHERE email = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApproveUserService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET token = ?, token_expiry = ? WHERE email = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ForgotPasswordService.php",
+      "app/services/TwoFactorAuthService.php"
+    ]
+  },
+  {
+    "query": "SELECT token, token_expiry FROM Users WHERE email = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/TwoFactorAuthService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ForgotPasswordService.php",
+      "app/services/TwoFactorAuthService.php",
+      "public/logout.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id FROM Users WHERE email = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/RegisteringService.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id FROM Users WHERE phone_number = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/RegisteringService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status) VALUES (?, ?, ?, ?, ?, ?, 'parent', 'pending')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/RegisteringService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET number_of_children = (SELECT COUNT(*) FROM Children WHERE user_id = ?) WHERE user_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/RegisteringService.php"
+    ]
+  },
+  {
+    "query": "SELECT start_date, end_date, ss_status FROM SystemSchedule WHERE feature = 'registration' ORDER BY start_date ASC, ss_id ASC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/RegisteringService.php",
+      "public/register.php"
+    ]
+  },
+  {
+    "query": "SELECT p.product_id, p.product_name, p.product_description, p.price, ( SELECT pi.image_path FROM ProductsImages pi WHERE pi.product_id = p.product_id ORDER BY pi.pro_image_id DESC LIMIT 1 ) AS product_image FROM Products p ORDER BY p.product_id DESC",
+    "bucket": "average",
+    "score": 6,
+    "joins": 0,
+    "selects": 2,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "SELECT p.product_id, p.product_name, p.product_description, p.price, ( SELECT pi.image_path FROM ProductsImages pi WHERE pi.product_id = p.product_id ORDER BY pi.pro_image_id DESC LIMIT 1 ) AS product_image FROM Products p WHERE p.product_id = ? LIMIT 1",
+    "bucket": "average",
+    "score": 6,
+    "joins": 0,
+    "selects": 2,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Products (product_name, product_description, price) VALUES (?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Products SET product_name = ?, product_description = ?, price = ? WHERE product_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO ProductsImages (product_id, image_path) VALUES (?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM ProductsImages WHERE product_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM OrderItems WHERE product_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Products WHERE product_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "SELECT image_path FROM ProductsImages WHERE product_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ProductsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM HomePageSections",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/HomePageService.php"
+    ]
+  },
+  {
+    "query": "SELECT section_id FROM HomePageSections WHERE section_key = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/HomePageService.php"
+    ]
+  },
+  {
+    "query": "UPDATE HomePageSections SET section_title = ?, section_subtitle = ?, content_json = ? WHERE section_key = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/HomePageService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO HomePageSections (section_key, section_title, section_subtitle, content_json) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/HomePageService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM EpikoinoniaPageSections",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT section_id FROM EpikoinoniaPageSections WHERE section_key = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaPageService.php"
+    ]
+  },
+  {
+    "query": "UPDATE EpikoinoniaPageSections SET section_title = ?, section_subtitle = ?, content_json = ? WHERE section_key = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EpikoinoniaPageService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO EpikoinoniaPageSections (section_key, section_title, section_subtitle, content_json) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EpikoinoniaPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT a.*, COALESCE(a.announcement_date, a.publish_date) as announcement_date, GROUP_CONCAT(ai.image_path) as images FROM Announcements a LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id GROUP BY a.announcement_id ORDER BY COALESCE(a.announcement_date, a.publish_date) DESC, a.publish_date DESC",
+    "bucket": "high",
+    "score": 8,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT a.*, COALESCE(a.announcement_date, a.publish_date) as announcement_date, GROUP_CONCAT(ai.image_path) as images FROM Announcements a LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id WHERE a.announcement_id = ? GROUP BY a.announcement_id",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Announcements (announcement_title, announcement_date, announcement_description, gdpr_notice, publish_date) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Announcements SET announcement_title = ?, announcement_date = ?, announcement_description = ?, gdpr_notice = ?, publish_date = ? WHERE announcement_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Announcements WHERE announcement_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO AnnouncementsImages (announcement_id, image_path) VALUES (?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM AnnouncementsImages WHERE an_image_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM AnnouncementsImages WHERE announcement_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM AnnouncementsImages WHERE announcement_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM AnnouncementAttachments WHERE announcement_id = ? ORDER BY attachment_id DESC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO AnnouncementAttachments (announcement_id, file_path, original_name) VALUES (?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM AnnouncementAttachments WHERE attachment_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM AnnouncementAttachments WHERE attachment_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) as count FROM Announcements",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT a.*, COALESCE(a.announcement_date, a.publish_date) as announcement_date, GROUP_CONCAT(ai.image_path) as images FROM Announcements a LEFT JOIN AnnouncementsImages ai ON a.announcement_id = ai.announcement_id WHERE a.announcement_title LIKE ? OR a.announcement_description LIKE ? GROUP BY a.announcement_id ORDER BY COALESCE(a.announcement_date, a.publish_date) DESC, a.publish_date DESC",
+    "bucket": "high",
+    "score": 9,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM AnnouncementAttachments WHERE announcement_id IN ({$placeholders}) ORDER BY attachment_id DESC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "SELECT announcement_id, announcement_title, announcement_description, COALESCE(announcement_date, publish_date) AS announcement_date FROM Announcements ORDER BY COALESCE(announcement_date, publish_date) DESC, publish_date DESC LIMIT 5",
+    "bucket": "average",
+    "score": 5,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/AnnouncementsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Payments SET payment_status = ?, transaction_id = ? WHERE payment_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopJCC.php",
+      "app/services/InsuranceJCC.php",
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "UPDATE Payments SET payment_status = ? WHERE payment_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "SELECT 1 FROM Payments WHERE payment_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php",
+      "app/services/InsuranceJCC.php",
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "SELECT child_id FROM Children WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO InsurancePayments (payment_id, child_id) SELECT ?, ? FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM InsurancePayments WHERE payment_id = ? AND child_id = ? )",
+    "bucket": "average",
+    "score": 5,
+    "joins": 0,
+    "selects": 2,
+    "origins": [
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET account_status = 'active', password = ?, token = NULL, token_expiry = NULL WHERE user_id = ? AND account_status = 'waiting_payment' LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "SELECT email FROM Users WHERE user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php",
+      "app/services/InsertPayment.php",
+      "app/services/InsuranceJCC.php",
+      "app/services/SubscriptionJcc.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM `ApplicationTemplates` WHERE `is_system_template` = 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM `ApplicationTemplates`",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM `ApplicationTemplates` WHERE template_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM `ApplicationTemplates` WHERE template_key = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM `ApplicationTemplates` WHERE category = ? ORDER BY name",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO `ApplicationTemplates` (template_key, name, description, category, form_schema, is_system_template) VALUES (?, ?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "UPDATE `ApplicationTemplates` SET name = ?, description = ?, category = ?, form_schema = ?, updated_at = NOW() WHERE template_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM `ApplicationTemplates` WHERE template_id = ? AND is_system_template = 0",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationTemplateService.php"
+    ]
+  },
+  {
+    "query": "select",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationTemplateService.php",
+      "public/admin/applications.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Payments (user_id, amount, payment_status, payment_type) VALUES (?, ?, 'pending', ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopJCC.php",
+      "app/services/InsertPayment.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Logs (user_id, action, description) VALUES (?, 'PAYMENT_CREATED', ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/InsertPayment.php"
+    ]
+  },
+  {
+    "query": "SELECT o.order_id, o.created_at, o.total_price, CONCAT(COALESCE(u.name, ''), ' ', COALESCE(u.surname, '')) AS parent_name, u.email AS parent_email, COALESCE(SUM(oi.quantity), 0) AS total_items FROM Orders o INNER JOIN Users u ON u.user_id = o.user_id LEFT JOIN OrderItems oi ON oi.order_id = o.order_id WHERE o.order_status = 'paid' GROUP BY o.order_id, o.created_at, o.total_price, u.name, u.surname, u.email ORDER BY o.created_at DESC",
+    "bucket": "very_high",
+    "score": 13,
+    "joins": 2,
+    "selects": 1,
+    "origins": [
+      "app/services/OrdersService.php"
+    ]
+  },
+  {
+    "query": "SELECT oi.order_id, oi.product_id, p.product_name, oi.quantity, oi.size, oi.price_at_purchase, (oi.quantity * oi.price_at_purchase) AS line_total FROM OrderItems oi INNER JOIN Products p ON p.product_id = oi.product_id WHERE oi.order_id IN ($placeholders) ORDER BY oi.order_id DESC, p.product_name ASC",
+    "bucket": "average",
+    "score": 5,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/OrdersService.php"
+    ]
+  },
+  {
+    "query": "SELECT oi.product_id, p.product_name, SUM(oi.quantity) AS total_quantity, SUM(oi.quantity * oi.price_at_purchase) AS total_value FROM Orders o INNER JOIN OrderItems oi ON oi.order_id = o.order_id INNER JOIN Products p ON p.product_id = oi.product_id WHERE o.order_status = 'paid' GROUP BY oi.product_id, p.product_name ORDER BY total_quantity DESC, p.product_name ASC",
+    "bucket": "very_high",
+    "score": 11,
+    "joins": 2,
+    "selects": 1,
+    "origins": [
+      "app/services/OrdersService.php"
+    ]
+  },
+  {
+    "query": "SELECT c.child_id FROM Children c WHERE c.user_id = ? AND NOT EXISTS ( SELECT 1 FROM InsurancePayments ip INNER JOIN Payments p ON p.payment_id = ip.payment_id WHERE ip.child_id = c.child_id AND p.user_id = c.user_id AND p.payment_type = 'insurance' AND p.payment_status = 'completed' )",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 2,
+    "origins": [
+      "app/services/InsuranceJCC.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Payments (user_id, amount, payment_status, payment_type) VALUES (?, ?, 'pending', 'insurance')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/InsuranceJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT payment_id, user_id, payment_status FROM Payments WHERE payment_id = ? AND payment_type = 'insurance' LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/InsuranceJCC.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO InsurancePayments (payment_id, child_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE child_id = VALUES(child_id)",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/InsuranceJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT name, surname, email FROM Users WHERE user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/PaymentReceiptService.php"
+    ]
+  },
+  {
+    "query": "SELECT payment_id, amount, payment_date, payment_status, payment_type, transaction_id FROM Payments WHERE user_id = ? AND payment_id IN (",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/PaymentReceiptService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS children_count FROM InsurancePayments WHERE payment_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/PaymentReceiptService.php"
+    ]
+  },
+  {
+    "query": "SELECT pd.quantity, pd.size, p.product_name FROM PaymentsDetails pd INNER JOIN Products p ON p.product_id = pd.product_id WHERE pd.payment_id = ? ORDER BY p.product_name ASC",
+    "bucket": "average",
+    "score": 5,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/PaymentReceiptService.php"
+    ]
+  },
+  {
+    "query": "SELECT order_id FROM Orders WHERE user_id = ? AND order_status = 'pending' ORDER BY order_id DESC LIMIT 1",
+    "bucket": "low",
+    "score": 4,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/CartService.php",
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Orders (user_id, total_price, created_at, order_status) VALUES (?, 0.00, NOW(), 'pending')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php",
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT oi.order_id, oi.product_id, oi.price_at_purchase, oi.quantity, oi.size, p.product_name, p.product_description, p.price, ( SELECT MIN(pi.image_path) FROM ProductsImages pi WHERE pi.product_id = p.product_id ) AS product_image FROM OrderItems oi INNER JOIN Products p ON oi.product_id = p.product_id WHERE oi.order_id = ? ORDER BY oi.product_id DESC",
+    "bucket": "high",
+    "score": 8,
+    "joins": 1,
+    "selects": 2,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "SELECT price FROM Products WHERE product_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "SELECT quantity FROM OrderItems WHERE order_id = ? AND product_id = ? AND ( (size = ?) OR (size IS NULL AND ? = '') ) LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "UPDATE OrderItems SET quantity = quantity + ? WHERE order_id = ? AND product_id = ? AND ( (size = ?) OR (size IS NULL AND ? = '') )",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO OrderItems (order_id, product_id, price_at_purchase, quantity, size) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "UPDATE OrderItems SET quantity = ? WHERE order_id = ? AND product_id = ? AND ( (size = ?) OR (size IS NULL AND ? = '') )",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM OrderItems WHERE order_id = ? AND product_id = ? AND ( (size = ?) OR (size IS NULL AND ? = '') )",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM OrderItems WHERE order_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "SELECT COALESCE(SUM(price_at_purchase * quantity), 0) AS total FROM OrderItems WHERE order_id = ?",
+    "bucket": "low",
+    "score": 4,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Orders SET total_price = ? WHERE order_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/CartService.php"
+    ]
+  },
+  {
+    "query": "SELECT o.order_id, o.total_price, COALESCE(SUM(oi.quantity), 0) AS items_count FROM Orders o LEFT JOIN OrderItems oi ON oi.order_id = o.order_id WHERE o.user_id = ? AND o.order_status = 'pending' GROUP BY o.order_id, o.total_price ORDER BY o.order_id DESC LIMIT 1",
+    "bucket": "high",
+    "score": 10,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT p.payment_id, p.user_id, p.payment_status, o.order_id, o.order_status FROM Payments p INNER JOIN Orders o ON o.user_id = p.user_id WHERE p.payment_id = ? AND o.order_id = ? AND p.payment_type = 'product' LIMIT 1",
+    "bucket": "average",
+    "score": 5,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT product_id, quantity, price_at_purchase, size FROM OrderItems WHERE order_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO PaymentsDetails (payment_id, product_id, quantity, price_at_purchase, size) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "UPDATE Orders SET order_status = ? WHERE order_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT 1 FROM Orders WHERE order_id = ? AND user_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopJCC.php"
+    ]
+  },
+  {
+    "query": "SELECT a.application_id, a.application_title, a.application_description, COUNT(ad.ap_document_id) AS document_count FROM Applications a LEFT JOIN ApplicationsDocuments ad ON a.application_id = ad.application_id GROUP BY a.application_id ORDER BY a.application_id DESC",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM Applications WHERE application_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Applications (application_title, application_description) VALUES (?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Applications SET application_title = ?, application_description = ? WHERE application_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Applications WHERE application_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT ap_document_id, application_id, file_path FROM ApplicationsDocuments ORDER BY ap_document_id DESC",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM ApplicationsDocuments WHERE application_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT ad.ap_document_id, ad.application_id, ad.file_path, a.application_title FROM ApplicationsDocuments ad INNER JOIN Applications a ON ad.application_id = a.application_id ORDER BY ad.ap_document_id DESC",
+    "bucket": "low",
+    "score": 4,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO ApplicationsDocuments (application_id, file_path) VALUES (?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM ApplicationsDocuments WHERE ap_document_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM ApplicationsDocuments WHERE ap_document_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE ApplicationsDocuments SET file_path = ? WHERE ap_document_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT 1 FROM Submissions WHERE application_id = ? AND user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Submissions (application_id, user_id, file_path, sub_status) VALUES (?, ?, ?, 'waiting')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Submissions (application_id, user_id, file_path, submission_data, sub_status) VALUES (?, ?, NULL, ?, 'waiting')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Submissions (application_id, user_id, file_path, submission_data, sub_status) VALUES (?, ?, ?, ?, 'waiting')",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ApplicationsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM UsefulInformationSections",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsefulInformationService.php"
+    ]
+  },
+  {
+    "query": "SELECT section_id FROM UsefulInformationSections WHERE section_key = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/UsefulInformationService.php"
+    ]
+  },
+  {
+    "query": "UPDATE UsefulInformationSections SET section_title = ?, section_subtitle = ?, content_json = ? WHERE section_key = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsefulInformationService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO UsefulInformationSections (section_key, section_title, section_subtitle, content_json) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/UsefulInformationService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT ? OFFSET ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) as count FROM contact_messages",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) as count FROM contact_messages WHERE is_read = FALSE",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM contact_messages WHERE message_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "UPDATE contact_messages SET is_read = TRUE WHERE message_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM contact_messages WHERE message_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM contact_messages WHERE name LIKE ? OR email LIKE ? OR subject LIKE ? ORDER BY created_at DESC",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EpikoinoniaService.php"
+    ]
+  },
+  {
+    "query": "SELECT is_visible FROM EshopSettings WHERE setting_id = 1 LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EshopSettingsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE EshopSettings SET is_visible = ?, updated_at = CURRENT_TIMESTAMP WHERE setting_id = 1",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopSettingsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO EshopSettings (setting_id, is_visible) VALUES (1, 1) ON DUPLICATE KEY UPDATE setting_id = setting_id",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EshopSettingsService.php"
+    ]
+  },
+  {
+    "query": "SELECT e.*, GROUP_CONCAT(ei.image_path) as images FROM Events e LEFT JOIN EventsImages ei ON e.event_id = ei.event_id GROUP BY e.event_id ORDER BY e.event_date DESC",
+    "bucket": "average",
+    "score": 6,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT e.*, GROUP_CONCAT(ei.image_path) as images FROM Events e LEFT JOIN EventsImages ei ON e.event_id = ei.event_id WHERE DATE(e.event_date) >= CURDATE() GROUP BY e.event_id ORDER BY e.event_date ASC",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT e.*, GROUP_CONCAT(ei.image_path) as images FROM Events e LEFT JOIN EventsImages ei ON e.event_id = ei.event_id WHERE DATE(e.event_date) < CURDATE() GROUP BY e.event_id ORDER BY e.event_date DESC",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT e.*, GROUP_CONCAT(ei.image_path) as images FROM Events e LEFT JOIN EventsImages ei ON e.event_id = ei.event_id WHERE e.event_id = ? GROUP BY e.event_id",
+    "bucket": "average",
+    "score": 6,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Events (event_title, event_description, gdpr_notice, event_date, publish_date) VALUES (?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "UPDATE Events SET event_title = ?, event_description = ?, gdpr_notice = ?, event_date = ?, publish_date = ? WHERE event_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM Events WHERE event_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO EventsImages (event_id, image_path) VALUES (?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM EventsImages WHERE ev_image_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM EventsImages WHERE event_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM EventsImages WHERE event_id = ?",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) as count FROM Events",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT e.*, GROUP_CONCAT(ei.image_path) as images FROM Events e LEFT JOIN EventsImages ei ON e.event_id = ei.event_id WHERE e.event_title LIKE ? OR e.event_description LIKE ? GROUP BY e.event_id ORDER BY e.event_date DESC",
+    "bucket": "average",
+    "score": 7,
+    "joins": 1,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT event_id, event_title, event_description, event_date FROM Events ORDER BY event_date DESC LIMIT 5",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT event_title as title, event_description as description, event_date as date, 'event' as type FROM Events ORDER BY event_date ASC",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/EventsService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM ParentsPageSections",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT section_id FROM ParentsPageSections WHERE section_key = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "UPDATE ParentsPageSections SET section_title = ?, section_subtitle = ?, content_json = ? WHERE section_key = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO ParentsPageSections (section_key, section_title, section_subtitle, content_json) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM ParentsPageGalleryImages ORDER BY sort_order ASC, image_id ASC",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT * FROM ParentsPageGalleryImages WHERE image_id = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO ParentsPageGalleryImages (full_image_path, thumb_image_path, alt_text, sort_order) VALUES (?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "DELETE FROM ParentsPageGalleryImages WHERE image_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) AS total FROM ParentsPageGalleryImages",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort_order FROM ParentsPageGalleryImages",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/services/ParentsPageService.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id FROM Users WHERE email = ? LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "app/views/pages/applications.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO Users (name, surname, email, password, phone_number, number_of_children, role, account_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "app/views/pages/applications.php"
+    ]
+  },
+  {
+    "query": "update",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "public/admin/announcements.php",
+      "public/admin/applications.php",
+      "public/admin/eshop.php",
+      "public/admin/events.php",
+      "public/cart.php"
+    ]
+  },
+  {
+    "query": "UPDATE Users SET token = NULL, token_expiry = NULL WHERE user_id = ?",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "public/logout.php"
+    ]
+  },
+  {
+    "query": "INSERT INTO ApplicationTemplates (template_key, name, description, category, form_schema, is_system_template) VALUES (?, ?, ?, ?, ?, 1)",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 0,
+    "origins": [
+      "public/insert_templates.php"
+    ]
+  },
+  {
+    "query": "SELECT COUNT(*) FROM ApplicationTemplates",
+    "bucket": "very_low",
+    "score": 2,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "public/insert_templates.php"
+    ]
+  },
+  {
+    "query": "SELECT template_id, name, category FROM ApplicationTemplates",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "public/insert_templates.php"
+    ]
+  },
+  {
+    "query": "SELECT user_id FROM Users WHERE email = ? AND token = ? AND token_expiry IS NOT NULL AND token_expiry >= NOW() LIMIT 1",
+    "bucket": "low",
+    "score": 3,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "public/reset-password.php"
+    ]
+  },
+  {
+    "query": "select[name=\"schedule_feature\"][form=\"",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "public/admin/users.php"
+    ]
+  },
+  {
+    "query": "select[name=\"schedule_feature\"][form]",
+    "bucket": "very_low",
+    "score": 1,
+    "joins": 0,
+    "selects": 1,
+    "origins": [
+      "public/admin/users.php"
+    ]
+  }
+]

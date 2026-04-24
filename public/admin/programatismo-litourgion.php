@@ -199,6 +199,30 @@ $registrationSchedules = $usersService->getSystemSchedules();
                 </div>
             </div>
 
+            <div class="alert alert-info mb-4" role="alert">
+                <h5 class="alert-heading mb-3"><i class="fas fa-info-circle me-2"></i>Διαθέσιμες Λειτουργίες Προγραμματισμού</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="mb-2">
+                            <strong>📝 Εγγραφές:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικά παράθυρα κατά τα οποία οι γονείς μπορούν να εγγραφούν ή να ενημερώσουν τα στοιχεία τους στο σύστημα.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="mb-2">
+                            <strong>🗑️ Διαγραφή Χρηστών:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών για καθαρισμό του συστήματος.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <strong>🧹 Καθαρισμός Υποβολών:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματο καθαρισμό παλαιών υποβολών.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table align-middle admin-dashboard-table program-feature-table mb-0">
                     <thead>

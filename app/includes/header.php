@@ -33,7 +33,7 @@ $nav_items = [
         'match' => ['home.php', 'index.php', ''],
     ],
     [
-        'label' => site_is_parent() ? 'Σύνδεσμος Γονέων' : 'Σύνδεσμος Γονέων',
+        'label' => 'Σύνδεσμος Γονέων',
         'href' => site_section_url('parents.php'),
         'icon' => 'fas fa-users',
         'match' => ['parents.php'],
@@ -159,6 +159,8 @@ if (site_is_parent()) {
         .site-header {
             font-family: 'Lato', sans-serif;
             color: var(--text-main);
+            max-width: 100%;
+            overflow-x: clip;
         }
 
         .site-header a,
@@ -178,7 +180,8 @@ if (site_is_parent()) {
             border-bottom: 1px solid var(--header-border);
             padding: .95rem 0 .7rem;
             font-family: 'Lato', sans-serif;
-            overflow: visible;
+            overflow-x: clip;
+            overflow-y: visible;
         }
 
         /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
@@ -198,48 +201,41 @@ if (site_is_parent()) {
         /* Στυλ λογοτύπου. */
         .logo-stack {
             display: inline-flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
             flex: 0 0 auto;
-            width: fit-content;
-            transform: translateX(62px);
+            width: auto;
+            margin-left: -.65rem;
         }
 
         .navbar-brand img {
+            display: block;
             width: 120px;
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 8px 24px rgba(26, 58, 92, 0.18);
+            background: transparent;
+            border: 3px solid rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
         }
 
         /* Κείμενο δίπλα στο λογότυπο. */
         .brand-text {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
+            display: block;
             justify-content: center;
             align-items: center;
-            flex: 1 1 auto;
+            flex: 0 1 auto;
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             color: var(--brand-color);
-            font-size: 2.2rem;
-            line-height: 1.02;
+            font-size: 1.75rem;
+            line-height: 1.15;
             letter-spacing: 0.01em;
             white-space: nowrap;
+            text-align: center;
             max-width: none;
-            width: 100%;
-            min-width: 0;
-        }
-
-        .brand-line {
-            display: inline;
             width: auto;
-        }
-
-        .brand-line + .brand-line {
-            margin-left: .35rem;
+            min-width: 0;
         }
 
         /* Λίγο κενό ανάμεσα στα menu items. */
@@ -302,12 +298,18 @@ if (site_is_parent()) {
         }
 
         /* Μικρή μπλε μπάρα κάτω από το ενεργό link. */
-        .navbar-nav .active > .nav-link::after {
+        .navbar-nav .nav-link-content {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .navbar-nav .active > .nav-link .nav-link-content::after {
             content: "";
             position: absolute;
-            left: .8rem;
-            right: .8rem;
-            bottom: .28rem;
+            left: 0;
+            right: 0;
+            bottom: -.35rem;
             height: 2px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.82);
@@ -439,25 +441,36 @@ if (site_is_parent()) {
             position: relative;
             margin: 0 0 1rem;
             flex: 0 0 100%;
-            justify-content: flex-start;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: nowrap;
             gap: 1rem;
-            text-align: left;
+            text-align: center;
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
         .navbar-collapse {
             width: 100%;
             min-width: 0;
-            justify-content: center;
+            max-width: 100%;
+            justify-content: safe center;
             align-items: center;
-            gap: 1rem;
+            gap: .7rem;
             margin-top: .05rem;
-            padding: .95rem 1.15rem;
+            padding: .85rem .9rem;
             border-top: 0;
-            border-radius: 18px;
+            border-radius: 18px !important;
             background: var(--nav-row-bg);
             box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 18px 34px rgba(15, 42, 76, 0.18);
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            overflow-y: visible;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
 
         .navbar-nav {
@@ -467,24 +480,26 @@ if (site_is_parent()) {
             justify-content: center;
             align-items: center;
             margin: 0;
-            gap: .25rem;
-            min-width: 0;
+            gap: clamp(.55rem, 1vw, 1.2rem);
+            min-width: max-content;
+            max-width: none;
             overflow: visible;
+            box-sizing: border-box;
         }
 
         .navbar-public .navbar-nav {
             justify-content: center;
             margin: 0;
-            gap: .35rem;
+            gap: clamp(.7rem, 1.4vw, 1.6rem);
         }
 
         .navbar-parent .navbar-collapse {
-            gap: .7rem;
+            gap: .45rem;
         }
 
         .navbar-parent .navbar-nav {
-            justify-content: flex-start;
-            gap: .12rem;
+            justify-content: center;
+            gap: clamp(.5rem, .9vw, 1.05rem);
             padding-right: .35rem;
         }
 
@@ -513,12 +528,14 @@ if (site_is_parent()) {
 
         .navbar-tools {
             flex: 0 0 auto;
+            flex-wrap: nowrap;
             justify-content: flex-end;
             gap: .8rem;
             margin-left: 1rem;
             min-width: auto;
             padding: .2rem 0 .2rem .9rem;
             border-left: 1px solid rgba(255, 255, 255, 0.18);
+            white-space: nowrap;
         }
 
         .navbar-parent .navbar-tools {
@@ -569,7 +586,8 @@ if (site_is_parent()) {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            max-width: 1640px;
+            max-width: 100%;
+            width: 100%;
             overflow: visible;
             position: relative;
             z-index: 1;
@@ -583,6 +601,10 @@ if (site_is_parent()) {
             white-space: nowrap;
         }
 
+        .site-header .login-btn {
+            white-space: nowrap;
+        }
+
         /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
         .navbar-nav .nav-link:focus-visible,
         .login-btn:focus-visible,
@@ -592,10 +614,86 @@ if (site_is_parent()) {
             outline-offset: 2px;
         }
 
+        @media (min-width: 1200px) and (max-width: 1799.98px) {
+            .navbar .container {
+                max-width: 100%;
+                padding-left: .65rem;
+                padding-right: .65rem;
+            }
+
+            .navbar-brand {
+                gap: .8rem;
+            }
+
+            .navbar-brand img {
+                width: 110px;
+                height: 110px;
+            }
+
+            .brand-text {
+                font-size: 1.45rem;
+            }
+
+            .navbar-collapse {
+                gap: .38rem;
+                padding: .7rem .65rem;
+                border-radius: 18px !important;
+            }
+
+            .navbar-nav {
+                flex: 0 0 auto;
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 1.2rem;
+                min-width: max-content;
+                max-width: none;
+            }
+
+            .navbar-nav .nav-item,
+            .navbar-public .navbar-nav .nav-item,
+            .navbar-parent .navbar-nav .nav-item {
+                flex: 0 0 auto;
+                min-width: auto;
+                margin: 0;
+            }
+
+            .navbar-nav .nav-link,
+            .navbar-public .navbar-nav .nav-link,
+            .navbar-parent .navbar-nav .nav-link {
+                padding: .38rem .48rem;
+                font-size: .82rem;
+            }
+
+            .navbar-parent .navbar-nav .nav-link--icon-only {
+                width: 2.25rem;
+                height: 2.25rem;
+                min-width: 2.25rem;
+            }
+
+            .navbar-tools,
+            .navbar-parent .navbar-tools {
+                gap: .35rem;
+                margin-left: .35rem;
+                padding-left: .45rem;
+            }
+
+            .site-header .login-btn,
+            .site-header .login-btn.btn,
+            .site-header .login-btn.btn-sm {
+                padding: .26rem .65rem !important;
+                font-size: .82rem !important;
+            }
+
+            .utility-icon-link {
+                width: 34px;
+                height: 34px;
+            }
+        }
+
         @media (max-width: 1199.98px) {
             .navbar-brand img {
-                width: 88px;
-                height: 88px;
+                width: 84px;
+                height: 84px;
             }
 
             .logo-line {
@@ -603,7 +701,7 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                font-size: 1.7rem;
+                font-size: 1.12rem;
             }
 
             .navbar-public .navbar-nav {
@@ -618,58 +716,30 @@ if (site_is_parent()) {
         }
 
         /* Ρυθμίσεις για κινητό/tablet. */
-        @media (max-width: 991.98px) {
+        @media (max-width: 1199.98px) {
             .navbar {
                 padding: .65rem 0;
             }
 
             .logo-stack {
-                transform: none;
+                margin-left: .15rem;
             }
+        }
 
-            .navbar-collapse.collapse {
-                display: block;
-                max-height: 0;
-                opacity: 0;
-                overflow: hidden;
-                transform: translateY(-6px);
-                pointer-events: none;
-                margin-top: 0;
-                padding-top: 0;
-                padding-bottom: 0;
-                transition: max-height .32s ease, opacity .26s ease, transform .26s ease, margin-top .26s ease, padding-top .26s ease, padding-bottom .26s ease;
-            }
-
-            .navbar-collapse.collapse.show {
-                max-height: 84vh;
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-                overflow-y: auto;
-                margin-top: .7rem;
-                padding-top: .85rem;
-                padding-bottom: .85rem;
-            }
-
-            .navbar-collapse.collapsing {
-                display: block;
-                overflow: hidden;
-                opacity: .45;
-                transform: translateY(-2px);
-                transition: height .32s ease, opacity .2s ease;
-            }
-
+        @media (max-width: 767.98px) {
             .navbar-brand {
                 margin: 0;
                 flex: 0 1 auto;
                 justify-content: flex-start;
+                flex-wrap: nowrap;
                 max-width: calc(100% - 78px);
-                gap: .7rem;
+                gap: .65rem;
+                min-width: 0;
             }
 
             .navbar-brand img {
-                width: 58px;
-                height: 58px;
+                width: 74px;
+                height: 74px;
             }
 
             .logo-line {
@@ -677,218 +747,108 @@ if (site_is_parent()) {
             }
 
             .brand-text {
-                display: inline-block;
-                max-width: calc(100vw - 150px);
-                font-size: 1.22rem;
-                line-height: 1.1;
+                display: block;
+                max-width: calc(100vw - 156px);
+                font-size: 1rem;
+                line-height: 1.08;
                 overflow: visible;
                 text-overflow: clip;
                 white-space: normal;
-            }
-
-            .brand-line {
-                display: block;
-                width: 100%;
-            }
-
-            .brand-line + .brand-line {
-                margin-left: 0;
-                margin-top: .1rem;
+                text-align: left;
             }
 
             .navbar-collapse {
                 margin-top: .7rem;
                 padding: .85rem 1rem;
                 min-width: 0;
+                border-radius: 18px !important;
+                flex-direction: column;
+                flex-wrap: nowrap !important;
+                align-items: center;
+                justify-content: flex-start;
+                overflow-x: hidden;
+                overflow-y: visible;
+            }
+
+            .navbar-collapse.show {
+                display: flex;
             }
 
             .navbar-nav {
-                margin-top: .75rem;
-                flex: 1 1 auto;
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                gap: .1rem;
-                min-width: 0;
+                margin-top: 0;
+                flex: 0 0 auto;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: center;
+                gap: .75rem;
+                min-width: max-content;
+                max-width: none;
                 overflow: visible;
-            }
-
-            .navbar-nav .nav-link {
-                white-space: normal;
-                word-break: break-word;
+                box-sizing: border-box;
             }
 
             .navbar-nav .nav-item {
-                margin: .15rem 0;
+                flex: 0 0 auto;
+                margin: 0;
+            }
+
+            .navbar-nav .nav-link {
+                white-space: nowrap;
+                overflow-wrap: normal;
             }
 
             .navbar-tools {
+                flex-direction: row !important;
+                align-items: center !important;
+                flex: 0 0 auto;
                 margin-top: .75rem;
                 margin-left: 0;
-                padding-top: .5rem;
+                padding-top: .75rem;
                 padding-left: 0;
                 border-top: 1px solid rgba(255, 255, 255, 0.2);
                 border-left: 0;
                 gap: .5rem;
                 min-width: 100%;
-                justify-content: flex-start;
-            }
-
-            .navbar-tools .btn {
-                width: 100%;
                 justify-content: center;
-                text-align: center;
             }
 
+            .navbar-tools .login-btn,
             .navbar-tools .utility-icon-link {
-                align-self: flex-start;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
             }
         }
 
-        /*
-         * Desktop zoom mode:
-         * If zoom goes above 125%, force burger behavior even on large widths.
-         */
-        .navbar.zoom-burger-mode {
-            padding: .65rem 0;
-        }
+        @media (max-width: 767.98px) {
+            .navbar-brand {
+                max-width: calc(100% - 60px);
+                gap: .45rem;
+            }
 
-        .navbar.zoom-burger-mode .navbar-toggler {
-            display: block !important;
-            margin-left: auto;
-        }
+            .navbar-brand img {
+                width: 64px;
+                height: 64px;
+            }
 
-        .navbar.zoom-burger-mode .navbar-brand {
-            margin: 0;
-            flex: 0 1 auto;
-            justify-content: flex-start;
-            max-width: calc(100% - 78px);
-            gap: .7rem;
-        }
-
-        .navbar.zoom-burger-mode .logo-stack {
-            transform: none;
-        }
-
-        .navbar.zoom-burger-mode .navbar-brand img {
-            width: 58px;
-            height: 58px;
-        }
-
-        .navbar.zoom-burger-mode .brand-text {
-            display: inline-block;
-            max-width: calc(100vw - 150px);
-            font-size: 1.22rem;
-            line-height: 1.1;
-            overflow: visible;
-            text-overflow: clip;
-            white-space: normal;
-        }
-
-        .navbar.zoom-burger-mode .brand-line {
-            display: block;
-            width: 100%;
-        }
-
-        .navbar.zoom-burger-mode .brand-line + .brand-line {
-            margin-left: 0;
-            margin-top: .1rem;
-        }
-
-        .navbar.zoom-burger-mode .navbar-collapse.collapse {
-            display: block !important;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transform: translateY(-6px);
-            pointer-events: none;
-            margin-top: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            transition: max-height .32s ease, opacity .26s ease, transform .26s ease, margin-top .26s ease, padding-top .26s ease, padding-bottom .26s ease;
-        }
-
-        .navbar.zoom-burger-mode .navbar-collapse.collapse.show {
-            max-height: 84vh;
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            overflow-y: auto;
-            margin-top: .7rem;
-            padding-top: .85rem;
-            padding-bottom: .85rem;
-        }
-
-        .navbar.zoom-burger-mode .navbar-collapse.collapsing {
-            display: block !important;
-            overflow: hidden;
-            opacity: .45;
-            transform: translateY(-2px);
-            transition: height .32s ease, opacity .2s ease;
-        }
-
-        .navbar.zoom-burger-mode .navbar-collapse {
-            margin-top: .7rem;
-            padding: .85rem 1rem;
-            min-width: 0;
-        }
-
-        .navbar.zoom-burger-mode .navbar-nav {
-            margin-top: .75rem;
-            flex: 1 1 auto;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            gap: .1rem;
-            min-width: 0;
-            overflow: visible;
-        }
-
-        .navbar.zoom-burger-mode .navbar-nav .nav-link {
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        .navbar.zoom-burger-mode .navbar-nav .nav-item {
-            margin: .15rem 0;
-        }
-
-        .navbar.zoom-burger-mode .navbar-tools {
-            margin-top: .75rem;
-            margin-left: 0;
-            padding-top: .5rem;
-            padding-left: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            border-left: 0;
-            gap: .5rem;
-            min-width: 100%;
-            justify-content: flex-start;
-        }
-
-        .navbar.zoom-burger-mode .navbar-tools .btn {
-            width: 100%;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .navbar.zoom-burger-mode .navbar-tools .utility-icon-link {
-            align-self: flex-start;
+            .brand-text {
+                font-size: .9rem;
+                max-width: calc(100vw - 126px);
+            }
         }
     </style>
 
 <header class="site-header">
 <!-- Κύριο navigation όλου του site. -->
-<nav class="navbar navbar-expand-lg navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
+<nav class="navbar navbar-expand-xl navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
     <div class="container">
 
         <!-- Λογότυπο + τίτλος σχολείου. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
-            <span class="logo-stack mr-2">
+            <span class="logo-stack">
                 <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo">
             </span>
-            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">
-                <span class="brand-line">Σύνδεσμος Γονέων &amp;</span>
-                <span class="brand-line">Κηδεμόνων Γυμνασίου</span>
-                <span class="brand-line">Αγίου Αθανασίου</span>
-            </span>
+            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</span>
         </a>
 
         <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->
@@ -912,36 +872,38 @@ if (site_is_parent()) {
                            aria-label="<?php echo htmlspecialchars($item['label']); ?>"
                            title="<?php echo htmlspecialchars($item['label']); ?>"
                            <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
-                            <i class="<?php echo $item['icon']; ?>" aria-hidden="true"></i>
-                            <?php if (empty($item['icon_only'])): ?>
-                                <?php echo $item['label']; ?>
-                            <?php else: ?>
-                                <span class="sr-only"><?php echo htmlspecialchars($item['label']); ?></span>
-                            <?php endif; ?>
+                            <span class="nav-link-content">
+                                <i class="<?php echo $item['icon']; ?>" aria-hidden="true"></i>
+                                <?php if (empty($item['icon_only'])): ?>
+                                    <span class="nav-link-text"><?php echo $item['label']; ?></span>
+                                <?php else: ?>
+                                    <span class="sr-only"><?php echo htmlspecialchars($item['label']); ?></span>
+                                <?php endif; ?>
+                            </span>
                         </a>
                     </li>
                 <?php endforeach; ?>
             </ul>
 
             <!-- Δεξιά εργαλεία: login + shortcut. -->
-            <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center navbar-tools">
+            <div class="d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center navbar-tools">
 
                 <?php if (site_is_parent()): ?>
                     <a href="<?php echo site_public_url('logout.php'); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn logout-btn">
-                        <i class="fas fa-sign-out-alt mr-1"></i> Αποσύνδεση
+                       class="btn btn-outline-dark btn-sm my-2 my-xl-0 login-btn logout-btn">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Log out
                     </a>
                 <?php else: ?>
                     <a href="<?php echo site_login_url(); ?>"
-                       class="btn btn-outline-dark btn-sm my-2 my-lg-0 login-btn login-btn-green">
-                        <i class="fas fa-sign-in-alt mr-1"></i> Σύνδεση
+                       class="btn btn-outline-dark btn-sm my-2 my-xl-0 login-btn login-btn-green">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Login
                     </a>
                 <?php endif; ?>
 
                 <?php if (site_is_parent()): ?>
                     <?php $is_profile_active = in_array($current_page, $profile_item['match'], true); ?>
                     <a href="<?php echo $profile_item['href']; ?>"
-                       class="mt-2 mt-lg-0 utility-icon-link profile-icon-link<?php echo $is_profile_active ? ' active' : ''; ?>"
+                       class="mt-2 mt-xl-0 utility-icon-link profile-icon-link<?php echo $is_profile_active ? ' active' : ''; ?>"
                        aria-label="<?php echo htmlspecialchars($profile_item['label']); ?>"
                        title="<?php echo htmlspecialchars($profile_item['label']); ?>"
                        <?php echo $is_profile_active ? 'aria-current="page"' : ''; ?>>
@@ -956,143 +918,42 @@ if (site_is_parent()) {
 </header>
 
 <script>
-    // Ενιαίος χειρισμός toggle για σταθερό άνοιγμα/κλείσιμο του mobile menu.
+    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
     (function () {
-        function getZoomSignals() {
-            var visualScale = 1;
-            var outerInnerScale = 1;
-
-            if (window.visualViewport && typeof window.visualViewport.scale === 'number') {
-                visualScale = window.visualViewport.scale;
-            }
-
-            if (window.outerWidth && window.innerWidth) {
-                outerInnerScale = window.outerWidth / window.innerWidth;
-            }
-
-            return {
-                visualScale: visualScale,
-                outerInnerScale: outerInnerScale
-            };
-        }
-
-        function forceBurgerMode(shouldForce) {
-            var navbar = document.querySelector('.site-header .navbar');
-            var menu = document.getElementById('mainNavbar');
-            var toggler = document.querySelector('[data-target="#mainNavbar"]');
-            if (!navbar || !menu || !toggler) return;
-
-            if (shouldForce) {
-                navbar.classList.add('zoom-burger-mode');
-
-                if (menu.classList.contains('show')) {
-                    if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function') {
-                        window.jQuery(menu).collapse('hide');
-                    } else {
-                        menu.classList.remove('show');
-                    }
-                }
-
-                toggler.setAttribute('aria-expanded', 'false');
-                toggler.classList.add('collapsed');
-                return;
-            }
-
-            navbar.classList.remove('zoom-burger-mode');
-            menu.classList.remove('collapsing');
-            menu.style.height = '';
-            toggler.setAttribute('aria-expanded', menu.classList.contains('show') ? 'true' : 'false');
-            toggler.classList.toggle('collapsed', !menu.classList.contains('show'));
-        }
-
-        function applyZoomMode() {
-            var desktopView = window.matchMedia('(min-width: 992px)').matches;
-            var signals = getZoomSignals();
-            var threshold = 1.49; // 150% with small tolerance for browser rounding.
-            var isAtLeast150 = signals.visualScale >= threshold
-                || signals.outerInnerScale >= threshold;
-            var shouldForceBurger = desktopView && isAtLeast150;
-            forceBurgerMode(shouldForceBurger);
-        }
-
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
         }
 
-        function bindNavbarToggle() {
+        function bindFallbackNavbarToggle() {
+            if (hasBootstrapCollapse()) return;
+
+            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
             var toggler = document.querySelector('[data-target="#mainNavbar"]');
             var menu = document.getElementById('mainNavbar');
-            if (!toggler || !menu || toggler.dataset.toggleBound === 'true') return;
+            if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
 
-            toggler.dataset.toggleBound = 'true';
+            toggler.dataset.fallbackBound = 'true';
 
-            function setExpandedState(isOpen) {
-                toggler.classList.toggle('collapsed', !isOpen);
-                toggler.setAttribute('aria-expanded', String(isOpen));
-            }
+            // Εναλλαγή open/close όταν πατάμε το hamburger.
+            toggler.addEventListener('click', function (event) {
+                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
+                if (hasBootstrapCollapse()) return;
 
-            function toggleMenu() {
-                if (hasBootstrapCollapse()) {
-                    window.jQuery(menu).collapse(menu.classList.contains('show') ? 'hide' : 'show');
-                    return;
-                }
+                event.preventDefault();
 
                 var isOpen = menu.classList.contains('show');
                 menu.classList.toggle('show', !isOpen);
-                setExpandedState(!isOpen);
-            }
-
-            if (hasBootstrapCollapse()) {
-                window.jQuery(menu).on('shown.bs.collapse', function () {
-                    setExpandedState(true);
-                });
-
-                window.jQuery(menu).on('hidden.bs.collapse', function () {
-                    setExpandedState(false);
-                });
-            }
-
-            toggler.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-                toggleMenu();
+                toggler.classList.toggle('collapsed', isOpen);
+                // Ενημέρωση του aria-expanded για accessibility.
+                toggler.setAttribute('aria-expanded', String(!isOpen));
             });
-
-            setExpandedState(menu.classList.contains('show'));
-        }
-
-        function bindZoomListeners() {
-            var rafId = null;
-            function onZoomOrResize() {
-                if (rafId) {
-                    window.cancelAnimationFrame(rafId);
-                }
-
-                rafId = window.requestAnimationFrame(function () {
-                    applyZoomMode();
-                });
-
-                // Some browsers update zoom metrics asynchronously.
-                window.setTimeout(applyZoomMode, 120);
-            }
-
-            window.addEventListener('resize', onZoomOrResize);
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', onZoomOrResize);
-            }
-
-            applyZoomMode();
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () {
-                bindNavbarToggle();
-                bindZoomListeners();
-            });
+            document.addEventListener('DOMContentLoaded', bindFallbackNavbarToggle);
             return;
         }
 
-        bindNavbarToggle();
-        bindZoomListeners();
+        bindFallbackNavbarToggle();
     })();
 </script>

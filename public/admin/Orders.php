@@ -12,6 +12,32 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 	header('Location: /parents-council-platform-group5/public/login.php');
 	exit;
 }
+
+// Handle AJAX requests for mark_order_seen
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+	$action = $_POST['action'];
+	
+	if ($action === 'mark_order_seen') {
+		require_once __DIR__ . '/../../app/config/db.php';
+		require_once __DIR__ . '/../../app/services/OrdersService.php';
+		
+		$order_id = (int)($_POST['order_id'] ?? 0);
+		$success = false;
+
+		if ($order_id > 0) {
+			$ordersService = new OrdersService($conn);
+			$success = $ordersService->markOrderAsSeen($order_id);
+		}
+
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode([
+			'success' => $success,
+			'order_id' => $order_id,
+			'pending_paid_orders_count' => (int)(new OrdersService($conn))->getPendingPaidOrdersCount(),
+		], JSON_UNESCAPED_UNICODE);
+		exit;
+	}
+}
 ?>
 <!DOCTYPE html>
 <html lang="el">
