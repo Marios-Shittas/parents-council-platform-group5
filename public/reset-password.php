@@ -11,38 +11,18 @@ header("Expires: 0");
 
 require_once __DIR__ . '/../app/config/config.php';
 require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/includes/TokenValidator.php';
+require_once __DIR__ . '/../app/controllers/ResetPasswordPageController.php';
 
 global $conn;
-$tokenValidator = new TokenValidator($conn);
-
-$resetPasswordServiceUrl = rtrim(APP_BASE_URL, '/') . '/app/services/ResetPasswordService.php';
-
-$token = trim((string) ($_GET['token'] ?? ''));
-$email = trim((string) ($_GET['email'] ?? ''));
-$isValidToken = false;
-$tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
-
-// Validate token if both token and email are provided
-if ($token && $email) {
-    // Check if token is valid and not expired
-    $stmt = $conn->prepare("
-        SELECT user_id FROM Users 
-        WHERE email = ? AND token = ? AND token_expiry IS NOT NULL AND token_expiry >= NOW()
-        LIMIT 1
-    ");
-    
-    if ($stmt) {
-        $stmt->bind_param("ss", $email, $token);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $isValidToken = $result->num_rows > 0;
-        $stmt->close();
-    }
-}
-
-$emailJson = json_encode($email, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-$tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$resetPasswordController = new ResetPasswordPageController($conn);
+$resetPasswordData = $resetPasswordController->viewData();
+$isValidToken = $resetPasswordData['is_valid_token'];
+$tokenMessage = $resetPasswordData['token_message'];
+$resetConfig = [
+    'RESET_EMAIL' => $resetPasswordData['email'],
+    'RESET_TOKEN' => $resetPasswordData['token'],
+    'RESET_PASSWORD_SERVICE_URL' => $resetPasswordData['service_url'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -103,11 +83,7 @@ $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
             
-            <script>
-                window.RESET_EMAIL = <?php echo $emailJson ?: '""'; ?>;
-                window.RESET_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
-                window.RESET_PASSWORD_SERVICE_URL = <?php echo json_encode($resetPasswordServiceUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
-            </script>
+            <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode($resetConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
             
             <script type="text/javascript" src="assets/js/reset-password.jsx"></script>
         <?php endif; ?>

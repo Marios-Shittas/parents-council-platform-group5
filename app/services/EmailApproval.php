@@ -10,6 +10,7 @@ class EmailApproval
     private PHPMailer $mailer;
     private array $transportModes = [];
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(array $smtpConfig)
     {
         $host = trim((string) ($smtpConfig['host'] ?? ''));
@@ -64,6 +65,7 @@ class EmailApproval
         $this->transportModes = $this->resolveTransportModes($encryption, $port);
     }
 
+    // Leitourgia sendApprovalEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function sendApprovalEmail(string $toEmail, string $link): void
     {
         $lastError = null;
@@ -92,6 +94,7 @@ class EmailApproval
         throw new \RuntimeException('Failed to send approval email.');
     }
 
+    // Leitourgia resolveTransportModes: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function resolveTransportModes(string $encryption, int $port): array
     {
         $normalized = strtolower(trim($encryption));
@@ -115,6 +118,7 @@ class EmailApproval
         return ['starttls', 'smtps', 'none'];
     }
 
+    // Leitourgia applyTransportMode: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function applyTransportMode(string $mode): void
     {
         if ($mode === 'smtps') {

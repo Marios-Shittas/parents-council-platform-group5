@@ -1,122 +1,83 @@
 <?php
 
+require_once __DIR__ . '/../core/SiteContext.php';
+
 if (!function_exists('site_context')) {
+    // Girnaei to trexon site context meso tis OO SiteContext klasis.
     function site_context(): string
     {
-        global $siteContext;
-
-        if (isset($siteContext) && in_array($siteContext, ['public', 'parent'], true)) {
-            return $siteContext;
-        }
-
-        $requestPath = (string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
-        return strpos($requestPath, '/public/parent/') !== false ? 'parent' : 'public';
+        return (new SiteContext())->context();
     }
 }
 
 if (!function_exists('site_is_parent')) {
+    // Elegxei an to request einai sto parent section.
     function site_is_parent(): bool
     {
-        return site_context() === 'parent';
+        return (new SiteContext())->isParent();
     }
 }
 
 if (!function_exists('site_base_url')) {
+    // Girnaei ti vasi tou public URL.
     function site_base_url(): string
     {
-        return '/parents-council-platform-group5/public';
+        return (new SiteContext())->baseUrl();
     }
 }
 
 if (!function_exists('site_project_url')) {
+    // Girnaei ti vasi tou project URL.
     function site_project_url(): string
     {
-        return '/parents-council-platform-group5';
+        return (new SiteContext())->projectUrl();
     }
 }
 
 if (!function_exists('site_section_url')) {
+    // Ftiaxnei URL gia public i parent section.
     function site_section_url(string $path = ''): string
     {
-        $prefix = site_is_parent() ? '/parent' : '';
-        $normalized = ltrim($path, '/');
-
-        if ($normalized === '') {
-            return site_base_url() . $prefix;
-        }
-
-        return site_base_url() . $prefix . '/' . $normalized;
+        return (new SiteContext())->sectionUrl($path);
     }
 }
 
 if (!function_exists('site_public_url')) {
+    // Ftiaxnei URL pou deixnei sto public root.
     function site_public_url(string $path = ''): string
     {
-        $normalized = ltrim($path, '/');
-        return $normalized === '' ? site_base_url() : site_base_url() . '/' . $normalized;
+        return (new SiteContext())->publicUrl($path);
     }
 }
 
 if (!function_exists('site_asset_url')) {
+    // Ftiaxnei URL gia public asset.
     function site_asset_url(string $path = ''): string
     {
-        $normalized = ltrim($path, '/');
-        return $normalized === ''
-            ? site_base_url() . '/assets'
-            : site_base_url() . '/assets/' . $normalized;
+        return (new SiteContext())->assetUrl($path);
     }
 }
 
 if (!function_exists('site_login_url')) {
+    // Girnaei to kentriko login URL.
     function site_login_url(): string
     {
-        return site_public_url('login.php');
+        return (new SiteContext())->loginUrl();
     }
 }
 
 if (!function_exists('site_storage_url')) {
+    // Ftiaxnei URL gia storage arxeia.
     function site_storage_url(string $path = ''): string
     {
-        $normalized = ltrim($path, '/');
-        $root = site_project_url() . '/storage';
-
-        if ($normalized === '' || $normalized === 'storage') {
-            return $root;
-        }
-
-        if (strpos($normalized, 'storage/') === 0) {
-            $normalized = substr($normalized, strlen('storage/'));
-        }
-
-        return $root . '/' . $normalized;
+        return (new SiteContext())->storageUrl($path);
     }
 }
 
 if (!function_exists('site_resolve_content_url')) {
+    // Metatrepei stored paths se URLs pou anoigoun apo browser.
     function site_resolve_content_url(string $path): string
     {
-        $trimmed = trim($path);
-
-        if ($trimmed === '' || strpos($trimmed, 'data:') === 0 || preg_match('#^https?://#i', $trimmed)) {
-            return $trimmed;
-        }
-
-        if (strpos($trimmed, '/parents-council-platform-group5/') === 0) {
-            return $trimmed;
-        }
-
-        if (strpos($trimmed, 'storage/') === 0 || strpos($trimmed, '/storage/') === 0) {
-            return site_storage_url($trimmed);
-        }
-
-        if (strpos($trimmed, 'public/') === 0) {
-            return site_project_url() . '/' . ltrim($trimmed, '/');
-        }
-
-        if ($trimmed[0] === '/') {
-            return $trimmed;
-        }
-
-        return site_public_url($trimmed);
+        return (new SiteContext())->resolveContentUrl($path);
     }
 }

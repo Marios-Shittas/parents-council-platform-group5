@@ -30,62 +30,11 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
         <!-- Costom CSS -->
         <link rel="stylesheet" href="assets/css/main.css">
         <link rel="stylesheet" href="assets/css/login.css">
-        <script>
-            (function () {
-                var faviconHref = 'assets/img/logo-icon.png';
-                var head = document.head || document.getElementsByTagName('head')[0];
-                if (!head) return;
-
-                var img = new Image();
-                img.onload = function () {
-                    var size = 128;
-                    var canvas = document.createElement('canvas');
-                    canvas.width = size;
-                    canvas.height = size;
-
-                    var context = canvas.getContext('2d');
-                    if (!context) {
-                        return;
-                    }
-
-                    context.clearRect(0, 0, size, size);
-                    context.beginPath();
-                    context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-                    context.closePath();
-                    context.clip();
-                    context.drawImage(img, 0, 0, size, size);
-
-                    var existingIcons = head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
-                    existingIcons.forEach(function (icon) {
-                        icon.parentNode.removeChild(icon);
-                    });
-
-                    var icon = document.createElement('link');
-                    icon.rel = 'icon';
-                    icon.type = 'image/png';
-                    icon.href = canvas.toDataURL('image/png');
-                    head.appendChild(icon);
-                };
-
-                img.src = faviconHref;
-            })();
-        </script>
+        <script src="assets/js/site-favicon.js" data-favicon-href="assets/img/logo-icon.png" data-favicon-shape="circle" defer></script>
     </head>
     
     <body class="body">
-    <script>
-        (function() {
-            window.addEventListener('popstate', function(event) {
-            });
-            
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    if (window.location.pathname.includes('login.php')) {
-                    }
-                }
-            });
-        })();
-    </script>
+    <script src="assets/js/login-page.js" defer></script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>

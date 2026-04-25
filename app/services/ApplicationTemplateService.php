@@ -9,6 +9,7 @@ class ApplicationTemplateService {
     private $templatesTableChecked = false;
     private $templatesTableReady = false;
     
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct($conn) {
         $this->conn = $conn;
         $this->ensureTemplatesTableReady();
@@ -39,12 +40,14 @@ class ApplicationTemplateService {
         return $this->templatesTableReady;
     }
 
+    // Leitourgia templatesTableExists: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function templatesTableExists() {
         $tableName = $this->conn->real_escape_string($this->templatesTable);
         $result = $this->conn->query("SHOW TABLES LIKE '{$tableName}'");
         return $result instanceof mysqli_result && $result->num_rows > 0;
     }
 
+    // Leitourgia createTemplatesTable: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function createTemplatesTable() {
         $sql = "CREATE TABLE IF NOT EXISTS `ApplicationTemplates` (
                     `template_id` INT NOT NULL AUTO_INCREMENT,
@@ -64,6 +67,7 @@ class ApplicationTemplateService {
         $this->conn->query($sql);
     }
 
+    // Leitourgia seedDefaultTemplatesIfNeeded: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function seedDefaultTemplatesIfNeeded() {
         if (!$this->templatesTableReady) {
             return;

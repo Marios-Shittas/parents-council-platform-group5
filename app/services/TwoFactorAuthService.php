@@ -9,12 +9,14 @@ class TwoFactorAuthService
     private mysqli $conn;
     private int $tokenExpirationMinutes = 10;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Leitourgia send2FACode: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function send2FACode(string $email, string $name, string $token): array
     {
         $email = trim($email);
@@ -68,6 +70,7 @@ class TwoFactorAuthService
         }
     }
 
+    // Leitourgia verify2FACode: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function verify2FACode(string $email, string $code): array
     {
         $stmt = $this->conn->prepare('SELECT token, token_expiry FROM Users WHERE email = ? LIMIT 1');
@@ -99,6 +102,7 @@ class TwoFactorAuthService
         return ['success' => true, 'message' => 'Η επαλήθευση 2FA ολοκληρώθηκε επιτυχώς.'];
     }
 
+    // Leitourgia clear2FAData: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function clear2FAData(string $email): void
     {
         $stmt = $this->conn->prepare('UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?');
@@ -111,6 +115,7 @@ class TwoFactorAuthService
         $stmt->close();
     }
 
+    // Leitourgia derive8CharCodeFromToken: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function derive8CharCodeFromToken(string $token): string
     {
         $token = trim($token);

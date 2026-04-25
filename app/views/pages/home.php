@@ -27,6 +27,7 @@ $eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Ε
 $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
 
 if (!function_exists('home_public_content_url_exists')) {
+    // Leitourgia home_public_content_url_exists: xeirizetai to antistoixo kommati tis selidas i tou service.
     function home_public_content_url_exists(string $url): bool
     {
         $path = (string)parse_url($url, PHP_URL_PATH);
@@ -207,26 +208,7 @@ if (!function_exists('home_public_content_url_exists')) {
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.home-school-banner__carousel').forEach(function (carousel) {
-                var slides = carousel.querySelectorAll('.home-school-banner__image');
-
-                if (slides.length <= 1) {
-                    return;
-                }
-
-                var currentIndex = 0;
-                var intervalMs = parseInt(carousel.getAttribute('data-interval'), 10) || 15000;
-
-                window.setInterval(function () {
-                    slides[currentIndex].classList.remove('is-active');
-                    currentIndex = (currentIndex + 1) % slides.length;
-                    slides[currentIndex].classList.add('is-active');
-                }, intervalMs);
-            });
-        });
-    </script>
+    <script src="<?php echo site_asset_url('js/home-banner-carousel.js'); ?>" defer></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>

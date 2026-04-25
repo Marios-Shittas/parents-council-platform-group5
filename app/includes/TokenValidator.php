@@ -5,11 +5,13 @@ class TokenValidator
 {
     private mysqli $conn;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
 
+    // Leitourgia isTokenValid: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function isTokenValid(
         string $token,
         ?string $role = null,
@@ -19,6 +21,7 @@ class TokenValidator
         return $this->getUserIdByToken($token, $role, $accountStatus, $requireNotExpired) !== null;
     }
 
+    // Leitourgia getUserIdByToken: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getUserIdByToken(
         string $token,
         ?string $role = null,
@@ -70,6 +73,7 @@ class TokenValidator
         return $row ? (int) $row['user_id'] : null;
     }
 
+    // Leitourgia resetAllExpiredWaitingPaymentUsersToPending: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function resetAllExpiredWaitingPaymentUsersToPending(): int
     {
         $stmt = $this->conn->prepare(

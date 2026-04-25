@@ -6,6 +6,7 @@ class EshopSettingsService
 {
     private mysqli $conn;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(?mysqli $conn = null)
     {
         if ($conn instanceof mysqli) {
@@ -17,6 +18,7 @@ class EshopSettingsService
         $this->conn = $conn;
     }
 
+    // Leitourgia isShopVisible: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function isShopVisible(): bool
     {
         $this->ensureSettingsTable();
@@ -35,6 +37,7 @@ class EshopSettingsService
         return true;
     }
 
+    // Leitourgia setShopVisibility: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function setShopVisibility(bool $isVisible): bool
     {
         $this->ensureSettingsTable();
@@ -57,6 +60,7 @@ class EshopSettingsService
         return $updated;
     }
 
+    // Leitourgia ensureSettingsTable: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureSettingsTable(): void
     {
         $this->conn->query("

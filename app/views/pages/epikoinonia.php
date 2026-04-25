@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="section-subtitle"><?php echo htmlspecialchars($mapSection['subtitle']); ?></p>
                 <?php endif; ?>
                 <div class="map-container">
-                    <iframe src="<?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?>" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe src="<?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?>" width="600" height="450" class="map-frame-borderless" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
 

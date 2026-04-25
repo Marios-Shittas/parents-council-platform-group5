@@ -10,6 +10,113 @@ body {
     min-height: 100vh;
 }
 
+.admin-gap-10 {
+    gap: 10px;
+}
+
+.admin-gap-12 {
+    gap: 12px;
+}
+
+.admin-inline-form {
+    display: inline;
+}
+
+.admin-mt-1rem {
+    margin-top: 1rem;
+}
+
+.admin-table-actions-150 {
+    width: 150px;
+}
+
+.admin-table-actions-170 {
+    width: 170px;
+}
+
+.admin-col-25 {
+    width: 25%;
+}
+
+.admin-col-20 {
+    width: 20%;
+}
+
+.admin-col-15 {
+    width: 15%;
+}
+
+.admin-text-center {
+    text-align: center;
+}
+
+.admin-thumb-placeholder {
+    background: #eee;
+}
+
+.admin-modal-header-blue {
+    background: #2f6fb3;
+}
+
+.admin-modal-title-white,
+.admin-modal-title-white i,
+.admin-modal-close-white,
+.admin-modal-close-white span {
+    color: #ffffff !important;
+}
+
+.admin-modal-close-white {
+    opacity: 1;
+    text-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+.admin-modal-content-rounded {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.admin-modal-body-confirm {
+    padding: 30px 25px;
+}
+
+.admin-confirm-main-text {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.admin-confirm-name-text {
+    font-weight: 700;
+    color: #1A374D;
+    font-size: 20px;
+}
+
+.admin-confirm-muted-text {
+    margin-top: 15px;
+    color: #6c757d;
+}
+
+.admin-product-preview-img {
+    max-width: 120px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.admin-hidden {
+    display: none;
+}
+
+.admin-template-card-blue {
+    background: #eef6ff;
+    border: 1px dashed #9fc2ea !important;
+}
+
+.admin-modal-close-filter {
+    filter: brightness(0) invert(1);
+    opacity: 1;
+}
+
 .admin-sidebar {
     width: 248px;
     background: linear-gradient(180deg, #163a63 0%, #183f6b 100%);

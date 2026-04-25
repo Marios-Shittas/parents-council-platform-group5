@@ -39,9 +39,7 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     </head>
     
     <body class="body">
-    <script>
-        window.initialTwoFactorSuccess = <?php echo json_encode($successMessage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
-    </script>
+    <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['initialTwoFactorSuccess' => $successMessage], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8'); ?>"></script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>

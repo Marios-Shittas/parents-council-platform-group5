@@ -1,14 +1,6 @@
 <?php
-$host = "localhost";
-$user = "root";
-$password = "";     // XAMPP default
-$database = "parents_council";
+require_once __DIR__ . '/../core/Database.php';
 
-$conn = new mysqli($host, $user, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if (!isset($conn) || !($conn instanceof mysqli)) {
+    $conn = Database::connect();
 }
-
-$conn->set_charset("utf8mb4");
-?>

@@ -9,6 +9,7 @@ class ApplicationsService {
     private $conn;
     private $hasAdminSeenAtColumn = null;
     
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct() {
         global $conn;
         $this->conn = $conn;

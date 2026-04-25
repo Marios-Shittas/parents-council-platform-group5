@@ -14,6 +14,7 @@ class ParentsPageService
     private $defaultGalleryImages;
     private $lastError = '';
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct()
     {
         global $conn;
@@ -26,6 +27,7 @@ class ParentsPageService
         $this->ensureDefaultGalleryImages();
     }
 
+    // Leitourgia getAllSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -54,12 +56,14 @@ class ParentsPageService
         return $sections;
     }
 
+    // Leitourgia getSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
 
+    // Leitourgia updateSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -124,6 +128,7 @@ class ParentsPageService
         return true;
     }
 
+    // Leitourgia getGalleryImages: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getGalleryImages()
     {
         $images = [];
@@ -138,6 +143,7 @@ class ParentsPageService
         return $images;
     }
 
+    // Leitourgia getGalleryImageById: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getGalleryImageById($imageId)
     {
         $stmt = $this->conn->prepare('SELECT * FROM ParentsPageGalleryImages WHERE image_id = ? LIMIT 1');
@@ -156,6 +162,7 @@ class ParentsPageService
         return $result ? ($result->fetch_assoc() ?: null) : null;
     }
 
+    // Leitourgia addGalleryImage: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function addGalleryImage($fullImagePath, $thumbImagePath = '', $altText = '')
     {
         $this->lastError = '';
@@ -189,6 +196,7 @@ class ParentsPageService
         return true;
     }
 
+    // Leitourgia deleteGalleryImage: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function deleteGalleryImage($imageId)
     {
         $this->lastError = '';
@@ -208,16 +216,19 @@ class ParentsPageService
         return $stmt->affected_rows > 0;
     }
 
+    // Leitourgia getLastError: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getLastError()
     {
         return $this->lastError;
     }
 
+    // Leitourgia getBoardArchiveReferenceRows: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getBoardArchiveReferenceRows(): array
     {
         return $this->buildDefaultBoardArchiveRows();
     }
 
+    // Leitourgia ensureTables: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureTables()
     {
         $sectionsSql = "CREATE TABLE IF NOT EXISTS ParentsPageSections (
@@ -245,6 +256,7 @@ class ParentsPageService
         $this->conn->query($gallerySql);
     }
 
+    // Leitourgia ensureDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -265,6 +277,7 @@ class ParentsPageService
         }
     }
 
+    // Leitourgia ensureDefaultGalleryImages: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureDefaultGalleryImages()
     {
         $result = $this->conn->query('SELECT COUNT(*) AS total FROM ParentsPageGalleryImages');
@@ -288,6 +301,7 @@ class ParentsPageService
         }
     }
 
+    // Leitourgia getNextGallerySortOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getNextGallerySortOrder()
     {
         $result = $this->conn->query('SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort_order FROM ParentsPageGalleryImages');
@@ -299,6 +313,7 @@ class ParentsPageService
         return 1;
     }
 
+    // Leitourgia buildDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildDefaultSections()
     {
         return [
@@ -518,6 +533,7 @@ class ParentsPageService
         ];
     }
 
+    // Leitourgia buildDefaultGalleryImages: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildDefaultGalleryImages()
     {
         return [
@@ -554,6 +570,7 @@ class ParentsPageService
         ];
     }
 
+    // Leitourgia buildDefaultBoardArchiveRows: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildDefaultBoardArchiveRows(): array
     {
         return [
@@ -599,6 +616,7 @@ class ParentsPageService
         ];
     }
 
+    // Leitourgia normalizeUtf8: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

@@ -377,7 +377,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                         <th>Τιμή</th>
                                         <th>Μεγέθη</th>
                                         <th>Περιγραφή</th>
-                                        <th style="width: 170px;">Ενέργειες</th>
+                                        <th class="admin-table-actions-170">Ενέργειες</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -466,18 +466,18 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="create">
 
-                    <div class="modal-header" style="background:#2f6fb3;">
-                        <h5 class="modal-title" style="color:#ffffff !important;">
-                            <i class="fas fa-plus mr-2" style="color:#ffffff !important;"></i>Νέο Προϊόν
+                    <div class="modal-header admin-modal-header-blue">
+                        <h5 class="modal-title admin-modal-title-white">
+                            <i class="fas fa-plus mr-2"></i>Νέο Προϊόν
                         </h5>
                         <button
                             type="button"
                             class="close"
                             data-dismiss="modal"
                             aria-label="Close"
-                            style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;"
+                            class="admin-modal-close-white"
                         >
-                            <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
@@ -517,9 +517,9 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                             </div>
                         </div>
 
-                        <div class="form-group js-size-options-group" style="display:none;">
+                        <div class="form-group js-size-options-group admin-hidden">
                             <label><strong>Διαθέσιμα Μεγέθη στον parent</strong></label>
-                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                            <div class="d-flex flex-wrap admin-gap-10">
                                 <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
                                     <div class="custom-control custom-checkbox">
                                         <input
@@ -576,18 +576,18 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="product_id" value="<?php echo $editProduct['product_id'] ?? ''; ?>">
 
-                    <div class="modal-header" style="background:#2f6fb3;">
-                        <h5 class="modal-title" style="color:#ffffff !important;">
-                            <i class="fas fa-edit mr-2" style="color:#ffffff !important;"></i>Επεξεργασία Προϊόντος
+                    <div class="modal-header admin-modal-header-blue">
+                        <h5 class="modal-title admin-modal-title-white">
+                            <i class="fas fa-edit mr-2"></i>Επεξεργασία Προϊόντος
                         </h5>
                         <button
                             type="button"
                             class="close"
                             data-dismiss="modal"
                             aria-label="Close"
-                            style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;"
+                            class="admin-modal-close-white"
                         >
-                            <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
@@ -648,9 +648,9 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                             </div>
                         </div>
 
-                        <div class="form-group js-size-options-group" style="display:<?php echo (!empty($editProduct['has_sizes'])) ? 'block' : 'none'; ?>;">
+                        <div class="form-group js-size-options-group<?php echo (!empty($editProduct['has_sizes'])) ? '' : ' admin-hidden'; ?>">
                             <label><strong>Διαθέσιμα Μεγέθη στον parent</strong></label>
-                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                            <div class="d-flex flex-wrap admin-gap-10">
                                 <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
                                     <div class="custom-control custom-checkbox">
                                         <input
@@ -695,7 +695,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                     <img
                                         src="<?php echo htmlspecialchars($editProduct['product_image']); ?>"
                                         alt="Τρέχουσα εικόνα προϊόντος"
-                                        style="max-width: 120px; border-radius: 8px; border:1px solid #ddd;"
+                                        class="admin-product-preview-img"
                                     >
                                 </div>
                             </div>
@@ -715,37 +715,37 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
 
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+            <div class="modal-content admin-modal-content-rounded">
                 <form method="POST">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" id="deleteProductId">
 
-                    <div class="modal-header" style="background:#2f6fb3;">
-                        <h5 class="modal-title" style="color:#ffffff !important;">
-                            <i class="fas fa-exclamation-triangle mr-2" style="color:#ffffff !important;"></i>Επιβεβαίωση Διαγραφής
+                    <div class="modal-header admin-modal-header-blue">
+                        <h5 class="modal-title admin-modal-title-white">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Επιβεβαίωση Διαγραφής
                         </h5>
                         <button
                             type="button"
                             class="close"
                             data-dismiss="modal"
                             aria-label="Close"
-                            style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;"
+                            class="admin-modal-close-white"
                         >
-                            <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-                    <div class="modal-body text-center" style="padding: 30px 25px;">
-                        <p style="font-size: 18px; margin-bottom: 10px;">
+                    <div class="modal-body text-center admin-modal-body-confirm">
+                        <p class="admin-confirm-main-text">
                             Είστε σίγουροι ότι θέλετε να διαγράψετε το προϊόν
                         </p>
-                        <p id="deleteProductName" style="font-weight:700; color:#1A374D; font-size:20px;"></p>
-                        <p style="margin-top:15px; color:#6c757d;">
+                        <p id="deleteProductName" class="admin-confirm-name-text"></p>
+                        <p class="admin-confirm-muted-text">
                             Η ενέργεια αυτή δεν αναιρείται.
                         </p>
                     </div>
 
-                    <div class="modal-footer d-flex justify-content-center" style="gap:10px;">
+                    <div class="modal-footer d-flex justify-content-center admin-gap-10">
                         <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Ακύρωση</button>
                         <button type="submit" class="btn btn-danger px-4">
                             <i class="fas fa-trash mr-1"></i>Διαγραφή
@@ -759,238 +759,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const deleteButtons = document.querySelectorAll('.delete-product-btn');
-            const deleteProductIdInput = document.getElementById('deleteProductId');
-            const deleteProductName = document.getElementById('deleteProductName');
-
-            function splitCustomSizes(value) {
-                return String(value || '')
-                    .split(/[\r\n,;]+/)
-                    .map(function(item) {
-                        return item.replace(/\s+/g, ' ').trim();
-                    })
-                    .filter(Boolean);
-            }
-
-            function bindCustomSizeBuilder(scopeEl) {
-                const builder = scopeEl.querySelector('.js-custom-size-builder');
-
-                if (!builder) {
-                    return null;
-                }
-
-                const input = builder.querySelector('.js-custom-size-input');
-                const addButton = builder.querySelector('.js-add-custom-size');
-                const chips = builder.querySelector('.js-custom-size-chips');
-                const hiddenField = builder.querySelector('.js-custom-size-options');
-                let values = splitCustomSizes(hiddenField ? hiddenField.value : '');
-
-                function syncHiddenField() {
-                    if (hiddenField) {
-                        hiddenField.value = values.join('\n');
-                    }
-                }
-
-                function render() {
-                    if (!chips) {
-                        syncHiddenField();
-                        return;
-                    }
-
-                    chips.innerHTML = '';
-
-                    if (values.length === 0) {
-                        const empty = document.createElement('span');
-                        empty.className = 'custom-size-empty';
-                        empty.textContent = 'Δεν έχουν προστεθεί άλλα μεγέθη.';
-                        chips.appendChild(empty);
-                        syncHiddenField();
-                        return;
-                    }
-
-                    values.forEach(function(value, index) {
-                        const chip = document.createElement('span');
-                        chip.className = 'custom-size-chip';
-
-                        const text = document.createElement('span');
-                        text.textContent = value;
-
-                        const removeButton = document.createElement('button');
-                        removeButton.type = 'button';
-                        removeButton.className = 'custom-size-chip-remove';
-                        removeButton.setAttribute('aria-label', 'Αφαίρεση ' + value);
-                        removeButton.innerHTML = '<i class="fas fa-times"></i>';
-                        removeButton.addEventListener('click', function() {
-                            values.splice(index, 1);
-                            render();
-                        });
-
-                        chip.appendChild(text);
-                        chip.appendChild(removeButton);
-                        chips.appendChild(chip);
-                    });
-
-                    syncHiddenField();
-                }
-
-                function addValue(shouldFocus) {
-                    if (!input) {
-                        return;
-                    }
-
-                    const nextValues = splitCustomSizes(input.value);
-
-                    nextValues.forEach(function(nextValue) {
-                        const exists = values.some(function(value) {
-                            return value.toLowerCase() === nextValue.toLowerCase();
-                        });
-
-                        if (!exists) {
-                            values.push(nextValue);
-                        }
-                    });
-
-                    input.value = '';
-                    render();
-
-                    if (shouldFocus !== false) {
-                        input.focus();
-                    }
-                }
-
-                if (addButton) {
-                    addButton.addEventListener('click', function() {
-                        addValue(true);
-                    });
-                }
-
-                if (input) {
-                    input.addEventListener('keydown', function(event) {
-                        if (event.key === 'Enter') {
-                            event.preventDefault();
-                            addValue(true);
-                        }
-                    });
-                }
-
-                render();
-
-                return {
-                    clear: function() {
-                        values = [];
-                        if (input) {
-                            input.value = '';
-                        }
-                        render();
-                    },
-                    hasValues: function() {
-                        return values.length > 0;
-                    },
-                    commit: function() {
-                        addValue(false);
-                    },
-                    sync: syncHiddenField
-                };
-            }
-
-            function bindSizeVisibility(scopeEl) {
-                if (!scopeEl) {
-                    return;
-                }
-
-                const toggle = scopeEl.querySelector('.js-has-sizes-toggle');
-                const optionsGroup = scopeEl.querySelector('.js-size-options-group');
-                const options = scopeEl.querySelectorAll('.js-size-option');
-                const customOptions = scopeEl.querySelector('.js-custom-size-options');
-                const customBuilder = bindCustomSizeBuilder(scopeEl);
-                const shouldPreselectDefaults = scopeEl.closest('#createProductModal') !== null;
-
-                if (!toggle || !optionsGroup) {
-                    return;
-                }
-
-                const sync = function(clearValues) {
-                    const enabled = toggle.checked;
-                    optionsGroup.style.display = enabled ? 'block' : 'none';
-
-                    if (enabled && shouldPreselectDefaults) {
-                        const hasCheckedOption = Array.prototype.some.call(options, function(option) {
-                            return option.checked;
-                        });
-                        const hasCustomValues = customBuilder ? customBuilder.hasValues() : splitCustomSizes(customOptions ? customOptions.value : '').length > 0;
-
-                        if (!hasCheckedOption && !hasCustomValues) {
-                            options.forEach(function(option) {
-                                option.checked = true;
-                            });
-                        }
-                    }
-
-                    if (!enabled && clearValues) {
-                        options.forEach(function(option) {
-                            option.checked = false;
-                        });
-
-                        if (customOptions) {
-                            customOptions.value = '';
-                        }
-
-                        if (customBuilder) {
-                            customBuilder.clear();
-                        }
-                    }
-                };
-
-                toggle.addEventListener('change', function() {
-                    sync(true);
-                });
-
-                scopeEl.addEventListener('submit', function(event) {
-                    if (!toggle.checked) {
-                        return;
-                    }
-
-                    if (customBuilder) {
-                        customBuilder.commit();
-                    }
-
-                    const hasClassicSize = Array.prototype.some.call(options, function(option) {
-                        return option.checked;
-                    });
-                    const hasCustomSize = customBuilder ? customBuilder.hasValues() : splitCustomSizes(customOptions ? customOptions.value : '').length > 0;
-
-                    if (!hasClassicSize && !hasCustomSize) {
-                        event.preventDefault();
-                        alert('Επίλεξε τουλάχιστον ένα μέγεθος ή άφησε ανενεργό το πεδίο "Το προϊόν έχει διαθέσιμα μεγέθη".');
-                    } else if (customBuilder) {
-                        customBuilder.sync();
-                    }
-                });
-
-                sync(false);
-            }
-
-            bindSizeVisibility(document.querySelector('#createProductModal form'));
-            bindSizeVisibility(document.querySelector('#editProductModal form'));
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const productId = this.getAttribute('data-id');
-                    const productName = this.getAttribute('data-name');
-
-                    deleteProductIdInput.value = productId;
-                    deleteProductName.textContent = productName;
-
-                    $('#deleteConfirmModal').modal('show');
-                });
-            });
-
-            <?php if ($editProduct): ?>
-                $('#editProductModal').modal('show');
-            <?php endif; ?>
-        });
-    </script>
+    <script src="../assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['ADMIN_ESHOP_OPEN_EDIT_MODAL' => (bool) $editProduct], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
+<script src="../assets/js/admin-eshop.js"></script>
 </body>
 </html>

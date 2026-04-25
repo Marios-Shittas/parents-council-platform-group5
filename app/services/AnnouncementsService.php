@@ -11,15 +11,18 @@ class AnnouncementsService {
     private $announcementAttachmentsTableChecked = false;
     private $announcementAttachmentsTableExists = false;
     
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Leitourgia getMaxImagesPerAnnouncement: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getMaxImagesPerAnnouncement() {
         return 6;
     }
 
+    // Leitourgia getLastOperationError: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getLastOperationError() {
         return $this->lastOperationError;
     }
@@ -212,6 +215,7 @@ class AnnouncementsService {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Leitourgia countImages: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function countImages($announcementId) {
         $sql = "SELECT COUNT(*) AS total FROM AnnouncementsImages WHERE announcement_id = ?";
 
@@ -224,6 +228,7 @@ class AnnouncementsService {
         return (int)($row['total'] ?? 0);
     }
 
+    // Leitourgia getAttachments: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAttachments($announcementId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return [];
@@ -243,6 +248,7 @@ class AnnouncementsService {
         }
     }
 
+    // Leitourgia addAttachment: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function addAttachment($announcementId, $filePath, $originalName = null) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             $this->lastOperationError = 'Ο πίνακας συνημμένων ανακοινώσεων δεν είναι διαθέσιμος.';
@@ -262,6 +268,7 @@ class AnnouncementsService {
         }
     }
 
+    // Leitourgia getAttachmentById: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAttachmentById($attachmentId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return null;
@@ -281,6 +288,7 @@ class AnnouncementsService {
         }
     }
 
+    // Leitourgia deleteAttachment: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function deleteAttachment($attachmentId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return false;
@@ -349,6 +357,7 @@ class AnnouncementsService {
         return $announcements;
     }
 
+    // Leitourgia getAttachmentsGroupedByAnnouncementIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getAttachmentsGroupedByAnnouncementIds(array $announcementIds) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return [];
@@ -392,6 +401,7 @@ class AnnouncementsService {
         return $attachmentsByAnnouncement;
     }
 
+    // Leitourgia isAnnouncementAttachmentsTableAvailable: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function isAnnouncementAttachmentsTableAvailable() {
         if ($this->announcementAttachmentsTableChecked) {
             return $this->announcementAttachmentsTableExists;
@@ -409,6 +419,7 @@ class AnnouncementsService {
         return $this->announcementAttachmentsTableExists;
     }
 
+    // Leitourgia get5LatestAnnouncements: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function get5LatestAnnouncements() {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');

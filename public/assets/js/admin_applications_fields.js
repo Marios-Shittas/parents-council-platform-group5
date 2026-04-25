@@ -30,6 +30,7 @@
     const createApplicationCloseDate = document.getElementById('create_application_close_date');
     const createInstructionFiles = document.getElementById('create_instruction_files');
 
+    // Leitourgia syncCreateCloseDateMin: krataei tin antistoixi symperifora tou UI.
     function syncCreateCloseDateMin() {
         if (!createApplicationOpenDate || !createApplicationCloseDate) {
             return;

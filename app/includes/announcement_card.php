@@ -124,16 +124,16 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
 
-            <div class="modal-header" style="background: linear-gradient(135deg, #0057a8, #003d7a); border: none;">
-                <h5 class="modal-title" style="color:#ffffff !important; font-weight:700;">
-                    <i class="fas fa-bullhorn mr-2" style="color:#ffffff !important;"></i><?php echo htmlspecialchars($announcement['announcement_title']); ?>
+            <div class="modal-header modal-brand-header">
+                <h5 class="modal-title modal-brand-title">
+                    <i class="fas fa-bullhorn mr-2"></i><?php echo htmlspecialchars($announcement['announcement_title']); ?>
                 </h5>
                 <button type="button"
                         class="close"
                         data-dismiss="modal"
                         aria-label="Close"
-                        style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;">
-                    <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
+                        class="modal-brand-close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
@@ -167,8 +167,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                         </div>
                     <?php else: ?>
                         <img src="<?php echo htmlspecialchars($announcement['images'][0]); ?>"
-                             class="img-fluid mb-4 w-100"
-                             style="border-radius:12px; max-height:380px; object-fit:cover;"
+                             class="img-fluid mb-4 w-100 modal-preview-image"
                              alt="<?php echo htmlspecialchars($announcement['announcement_title']); ?>">
                     <?php endif; ?>
                 <?php endif; ?>

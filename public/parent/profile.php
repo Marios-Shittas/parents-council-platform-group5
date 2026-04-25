@@ -9,6 +9,7 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 auth_require_role('parent');
 
+// Leitourgia parentProfileFormatAccountStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatAccountStatusLabel(string $status): string
 {
     $map = [
@@ -22,6 +23,7 @@ function parentProfileFormatAccountStatusLabel(string $status): string
     return $map[$status] ?? ucfirst($status);
 }
 
+// Leitourgia parentProfileAccountStatusClass: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileAccountStatusClass(string $status): string
 {
     switch ($status) {
@@ -38,6 +40,7 @@ function parentProfileAccountStatusClass(string $status): string
     }
 }
 
+// Leitourgia parentProfileFormatOrderStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatOrderStatusLabel(string $status): string
 {
     $map = [
@@ -49,6 +52,7 @@ function parentProfileFormatOrderStatusLabel(string $status): string
     return $map[$status] ?? ucfirst($status);
 }
 
+// Leitourgia parentProfileOrderStatusClass: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileOrderStatusClass(string $status): string
 {
     switch ($status) {
@@ -61,6 +65,7 @@ function parentProfileOrderStatusClass(string $status): string
     }
 }
 
+// Leitourgia parentProfileFormatPaymentStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatPaymentStatusLabel(string $status): string
 {
     $map = [
@@ -73,6 +78,7 @@ function parentProfileFormatPaymentStatusLabel(string $status): string
     return $map[$status] ?? ucfirst($status);
 }
 
+// Leitourgia parentProfilePaymentStatusClass: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfilePaymentStatusClass(string $status): string
 {
     switch ($status) {
@@ -87,6 +93,7 @@ function parentProfilePaymentStatusClass(string $status): string
     }
 }
 
+// Leitourgia parentProfileFormatPaymentTypeLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatPaymentTypeLabel(string $type): string
 {
     $map = [

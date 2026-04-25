@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
 
+// Leitourgia sendApprovalEmailMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
 function sendApprovalEmailMessage(string $email, string $link): void
 {
     $smtpFailureMessage = '';

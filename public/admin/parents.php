@@ -15,27 +15,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leitourgia parentsAdminTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia parentsAdminTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
+// Leitourgia parentsAdminUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminUrl($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia parentsAdminFixedPageHeaderIcon: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminFixedPageHeaderIcon()
 {
     return 'fas fa-users';
 }
 
+// Leitourgia parentsAdminTextareaToList: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToList($value)
 {
     $lines = explode("\n", parentsAdminTextarea($value));
@@ -51,6 +56,7 @@ function parentsAdminTextareaToList($value)
     return $items;
 }
 
+// Leitourgia parentsAdminTextareaToRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToRows($value, array $keys)
 {
     $lines = explode("\n", parentsAdminTextarea($value));
@@ -81,11 +87,13 @@ function parentsAdminTextareaToRows($value, array $keys)
     return $rows;
 }
 
+// Leitourgia parentsAdminListToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminListToTextarea($items)
 {
     return implode("\n", is_array($items) ? $items : []);
 }
 
+// Leitourgia parentsAdminRowsToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminRowsToTextarea($rows, array $keys)
 {
     if (!is_array($rows)) {
@@ -116,6 +124,7 @@ function parentsAdminRowsToTextarea($rows, array $keys)
     return implode("\n", $lines);
 }
 
+// Leitourgia parentsAdminMergeBoardArchiveReferenceRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
     $mergedRows = is_array($rows) ? $rows : [];
@@ -155,6 +164,7 @@ function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenc
     return $mergedRows;
 }
 
+// Leitourgia parentsAdminGroupBoardArchiveRowsByYear: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
 {
     $groupedRows = [];
@@ -182,11 +192,13 @@ function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
     return $groupedRows;
 }
 
+// Leitourgia parentsAdminBoardArchiveGroupToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminBoardArchiveGroupToTextarea(array $rows)
 {
     return parentsAdminRowsToTextarea($rows, ['role', 'name']);
 }
 
+// Leitourgia parentsAdminBoardArchiveBlocksToRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
 {
     $archiveRows = [];

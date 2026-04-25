@@ -15,11 +15,13 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
+// Leitourgia normalizeScheduleStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeScheduleStatus(string $status): string
 {
     return in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
 }
 
+// Leitourgia normalizeScheduleFeature: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeScheduleFeature(string $feature): string
 {
     $normalized = trim((string)$feature);
@@ -31,6 +33,7 @@ function normalizeScheduleFeature(string $feature): string
     return in_array($normalized, $allowed, true) ? $normalized : 'registration';
 }
 
+// Leitourgia scheduleFeatureLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function scheduleFeatureLabel(string $feature): string
 {
     $map = [
@@ -42,6 +45,7 @@ function scheduleFeatureLabel(string $feature): string
     return $map[$feature] ?? $feature;
 }
 
+// Leitourgia normalizeDateTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeDateTimeLocalInput(string $value): ?string
 {
     $trimmed = trim($value);
@@ -61,6 +65,7 @@ function normalizeDateTimeLocalInput(string $value): ?string
     return $dateTime->format('Y-m-d H:i:s');
 }
 
+// Leitourgia toDateTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
 function toDateTimeLocalValue(?string $value): string
 {
     if (!is_string($value) || trim($value) === '') {
@@ -71,6 +76,7 @@ function toDateTimeLocalValue(?string $value): string
     return $timestamp ? date('Y-m-d\\TH:i', $timestamp) : '';
 }
 
+// Leitourgia redirectWithFlash: xeirizetai to antistoixo kommati tis selidas i tou service.
 function redirectWithFlash(string $message, string $type = 'info', string $email = ''): void
 {
     $_SESSION['flash_message'] = $message;
@@ -370,59 +376,6 @@ $registrationSchedules = $usersService->getSystemSchedules();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel" src="../assets/js/admin-programatismo-litourgion.jsx"></script>
-<script>
-    (function () {
-        var deleteScheduleModal = document.getElementById('deleteScheduleModal');
-        if (!deleteScheduleModal) {
-            return;
-        }
-
-        deleteScheduleModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
-            var startDate = button.getAttribute('data-schedule-start') || '';
-            var endDate = button.getAttribute('data-schedule-end') || '';
-            var formId = button.getAttribute('data-schedule-delete-form-id') || '';
-
-            var featureEl = document.getElementById('delete_schedule_feature');
-            var datesEl = document.getElementById('delete_schedule_dates');
-            var formIdEl = document.getElementById('delete_schedule_form_id');
-
-            if (featureEl) {
-                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
-            }
-
-            if (datesEl) {
-                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
-            }
-
-            if (formIdEl) {
-                formIdEl.value = formId;
-            }
-        });
-
-        var confirmDeleteScheduleButton = document.getElementById('confirmDeleteScheduleButton');
-        if (confirmDeleteScheduleButton) {
-            confirmDeleteScheduleButton.addEventListener('click', function () {
-                var formIdEl = document.getElementById('delete_schedule_form_id');
-                var formId = formIdEl ? formIdEl.value : '';
-                if (!formId) {
-                    return;
-                }
-
-                var form = document.getElementById(formId);
-                if (!form) {
-                    return;
-                }
-
-                form.submit();
-            });
-        }
-    })();
-</script>
+<script src="../assets/js/admin-programatismo-litourgion-page.js"></script>
 </body>
 </html>

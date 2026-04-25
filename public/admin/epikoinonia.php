@@ -16,17 +16,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leitourgia epikoinoniaAdminTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function epikoinoniaAdminTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia epikoinoniaAdminTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function epikoinoniaAdminTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
+// Leitourgia epikoinoniaAdminFixedPageHeaderIcon: xeirizetai to antistoixo kommati tis selidas i tou service.
 function epikoinoniaAdminFixedPageHeaderIcon()
 {
     return 'fas fa-envelope';
@@ -396,7 +399,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                     </div>
 
                     <div class="message-actions">
-                        <form method="POST" style="display: inline;" class="delete-form" data-message-id="<?php echo $detailMessage['message_id']; ?>">
+                        <form method="POST" class="admin-inline-form delete-form" data-message-id="<?php echo $detailMessage['message_id']; ?>">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="message_id" value="<?php echo $detailMessage['message_id']; ?>">
                             <button type="button" class="btn btn-danger delete-btn">
@@ -769,7 +772,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                     </form>
 
                     <?php if (!empty($search) || !empty($status) || !empty($dateFrom) || !empty($dateTo)): ?>
-                        <div style="margin-top: 1rem;">
+                        <div class="admin-mt-1rem">
                             <a href="epikoinonia.php" class="btn-reset">
                                 <i class="fas fa-times"></i>
                                 Εκκαθάριση Φίλτρων
@@ -809,11 +812,11 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             <table class="table table-custom">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">ΑΠΟΣΤΟΛΕΑΣ</th>
-                                        <th style="width: 25%;">ΘΕΜΑ</th>
-                                        <th style="width: 20%;">ΗΜΕΡΟΜΗΝΙΑ</th>
-                                        <th style="width: 15%;">ΚΑΤΑΣΤΑΣΗ</th>
-                                        <th style="width: 15%; text-align: center;">ΕΝΕΡΓΕΙΕΣ</th>
+                                        <th class="admin-col-25">ΑΠΟΣΤΟΛΕΑΣ</th>
+                                        <th class="admin-col-25">ΘΕΜΑ</th>
+                                        <th class="admin-col-20">ΗΜΕΡΟΜΗΝΙΑ</th>
+                                        <th class="admin-col-15">ΚΑΤΑΣΤΑΣΗ</th>
+                                        <th class="admin-col-15 admin-text-center">ΕΝΕΡΓΕΙΕΣ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -860,8 +863,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                                         <i class="fas fa-eye"></i>
                                                         Προβολή
                                                     </a>
-                                                    <form method="POST" style="display: inline;" 
-                                                          class="delete-form" data-message-id="<?php echo $message['message_id']; ?>">
+                                                    <form method="POST" class="admin-inline-form delete-form" data-message-id="<?php echo $message['message_id']; ?>">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="message_id" value="<?php echo $message['message_id']; ?>">
                                                         <button type="button" class="btn btn-sm btn-danger delete-btn">
@@ -956,39 +958,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     
-    <script>
-        let pendingDeleteForm = null;
-        
-        // Show delete confirmation modal
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('.delete-form');
-                pendingDeleteForm = form;
-                document.getElementById('deleteModal').classList.add('active');
-            });
-        });
-        
-        // Cancel deletion
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            document.getElementById('deleteModal').classList.remove('active');
-            pendingDeleteForm = null;
-        });
-        
-        // Confirm deletion
-        document.getElementById('confirmBtn').addEventListener('click', function() {
-            if (pendingDeleteForm) {
-                pendingDeleteForm.submit();
-            }
-        });
-        
-        // Close modal when clicking outside
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-                pendingDeleteForm = null;
-            }
-        });
-    </script>
+    <script src="../assets/js/admin-epikoinonia.js"></script>
 </body>
 </html>

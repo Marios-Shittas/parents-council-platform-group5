@@ -14,11 +14,13 @@ class InsuranceJccService
 {
     private mysqli $conn;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
 
+    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function handleRequest(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -37,6 +39,7 @@ class InsuranceJccService
         $this->redirectToProfile('failed', 'Method not allowed.');
     }
 
+    // Leitourgia startCheckout: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function startCheckout(): void
     {
         auth_require_role('parent', [
@@ -98,6 +101,7 @@ class InsuranceJccService
         }
     }
 
+    // Leitourgia handleCallback: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function handleCallback(): void
     {
         $gatewayOrderId = trim((string) ($_GET['orderId'] ?? $_GET['mdOrder'] ?? ''));
@@ -180,6 +184,7 @@ class InsuranceJccService
         }
     }
 
+    // Leitourgia getPendingInsuranceChildrenIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getPendingInsuranceChildrenIds(int $userId): array
     {
         $stmt = $this->conn->prepare(
@@ -217,6 +222,7 @@ class InsuranceJccService
         return $childIds;
     }
 
+    // Leitourgia getInsurancePrice: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getInsurancePrice(): float
     {
         $result = $this->conn->query('SELECT insurance_price FROM PricingSettings LIMIT 1');
@@ -228,6 +234,7 @@ class InsuranceJccService
         return (float) ($row['insurance_price'] ?? 0.0);
     }
 
+    // Leitourgia getUserEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getUserEmail(int $userId): string
     {
         $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
@@ -244,6 +251,7 @@ class InsuranceJccService
         return trim((string) ($row['email'] ?? ''));
     }
 
+    // Leitourgia createInsurancePayment: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function createInsurancePayment(int $userId, float $amount): int
     {
         $stmt = $this->conn->prepare(
@@ -263,6 +271,7 @@ class InsuranceJccService
         return $paymentId;
     }
 
+    // Leitourgia getInsurancePayment: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getInsurancePayment(int $paymentId): ?array
     {
         $stmt = $this->conn->prepare(
@@ -285,6 +294,7 @@ class InsuranceJccService
         return $row ?: null;
     }
 
+    // Leitourgia updatePaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function updatePaymentStatus(int $paymentId, int $userId, string $status, string $transactionId): void
     {
         $stmt = $this->conn->prepare(
@@ -324,6 +334,7 @@ class InsuranceJccService
         $stmt->close();
     }
 
+    // Leitourgia insertInsurancePaymentsForChildren: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function insertInsurancePaymentsForChildren(int $paymentId, array $childIds): void
     {
         if (empty($childIds)) {
@@ -353,6 +364,7 @@ class InsuranceJccService
         $stmt->close();
     }
 
+    // Leitourgia registerJccOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function registerJccOrder(
         string $orderNumber,
         float $amount,
@@ -379,6 +391,7 @@ class InsuranceJccService
         return $this->callJccEndpoint(JCC_REGISTER_URL, $requestFields, 'register');
     }
 
+    // Leitourgia getJccOrderStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getJccOrderStatus(string $orderId): array
     {
         return $this->callJccEndpoint(JCC_ORDER_STATUS_URL, [
@@ -388,6 +401,7 @@ class InsuranceJccService
         ], 'status');
     }
 
+    // Leitourgia callJccEndpoint: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function callJccEndpoint(string $url, array $fields, string $context): array
     {
         if (!function_exists('curl_init')) {
@@ -436,6 +450,7 @@ class InsuranceJccService
         return $response;
     }
 
+    // Leitourgia mapOrderStatusToPaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function mapOrderStatusToPaymentStatus(int $orderStatus): string
     {
         if ($orderStatus === 2) {
@@ -453,6 +468,7 @@ class InsuranceJccService
         return 'failed';
     }
 
+    // Leitourgia resolveFinalPaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function resolveFinalPaymentStatus(string $currentStatus, string $nextStatus): string
     {
         if ($currentStatus === 'completed') {
@@ -466,6 +482,7 @@ class InsuranceJccService
         return $nextStatus;
     }
 
+    // Leitourgia resolveTransactionId: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function resolveTransactionId(array $statusResponse, string $fallbackOrderId): string
     {
         if (isset($statusResponse['transactionAttributes']) && is_array($statusResponse['transactionAttributes'])) {
@@ -490,6 +507,7 @@ class InsuranceJccService
         return $fallbackOrderId;
     }
 
+    // Leitourgia mapLogActionByPaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function mapLogActionByPaymentStatus(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
@@ -503,6 +521,7 @@ class InsuranceJccService
         return 'PAYMENT_FAILED';
     }
 
+    // Leitourgia insertLog: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function insertLog(int $userId, string $action, string $description): void
     {
         $stmt = $this->conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)');
@@ -515,6 +534,7 @@ class InsuranceJccService
         $stmt->close();
     }
 
+    // Leitourgia buildRedirectMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildRedirectMessage(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
@@ -528,6 +548,7 @@ class InsuranceJccService
         return 'Η πληρωμή ασφάλειας δεν ολοκληρώθηκε.';
     }
 
+    // Leitourgia redirectToProfile: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function redirectToProfile(string $status, string $message): void
     {
         $this->redirectToExternalUrl(
@@ -538,6 +559,7 @@ class InsuranceJccService
         );
     }
 
+    // Leitourgia redirectToExternalUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function redirectToExternalUrl(string $url): void
     {
         if ($url === '') {
@@ -548,6 +570,7 @@ class InsuranceJccService
         exit;
     }
 
+    // Leitourgia storeCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function storeCheckoutContext(string $gatewayOrderId, int $paymentId, array $childIds): void
     {
         if ($gatewayOrderId === '') {
@@ -566,12 +589,14 @@ class InsuranceJccService
         ];
     }
 
+    // Leitourgia getStoredCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getStoredCheckoutContext(string $gatewayOrderId): ?array
     {
         $context = $_SESSION['insurance_checkout_context'][$gatewayOrderId] ?? null;
         return is_array($context) ? $context : null;
     }
 
+    // Leitourgia clearStoredCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function clearStoredCheckoutContext(string $gatewayOrderId): void
     {
         if (isset($_SESSION['insurance_checkout_context'][$gatewayOrderId])) {

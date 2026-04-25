@@ -15,7 +15,6 @@ $paramsPayload = [
     'status' => $statusHint,
 ];
 
-$paramsJson = json_encode($paramsPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
 <!DOCTYPE html>
 <html lang="el">
@@ -29,9 +28,7 @@ $paramsJson = json_encode($paramsPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPE
 <body>
     <div id="subscription-result-root"></div>
 
-    <script>
-        window.SUBSCRIPTION_RESULT_PARAMS = <?php echo $paramsJson ?: '{}'; ?>;
-    </script>
+    <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['SUBSCRIPTION_RESULT_PARAMS' => $paramsPayload], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>

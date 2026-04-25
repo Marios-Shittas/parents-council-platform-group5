@@ -497,3 +497,40 @@ table tbody tr:hover {
         height: auto;
     }
 }
+
+.modal-brand-header {
+    background: linear-gradient(135deg, #0057a8, #003d7a);
+    border: none;
+}
+
+.modal-brand-title,
+.modal-brand-title i,
+.modal-brand-close,
+.modal-brand-close span {
+    color: #ffffff !important;
+}
+
+.modal-brand-title {
+    font-weight: 700;
+}
+
+.modal-brand-close {
+    opacity: 1;
+    text-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+.modal-preview-image {
+    border-radius: 12px;
+    max-height: 380px;
+    object-fit: cover;
+}
+
+.map-frame-borderless {
+    border: 0;
+}
+
+.alert-rounded-lg {
+    border-radius: 14px;
+}

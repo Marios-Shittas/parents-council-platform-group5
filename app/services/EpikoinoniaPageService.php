@@ -12,6 +12,7 @@ class EpikoinoniaPageService
     private $defaultSections;
     private $lastError = '';
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct()
     {
         global $conn;
@@ -22,6 +23,7 @@ class EpikoinoniaPageService
         $this->ensureDefaultSections();
     }
 
+    // Leitourgia getAllSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -50,12 +52,14 @@ class EpikoinoniaPageService
         return $sections;
     }
 
+    // Leitourgia getSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
 
+    // Leitourgia updateSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -120,11 +124,13 @@ class EpikoinoniaPageService
         return true;
     }
 
+    // Leitourgia getLastError: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getLastError()
     {
         return $this->lastError;
     }
 
+    // Leitourgia ensureTable: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
@@ -141,6 +147,7 @@ class EpikoinoniaPageService
         $this->conn->query($sql);
     }
 
+    // Leitourgia ensureDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -161,6 +168,7 @@ class EpikoinoniaPageService
         }
     }
 
+    // Leitourgia buildDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildDefaultSections()
     {
         return [
@@ -250,6 +258,7 @@ class EpikoinoniaPageService
         ];
     }
 
+    // Leitourgia normalizeUtf8: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

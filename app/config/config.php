@@ -1,54 +1,21 @@
 <?php
+require_once __DIR__ . '/../core/AppConfig.php';
+
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Europe/Athens');
 
 if (!function_exists('app_detect_request_value')) {
+    // Kanei delegate stin OO config klasi gia na meinoun symvata ta palia calls.
     function app_detect_request_value(string $primaryKey, string $fallbackKey = ''): string
     {
-        $value = trim((string) ($_SERVER[$primaryKey] ?? ''));
-        if ($value !== '') {
-            return explode(',', $value)[0];
-        }
-
-        if ($fallbackKey !== '') {
-            $fallbackValue = trim((string) ($_SERVER[$fallbackKey] ?? ''));
-            if ($fallbackValue !== '') {
-                return explode(',', $fallbackValue)[0];
-            }
-        }
-
-        return '';
+        return AppConfig::detectRequestValue($primaryKey, $fallbackKey);
     }
 }
 
 if (!function_exists('app_detect_base_url')) {
+    // Kanei delegate stin OO config klasi gia ton ypologismo tou base URL.
     function app_detect_base_url(): string
     {
-        $configuredBaseUrl = trim((string) getenv('APP_BASE_URL'));
-        if ($configuredBaseUrl !== '') {
-            return rtrim($configuredBaseUrl, '/');
-        }
-
-        $scheme = app_detect_request_value('HTTP_X_FORWARDED_PROTO');
-        if ($scheme === '') {
-            $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
-            $scheme = ($https !== '' && $https !== 'off') ? 'https' : 'http';
-        }
-
-        $host = app_detect_request_value('HTTP_X_FORWARDED_HOST', 'HTTP_HOST');
-        if ($host === '') {
-            $host = trim((string) ($_SERVER['SERVER_NAME'] ?? 'localhost'));
-        }
-
-        $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
-        $basePath = '/parents-council-platform-group5';
-
-        if (preg_match('#^(.*?)/public(?:/|$)#', $scriptName, $matches)) {
-            $basePath = $matches[1] !== '' ? $matches[1] : '';
-        } elseif (preg_match('#^(.*?)/app(?:/|$)#', $scriptName, $matches)) {
-            $basePath = $matches[1] !== '' ? $matches[1] : '';
-        }
-
-        return rtrim($scheme . '://' . $host . $basePath, '/');
+        return AppConfig::detectBaseUrl();
     }
 }
 

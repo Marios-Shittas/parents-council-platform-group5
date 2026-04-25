@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../includes/site_context.php';
 
+// Leitourgia parentProfileFormatPhoneNumber: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatPhoneNumber($phone): string
 {
     $rawPhone = trim((string)$phone);

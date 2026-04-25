@@ -39,6 +39,7 @@ var SUBMISSION_MODE_LABELS = {
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const _justApplied = new Set(); // appIds submitted during this page session
 
+// Leitourgia isJsApplied: krataei tin antistoixi symperifora tou UI.
 function isJsApplied(appId) {
     return _justApplied.has(appId);
 }
@@ -46,14 +47,17 @@ function isJsApplied(appId) {
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HELPERS
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia getMeta: krataei tin antistoixi symperifora tou UI.
 function getMeta(index) {
     return APP_META[((index % APP_META.length) + APP_META.length) % APP_META.length];
 }
 
+// Leitourgia todayLabel: krataei tin antistoixi symperifora tou UI.
 function todayLabel() {
     return new Date().toLocaleDateString('el-GR');
 }
 
+// Leitourgia escHtml: krataei tin antistoixi symperifora tou UI.
 function escHtml(str) {
     return String(str)
         .replace(/&/g,  '&amp;')
@@ -63,19 +67,23 @@ function escHtml(str) {
         .replace(/'/g,  '&#039;');
 }
 
+// Leitourgia normalizeSubmissionMode: krataei tin antistoixi symperifora tou UI.
 function normalizeSubmissionMode(mode) {
     return mode === 'manual' ? 'manual' : 'upload';
 }
 
+// Leitourgia getSubmissionModeLabel: krataei tin antistoixi symperifora tou UI.
 function getSubmissionModeLabel(mode) {
     var normalizedMode = normalizeSubmissionMode(mode);
     return SUBMISSION_MODE_LABELS[normalizedMode] || SUBMISSION_MODE_LABELS.upload;
 }
 
+// Leitourgia humanizeSubmissionFieldKey: krataei tin antistoixi symperifora tou UI.
 function humanizeSubmissionFieldKey(key) {
     return SUBMISSION_FIELD_LABELS[key] || String(key || '').replace(/_/g, ' ');
 }
 
+// Leitourgia getDisplayableSubmissionEntries: krataei tin antistoixi symperifora tou UI.
 function getDisplayableSubmissionEntries(submissionDataObj) {
     var data = submissionDataObj && typeof submissionDataObj === 'object' ? submissionDataObj : {};
     var entries = [];
@@ -152,10 +160,12 @@ function getDisplayableSubmissionEntries(submissionDataObj) {
     return entries;
 }
 
+// Leitourgia draftStorageKey: krataei tin antistoixi symperifora tou UI.
 function draftStorageKey(appId) {
     return 'applications_draft_' + String(appId);
 }
 
+// Leitourgia saveDraft: krataei tin antistoixi symperifora tou UI.
 function saveDraft(appId, data) {
     try {
         localStorage.setItem(draftStorageKey(appId), JSON.stringify(data));
@@ -165,6 +175,7 @@ function saveDraft(appId, data) {
     }
 }
 
+// Leitourgia loadDraft: krataei tin antistoixi symperifora tou UI.
 function loadDraft(appId) {
     try {
         var raw = localStorage.getItem(draftStorageKey(appId));
@@ -175,6 +186,7 @@ function loadDraft(appId) {
     }
 }
 
+// Leitourgia clearDraft: krataei tin antistoixi symperifora tou UI.
 function clearDraft(appId) {
     try {
         localStorage.removeItem(draftStorageKey(appId));
@@ -183,6 +195,7 @@ function clearDraft(appId) {
     }
 }
 
+// Leitourgia getAllDraftAppIds: krataei tin antistoixi symperifora tou UI.
 function getAllDraftAppIds() {
     var ids = [];
     var prefix = 'applications_draft_';
@@ -204,6 +217,7 @@ function getAllDraftAppIds() {
     return ids;
 }
 
+// Leitourgia toggleSubmissionsVisibility: krataei tin antistoixi symperifora tou UI.
 function toggleSubmissionsVisibility() {
     var tbody = document.getElementById('submissions-tbody');
     var table = document.getElementById('submissions-table');
@@ -211,14 +225,16 @@ function toggleSubmissionsVisibility() {
     if (!tbody || !table || !noMsg) return;
 
     var hasRows = tbody.querySelectorAll('tr').length > 0;
-    noMsg.style.display = hasRows ? 'none' : '';
-    table.style.display = hasRows ? '' : 'none';
+    noMsg.hidden = hasRows;
+    table.hidden = !hasRows;
 }
 
+// Leitourgia getAppCardById: krataei tin antistoixi symperifora tou UI.
 function getAppCardById(appId) {
     return document.getElementById('app-card-' + String(appId));
 }
 
+// Leitourgia getAppTitleById: krataei tin antistoixi symperifora tou UI.
 function getAppTitleById(appId) {
     var card = getAppCardById(appId);
     if (!card) return '\u0391\u03af\u03c4\u03b7\u03c3\u03b7 #' + String(appId);
@@ -226,6 +242,7 @@ function getAppTitleById(appId) {
     return titleEl ? titleEl.textContent.trim() : '\u0391\u03af\u03c4\u03b7\u03c3\u03b7 #' + String(appId);
 }
 
+// Leitourgia getDraftStudentInfo: krataei tin antistoixi symperifora tou UI.
 function getDraftStudentInfo(draftData) {
     return {
         studentName: draftData && draftData.student_name ? draftData.student_name : 'â€”',
@@ -233,6 +250,7 @@ function getDraftStudentInfo(draftData) {
     };
 }
 
+// Leitourgia upsertDraftSubmissionRow: krataei tin antistoixi symperifora tou UI.
 function upsertDraftSubmissionRow(appId, draftData) {
     var tbody = document.getElementById('submissions-tbody');
     if (!tbody) return;
@@ -252,6 +270,7 @@ function upsertDraftSubmissionRow(appId, draftData) {
     toggleSubmissionsVisibility();
 }
 
+// Leitourgia removeDraftSubmissionRow: krataei tin antistoixi symperifora tou UI.
 function removeDraftSubmissionRow(appId) {
     var tbody = document.getElementById('submissions-tbody');
     if (!tbody) return;
@@ -260,6 +279,7 @@ function removeDraftSubmissionRow(appId) {
     toggleSubmissionsVisibility();
 }
 
+// Leitourgia renderDraftRowsFromStorage: krataei tin antistoixi symperifora tou UI.
 function renderDraftRowsFromStorage() {
     getAllDraftAppIds().forEach(function (appId) {
         var draft = loadDraft(appId);
@@ -269,6 +289,7 @@ function renderDraftRowsFromStorage() {
     });
 }
 
+// Leitourgia restoreDraftToForm: krataei tin antistoixi symperifora tou UI.
 function restoreDraftToForm(form, draftData) {
     if (!form || !draftData || typeof draftData !== 'object') return;
 
@@ -295,6 +316,7 @@ function restoreDraftToForm(form, draftData) {
     });
 }
 
+// Leitourgia parseUiDate: krataei tin antistoixi symperifora tou UI.
 function parseUiDate(value) {
     var v = String(value || '').trim();
     if (!v) return null;
@@ -312,6 +334,7 @@ function parseUiDate(value) {
     return null;
 }
 
+// Leitourgia getApplicationWindowStatus: krataei tin antistoixi symperifora tou UI.
 function getApplicationWindowStatus(openDate, closeDate) {
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -332,6 +355,7 @@ function getApplicationWindowStatus(openDate, closeDate) {
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    BADGE / TAG HTML BUILDERS
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia cardStatusBadge: krataei tin antistoixi symperifora tou UI.
 function cardStatusBadge(status) {
     var map = {
         open:     { cls: 'app-status-open',    icon: 'fa-unlock-alt', label: '\u0391\u03bd\u03bf\u03b9\u03c7\u03c4\u03ae' },
@@ -344,6 +368,7 @@ function cardStatusBadge(status) {
            '<i class="fas ' + s.icon + '"></i>' + escHtml(s.label) + '</span>';
 }
 
+// Leitourgia submissionStatusBadge: krataei tin antistoixi symperifora tou UI.
 function submissionStatusBadge(status) {
     var map = {
         submitted: { cls: 'sub-submitted', label: '\u03a5\u03c0\u03bf\u03b2\u03bb\u03ae\u03b8\u03b7\u03ba\u03b5' },
@@ -359,6 +384,7 @@ function submissionStatusBadge(status) {
    AUGMENT CARDS  â€“ inject status badge, category tag, and date row into every
    PHP-rendered application card using its data-app-index attribute.
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia augmentCards: krataei tin antistoixi symperifora tou UI.
 function augmentCards() {
     document.querySelectorAll('.app-card-wrapper').forEach(function (card) {
         var idx        = parseInt(card.dataset.appIndex, 10);
@@ -437,6 +463,7 @@ function augmentCards() {
    RENDER NEWLY-SUBMITTED ROWS  (rows added this page session, before reload)
    DB-rendered rows are already in the tbody from PHP.
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia addSubmissionRow: krataei tin antistoixi symperifora tou UI.
 function addSubmissionRow(sub) {
     var tbody = document.getElementById('submissions-tbody');
     var table = document.getElementById('submissions-table');
@@ -464,13 +491,14 @@ function addSubmissionRow(sub) {
         '<td>' + escHtml(sub.submittedDate) + '</td>';
     tbody.appendChild(tr);
 
-    if (noMsg)  noMsg.style.display  = 'none';
-    if (table)  table.style.display  = '';
+    if (noMsg)  noMsg.hidden = true;
+    if (table)  table.hidden = false;
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    BUILD ONE FORM FIELD
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia buildField: krataei tin antistoixi symperifora tou UI.
 function buildField(field) {
     var req = field.required
         ? '<span class="text-danger ml-1" aria-hidden="true">*</span>'
@@ -527,6 +555,7 @@ function buildField(field) {
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SHOW VIEW MODAL  â€“ handles both PHP-rendered DB rows and JS-submitted rows
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia showViewModalFromData: krataei tin antistoixi symperifora tou UI.
 function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
     var rows = getDisplayableSubmissionEntries(submissionDataObj).map(function (entry) {
         return '<tr><th class="text-muted font-weight-normal" style="width:45%">' +
@@ -552,11 +581,12 @@ function showViewModalFromData(appTitle, submissionDataObj, statusKey, submitted
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SHOW SUCCESS TOAST
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// Leitourgia showToast: krataei tin antistoixi symperifora tou UI.
 function showToast() {
     var toast = document.getElementById('submission-toast');
     if (!toast) return;
-    toast.style.display = 'block';
-    setTimeout(function () { toast.style.display = 'none'; }, 4000);
+    toast.hidden = false;
+    setTimeout(function () { toast.hidden = true; }, 4000);
 }
 
 /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -577,6 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
         : '';
     var bodyScrollLockCount = 0;
 
+    // Leitourgia cleanupModalArtifacts: krataei tin antistoixi symperifora tou UI.
     function cleanupModalArtifacts() {
         var openModals = document.querySelectorAll('.modal.show').length;
         if (openModals > 0) {
@@ -591,6 +622,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.style.paddingRight = '';
     }
 
+    // Leitourgia lockBodyScroll: krataei tin antistoixi symperifora tou UI.
     function lockBodyScroll() {
         if (bodyScrollLockCount === 0) {
             var currentY = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -606,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function () {
         bodyScrollLockCount++;
     }
 
+    // Leitourgia unlockBodyScroll: krataei tin antistoixi symperifora tou UI.
     function unlockBodyScroll() {
         bodyScrollLockCount = Math.max(0, bodyScrollLockCount - 1);
         if (bodyScrollLockCount > 0) {
@@ -669,6 +702,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Leitourgia hideCenterNotice: krataei tin antistoixi symperifora tou UI.
     function hideCenterNotice() {
         if (applicationNoticeBox) {
             applicationNoticeBox.classList.remove('is-visible');
@@ -678,6 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Leitourgia showCenterNotice: krataei tin antistoixi symperifora tou UI.
     function showCenterNotice(messageText) {
         if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
             window.alert(messageText || 'Σφάλμα.');
@@ -707,6 +742,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Leitourgia showUnavailableBox: krataei tin antistoixi symperifora tou UI.
     function showUnavailableBox(messageText) {
         if (unavailableMessageEl) {
             unavailableMessageEl.textContent = messageText || '\u0397 \u03b1\u03af\u03c4\u03b7\u03c3\u03b7 \u03b4\u03b5\u03bd \u03ad\u03c7\u03b5\u03b9 \u03b1\u03bd\u03bf\u03af\u03be\u03b5\u03b9 \u03b1\u03ba\u03cc\u03bc\u03b1.';
@@ -714,6 +750,7 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#application-unavailable-modal').modal('show');
     }
 
+    // Leitourgia normalizeDocPath: krataei tin antistoixi symperifora tou UI.
     function normalizeDocPath(rawPath) {
         var prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
         if (!rawPath) return '';
@@ -730,6 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(rawPath);
     }
 
+    // Leitourgia renderSelectedSubmissionFiles: krataei tin antistoixi symperifora tou UI.
     function renderSelectedSubmissionFiles() {
         if (!viewModalSelectedFiles || !viewModalFileInput) return;
 
@@ -744,10 +782,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
+    // Leitourgia getFallbackManualFields: krataei tin antistoixi symperifora tou UI.
     function getFallbackManualFields(formType) {
         return FORM_FIELDS[formType] || FORM_FIELDS.general || [];
     }
 
+    // Leitourgia normalizeManualFieldType: krataei tin antistoixi symperifora tou UI.
     function normalizeManualFieldType(type) {
         var normalizedType = String(type || 'text').toLowerCase();
         if (normalizedType === 'phone') {
@@ -761,6 +801,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return allowedTypes.indexOf(normalizedType) !== -1 ? normalizedType : 'text';
     }
 
+    // Leitourgia collectFormUploadFiles: krataei tin antistoixi symperifora tou UI.
     function collectFormUploadFiles(formElement) {
         if (!formElement) {
             return [];
@@ -779,6 +820,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return allFiles;
     }
 
+    // Leitourgia applyFormDataValuesWithoutFiles: krataei tin antistoixi symperifora tou UI.
     function applyFormDataValuesWithoutFiles(formElement, targetData) {
         if (!formElement || !targetData) {
             return;
@@ -797,6 +839,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Leitourgia getSubmissionFilesValidationMessage: krataei tin antistoixi symperifora tou UI.
     function getSubmissionFilesValidationMessage(files, requireAtLeastOne) {
         var selectedFiles = Array.isArray(files) ? files : [];
         if (requireAtLeastOne && selectedFiles.length === 0) {
@@ -818,6 +861,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return '';
     }
 
+    // Leitourgia normalizeManualField: krataei tin antistoixi symperifora tou UI.
     function normalizeManualField(field, index) {
         if (!field || typeof field !== 'object') {
             return null;
@@ -846,6 +890,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // Leitourgia fetchManualFieldsForApplication: krataei tin antistoixi symperifora tou UI.
     function fetchManualFieldsForApplication(appId, formType) {
         var fallbackFields = getFallbackManualFields(formType);
         if (!appId) {
@@ -884,6 +929,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Leitourgia renderManualApplicationFields: krataei tin antistoixi symperifora tou UI.
     function renderManualApplicationFields(prefill, fields) {
         if (!viewManualFields) {
             return;
@@ -920,6 +966,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Leitourgia setApplicationSubmitButtonText: krataei tin antistoixi symperifora tou UI.
     function setApplicationSubmitButtonText(mode) {
         if (!viewModalSubmitBtn) {
             return;
@@ -936,6 +983,7 @@ document.addEventListener('DOMContentLoaded', function () {
             : '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
     }
 
+    // Leitourgia setApplicationSubmitMode: krataei tin antistoixi symperifora tou UI.
     function setApplicationSubmitMode(mode) {
         var normalizedMode = normalizeSubmissionMode(mode);
         _modal.submitMode = normalizedMode;
@@ -961,6 +1009,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setApplicationSubmitButtonText(normalizedMode);
     }
 
+    // Leitourgia openApplicationViewModal: krataei tin antistoixi symperifora tou UI.
     function openApplicationViewModal(card) {
         if (!card) return;
 
@@ -1531,4 +1580,3 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-

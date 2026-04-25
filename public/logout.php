@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../app/config/db.php';
 
+// Leitourgia clearUserTokenOnLogout: xeirizetai to antistoixo kommati tis selidas i tou service.
 function clearUserTokenOnLogout(mysqli $conn, ?int $userId, ?string $email): void
 {
     if ($userId !== null && $userId > 0) {
@@ -87,29 +88,8 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
     <title>Logging out...</title>
 </head>
 <body>
-    <script>
-        // Clear all possible ways to go back to protected pages
-        (function() {
-            // Clear session and local storage
-            try {
-                sessionStorage.clear();
-                localStorage.clear();
-            } catch(e) {}
-            
-            // Replace current state multiple times to bury history
-            for (let i = 0; i < 10; i++) {
-                window.history.replaceState(null, null, window.location.href);
-            }
-            
-            // Push many forward states
-            for (let i = 0; i < 50; i++) {
-                window.history.pushState({state: i}, null, window.location.href);
-            }
-            
-            // Redirect without adding to history
-            window.location.replace('<?php echo $redirectUrl; ?>');
-        })();
-    </script>
+    <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['LOGOUT_REDIRECT_URL' => $redirectUrl], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
+    <script src="assets/js/logout-redirect.js" defer></script>
     <noscript>
         Redirecting...
         <meta http-equiv="refresh" content="0;url=<?php echo $redirectUrl; ?>">

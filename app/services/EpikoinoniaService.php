@@ -9,6 +9,7 @@ class EpikoinoniaService {
     private $conn;
     private static $tableChecked = false;
     
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct() {
         global $conn;
         $this->conn = $conn;

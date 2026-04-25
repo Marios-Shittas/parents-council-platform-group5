@@ -48,15 +48,18 @@
         'December',
     ];
 
+    // Leitourgia isIsoDate: krataei tin antistoixi symperifora tou UI.
     function isIsoDate(value) {
         return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
     }
 
+    // Leitourgia parseIsoDate: krataei tin antistoixi symperifora tou UI.
     function parseIsoDate(isoDate) {
         const parts = String(isoDate).split('-').map(Number);
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    // Leitourgia toIsoDate: krataei tin antistoixi symperifora tou UI.
     function toIsoDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -64,6 +67,7 @@
         return `${year}-${month}-${day}`;
     }
 
+    // Leitourgia escapeHtml: krataei tin antistoixi symperifora tou UI.
     function escapeHtml(value) {
         return String(value ?? '')
             .replace(/&/g, '&amp;')
@@ -73,6 +77,7 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Leitourgia formatLongDate: krataei tin antistoixi symperifora tou UI.
     function formatLongDate(isoDate) {
         return new Intl.DateTimeFormat('el-GR', {
             weekday: 'long',
@@ -82,6 +87,7 @@
         }).format(parseIsoDate(isoDate));
     }
 
+    // Leitourgia formatShortDate: krataei tin antistoixi symperifora tou UI.
     function formatShortDate(isoDate) {
         return new Intl.DateTimeFormat('el-GR', {
             day: '2-digit',
@@ -90,6 +96,7 @@
         }).format(parseIsoDate(isoDate));
     }
 
+    // Leitourgia formatTime: krataei tin antistoixi symperifora tou UI.
     function formatTime(value) {
         if (!value) {
             return 'Χωρίς συγκεκριμένη ώρα';
@@ -98,6 +105,7 @@
         return value;
     }
 
+    // Leitourgia getItemsForDate: krataei tin antistoixi symperifora tou UI.
     function getItemsForDate(isoDate) {
         return (Array.isArray(data.items) ? data.items : [])
             .filter((item) => item && item.date === isoDate)
@@ -120,6 +128,7 @@
             });
     }
 
+    // Leitourgia getCounts: krataei tin antistoixi symperifora tou UI.
     function getCounts(items) {
         return items.reduce((accumulator, item) => {
             if (accumulator[item.type] !== undefined) {
@@ -129,6 +138,7 @@
         }, { holiday: 0, event: 0, announcement: 0 });
     }
 
+    // Leitourgia syncFormFields: krataei tin antistoixi symperifora tou UI.
     function syncFormFields() {
         document.querySelectorAll('[data-calendar-date-field]').forEach((field) => {
             field.value = state.selectedDate;
@@ -143,6 +153,7 @@
         });
     }
 
+    // Leitourgia openModal: krataei tin antistoixi symperifora tou UI.
     function openModal(modalSelector) {
         syncFormFields();
 
@@ -151,6 +162,7 @@
         }
     }
 
+    // Leitourgia renderCalendarCells: krataei tin antistoixi symperifora tou UI.
     function renderCalendarCells() {
         const firstDay = new Date(state.year, state.month, 1).getDay();
         const daysInMonth = new Date(state.year, state.month + 1, 0).getDate();
@@ -199,6 +211,7 @@
         return cells.join('');
     }
 
+    // Leitourgia renderSelectedDayPanel: krataei tin antistoixi symperifora tou UI.
     function renderSelectedDayPanel() {
         const items = getItemsForDate(state.selectedDate);
         const counts = getCounts(items);
@@ -264,6 +277,7 @@
         `;
     }
 
+    // Leitourgia render: krataei tin antistoixi symperifora tou UI.
     function render() {
         root.innerHTML = `
             <div class="calendar-dashboard-grid">

@@ -8,12 +8,14 @@ class UsersService
 {
     private mysqli $conn;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Leitourgia getUserByEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getUserByEmail($email)
     {
         $sql = "SELECT * FROM Users WHERE email = ? LIMIT 1";
@@ -31,6 +33,7 @@ class UsersService
         return $user ?: null;
     }
 
+    // Leitourgia getUserById: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getUserById(int $userId)
     {
         $sql = "SELECT * FROM Users WHERE user_id = ? LIMIT 1";
@@ -49,6 +52,7 @@ class UsersService
         return $user ?: null;
     }
 
+    // Leitourgia login: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function login($inputEmail, $inputPassword)
     {
         $email = trim((string)$inputEmail);
@@ -102,6 +106,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia resetAllExpiredWaitingPaymentUsersToPending: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function resetAllExpiredWaitingPaymentUsersToPending(): int
     {
         $stmt = $this->conn->prepare(
@@ -124,11 +129,13 @@ class UsersService
         return max(0, $affectedRows);
     }
 
+    // Leitourgia runScheduledMaintenance: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function runScheduledMaintenance(): void
     {
         $this->runScheduledMaintenanceWithReport();
     }
 
+    // Leitourgia runScheduledMaintenanceWithReport: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function runScheduledMaintenanceWithReport(): array
     {
         $deletedUsers = $this->runScheduledUsersCleanup();
@@ -140,6 +147,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia runScheduledUsersCleanup: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function runScheduledUsersCleanup(): int
     {
         $gate = $this->isSystemFeatureOpen('delete_users');
@@ -173,6 +181,7 @@ class UsersService
         return $deletedCount;
     }
 
+    // Leitourgia runScheduledSubmissionsCleanup: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function runScheduledSubmissionsCleanup(): int
     {
         $gate = $this->isSystemFeatureOpen('cleanup_submissions');
@@ -195,6 +204,7 @@ class UsersService
         return $deletedCount;
     }
 
+    // Leitourgia forgot: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function forgot($email)
     {
         $email = trim((string)$email);
@@ -210,6 +220,7 @@ class UsersService
         return ['success' => true, 'message' => 'Ο σύνδεσμος στάλθηκε.'];
     }
 
+    // Leitourgia resetPassword: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function resetPassword($email, $newPassword) 
     {
         if ($newPassword === '') {
@@ -254,6 +265,7 @@ class UsersService
 
     }
 
+    // Leitourgia getAllUsersForAdmin: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAllUsersForAdmin(string $sort = 'pending_first'): array
     {
         switch ($sort) {
@@ -352,6 +364,7 @@ class UsersService
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Leitourgia getPendingRegistrationCount: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getPendingRegistrationCount(): int
     {
         $sql = "
@@ -370,6 +383,7 @@ class UsersService
         return max(0, (int)($row['count'] ?? 0));
     }
 
+    // Leitourgia getSystemSchedules: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getSystemSchedules(): array
     {
         $sql = "
@@ -386,6 +400,7 @@ class UsersService
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Leitourgia getParentLogsByEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getParentLogsByEmail(string $email): array
     {
         $normalizedEmail = trim($email);
@@ -457,6 +472,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia isSystemFeatureOpen: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function isSystemFeatureOpen(string $feature): array
     {
         $normalizedFeature = $this->normalizeScheduleFeature($feature);
@@ -536,6 +552,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia updateSystemSchedule: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateSystemSchedule(int $ssId, string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
@@ -585,6 +602,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το πρόγραμμα ενημερώθηκε επιτυχώς.'];
     }
 
+    // Leitourgia createSystemSchedule: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function createSystemSchedule(string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
     {
         $normalized = $this->normalizeScheduleInput($feature, $startDate, $endDate, $status);
@@ -625,6 +643,7 @@ class UsersService
         return ['success' => true, 'message' => 'Προστέθηκε νέο πρόγραμμα επιτυχώς.'];
     }
 
+    // Leitourgia deleteSystemSchedule: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function deleteSystemSchedule(int $ssId, ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
@@ -659,6 +678,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το πρόγραμμα διαγράφηκε επιτυχώς.'];
     }
 
+    // Leitourgia createUserByAdmin: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function createUserByAdmin(array $data, ?int $actorUserId = null): array
     {
         $name = trim((string)($data['name'] ?? ''));
@@ -727,6 +747,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia updateUserByAdmin: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateUserByAdmin(int $userId, array $data, ?int $actorUserId = null): array
     {
         $existingUser = $this->getUserById($userId);
@@ -895,6 +916,7 @@ class UsersService
         }
     }
 
+    // Leitourgia deleteUserByAdmin: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function deleteUserByAdmin(int $userId, ?int $actorUserId = null): array
     {
         $existingUser = $this->getUserById($userId);
@@ -945,6 +967,7 @@ class UsersService
         return ['success' => true, 'message' => 'Ο χρήστης διαγράφηκε επιτυχώς.'];
     }
 
+    // Leitourgia collectUserSubmissionFilePaths: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function collectUserSubmissionFilePaths(int $userId): array
     {
         $paths = [];
@@ -993,6 +1016,7 @@ class UsersService
         return array_values(array_unique($paths));
     }
 
+    // Leitourgia deleteUserCommerceHistory: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function deleteUserCommerceHistory(int $userId): void
     {
         $paymentIds = [];
@@ -1088,6 +1112,7 @@ class UsersService
         }
     }
 
+    // Leitourgia unlinkProjectRelativeFile: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function unlinkProjectRelativeFile(string $path): void
     {
         $path = trim($path);
@@ -1103,6 +1128,7 @@ class UsersService
         }
     }
 
+    // Leitourgia getChildrenByUserId: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getChildrenByUserId(int $userId): array
     {
         $stmt = $this->conn->prepare(
@@ -1125,6 +1151,7 @@ class UsersService
         return $children;
     }
 
+    // Leitourgia getChildrenGroupedByUserIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getChildrenGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1176,6 +1203,7 @@ class UsersService
         return $groupedChildren;
     }
 
+    // Leitourgia getOrdersGroupedByUserIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getOrdersGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1227,12 +1255,14 @@ class UsersService
         return $groupedOrders;
     }
 
+    // Leitourgia getOrdersByUserId: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getOrdersByUserId(int $userId): array
     {
         $groupedOrders = $this->getOrdersGroupedByUserIds([$userId]);
         return $groupedOrders[$userId] ?? [];
     }
 
+    // Leitourgia getPaymentsGroupedByUserIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getPaymentsGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1284,12 +1314,14 @@ class UsersService
         return $groupedPayments;
     }
 
+    // Leitourgia getPaymentsByUserId: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getPaymentsByUserId(int $userId): array
     {
         $groupedPayments = $this->getPaymentsGroupedByUserIds([$userId]);
         return $groupedPayments[$userId] ?? [];
     }
 
+    // Leitourgia getCompletedInsuredChildIdsByUserId: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getCompletedInsuredChildIdsByUserId(int $userId): array
     {
         $stmt = $this->conn->prepare(
@@ -1324,6 +1356,7 @@ class UsersService
         return array_values(array_unique($childIds));
     }
 
+    // Leitourgia getInsurancePriceSetting: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getInsurancePriceSetting(): float
     {
         $result = $this->conn->query('SELECT insurance_price FROM PricingSettings LIMIT 1');
@@ -1335,6 +1368,7 @@ class UsersService
         return (float)($row['insurance_price'] ?? 0.0);
     }
 
+    // Leitourgia getOrderItemsGroupedByOrderIds: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getOrderItemsGroupedByOrderIds(array $orderIds): array
     {
         $orderIds = array_values(array_filter(array_map('intval', $orderIds), static function ($id) {
@@ -1401,6 +1435,7 @@ class UsersService
         return $itemsByOrderId;
     }
 
+    // Leitourgia createChildForParent: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function createChildForParent(int $parentUserId, array $data, ?int $actorUserId = null): array
     {
         $parent = $this->getUserById($parentUserId);
@@ -1450,6 +1485,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το παιδί προστέθηκε επιτυχώς.'];
     }
 
+    // Leitourgia updateChildForParent: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateChildForParent(int $childId, int $parentUserId, array $data, ?int $actorUserId = null): array
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
@@ -1499,6 +1535,7 @@ class UsersService
         return ['success' => true, 'message' => 'Τα στοιχεία του παιδιού ενημερώθηκαν επιτυχώς.'];
     }
 
+    // Leitourgia deleteChildForParent: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function deleteChildForParent(int $childId, int $parentUserId, ?int $actorUserId = null): array
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
@@ -1539,6 +1576,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το παιδί διαγράφηκε επιτυχώς.'];
     }
 
+    // Leitourgia emailExists: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function emailExists(string $email, int $excludeUserId = 0): bool
     {
         if ($excludeUserId > 0) {
@@ -1567,6 +1605,7 @@ class UsersService
         return $exists;
     }
 
+    // Leitourgia getDeletionBlockingData: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getDeletionBlockingData(int $userId): array
     {
         $stmtOrders = $this->conn->prepare("SELECT COUNT(*) AS total FROM Orders WHERE user_id = ?");
@@ -1600,6 +1639,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia insertAdminLog: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function insertAdminLog(?int $actorUserId, string $action, string $description): void
     {
         if ($actorUserId === null || $actorUserId <= 0) {
@@ -1619,6 +1659,7 @@ class UsersService
         $stmt->close();
     }
 
+    // Leitourgia getChildByIdForParent: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getChildByIdForParent(int $childId, int $parentUserId)
     {
         $stmt = $this->conn->prepare(
@@ -1641,6 +1682,7 @@ class UsersService
         return $child ?: null;
     }
 
+    // Leitourgia syncUserChildrenCount: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function syncUserChildrenCount(int $userId): void
     {
         $stmt = $this->conn->prepare(
@@ -1660,18 +1702,21 @@ class UsersService
         $stmt->close();
     }
 
+    // Leitourgia isValidDate: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function isValidDate(string $date): bool
     {
         $dt = DateTime::createFromFormat('Y-m-d', $date);
         return $dt instanceof DateTime && $dt->format('Y-m-d') === $date;
     }
 
+    // Leitourgia isValidDateTime: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function isValidDateTime(string $dateTime): bool
     {
         $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
         return $dt instanceof DateTime && $dt->format('Y-m-d H:i:s') === $dateTime;
     }
 
+    // Leitourgia normalizeScheduleInput: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeScheduleInput(string $feature, string $startDate, string $endDate, string $status): array
     {
         $normalizedFeature = $this->normalizeScheduleFeature($feature);
@@ -1712,6 +1757,7 @@ class UsersService
         ];
     }
 
+    // Leitourgia normalizeScheduleFeature: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeScheduleFeature(string $feature): string
     {
         $normalized = trim((string)$feature);
@@ -1723,22 +1769,26 @@ class UsersService
         return in_array($normalized, $allowed, true) ? $normalized : '';
     }
 
+    // Leitourgia isSingleMomentScheduleFeature: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function isSingleMomentScheduleFeature(string $feature): bool
     {
         return in_array($feature, ['delete_users', 'cleanup_submissions'], true);
     }
 
+    // Leitourgia normalizeRole: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeRole(string $role): string
     {
         return in_array($role, ['admin', 'parent'], true) ? $role : 'parent';
     }
 
+    // Leitourgia normalizeStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeStatus(string $status): string
     {
         $allowedStatuses = ['pending', 'approved', 'rejected', 'waiting_payment', 'active'];
         return in_array($status, $allowedStatuses, true) ? $status : 'pending';
     }
 
+    // Leitourgia shouldTriggerApprovalFlow: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function shouldTriggerApprovalFlow(array $existingUser, string $role, string $status): bool
     {
         if ($role !== 'parent' || $status !== 'approved') {
@@ -1751,6 +1801,7 @@ class UsersService
         return in_array($currentStatus, ['pending', 'rejected', 'approved', 'waiting_payment'], true);
     }
 
+    // Leitourgia sendApprovalEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function sendApprovalEmail(string $email, string $link): void
     {
         $smtpFailureMessage = '';
@@ -1812,6 +1863,7 @@ class UsersService
         }
     }
 
+    // Leitourgia sendRejectionEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function sendRejectionEmail(string $email, string $rejectionMessage): void
     {
         $smtpFailureMessage = '';

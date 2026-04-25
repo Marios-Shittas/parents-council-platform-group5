@@ -10,12 +10,14 @@ class SubscriptionService
     private mysqli $conn;
     private TokenValidator $tokenValidator;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
 
+    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function handleRequest(): void
     {
         $token = trim((string) ($_GET['token'] ?? ''));
@@ -65,11 +67,13 @@ class SubscriptionService
         ]);
     }
 
+    // Leitourgia getUserIdFromToken: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getUserIdFromToken(string $token): ?int
     {
         return $this->tokenValidator->getUserIdByToken($token, 'parent', 'waiting_payment', true);
     }
 
+    // Leitourgia getChildrenCount: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getChildrenCount(int $userId): int
     {
         $stmt = $this->conn->prepare('SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?');
@@ -86,6 +90,7 @@ class SubscriptionService
         return (int) ($row['children_count'] ?? 0);
     }
 
+    // Leitourgia getPricing: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getPricing(): ?array
     {
         $sql = 'SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1';
@@ -98,6 +103,7 @@ class SubscriptionService
         return $row ?: null;
     }
 
+    // Leitourgia respond: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function respond(int $statusCode, array $payload): void
     {
         http_response_code($statusCode);

@@ -18,38 +18,45 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
+// Leitourgia adminCalendarIsValidIsoDate: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarIsValidIsoDate($value)
 {
     return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1;
 }
 
+// Leitourgia adminCalendarNormalizeTime: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarNormalizeTime($value)
 {
     $value = trim((string)$value);
     return preg_match('/^\d{2}:\d{2}$/', $value) ? $value : '09:00';
 }
 
+// Leitourgia adminHomeTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia adminHomeTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
+// Leitourgia adminHomeGetBannerUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeGetBannerUploadDir()
 {
     return dirname(__DIR__) . '/assets/Home_img/';
 }
 
+// Leitourgia adminHomeBuildBannerWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeBuildBannerWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Home_img/' . $fileName;
 }
 
+// Leitourgia adminHomeDeleteManagedBannerImage: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeDeleteManagedBannerImage($path)
 {
     $trimmed = trim((string)$path);
@@ -65,6 +72,7 @@ function adminHomeDeleteManagedBannerImage($path)
     }
 }
 
+// Leitourgia adminHomePublicContentUrlExists: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomePublicContentUrlExists($url)
 {
     $path = (string)parse_url((string)$url, PHP_URL_PATH);
@@ -86,6 +94,7 @@ function adminHomePublicContentUrlExists($url)
     return is_file($filePath);
 }
 
+// Leitourgia adminHomeUploadBannerImage: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeUploadBannerImage($fileField, $existingPath)
 {
     $upload = $_FILES[$fileField] ?? null;
@@ -150,46 +159,55 @@ function adminHomeUploadBannerImage($fileField, $existingPath)
     return [adminHomeBuildBannerWebPath($newFileName), ''];
 }
 
+// Leitourgia adminCalendarGetEventImageUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetEventImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Events_img/';
 }
 
+// Leitourgia adminCalendarBuildEventImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildEventImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Events_img/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetAnnouncementImageUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetAnnouncementImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_img/';
 }
 
+// Leitourgia adminCalendarBuildAnnouncementImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildAnnouncementImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetAnnouncementAttachmentUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetAnnouncementAttachmentUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_docs/';
 }
 
+// Leitourgia adminCalendarBuildAnnouncementAttachmentWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetDefaultAnnouncementGdprNotice: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetDefaultAnnouncementGdprNotice()
 {
     return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
 }
 
+// Leitourgia adminCalendarGetDefaultEventGdprNotice: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetDefaultEventGdprNotice()
 {
     return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
 }
 
+// Leitourgia adminCalendarUploadImages: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
 {
     $uploadedCount = 0;
@@ -292,6 +310,7 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
     return [$uploadedCount, $uploadErrors];
 }
 
+// Leitourgia adminCalendarUploadAnnouncementAttachments: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarUploadAnnouncementAttachments($announcementsService, $announcementId)
 {
     $uploadedCount = 0;
@@ -378,6 +397,7 @@ function adminCalendarUploadAnnouncementAttachments($announcementsService, $anno
     return [$uploadedCount, $uploadErrors];
 }
 
+// Leitourgia adminCalendarBuildItems: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService)
 {
     $items = [];
@@ -1290,355 +1310,11 @@ $calendarPayload = [
     </div>
 </div>
 
-<script>
-window.adminCalendarData = <?php echo json_encode(
-    $calendarPayload,
-    JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-); ?>;
-</script>
+<script src="../assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['adminCalendarData' => $calendarPayload], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/admin-home-calendar.js"></script>
-<script>
-function ensureDashboardNoticeElements() {
-    if (document.getElementById('page-notice-overlay')) {
-        return;
-    }
-
-    const overlay = document.createElement('div');
-    overlay.id = 'page-notice-overlay';
-    overlay.className = 'page-notice-overlay';
-    overlay.innerHTML = '' +
-        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
-        '</div>';
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        }
-    });
-
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('page-notice-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        });
-    }
-}
-
-function showDashboardNotice(message, options) {
-    ensureDashboardNoticeElements();
-
-    const overlay = document.getElementById('page-notice-overlay');
-    const card = document.getElementById('page-notice-card');
-    const title = document.getElementById('page-notice-title');
-    const body = document.getElementById('page-notice-message');
-    const opts = options || {};
-
-    if (!overlay || !card || !title || !body) {
-        console.error(message);
-        return;
-    }
-
-    card.classList.remove('is-error', 'is-warning');
-    if (opts.variant === 'error') card.classList.add('is-error');
-    if (opts.variant === 'warning') card.classList.add('is-warning');
-
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
-
-    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
-    document.body.style.overflow = 'hidden';
-    overlay.classList.add('is-open');
-}
-
-function truncateDashboardPreviewFileName(fileName, maxLength) {
-    if (fileName.length <= maxLength) {
-        return fileName;
-    }
-
-    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
-}
-
-function getDashboardFileKey(file) {
-    return [file.name, file.size, file.lastModified, file.type].join('::');
-}
-
-function syncDashboardInputFiles(input, stagedFiles) {
-    if (typeof DataTransfer === 'undefined') {
-        return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    stagedFiles.forEach((file) => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-}
-
-function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const item = document.createElement('div');
-        item.className = 'image-preview-item';
-
-        const image = document.createElement('img');
-        image.alt = file.name;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        const caption = document.createElement('div');
-        caption.className = 'preview-file-caption';
-        caption.textContent = truncateDashboardPreviewFileName(file.name, 18);
-
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            image.src = String(event.target && event.target.result ? event.target.result : '');
-        };
-        reader.readAsDataURL(file);
-
-        item.appendChild(image);
-        item.appendChild(deleteBtn);
-        item.appendChild(caption);
-        preview.appendChild(item);
-    });
-}
-
-function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-        const item = document.createElement('div');
-        item.className = 'attachment-preview-item';
-
-        const info = document.createElement('div');
-        info.className = 'attachment-preview-info';
-
-        const icon = document.createElement('i');
-        icon.className = fileExt === 'pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
-
-        const text = document.createElement('span');
-        text.className = 'attachment-preview-name';
-        text.textContent = truncateDashboardPreviewFileName(file.name, 40);
-
-        const size = document.createElement('span');
-        size.className = 'attachment-preview-size';
-        size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'attachment-remove-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        info.appendChild(icon);
-        info.appendChild(text);
-        info.appendChild(size);
-        item.appendChild(info);
-        item.appendChild(deleteBtn);
-        preview.appendChild(item);
-    });
-}
-
-function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function updateInputState() {
-        if (existingCount + stagedFiles.length >= imageLimit) {
-            input.disabled = true;
-        } else if (existingCount < imageLimit) {
-            input.disabled = false;
-        }
-    }
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-        const maxFileSize = 5 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-        let reachedLimit = false;
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        if (existingCount >= imageLimit) {
-            warnings.push(`Έχει ήδη συμπληρωθεί το όριο των ${imageLimit} εικόνων.`);
-        } else {
-            incomingFiles.forEach((file) => {
-                const fileKey = getDashboardFileKey(file);
-                const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-
-                if (!allowedExtensions.includes(fileExt)) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-                    return;
-                }
-
-                if (file.size > maxFileSize) {
-                    warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-                    return;
-                }
-
-                if (!String(file.type || '').startsWith('image/')) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-                    return;
-                }
-
-                if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
-                    return;
-                }
-
-                if (existingCount + stagedFiles.length >= imageLimit) {
-                    if (!reachedLimit) {
-                        const remainingSlots = Math.max(0, imageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες.`);
-                        reachedLimit = true;
-                    }
-                    return;
-                }
-
-                stagedFiles.push(file);
-                stagedKeys.add(fileKey);
-            });
-        }
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-
-    updateInputState();
-}
-
-function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-        const maxFileSize = 8 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        incomingFiles.forEach((file) => {
-            const fileKey = getDashboardFileKey(file);
-            const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-            const fileType = String(file.type || '');
-
-            if (!allowedExtensions.includes(fileExt)) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
-                return;
-            }
-
-            if (file.size > maxFileSize) {
-                warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
-                return;
-            }
-
-            if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
-                return;
-            }
-
-            if (stagedKeys.has(fileKey)) {
-                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
-                return;
-            }
-
-            stagedFiles.push(file);
-            stagedKeys.add(fileKey);
-        });
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-}
-
-setupDashboardImageInput(document.getElementById('calendar_event_images'), 'calendarEventImagePreview', 6, 'Έλεγχος εικόνων εκδήλωσης');
-setupDashboardImageInput(document.getElementById('calendar_announcement_images'), 'calendarAnnouncementImagePreview', 6, 'Έλεγχος εικόνων ανακοίνωσης');
-setupDashboardAttachmentInput(document.getElementById('calendar_announcement_attachments'), 'calendarAnnouncementAttachmentPreview', 'Έλεγχος συνημμένων ανακοίνωσης');
-</script>
+<script src="../assets/js/admin-home-dashboard.js"></script>
 </body>
 </html>

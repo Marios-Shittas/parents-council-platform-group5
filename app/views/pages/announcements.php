@@ -63,22 +63,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var params = new URLSearchParams(window.location.search);
-        var openId = params.get('open');
-
-        if (!openId) {
-            return;
-        }
-
-        var modalElement = document.getElementById('announcementModal' + openId);
-        if (!modalElement || typeof window.jQuery === 'undefined') {
-            return;
-        }
-
-        window.jQuery(modalElement).modal('show');
-    });
-</script>
+<script src="<?php echo site_asset_url('js/announcement-open-modal.js'); ?>" defer></script>
 </body>
 </html>

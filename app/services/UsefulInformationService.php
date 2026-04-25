@@ -12,6 +12,7 @@ class UsefulInformationService
     private $defaultSections;
     private $lastError = '';
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct()
     {
         global $conn;
@@ -23,6 +24,7 @@ class UsefulInformationService
         $this->applyLegacyContentAdjustments();
     }
 
+    // Leitourgia getAllSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -51,12 +53,14 @@ class UsefulInformationService
         return $sections;
     }
 
+    // Leitourgia getSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
 
+    // Leitourgia updateSection: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -121,11 +125,13 @@ class UsefulInformationService
         return true;
     }
 
+    // Leitourgia getLastError: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getLastError()
     {
         return $this->lastError;
     }
 
+    // Leitourgia resetAllSectionsToDefaults: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function resetAllSectionsToDefaults()
     {
         $this->lastError = '';
@@ -146,6 +152,7 @@ class UsefulInformationService
         return true;
     }
 
+    // Leitourgia ensureTable: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS UsefulInformationSections (
@@ -162,6 +169,7 @@ class UsefulInformationService
         $this->conn->query($sql);
     }
 
+    // Leitourgia ensureDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -182,6 +190,7 @@ class UsefulInformationService
         }
     }
 
+    // Leitourgia applyLegacyContentAdjustments: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function applyLegacyContentAdjustments()
     {
         $legacyPageHeaderSubtitle = 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.';
@@ -255,6 +264,7 @@ class UsefulInformationService
         );
     }
 
+    // Leitourgia buildDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildDefaultSections()
     {
         return [
@@ -407,6 +417,7 @@ class UsefulInformationService
         ];
     }
 
+    // Leitourgia normalizeUtf8: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {
@@ -432,6 +443,7 @@ class UsefulInformationService
         return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
     }
 
+    // Leitourgia getHolidayRows: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getHolidayRows()
     {
         $sections = $this->getAllSections();
@@ -439,6 +451,7 @@ class UsefulInformationService
         return is_array($rows) ? $rows : [];
     }
 
+    // Leitourgia getHolidayCalendarItems: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getHolidayCalendarItems()
     {
         $items = [];
@@ -466,6 +479,7 @@ class UsefulInformationService
         return $items;
     }
 
+    // Leitourgia getSchoolYearCalendarItems: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getSchoolYearCalendarItems()
     {
         $section = $this->getSection('school_year');
@@ -514,6 +528,7 @@ class UsefulInformationService
         return $items;
     }
 
+    // Leitourgia addHolidayFromIsoDate: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function addHolidayFromIsoDate($isoDate, $name)
     {
         $this->lastError = '';
@@ -572,6 +587,7 @@ class UsefulInformationService
         );
     }
 
+    // Leitourgia sortHolidayRows: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function sortHolidayRows(array $rows)
     {
         usort($rows, function ($left, $right) {
@@ -591,6 +607,7 @@ class UsefulInformationService
         return $rows;
     }
 
+    // Leitourgia buildHolidaySortKey: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildHolidaySortKey($dateText)
     {
         $dateText = trim((string)$dateText);
@@ -611,6 +628,7 @@ class UsefulInformationService
         return $singleIso ?? '9999-99-99';
     }
 
+    // Leitourgia convertHolidayDisplayDateToIso: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function convertHolidayDisplayDateToIso($dateText)
     {
         $dateText = trim((string)$dateText);
@@ -662,6 +680,7 @@ class UsefulInformationService
         return $year . '-' . $greekMonths[$monthText] . '-' . $day;
     }
 
+    // Leitourgia convertHolidayDisplayDateToIsoWithFallbackYear: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function convertHolidayDisplayDateToIsoWithFallbackYear($startText, $endText)
     {
         $directIso = $this->convertHolidayDisplayDateToIso((string)$startText);
@@ -687,6 +706,7 @@ class UsefulInformationService
         return $this->convertHolidayDisplayDateToIso($startText . ' ' . $matches[1]);
     }
 
+    // Leitourgia convertSchoolYearDisplayDateToIso: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function convertSchoolYearDisplayDateToIso($dateText)
     {
         $dateText = trim((string)$dateText);
@@ -701,6 +721,7 @@ class UsefulInformationService
         return $this->convertHolidayDisplayDateToIso($dateText);
     }
 
+    // Leitourgia convertIsoDateToHolidayDisplayDate: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function convertIsoDateToHolidayDisplayDate($isoDate)
     {
         $parts = explode('-', (string)$isoDate);

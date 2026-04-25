@@ -15,11 +15,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leitourgia usefulInfoTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function usefulInfoTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia usefulInfoTextareaToList: xeirizetai to antistoixo kommati tis selidas i tou service.
 function usefulInfoTextareaToList($value)
 {
     $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
@@ -36,6 +38,7 @@ function usefulInfoTextareaToList($value)
     return $items;
 }
 
+// Leitourgia usefulInfoTextareaToPairs: xeirizetai to antistoixo kommati tis selidas i tou service.
 function usefulInfoTextareaToPairs($value)
 {
     $normalized = str_replace(["\r\n", "\r"], "\n", (string)$value);
@@ -60,11 +63,13 @@ function usefulInfoTextareaToPairs($value)
     return $rows;
 }
 
+// Leitourgia usefulInfoListToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function usefulInfoListToTextarea($items)
 {
     return implode("\n", is_array($items) ? $items : []);
 }
 
+// Leitourgia usefulInfoPairsToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function usefulInfoPairsToTextarea($rows)
 {
     if (!is_array($rows)) {

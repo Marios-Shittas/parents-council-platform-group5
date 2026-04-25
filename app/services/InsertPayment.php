@@ -11,12 +11,14 @@ class InsertPaymentService
     private mysqli $conn;
     private TokenValidator $tokenValidator;
 
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
 
+    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function handleRequest(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -108,6 +110,7 @@ class InsertPaymentService
         }
     }
 
+    // Leitourgia parseJsonBody: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function parseJsonBody(): array
     {
         $raw = file_get_contents('php://input');
@@ -119,11 +122,13 @@ class InsertPaymentService
         return is_array($decoded) ? $decoded : [];
     }
 
+    // Leitourgia getUserIdFromToken: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getUserIdFromToken(string $token): ?int
     {
         return $this->tokenValidator->getUserIdByToken($token, 'parent', 'waiting_payment', true);
     }
 
+    // Leitourgia getChildrenCount: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getChildrenCount(int $userId): int
     {
         $stmt = $this->conn->prepare('SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?');
@@ -140,6 +145,7 @@ class InsertPaymentService
         return (int) ($row['children_count'] ?? 0);
     }
 
+    // Leitourgia getPricing: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getPricing(): ?array
     {
         $res = $this->conn->query('SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1');
@@ -151,6 +157,7 @@ class InsertPaymentService
         return $row ?: null;
     }
 
+    // Leitourgia getUserEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function getUserEmail(int $userId): string
     {
         $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
@@ -167,6 +174,7 @@ class InsertPaymentService
         return (string) ($row['email'] ?? '');
     }
 
+    // Leitourgia insertPayment: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function insertPayment(int $userId, float $amount, string $paymentType): int
     {
         $stmt = $this->conn->prepare(
@@ -186,6 +194,7 @@ class InsertPaymentService
         return $paymentId;
     }
 
+    // Leitourgia buildJccReturnUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function buildJccReturnUrl(string $token, int $membershipPaymentId, ?int $insurancePaymentId, bool $failed): string
     {
         $base = $failed ? JCC_FAIL_URL : JCC_RETURN_URL;
@@ -200,12 +209,14 @@ class InsertPaymentService
         return $base . $separator . http_build_query($params);
     }
 
+    // Leitourgia generateOrderNumber: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function generateOrderNumber(int $userId): string
     {
         $randomPart = bin2hex(random_bytes(5));
         return sprintf('SUB-%d-%d-%s', $userId, time(), $randomPart);
     }
 
+    // Leitourgia registerJccOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function registerJccOrder(
         string $orderNumber,
         float $amount,
@@ -287,6 +298,7 @@ class InsertPaymentService
         ];
     }
 
+    // Leitourgia insertLog: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function insertLog(int $userId, string $description): void
     {
         $stmt = $this->conn->prepare(
@@ -302,6 +314,7 @@ class InsertPaymentService
         $stmt->close();
     }
 
+    // Leitourgia respond: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function respond(int $statusCode, array $payload): void
     {
         http_response_code($statusCode);

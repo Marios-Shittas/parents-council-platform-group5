@@ -9,15 +9,18 @@ class EventsService {
     private $conn;
     private $lastOperationError = '';
     
+    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Leitourgia getMaxImagesPerEvent: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getMaxImagesPerEvent() {
         return 6;
     }
 
+    // Leitourgia getLastOperationError: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getLastOperationError() {
         return $this->lastOperationError;
     }
@@ -245,6 +248,7 @@ class EventsService {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Leitourgia countImages: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function countImages($eventId) {
         $sql = "SELECT COUNT(*) AS total FROM EventsImages WHERE event_id = ?";
 
@@ -297,6 +301,7 @@ class EventsService {
         return $events;
     }
 
+    // Leitourgia get5LatestEvents: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function get5LatestEvents() {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
@@ -316,6 +321,7 @@ class EventsService {
         echo json_encode($events);
     }
 
+    // Leitourgia getAllEventsForCalendar: xeirizetai to antistoixo kommati tis selidas i tou service.
     public function getAllEventsForCalendar() {
         $eventsQuery = "SELECT event_title as title, event_description as description, event_date as date, 'event' as type FROM Events ORDER BY event_date ASC";
         $result = $this->conn->query($eventsQuery);

@@ -9,6 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/UsersService.php';
 
+// Leitourgia adminLogsRespond: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminLogsRespond(int $statusCode, array $payload): void
 {
     http_response_code($statusCode);

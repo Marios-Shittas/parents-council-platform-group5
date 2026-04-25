@@ -49,9 +49,7 @@ header("Expires: 0");
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-        <script>
-            window.FORGOT_PASSWORD_SERVICE_URL = <?php echo json_encode($forgotPasswordServiceUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
-        </script>
+        <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['FORGOT_PASSWORD_SERVICE_URL' => $forgotPasswordServiceUrl], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
         <script type="text/babel" src="assets/js/forgot-password.jsx"></script>
     </body>
 </html>
