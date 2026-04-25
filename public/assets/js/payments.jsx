@@ -25,12 +25,49 @@ function Payments() {
         'one-size': 'One Size'
     };
 
-    function getSizeLabel(sizeValue) {
+    function getSizeLabel(sizeValue, labels = {}) {
         if (!sizeValue) {
             return '';
         }
 
+        if (labels && labels[sizeValue]) {
+            return labels[sizeValue];
+        }
+
         return sizeLabels[sizeValue] || sizeValue;
+    }
+
+    function normalizeSizeOption(sizeOption) {
+        if (sizeOption && typeof sizeOption === 'object') {
+            const value = String(sizeOption.value || '').trim();
+            const label = String(sizeOption.label || value).trim();
+
+            if (!value || !label) {
+                return null;
+            }
+
+            return { value, label };
+        }
+
+        const value = String(sizeOption || '').trim();
+        if (!value) {
+            return null;
+        }
+
+        return {
+            value,
+            label: getSizeLabel(value)
+        };
+    }
+
+    function getProductSizeOptions(product) {
+        if (!product || !Array.isArray(product.size_options)) {
+            return [];
+        }
+
+        return product.size_options
+            .map(normalizeSizeOption)
+            .filter(Boolean);
     }
 
     function getPaymentFeedback(status, message) {
@@ -206,14 +243,22 @@ function Payments() {
     }
 
     function addToCart(product) {
-        const availableSizes = Array.isArray(product.size_options) ? product.size_options : [];
+        const availableSizes = getProductSizeOptions(product);
         const requiresSize = Boolean(product.has_sizes) && availableSizes.length > 0;
-        const selectedSize = selectedSizes[product.product_id];
+        const selectedSize = selectedSizes[product.product_id] || '';
 
         if (requiresSize && (!selectedSize || selectedSize.trim() === '')) {
             setSizeErrors(prev => ({
                 ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
+            }));
+            return;
+        }
+
+        if (requiresSize && !availableSizes.some(sizeOption => sizeOption.value === selectedSize)) {
+            setSizeErrors(prev => ({
+                ...prev,
+                [product.product_id]: 'Το μέγεθος που επιλέχθηκε δεν είναι διαθέσιμο για αυτό το προϊόν.'
             }));
             return;
         }
@@ -355,7 +400,10 @@ function Payments() {
                     )}
 
                     <div className="row">
-                        {products.map(product => (
+                        {products.map(product => {
+                            const productSizeOptions = getProductSizeOptions(product);
+
+                            return (
                             <div className="col-md-4" key={product.product_id}>
                                 <div className="card m-4 mb-4">
                                     <div className="card-body">
@@ -400,7 +448,7 @@ function Payments() {
                                         </div>
 
                                         <div className="size-selector mt-3">
-                                            {Boolean(product.has_sizes) && Array.isArray(product.size_options) && product.size_options.length > 0 ? (
+                                            {Boolean(product.has_sizes) && productSizeOptions.length > 0 ? (
                                                 <>
                                                     <label className="size-label">Επιλέξτε μέγεθος:</label>
                                                     <select
@@ -409,9 +457,9 @@ function Payments() {
                                                         onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
                                                     >
                                                         <option value="">Επιλέξτε μέγεθος</option>
-                                                        {product.size_options.map((sizeValue) => (
-                                                            <option key={sizeValue} value={sizeValue}>
-                                                                {getSizeLabel(sizeValue)}
+                                                        {productSizeOptions.map((sizeOption) => (
+                                                            <option key={sizeOption.value} value={sizeOption.value}>
+                                                                {sizeOption.label}
                                                             </option>
                                                         ))}
                                                     </select>
@@ -437,7 +485,8 @@ function Payments() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="wholecart m-4 mt-3">
@@ -477,7 +526,7 @@ function Payments() {
                                                 <div>{item.product_name}</div>
                                                 {item.size && (
                                                     <small className="cart-size-badge">
-                                                        {getSizeLabel(item.size)}
+                                                        {item.size_label || getSizeLabel(item.size)}
                                                     </small>
                                                 )}
                                             </div>

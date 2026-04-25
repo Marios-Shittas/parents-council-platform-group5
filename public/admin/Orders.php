@@ -37,6 +37,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 		], JSON_UNESCAPED_UNICODE);
 		exit;
 	}
+
+	if ($action === 'clear_product_order_history') {
+		require_once __DIR__ . '/../../app/config/db.php';
+		require_once __DIR__ . '/../../app/services/OrdersService.php';
+
+		header('Content-Type: application/json; charset=utf-8');
+
+		try {
+			$ordersService = new OrdersService($conn);
+			$stats = $ordersService->clearProductOrderHistory();
+
+			echo json_encode([
+				'success' => true,
+				'message' => 'Το ιστορικό παραγγελιών e-shop καθαρίστηκε.',
+				'stats' => $stats,
+				'pending_paid_orders_count' => (int)$ordersService->getPendingPaidOrdersCount(),
+			], JSON_UNESCAPED_UNICODE);
+		} catch (Throwable $e) {
+			http_response_code(500);
+			echo json_encode([
+				'success' => false,
+				'message' => 'Δεν ήταν δυνατός ο καθαρισμός του ιστορικού παραγγελιών.',
+			], JSON_UNESCAPED_UNICODE);
+			error_log('Clear product order history error: ' . $e->getMessage());
+		}
+
+		exit;
+	}
+
+	if ($action === 'delete_product_order_history') {
+		require_once __DIR__ . '/../../app/config/db.php';
+		require_once __DIR__ . '/../../app/services/OrdersService.php';
+
+		header('Content-Type: application/json; charset=utf-8');
+
+		try {
+			$orderId = (int)($_POST['order_id'] ?? 0);
+			$ordersService = new OrdersService($conn);
+			$stats = $ordersService->deleteProductOrderHistory($orderId);
+
+			echo json_encode([
+				'success' => true,
+				'message' => 'Η παραγγελία e-shop διαγράφηκε.',
+				'stats' => $stats,
+				'pending_paid_orders_count' => (int)$ordersService->getPendingPaidOrdersCount(),
+			], JSON_UNESCAPED_UNICODE);
+		} catch (Throwable $e) {
+			http_response_code(500);
+			echo json_encode([
+				'success' => false,
+				'message' => 'Δεν ήταν δυνατή η διαγραφή της παραγγελίας.',
+			], JSON_UNESCAPED_UNICODE);
+			error_log('Delete product order history error: ' . $e->getMessage());
+		}
+
+		exit;
+	}
 }
 ?>
 <!DOCTYPE html>
@@ -52,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 	<link rel="stylesheet" href="../assets/css/main.css">
 	<link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
-	<link rel="stylesheet" href="../assets/css/admin_css/admin_orders.css">
+	<link rel="stylesheet" href="../assets/css/admin_css/admin_orders.css?v=9">
 </head>
 <body>
 	<div class="admin-wrapper">
@@ -74,6 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-	<script type="text/babel" src="../assets/js/admin-orders.jsx"></script>
+	<script type="text/babel" src="../assets/js/admin-orders.jsx?v=7"></script>
 </body>
 </html>

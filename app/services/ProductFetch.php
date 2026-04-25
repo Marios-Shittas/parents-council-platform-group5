@@ -28,20 +28,57 @@ function resolveProductImagePath(string $imagePath): string
         return getDefaultProductImagePath();
     }
 
-    $normalized = str_replace('\\', '/', $imagePath);
+    $absolutePath = resolveProductImageAbsolutePath($imagePath);
+
+    return file_exists($absolutePath) ? resolveProductImagePublicUrl($imagePath) : getDefaultProductImagePath();
+}
+
+function resolveProductImageAbsolutePath(string $imagePath): string
+{
     $projectRoot = dirname(__DIR__, 2);
-    $absolutePath = '';
+    $publicRelativePath = resolveProductImagePublicRelativePath($imagePath);
+
+    return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
+}
+
+function resolveProductImagePublicUrl(string $imagePath): string
+{
+    $publicRelativePath = resolveProductImagePublicRelativePath($imagePath);
+
+    return $publicRelativePath === ''
+        ? getDefaultProductImagePath()
+        : '/parents-council-platform-group5/public/' . $publicRelativePath;
+}
+
+function resolveProductImagePublicRelativePath(string $imagePath): string
+{
+    $normalized = trim(str_replace('\\', '/', $imagePath));
+    if ($normalized === '') {
+        return '';
+    }
 
     $publicPosition = strpos($normalized, '/public/');
     if ($publicPosition !== false) {
-        $absolutePath = $projectRoot . substr($normalized, $publicPosition);
-    } elseif (strpos($normalized, '/assets/') === 0) {
-        $absolutePath = $projectRoot . '/public' . $normalized;
-    } else {
-        $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+        return ltrim(substr($normalized, $publicPosition + strlen('/public/')), '/');
     }
 
-    return file_exists($absolutePath) ? $imagePath : getDefaultProductImagePath();
+    if (strpos($normalized, '../assets/') === 0) {
+        return substr($normalized, 3);
+    }
+
+    if (strpos($normalized, '/assets/') === 0) {
+        return ltrim($normalized, '/');
+    }
+
+    if (strpos($normalized, 'assets/') === 0) {
+        return $normalized;
+    }
+
+    if (strpos($normalized, 'public/') === 0) {
+        return substr($normalized, strlen('public/'));
+    }
+
+    return ltrim($normalized, '/');
 }
 
 $sql = "SELECT product_id, product_name, product_description, price FROM Products";
@@ -69,13 +106,14 @@ if ($result->num_rows > 0) {
 
         $sizeMeta = product_sizes_get_for_product((int)$product_id);
         $row['has_sizes'] = $sizeMeta['has_sizes'];
-        $row['size_options'] = $sizeMeta['size_options'];
+        $row['size_options'] = $sizeMeta['size_options_with_labels'];
+        $row['size_labels'] = $sizeMeta['size_labels'];
         $row['images'] = $images;
         $products[] = $row;      
     }
 }
 
-echo json_encode($products);
+echo json_encode($products, JSON_UNESCAPED_UNICODE);
 
 $conn->close();
 ?>
