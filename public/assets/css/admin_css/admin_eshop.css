@@ -126,6 +126,78 @@
     box-shadow: none !important;
 }
 
+.custom-size-builder {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid #dfe5ee;
+    border-radius: 10px;
+    background: #f8fbfd;
+}
+
+.custom-size-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.custom-size-input-row .form-control {
+    min-height: 42px;
+}
+
+.custom-size-input-row .btn {
+    flex-shrink: 0;
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+.custom-size-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 34px;
+    margin-top: 12px;
+}
+
+.custom-size-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 8px 6px 12px;
+    border: 1px solid rgba(47, 111, 179, 0.22);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--color-navy);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.custom-size-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.1);
+    color: #b42335;
+    cursor: pointer;
+}
+
+.custom-size-chip-remove:hover,
+.custom-size-chip-remove:focus {
+    background: #dc3545;
+    color: #ffffff;
+    outline: none;
+}
+
+.custom-size-empty {
+    align-self: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
 @media (max-width: 767.98px) {
     .eshop-visibility-panel {
         flex-direction: column;
@@ -149,6 +221,10 @@
     .thumbnail {
         width: 56px;
         height: 56px;
+    }
+
+    .custom-size-input-row {
+        flex-direction: column;
     }
 
     #createProductModal .modal-dialog,

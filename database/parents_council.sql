@@ -222,8 +222,8 @@ CREATE TABLE `OrderItems` (
   `product_id` int(11) NOT NULL,
   `price_at_purchase` decimal(10,2) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
-  `size` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`order_id`,`product_id`),
+  `size` varchar(100) NOT NULL DEFAULT '',
+  PRIMARY KEY (`order_id`,`product_id`,`size`),
   KEY `fk_oi_product` (`product_id`),
   CONSTRAINT `fk_oi_order` FOREIGN KEY (`order_id`) REFERENCES `Orders` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_oi_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON UPDATE CASCADE
@@ -282,7 +282,7 @@ CREATE TABLE `PaymentsDetails` (
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `price_at_purchase` decimal(10,2) NOT NULL,
-  `size` varchar(10) DEFAULT NULL,
+  `size` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`payment_item_id`),
   KEY `fk_pd_payment` (`payment_id`),
   KEY `fk_pd_product` (`product_id`),
@@ -324,6 +324,19 @@ CREATE TABLE `Products` (
   `price` decimal(10,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `ProductSizeOptions`;
+CREATE TABLE `ProductSizeOptions` (
+  `size_option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `size_value` varchar(100) NOT NULL,
+  `size_label` varchar(100) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`size_option_id`),
+  UNIQUE KEY `uq_product_size_value` (`product_id`,`size_value`),
+  KEY `idx_product_size_product` (`product_id`),
+  CONSTRAINT `fk_product_size_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 DROP TABLE IF EXISTS `ProductsImages`;
 CREATE TABLE `ProductsImages` (
   `pro_image_id` int(11) NOT NULL AUTO_INCREMENT,

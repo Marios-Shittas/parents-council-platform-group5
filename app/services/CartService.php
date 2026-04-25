@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 class CartService
 {
@@ -100,6 +101,9 @@ class CartService
                 $row['price'] = (float)$row['price'];
                 $row['price_at_purchase'] = (float)$row['price_at_purchase'];
                 $row['line_total'] = $row['quantity'] * $row['price_at_purchase'];
+                $sizeValue = trim((string)($row['size'] ?? ''));
+                $sizeMeta = product_sizes_get_for_product((int)$row['product_id']);
+                $row['size_label'] = product_sizes_label_for_value($sizeValue, $sizeMeta);
                 $total += $row['line_total'];
                 $items[] = $row;
             }
@@ -129,6 +133,18 @@ class CartService
 
         if (!$orderId) {
             return false;
+        }
+
+        $sizeMeta = product_sizes_get_for_product($productId);
+        $availableSizes = $sizeMeta['size_options'] ?? [];
+        $requiresSize = !empty($sizeMeta['has_sizes']) && !empty($availableSizes);
+
+        if ($requiresSize) {
+            if ($size === '' || !in_array($size, $availableSizes, true)) {
+                return false;
+            }
+        } else {
+            $size = '';
         }
 
         $stmtPrice = $this->conn->prepare("
