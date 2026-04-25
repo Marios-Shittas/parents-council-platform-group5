@@ -80,6 +80,68 @@
     padding: 12px 20px;
 }
 
+.custom-size-builder {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid #dfe7f2;
+    border-radius: 10px;
+    background: #f8fbff;
+}
+
+.custom-size-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.custom-size-input-row .form-control {
+    min-width: 0;
+}
+
+.custom-size-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.custom-size-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 9px 6px 11px;
+    border: 1px solid #cfe0f3;
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--color-navy);
+    font-weight: 700;
+}
+
+.custom-size-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 50%;
+    background: #eef3f8;
+    color: #5f7082;
+    font-size: 0.72rem;
+}
+
+.custom-size-chip-remove:hover,
+.custom-size-chip-remove:focus {
+    background: #dc3545;
+    color: #ffffff;
+    outline: none;
+}
+
+.custom-size-empty {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
 #createProductModal .modal-header {
     background: #2f6fb3 !important;
 }
@@ -140,6 +202,10 @@
     .eshop-visibility-btn {
         width: 100%;
         min-width: 0;
+    }
+
+    .custom-size-input-row {
+        flex-direction: column;
     }
 
     .admin-table {

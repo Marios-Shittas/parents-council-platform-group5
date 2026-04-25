@@ -275,7 +275,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                                         <span>
                                                             <?php echo (int)($item['quantity'] ?? 0); ?> τεμ.
                                                             <?php if (!empty($item['size'])): ?>
-                                                                • Μέγεθος <?php echo htmlspecialchars((string)$item['size']); ?>
+                                                                • Μέγεθος <?php echo htmlspecialchars((string)($item['size_label'] ?? $item['size'])); ?>
                                                             <?php endif; ?>
                                                         </span>
                                                     </div>

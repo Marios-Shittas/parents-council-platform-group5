@@ -3,6 +3,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
 require_once __DIR__ . '/EmailRejection.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 class UsersService
 {
@@ -1370,11 +1371,15 @@ class UsersService
                 $itemsByOrderId[$orderId] = [];
             }
 
+            $sizeValue = $row['size'] === null ? '' : (string)$row['size'];
+            $sizeMeta = product_sizes_get_for_product((int)($row['product_id'] ?? 0));
+
             $itemsByOrderId[$orderId][] = [
                 'product_id' => (int)($row['product_id'] ?? 0),
                 'product_name' => (string)($row['product_name'] ?? ''),
                 'quantity' => (int)($row['quantity'] ?? 0),
-                'size' => $row['size'] === null ? null : (string)$row['size'],
+                'size' => $sizeValue === '' ? null : $sizeValue,
+                'size_label' => product_sizes_label_for_value($sizeValue, $sizeMeta),
                 'price_at_purchase' => (float)($row['price_at_purchase'] ?? 0),
                 'line_total' => (float)($row['line_total'] ?? 0),
             ];

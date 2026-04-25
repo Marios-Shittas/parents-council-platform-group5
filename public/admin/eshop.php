@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../../app/services/ProductsService.php';
 require_once __DIR__ . '/../../app/services/EshopSettingsService.php';
+require_once __DIR__ . '/../../app/includes/product_sizes.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -24,6 +25,7 @@ $eshopSettingsService = new EshopSettingsService();
 $message = '';
 $messageType = '';
 $editProduct = null;
+$availableSizeOptions = product_sizes_allowed_options();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -32,11 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['product_name'] ?? '');
         $description = trim($_POST['product_description'] ?? '');
         $price = trim($_POST['price'] ?? '');
+        $hasSizes = isset($_POST['has_sizes']) && $_POST['has_sizes'] === '1';
+        $sizeOptions = $_POST['size_options'] ?? [];
+        $customSizeOptions = trim($_POST['custom_size_options'] ?? '');
+
+        if (!is_array($sizeOptions)) {
+            $sizeOptions = [];
+        }
 
         if ($name !== '' && $price !== '') {
             $productId = $productsService->createProduct($name, $description, $price);
 
             if ($productId) {
+                $sizesSaved = product_sizes_set_for_product((int)$productId, $hasSizes, $sizeOptions, $customSizeOptions);
+
                 if (!empty($_FILES['product_image']['name'])) {
                     $uploadDir = __DIR__ . '/../assets/Products_img/';
 
@@ -73,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['flash_message_type'] = 'warning';
                     } else {
                         if (move_uploaded_file($fileTmp, $targetPath)) {
-                            $dbImagePath = '../assets/Products_img/' . $newFileName;
+                            $dbImagePath = '/parents-council-platform-group5/public/assets/Products_img/' . $newFileName;
                             $imageSaved = $productsService->addProductImage($productId, $dbImagePath);
 
                             if ($imageSaved) {
@@ -93,6 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['flash_message_type'] = 'success';
                 }
 
+                if (!$sizesSaved) {
+                    $_SESSION['flash_message'] = 'Το προϊόν δημιουργήθηκε, αλλά τα μεγέθη δεν αποθηκεύτηκαν σωστά.';
+                    $_SESSION['flash_message_type'] = 'warning';
+                }
+
                 header("Location: eshop.php");
                 exit;
             } else {
@@ -110,11 +126,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['product_name'] ?? '');
         $description = trim($_POST['product_description'] ?? '');
         $price = trim($_POST['price'] ?? '');
+        $hasSizes = isset($_POST['has_sizes']) && $_POST['has_sizes'] === '1';
+        $sizeOptions = $_POST['size_options'] ?? [];
+        $customSizeOptions = trim($_POST['custom_size_options'] ?? '');
+
+        if (!is_array($sizeOptions)) {
+            $sizeOptions = [];
+        }
 
         if ($id > 0 && $name !== '' && $price !== '') {
             $updated = $productsService->updateProduct($id, $name, $description, $price);
 
             if ($updated) {
+                $sizesSaved = product_sizes_set_for_product($id, $hasSizes, $sizeOptions, $customSizeOptions);
+
                 if (!empty($_FILES['product_image']['name'])) {
                     $uploadDir = __DIR__ . '/../assets/Products_img/';
 
@@ -151,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['flash_message_type'] = 'warning';
                     } else {
                         if (move_uploaded_file($fileTmp, $targetPath)) {
-                            $dbImagePath = '../assets/Products_img/' . $newFileName;
+                            $dbImagePath = '/parents-council-platform-group5/public/assets/Products_img/' . $newFileName;
                             $imageSaved = $productsService->replaceProductImage($id, $dbImagePath);
 
                             if ($imageSaved) {
@@ -176,6 +201,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['flash_message'] = 'Το προϊόν ενημερώθηκε επιτυχώς.';
                     $_SESSION['flash_message_type'] = 'success';
                 }
+
+                if (!$sizesSaved) {
+                    $_SESSION['flash_message'] = 'Το προϊόν ενημερώθηκε, αλλά τα μεγέθη δεν αποθηκεύτηκαν σωστά.';
+                    $_SESSION['flash_message_type'] = 'warning';
+                }
             } else {
                 $_SESSION['flash_message'] = 'Σφάλμα κατά την ενημέρωση του προϊόντος.';
                 $_SESSION['flash_message_type'] = 'danger';
@@ -198,12 +228,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existsInOrders = $productsService->productExistsInOrders($id);
 
             if ($existsInOrders === true) {
-                $_SESSION['flash_message'] = 'Το προϊόν δεν μπορεί να διαγραφεί, γιατί υπάρχει σε καταχωρημένες παραγγελίες.';
+                $_SESSION['flash_message'] = 'Το προϊόν δεν μπορεί να διαγραφεί, γιατί υπάρχει σε ολοκληρωμένες παραγγελίες ή πληρωμές. Καθάρισε πρώτα το αντίστοιχο ιστορικό e-shop από τις Παραγγελίες.';
                 $_SESSION['flash_message_type'] = 'warning';
             } else {
                 $deleted = $productsService->deleteProduct($id);
 
                 if ($deleted) {
+                    product_sizes_remove_for_product($id);
                     $_SESSION['flash_message'] = 'Το προϊόν διαγράφηκε επιτυχώς.';
                     $_SESSION['flash_message_type'] = 'success';
                 } else {
@@ -253,7 +284,15 @@ if (isset($_GET['edit'])) {
     }
 }
 
+if (is_array($editProduct)) {
+    $sizeMeta = product_sizes_get_for_product((int)($editProduct['product_id'] ?? 0));
+    $editProduct['has_sizes'] = $sizeMeta['has_sizes'];
+    $editProduct['size_options'] = $sizeMeta['size_options'];
+    $editProduct['custom_size_options'] = $sizeMeta['custom_size_options'];
+}
+
 $products = $productsService->getAllProducts();
+$productSizesMap = product_sizes_read_all();
 $isShopVisible = $eshopSettingsService->isShopVisible();
 ?>
 
@@ -269,7 +308,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
-    <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css?v=13">
+    <link rel="stylesheet" href="../assets/css/admin_css/admin_eshop.css?v=14">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -336,6 +375,7 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                         <th>Εικόνα</th>
                                         <th>Τίτλος</th>
                                         <th>Τιμή</th>
+                                        <th>Μεγέθη</th>
                                         <th>Περιγραφή</th>
                                         <th style="width: 170px;">Ενέργειες</th>
                                     </tr>
@@ -361,6 +401,27 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                             </td>
                                             <td>
                                                 €<?php echo htmlspecialchars($product['price']); ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $productIdKey = (string)((int)$product['product_id']);
+                                                $sizeMeta = $productSizesMap[$productIdKey] ?? null;
+                                                $sizeValues = [];
+
+                                                if (is_array($sizeMeta) && !empty($sizeMeta['has_sizes']) && !empty($sizeMeta['size_options_with_labels']) && is_array($sizeMeta['size_options_with_labels'])) {
+                                                    foreach ($sizeMeta['size_options_with_labels'] as $sizeOption) {
+                                                        if (is_array($sizeOption) && !empty($sizeOption['label'])) {
+                                                            $sizeValues[] = (string)$sizeOption['label'];
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+
+                                                <?php if (!empty($sizeValues)): ?>
+                                                    <span><?php echo htmlspecialchars(implode(', ', $sizeValues)); ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-muted">Χωρίς μέγεθος</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <?php
@@ -448,6 +509,53 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                                 Επιτρεπόμενοι τύποι: JPG, JPEG, PNG, GIF, WEBP | Μέγιστο μέγεθος: 5MB
                             </small>
                         </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input js-has-sizes-toggle" id="create_has_sizes" name="has_sizes" value="1">
+                                <label class="custom-control-label" for="create_has_sizes"><strong>Το προϊόν έχει διαθέσιμα μεγέθη</strong></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group js-size-options-group" style="display:none;">
+                            <label><strong>Διαθέσιμα μεγέθη στο e-shop</strong></label>
+                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                                <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
+                                    <div class="custom-control custom-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input js-size-option"
+                                            id="create_size_<?php echo htmlspecialchars($sizeValue); ?>"
+                                            name="size_options[]"
+                                            value="<?php echo htmlspecialchars($sizeValue); ?>"
+                                            checked
+                                        >
+                                        <label class="custom-control-label" for="create_size_<?php echo htmlspecialchars($sizeValue); ?>"><?php echo htmlspecialchars($sizeLabel); ?></label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="custom-size-builder js-custom-size-builder">
+                                <label for="create_custom_size_input"><strong>Πρόσθεσε άλλο μέγεθος / επιλογή</strong></label>
+                                <div class="custom-size-input-row">
+                                    <input
+                                        type="text"
+                                        id="create_custom_size_input"
+                                        class="form-control js-custom-size-input"
+                                        placeholder="Π.χ. 2-3 ετών ή 36"
+                                    >
+                                    <button type="button" class="btn btn-outline-primary js-add-custom-size">
+                                        <i class="fas fa-plus mr-1"></i>Προσθήκη
+                                    </button>
+                                </div>
+                                <div class="custom-size-chips js-custom-size-chips" aria-live="polite"></div>
+                                <textarea
+                                    id="create_custom_size_options"
+                                    name="custom_size_options"
+                                    class="js-custom-size-options d-none"
+                                ></textarea>
+                            </div>
+                            <small class="text-muted d-block mt-2">Επίλεξε τα έτοιμα μεγέθη ή γράψε δικά σου. Αν το προϊόν δεν έχει μέγεθος, άφησε το checkbox ανενεργό.</small>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -526,6 +634,60 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
                             </small>
                         </div>
 
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    type="checkbox"
+                                    class="custom-control-input js-has-sizes-toggle"
+                                    id="edit_has_sizes"
+                                    name="has_sizes"
+                                    value="1"
+                                    <?php echo (!empty($editProduct['has_sizes'])) ? 'checked' : ''; ?>
+                                >
+                                <label class="custom-control-label" for="edit_has_sizes"><strong>Το προϊόν έχει διαθέσιμα μεγέθη</strong></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group js-size-options-group" style="display:<?php echo (!empty($editProduct['has_sizes'])) ? 'block' : 'none'; ?>;">
+                            <label><strong>Διαθέσιμα μεγέθη στο e-shop</strong></label>
+                            <div class="d-flex flex-wrap" style="gap:10px 14px;">
+                                <?php foreach ($availableSizeOptions as $sizeValue => $sizeLabel): ?>
+                                    <div class="custom-control custom-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            class="custom-control-input js-size-option"
+                                            id="edit_size_<?php echo htmlspecialchars($sizeValue); ?>"
+                                            name="size_options[]"
+                                            value="<?php echo htmlspecialchars($sizeValue); ?>"
+                                            <?php echo (!empty($editProduct['size_options']) && is_array($editProduct['size_options']) && in_array($sizeValue, $editProduct['size_options'], true)) ? 'checked' : ''; ?>
+                                        >
+                                        <label class="custom-control-label" for="edit_size_<?php echo htmlspecialchars($sizeValue); ?>"><?php echo htmlspecialchars($sizeLabel); ?></label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="custom-size-builder js-custom-size-builder">
+                                <label for="edit_custom_size_input"><strong>Πρόσθεσε άλλο μέγεθος / επιλογή</strong></label>
+                                <div class="custom-size-input-row">
+                                    <input
+                                        type="text"
+                                        id="edit_custom_size_input"
+                                        class="form-control js-custom-size-input"
+                                        placeholder="Π.χ. 2-3 ετών ή 36"
+                                    >
+                                    <button type="button" class="btn btn-outline-primary js-add-custom-size">
+                                        <i class="fas fa-plus mr-1"></i>Προσθήκη
+                                    </button>
+                                </div>
+                                <div class="custom-size-chips js-custom-size-chips" aria-live="polite"></div>
+                                <textarea
+                                    id="edit_custom_size_options"
+                                    name="custom_size_options"
+                                    class="js-custom-size-options d-none"
+                                ><?php echo htmlspecialchars($editProduct['custom_size_options'] ?? ''); ?></textarea>
+                            </div>
+                            <small class="text-muted d-block mt-2">Επίλεξε τα έτοιμα μεγέθη ή γράψε δικά σου. Αν το προϊόν δεν έχει μέγεθος, άφησε το checkbox ανενεργό.</small>
+                        </div>
+
                         <?php if (!empty($editProduct['product_image'])): ?>
                             <div class="form-group">
                                 <label><strong>Τρέχουσα Εικόνα</strong></label>
@@ -602,6 +764,216 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
             const deleteButtons = document.querySelectorAll('.delete-product-btn');
             const deleteProductIdInput = document.getElementById('deleteProductId');
             const deleteProductName = document.getElementById('deleteProductName');
+
+            function splitCustomSizes(value) {
+                return String(value || '')
+                    .split(/[\r\n,;]+/)
+                    .map(function(item) {
+                        return item.replace(/\s+/g, ' ').trim();
+                    })
+                    .filter(Boolean);
+            }
+
+            function bindCustomSizeBuilder(scopeEl) {
+                const builder = scopeEl.querySelector('.js-custom-size-builder');
+
+                if (!builder) {
+                    return null;
+                }
+
+                const input = builder.querySelector('.js-custom-size-input');
+                const addButton = builder.querySelector('.js-add-custom-size');
+                const chips = builder.querySelector('.js-custom-size-chips');
+                const hiddenField = builder.querySelector('.js-custom-size-options');
+                let values = splitCustomSizes(hiddenField ? hiddenField.value : '');
+
+                function syncHiddenField() {
+                    if (hiddenField) {
+                        hiddenField.value = values.join('\n');
+                    }
+                }
+
+                function render() {
+                    if (!chips) {
+                        syncHiddenField();
+                        return;
+                    }
+
+                    chips.innerHTML = '';
+
+                    if (values.length === 0) {
+                        const empty = document.createElement('span');
+                        empty.className = 'custom-size-empty';
+                        empty.textContent = 'Δεν έχουν προστεθεί άλλα μεγέθη.';
+                        chips.appendChild(empty);
+                        syncHiddenField();
+                        return;
+                    }
+
+                    values.forEach(function(value, index) {
+                        const chip = document.createElement('span');
+                        chip.className = 'custom-size-chip';
+
+                        const text = document.createElement('span');
+                        text.textContent = value;
+
+                        const removeButton = document.createElement('button');
+                        removeButton.type = 'button';
+                        removeButton.className = 'custom-size-chip-remove';
+                        removeButton.setAttribute('aria-label', 'Αφαίρεση ' + value);
+                        removeButton.innerHTML = '<i class="fas fa-times"></i>';
+                        removeButton.addEventListener('click', function() {
+                            values.splice(index, 1);
+                            render();
+                        });
+
+                        chip.appendChild(text);
+                        chip.appendChild(removeButton);
+                        chips.appendChild(chip);
+                    });
+
+                    syncHiddenField();
+                }
+
+                function addValue(shouldFocus) {
+                    if (!input) {
+                        return;
+                    }
+
+                    const nextValues = splitCustomSizes(input.value);
+
+                    nextValues.forEach(function(nextValue) {
+                        const exists = values.some(function(value) {
+                            return value.toLowerCase() === nextValue.toLowerCase();
+                        });
+
+                        if (!exists) {
+                            values.push(nextValue);
+                        }
+                    });
+
+                    input.value = '';
+                    render();
+
+                    if (shouldFocus !== false) {
+                        input.focus();
+                    }
+                }
+
+                if (addButton) {
+                    addButton.addEventListener('click', function() {
+                        addValue(true);
+                    });
+                }
+
+                if (input) {
+                    input.addEventListener('keydown', function(event) {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            addValue(true);
+                        }
+                    });
+                }
+
+                render();
+
+                return {
+                    clear: function() {
+                        values = [];
+                        if (input) {
+                            input.value = '';
+                        }
+                        render();
+                    },
+                    hasValues: function() {
+                        return values.length > 0;
+                    },
+                    commit: function() {
+                        addValue(false);
+                    },
+                    sync: syncHiddenField
+                };
+            }
+
+            function bindSizeVisibility(scopeEl) {
+                if (!scopeEl) {
+                    return;
+                }
+
+                const toggle = scopeEl.querySelector('.js-has-sizes-toggle');
+                const optionsGroup = scopeEl.querySelector('.js-size-options-group');
+                const options = scopeEl.querySelectorAll('.js-size-option');
+                const customOptions = scopeEl.querySelector('.js-custom-size-options');
+                const customBuilder = bindCustomSizeBuilder(scopeEl);
+                const shouldPreselectDefaults = scopeEl.closest('#createProductModal') !== null;
+
+                if (!toggle || !optionsGroup) {
+                    return;
+                }
+
+                const sync = function(clearValues) {
+                    const enabled = toggle.checked;
+                    optionsGroup.style.display = enabled ? 'block' : 'none';
+
+                    if (enabled && shouldPreselectDefaults) {
+                        const hasCheckedOption = Array.prototype.some.call(options, function(option) {
+                            return option.checked;
+                        });
+                        const hasCustomValues = customBuilder ? customBuilder.hasValues() : splitCustomSizes(customOptions ? customOptions.value : '').length > 0;
+
+                        if (!hasCheckedOption && !hasCustomValues) {
+                            options.forEach(function(option) {
+                                option.checked = true;
+                            });
+                        }
+                    }
+
+                    if (!enabled && clearValues) {
+                        options.forEach(function(option) {
+                            option.checked = false;
+                        });
+
+                        if (customOptions) {
+                            customOptions.value = '';
+                        }
+
+                        if (customBuilder) {
+                            customBuilder.clear();
+                        }
+                    }
+                };
+
+                toggle.addEventListener('change', function() {
+                    sync(true);
+                });
+
+                scopeEl.addEventListener('submit', function(event) {
+                    if (!toggle.checked) {
+                        return;
+                    }
+
+                    if (customBuilder) {
+                        customBuilder.commit();
+                    }
+
+                    const hasClassicSize = Array.prototype.some.call(options, function(option) {
+                        return option.checked;
+                    });
+                    const hasCustomSize = customBuilder ? customBuilder.hasValues() : splitCustomSizes(customOptions ? customOptions.value : '').length > 0;
+
+                    if (!hasClassicSize && !hasCustomSize) {
+                        event.preventDefault();
+                        alert('Επίλεξε τουλάχιστον ένα μέγεθος ή άφησε ανενεργό το πεδίο "Το προϊόν έχει διαθέσιμα μεγέθη".');
+                    } else if (customBuilder) {
+                        customBuilder.sync();
+                    }
+                });
+
+                sync(false);
+            }
+
+            bindSizeVisibility(document.querySelector('#createProductModal form'));
+            bindSizeVisibility(document.querySelector('#editProductModal form'));
 
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function () {

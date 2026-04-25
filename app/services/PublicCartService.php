@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 class PublicCartService
 {
@@ -53,6 +54,16 @@ class PublicCartService
                 continue;
             }
 
+            $sizeMeta = product_sizes_get_for_product($productId);
+            $availableSizes = $sizeMeta['size_options'] ?? [];
+            $requiresSize = !empty($sizeMeta['has_sizes']) && !empty($availableSizes);
+            if ($requiresSize && ($size === '' || !in_array($size, $availableSizes, true))) {
+                continue;
+            }
+            if (!$requiresSize) {
+                $size = '';
+            }
+
             $priceAtPurchase = (float) ($item['price_at_purchase'] ?? 0);
             if ($priceAtPurchase <= 0) {
                 $priceAtPurchase = (float) ($product['price'] ?? 0);
@@ -75,6 +86,7 @@ class PublicCartService
                 'price' => (float) ($product['price'] ?? 0),
                 'product_image' => (string) ($product['product_image'] ?? $this->getDefaultProductImagePath()),
                 'line_total' => $lineTotal,
+                'size_label' => product_sizes_label_for_value($size, $sizeMeta),
             ];
 
             $cleanItems[] = [
@@ -115,6 +127,18 @@ class PublicCartService
         $product = $this->loadProductSnapshot($productId);
         if ($product === null) {
             return false;
+        }
+
+        $sizeMeta = product_sizes_get_for_product($productId);
+        $availableSizes = $sizeMeta['size_options'] ?? [];
+        $requiresSize = !empty($sizeMeta['has_sizes']) && !empty($availableSizes);
+
+        if ($requiresSize) {
+            if ($size === '' || !in_array($size, $availableSizes, true)) {
+                return false;
+            }
+        } else {
+            $size = '';
         }
 
         $priceAtPurchase = (float) ($product['price'] ?? 0);
@@ -279,17 +303,58 @@ class PublicCartService
             return $this->getDefaultProductImagePath();
         }
 
-        $normalized = str_replace('\\', '/', $imagePath);
-        $projectRoot = dirname(__DIR__, 2);
+        $absolutePath = $this->resolveProductImageAbsolutePath($imagePath);
 
-        if (strpos($normalized, '/public/') !== false) {
-            $absolutePath = $projectRoot . substr($normalized, strpos($normalized, '/public/'));
-        } elseif (strpos($normalized, '/assets/') === 0) {
-            $absolutePath = $projectRoot . '/public' . $normalized;
-        } else {
-            $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+        return file_exists($absolutePath)
+            ? $this->resolveProductImagePublicUrl($imagePath)
+            : $this->getDefaultProductImagePath();
+    }
+
+    private function resolveProductImageAbsolutePath(string $imagePath): string
+    {
+        $projectRoot = dirname(__DIR__, 2);
+        $publicRelativePath = $this->resolveProductImagePublicRelativePath($imagePath);
+
+        return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
+    }
+
+    private function resolveProductImagePublicUrl(string $imagePath): string
+    {
+        $publicRelativePath = $this->resolveProductImagePublicRelativePath($imagePath);
+
+        return $publicRelativePath === ''
+            ? $this->getDefaultProductImagePath()
+            : '/parents-council-platform-group5/public/' . $publicRelativePath;
+    }
+
+    private function resolveProductImagePublicRelativePath(string $imagePath): string
+    {
+        $normalized = trim(str_replace('\\', '/', $imagePath));
+        if ($normalized === '') {
+            return '';
         }
 
-        return file_exists($absolutePath) ? $imagePath : $this->getDefaultProductImagePath();
+        $publicPosition = strpos($normalized, '/public/');
+        if ($publicPosition !== false) {
+            return ltrim(substr($normalized, $publicPosition + strlen('/public/')), '/');
+        }
+
+        if (strpos($normalized, '../assets/') === 0) {
+            return substr($normalized, 3);
+        }
+
+        if (strpos($normalized, '/assets/') === 0) {
+            return ltrim($normalized, '/');
+        }
+
+        if (strpos($normalized, 'assets/') === 0) {
+            return $normalized;
+        }
+
+        if (strpos($normalized, 'public/') === 0) {
+            return substr($normalized, strlen('public/'));
+        }
+
+        return ltrim($normalized, '/');
     }
 }

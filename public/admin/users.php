@@ -335,11 +335,12 @@ function buildOrdersExportSummary(array $orders, array $orderItemsByOrderId): st
 
         foreach ($items as $item) {
             $size = trim((string)($item['size'] ?? ''));
+            $sizeLabel = trim((string)($item['size_label'] ?? $size));
             $itemParts[] = sprintf(
                 '%s x%d%s',
                 (string)($item['product_name'] ?? 'Προϊόν'),
                 (int)($item['quantity'] ?? 0),
-                $size !== '' ? ' [' . $size . ']' : ''
+                $size !== '' ? ' [' . $sizeLabel . ']' : ''
             );
         }
 

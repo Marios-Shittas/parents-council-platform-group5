@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 
 	<link rel="stylesheet" href="../assets/css/main.css">
 	<link rel="stylesheet" href="../assets/css/admin_css/admin_panel.css">
-	<link rel="stylesheet" href="../assets/css/admin_css/admin_orders.css">
+	<link rel="stylesheet" href="../assets/css/admin_css/admin_orders.css?v=2">
 </head>
 <body>
 	<div class="admin-wrapper">
@@ -48,6 +48,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-	<script type="text/babel" src="../assets/js/admin-orders.jsx"></script>
+	<script type="text/babel" src="../assets/js/admin-orders.jsx?v=2"></script>
 </body>
 </html>
