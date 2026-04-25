@@ -53,7 +53,7 @@ if (!function_exists('app_detect_base_url')) {
 }
 
 define('DB_HOST', 'localhost');        // Server
-define('DB_NAME', 'parents_council_dimotiko');  // Όνομα βάσης
+define('DB_NAME', 'parents_council_dimotiko');  // Όνομα βάσης - δημοτικό
 define('DB_USER', 'root');             // XAMPP default user
 define('DB_PASS', '');                  // XAMPP default password
 define('DB_CHARSET', 'utf8mb4');       // Κωδικοποίηση
