@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\views\pages\applications.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Parent Applications Page
- * Displays all applications and allows parent users to submit them.
+ * Goneas Aitiseis Page
+ * Displays ola aitiseis kai allows goneas xristes to submit them.
  */
 
 require_once __DIR__ . '/../../services/ApplicationsService.php';
@@ -46,10 +49,10 @@ function formatUiDatePublic(string $date): string {
 }
 
 /**
- * Normalize $_FILES input (single or multiple) into a flat files array.
+ * Normalize $_FILES input (ena i multiple) mesa se a flat arxeia pinakas.
  *
- * @param array<string, mixed> $files
- * @return array<int, array<string, mixed>>
+ * @param array<string, mixed - > $arxeia
+ * @return array<int, - pinakas<string, mixed>>
  */
 function normalizeUploadedSubmissionFiles(array $files): array {
     $normalized = [];
@@ -932,7 +935,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
                                         <div class="post-content d-flex flex-column h-100">
 
-                                        <!-- Status badge & category tag – filled by JS -->
+                                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                                         <div class="app-meta-top d-flex justify-content-between align-items-center mb-2">
                                             <span class="js-status-placeholder"></span>
                                             <span class="js-category-placeholder"></span>
@@ -954,7 +957,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                             <span><?php echo htmlspecialchars($applicationDateDisplay); ?></span>
                                         </div>
 
-                                        <!-- Open / close date row – filled by JS -->
+                                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                                         <div class="js-dates-placeholder mb-3"></div>
 
                                         <button
@@ -1160,7 +1163,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── Submit Application Modal ────────────────────────────────────── -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -1176,7 +1179,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                 <p id="modal-description" class="text-muted small mb-3"></p>
                 <hr class="my-2">
                 <div id="modal-dynamic-fields">
-                    <!-- Rendered by JavaScript -->
+                    <!-- Rendered apo JavaScript -->
                 </div>
                 <div class="form-group mt-3 mb-0">
                     <label class="form-label-custom mb-2">
@@ -1198,7 +1201,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── View Submission Details Modal ─────────────────────────────────── -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
@@ -1227,7 +1230,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── Success Toast ──────────────────────────────────────────────────── -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <div id="submission-toast" class="position-fixed submission-toast" hidden>
     <div class="alert alert-success shadow py-3 px-4 mb-0">
         <i class="fas fa-check-circle mr-2"></i> Η αίτησή σας υποβλήθηκε επιτυχώς!

@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\ApplicationTemplateService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
  * ApplicationTemplateService
- * Manages reusable application templates for standard/recurring applications
+ * Diaxeirizetai reusable aitisi templates gia standard/epanalamvanomenes aitiseis
  */
 class ApplicationTemplateService {
     private $conn;
@@ -16,8 +19,8 @@ class ApplicationTemplateService {
     }
 
     /**
-     * Ensure the templates table exists for older installs that have not run the
-     * applications v2 migration yet.
+     * Eksasfalizei to templates pinakas yparxei gia palaioteres egkatastaseis that have not run to
+     * aitiseis v2 migration yet.
      */
     private function ensureTemplatesTableReady() {
         if ($this->templatesTableChecked) {
@@ -289,8 +292,8 @@ class ApplicationTemplateService {
     // ============================================================
     
     /**
-     * Seed system templates into database
-     * Call this once during installation
+     * Vazei arxika system templates mesa se vasi
+     * Kaleitai mia fora kata tin egkatastasi
      */
     public function seedDefaultTemplates() {
         $templates = $this->getDefaultTemplates();

@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_programatismo_litourgion.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Styles gia tin admin selida programmatismou leitourgion. */
+/* Epiireazei schedule cards, log search, filters kai modal leptomereies gia tis leitourgies. */
 :root {
     --program-accent: #1f7aec;
     --program-accent-dark: #1267d1;

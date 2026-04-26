@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\UsersService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
@@ -188,7 +191,7 @@ class UsersService
             return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να περιέχει κενά.'];
         }
 
-        // At least 8 chars, with letters, numbers, and a special character.
+        // At least 8 chars, me letters, numbers, kai a special character.
         if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/', $newPassword)) {
             return [
                 'success' => false,
@@ -1753,8 +1756,8 @@ class UsersService
         }
 
         $currentStatus = (string)($existingUser['account_status'] ?? 'pending');
-        // Allow re-running the approval email/token flow for parent accounts
-        // unless they are already fully active.
+        // Allow re-running to approval email/token flow gia goneas accounts
+        // unless they are aldiavasmay fully active.
         return in_array($currentStatus, ['pending', 'rejected', 'approved', 'waiting_payment'], true);
     }
 

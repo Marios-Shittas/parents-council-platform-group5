@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\HomePageService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * HomePageService
- * Αποθηκεύει και ανακτά το editable περιεχόμενο της αρχικής σελίδας.
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';

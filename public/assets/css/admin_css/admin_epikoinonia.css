@@ -1,3 +1,6 @@
+/* Arxeio: public\assets\css\admin_css\admin_epikoinonia.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
 /* Professional Minimal Communication Management Styling */
 
 :root {
@@ -405,7 +408,7 @@ body {
     letter-spacing: 0.3px;
 }
 
-/* Search & Filters Section */
+/* Psaxnei & Filters Section */
 .search-filters-section {
     background: white;
     border-radius: 6px;
@@ -600,7 +603,7 @@ body {
     border: 1px solid var(--border-color);
 }
 
-/* Table Styles */
+/* Pinakas Styles */
 .table-custom {
     margin: 0;
     width: 100%;
@@ -1013,7 +1016,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* Modal Styling */
+/* Modal parathyro Styling */
 .modal-content {
     border-radius: 6px;
     border: none;
@@ -1280,7 +1283,7 @@ textarea.form-control {
     cursor: pointer;
 }
 
-/* Delete Confirmation Modal */
+/* Diagrafei Confirmation Modal parathyro */
 .delete-modal {
     display: none;
     position: fixed;

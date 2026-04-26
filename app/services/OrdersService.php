@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\OrdersService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -18,8 +21,8 @@ class OrdersService
     }
 
     /**
-     * Get count of paid orders not yet seen by admin
-     * @return int Count of unseen paid orders
+     * Pairnei metrisis gia paid paraggelies not yet seen apo admin
+     * @return int - Metraei apo unseen paid paraggelies
      */
     public function getPendingPaidOrdersCount(): int
     {
@@ -34,9 +37,9 @@ class OrdersService
     }
 
     /**
-     * Mark an order as seen by admin
-     * @param int $orderId Order ID
-     * @return bool True when query executes successfully
+     * Mark an paraggelia as seen apo admin
+     * @param int $orderId - Order ID
+     * @return bool - True otan query executes successfully
      */
     public function markOrderAsSeen(int $orderId): bool
     {

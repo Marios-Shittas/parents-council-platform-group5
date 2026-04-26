@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\UsefulInmorfiionService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * UsefulInformationService
- * Αποθηκεύει και ανακτά το περιεχόμενο της σελίδας "Χρήσιμες Πληροφορίες".
+ * UsefulInmorfiionService
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';

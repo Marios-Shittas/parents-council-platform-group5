@@ -1,6 +1,9 @@
+// Arxeio: public\assets\js\admin-users.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-auto-submit-on-change]').forEach(function (field) {
-        // Kanei submit to parent form otan allazei select me data attribute.
+        // Kanei submit to goneas forma otan allazei select me dedomena attribute.
         field.addEventListener('change', function () {
             if (field.form) {
                 field.form.submit();

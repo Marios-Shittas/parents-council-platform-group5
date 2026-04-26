@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\eshop.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 require_once __DIR__ . '/../../includes/site_context.php';
 require_once __DIR__ . '/../../services/EshopSettingsService.php';
 

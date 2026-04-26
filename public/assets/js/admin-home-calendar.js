@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-home-calendar.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 (function () {
     const root = document.getElementById('admin-calendar-app');
     if (!root) {

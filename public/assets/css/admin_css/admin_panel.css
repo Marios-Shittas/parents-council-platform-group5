@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_panel.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Vasika styles gia to admin panel kai to geniko layout. */
+/* Epiireazei to koino admin shell: body, sidebar spacing, buttons kai responsive behavior. */
 body {
     font-family: 'Lato', sans-serif;
     background: #f5f7fb;

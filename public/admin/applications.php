@@ -1,19 +1,25 @@
 <?php
+// Arxeio: public\admin\applications.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Admin Applications Management Page
- * Create, update, delete applications and manage documents
+ * Admin selida diaxeirisis aitiseon
+ * Dimiourgei, enimeronei, diagrafei aitiseis kai diaxeirizetai documents
+ * Edo o admin ftiaxnei aitiseis/templates kai diaxeirizetai ta arxeia pou synodevoun kathe aitisi.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// No-cache gia na min emfanizontai admin dedomena apo browser history meta logout.
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
 header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    // Mono admin mporoun na allaksoun aitiseis/templates, alliws redirect sto login.
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
 }
@@ -22,7 +28,8 @@ require_once __DIR__ . '/../../app/services/ApplicationsService.php';
 require_once __DIR__ . '/../../app/services/ApplicationTemplateService.php';
 require_once __DIR__ . '/../../app/config/db.php';
 
-// Initialize the services
+// Arxikopoiei ta services
+// ApplicationsService kanei CRUD stis aitiseis, ApplicationTemplateService xeirizetai ta reusable templates.
 $applicationsService = new ApplicationsService();
 $templateService = new ApplicationTemplateService($conn);
 
@@ -32,11 +39,13 @@ unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 
 $documentsUploadDir = __DIR__ . '/../assets/Applications_docs/';
 if (!is_dir($documentsUploadDir)) {
+    // Dimiourgoume ton upload fakelo an leipei, gia na min apotyxei to upload sti mesi.
     mkdir($documentsUploadDir, 0777, true);
 }
 
 // Leitourgia normalizeUploadedFiles: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeUploadedFiles(array $fileField): array {
+    // Kanonikopoiei to $_FILES gia ena kai multiple uploads sto idio pinakas morfi.
     $files = [];
 
     if (!isset($fileField['name'])) {
@@ -72,6 +81,7 @@ function normalizeUploadedFiles(array $fileField): array {
 
 // Leitourgia uploadApplicationFiles: xeirizetai to antistoixo kommati tis selidas i tou service.
 function uploadApplicationFiles(ApplicationsService $applicationsService, int $applicationId, string $uploadDir): array {
+    // Elegxei types/oria, metaferei ta arxeia sto uploads dir kai ta syndeei me tin aitisi sti vasi.
     $definitions = [
         'application_image' => ['label' => 'εικόνα', 'extensions' => ['jpg', 'jpeg', 'png', 'webp']],
         'instruction_file' => ['label' => 'αρχείο οδηγιών', 'extensions' => ['pdf', 'doc', 'docx']],
@@ -176,7 +186,7 @@ function uploadApplicationFiles(ApplicationsService $applicationsService, int $a
 }
 
 /**
- * Convert stored document path to a public URL that can be opened from /public/admin.
+ * Metatrepei to apothikevmeno document path se public URL gia anoigma apo /public/admin.
  */
 function getDocumentPublicUrl(string $storedPath): string {
     $storedPath = trim($storedPath);
@@ -196,7 +206,7 @@ function getDocumentPublicUrl(string $storedPath): string {
 }
 
 /**
- * Convert stored document path to local absolute filesystem path for delete.
+ * Metatrepei to apothikevmeno document path se local absolute path gia diagrafi.
  */
 function getDocumentAbsolutePath(string $storedPath): string {
     $storedPath = trim($storedPath);
@@ -610,7 +620,7 @@ function cloneTemplateInstructionFilesToApplication(
     return $result;
 }
 
-// Leitourgia deleteTemplateInstructionFiles: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia diagrafiTemplateInstructionFiles: xeirizetai to antistoixo kommati tis selidas i tou service.
 function deleteTemplateInstructionFiles(int $templateId): void {
     if ($templateId <= 0) {
         return;
@@ -961,7 +971,7 @@ function normalizeSubmissionSort(string $sort): string {
     return in_array($sort, ['newest', 'oldest'], true) ? $sort : 'newest';
 }
 
-// Leitourgia normalizeEditModalTab: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia normalizeEditModal parathyroTab: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeEditModalTab(string $tab): string {
     $tab = strtolower(trim($tab));
     if (in_array($tab, ['files', 'edit-files', 'edit-files-pane'], true)) {
@@ -974,7 +984,7 @@ function normalizeEditModalTab(string $tab): string {
     return 'info';
 }
 
-// Leitourgia normalizeUiDate: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia normalizeUiImerominia: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeUiDate(string $date): string {
     $date = trim($date);
     if ($date === '') {
@@ -989,7 +999,7 @@ function normalizeUiDate(string $date): string {
     return '';
 }
 
-// Leitourgia getTodayUiDate: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia getTodayUiImerominia: xeirizetai to antistoixo kommati tis selidas i tou service.
 function getTodayUiDate(): string {
     try {
         $timezone = new DateTimeZone('Europe/Athens');
@@ -1204,7 +1214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $newApplicationId = $applicationsService->createApplication($title, $description);
             if ($newApplicationId) {
-                // Ανέβασμα αρχείων ανεξάρτητα από τη μέθοδο υποβολής
+                // Sxolio: voithitiko sxolio gia ton parakato kodika.
                 $uploadResult = uploadApplicationFiles($applicationsService, (int)$newApplicationId, $documentsUploadDir);
 
                 $newMeta = [
@@ -1219,7 +1229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $applicationUiMeta[(string)$newApplicationId] = $newMeta;
                 saveApplicationUiMeta($applicationUiMeta);
 
-                // Αποθήκευση των πεδίων φόρμας για online συμπλήρωση
+                // Sxolio: voithitiko sxolio gia ton parakato kodika.
                 $formFields = json_decode($formFieldsJson, true);
                 if (is_array($formFields) && !empty($formFields)) {
                     foreach ($formFields as $index => $field) {
@@ -1627,7 +1637,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Handle creating application from template (NEW)
+    // Xeirizetai creating aitisi apo template (NEW)
     if ($action === 'create_app_from_template') {
         $template_id = !empty($_POST['template_id']) && $_POST['template_id'] !== 'blank' ? (int)$_POST['template_id'] : null;
         $title = trim($_POST['title'] ?? '');
@@ -1649,7 +1659,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.';
             $messageType = 'danger';
         } else {
-            // Also add to legacy field names
+            // Also add to legacy pedio names
             $app_id = $applicationsService->createApplicationFromTemplate(
                 $template_id,
                 $title,
@@ -1682,7 +1692,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle publishing application (NEW)
+    // Xeirizetai publishing aitisi (NEW)
     if ($action === 'publish_application') {
         $app_id = (int)($_POST['application_id'] ?? 0);
         if ($app_id > 0) {
@@ -1693,7 +1703,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle closing application (NEW)
+    // Xeirizetai closing aitisi (NEW)
     if ($action === 'close_application') {
         $app_id = (int)($_POST['application_id'] ?? 0);
         if ($app_id > 0) {
@@ -1704,7 +1714,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle creating template (NEW)
+    // Xeirizetai creating template (NEW)
     if ($action === 'create_template') {
         $template_name = trim($_POST['template_name'] ?? '');
         $template_category = 'standard';
@@ -1730,7 +1740,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $messageType = 'danger';
             $activeTab = 'templates';
         } else {
-            // Auto-generate template key from name (lowercase, replace spaces with underscores)
+            // Auto-generate template key apo name (lowercase, replace spaces me underscores)
             $template_key = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $template_name));
             $template_key = trim($template_key, '_'); // Remove leading/trailing underscores
             if ($template_key === '') {
@@ -1773,7 +1783,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle deleting template (NEW)
+    // Xeirizetai deleting template (NEW)
     if ($action === 'delete_template') {
         $template_id = (int)($_POST['template_id'] ?? 0);
         if ($template_id > 0) {
@@ -1798,7 +1808,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle updating template (NEW)
+    // Xeirizetai updating template (NEW)
     if ($action === 'update_template') {
         $template_id = (int)($_POST['template_id'] ?? 0);
         $template_name = trim($_POST['template_name'] ?? '');
@@ -2110,7 +2120,7 @@ if ($selectedApplicationId > 0) {
             </div>
         </div>
 
-        <!-- TABS for new features -->
+        <!-- TABS gia neo features -->
         <ul class="nav nav-tabs mb-4" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="tab-manage-link" data-bs-toggle="tab" href="#tab-manage" role="tab" aria-controls="tab-manage" aria-selected="true">
@@ -2125,7 +2135,7 @@ if ($selectedApplicationId > 0) {
         </ul>
 
         <div class="tab-content">
-            <!-- TAB 1: Manage Applications -->
+            <!-- TAB 1: Diaxeirizetai Aitiseis -->
             <div id="tab-manage" class="tab-pane fade show active" role="tabpanel" aria-labelledby="tab-manage-link">
 
         <div class="card card-custom mb-4">
@@ -2656,7 +2666,7 @@ if ($selectedApplicationId > 0) {
                                     </div>
                                     <div class="card-body">
                                         <div id="template_fields_container" class="vstack gap-3 mb-3">
-                                            <!-- Fields will be rendered here -->
+                                            <!-- Fields tha einai rendered here -->
                                         </div>
                                         <button type="button" id="add_template_field_btn" class="btn btn-outline-primary w-100">
                                             <i class="fas fa-plus me-1"></i>Προσθήκη Πεδίου
@@ -2752,13 +2762,13 @@ if ($selectedApplicationId > 0) {
                 </ul>
 
                 <div class="tab-content">
-                    <!-- TAB 1: Online Συμπλήρωση -->
+                    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                     <div class="tab-pane fade show active" id="online-fill-pane" role="tabpanel" aria-labelledby="online-fill-tab">
                         <div class="row g-3">
                             <div class="col-12">
                                 <h6 class="mb-3"><i class="fas fa-list me-2"></i>Πεδία Φόρμας</h6>
                                 <div id="online_form_fields_container" class="vstack gap-2 mb-3">
-                                    <!-- Τα πεδία θα προστεθούν δυναμικά εδώ -->
+                                    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                                 </div>
                             </div>
                             <div class="col-12">

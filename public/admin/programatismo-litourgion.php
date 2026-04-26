@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\programatismo-litourgion.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -45,7 +48,7 @@ function scheduleFeatureLabel(string $feature): string
     return $map[$feature] ?? $feature;
 }
 
-// Leitourgia normalizeDateTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia normalizeImerominiaTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeDateTimeLocalInput(string $value): ?string
 {
     $trimmed = trim($value);
@@ -65,7 +68,7 @@ function normalizeDateTimeLocalInput(string $value): ?string
     return $dateTime->format('Y-m-d H:i:s');
 }
 
-// Leitourgia toDateTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia toImerominiaTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
 function toDateTimeLocalValue(?string $value): string
 {
     if (!is_string($value) || trim($value) === '') {

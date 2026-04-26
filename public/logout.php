@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\logout.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -29,7 +32,7 @@ function clearUserTokenOnLogout(mysqli $conn, ?int $userId, ?string $email): voi
     }
 }
 
-// Get the user role before destroying the session
+// Pairnei to xristis role before destroying to session
 $role = $_SESSION['role'] ?? 'public';
 
 $logoutUserId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
@@ -45,7 +48,7 @@ if (($logoutEmail === null || $logoutEmail === '') && isset($_SESSION['temp_emai
 
 clearUserTokenOnLogout($conn, $logoutUserId, $logoutEmail);
 
-// Log the logout event before destroying the session (only for parents, not admins)
+// Log to logout ekdilosi before destroying to session (only gia goneis, not admins)
 if ($logoutUserId !== null && $logoutUserId > 0 && strtolower((string)$role) === 'parent') {
     $logoutDescription = sprintf(
         'Logout for parent user #%d (%s).',

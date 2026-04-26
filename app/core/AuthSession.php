@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\core\AuthSession.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
 
 class AuthSession
 {

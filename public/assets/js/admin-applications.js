@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-applications.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-template-editor-close]').forEach(function (button) {
         // Kleinei ton protypo editor xoris inline JavaScript sto PHP provoli.

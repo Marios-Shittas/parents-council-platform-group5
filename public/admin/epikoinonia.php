@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\epikoinonia.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/EpikoinoniaService.php';
 require_once __DIR__ . '/../../app/services/EpikoinoniaPageService.php';
 
@@ -730,7 +733,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
                 </div>
 
-                <!-- Search & Filters Section -->
+                <!-- Psaxnei & Filters Section -->
                 <div class="search-filters-section">
                     <div class="search-filters-header">
                         <i class="fas fa-filter"></i>
@@ -934,7 +937,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Diagrafei Confirmation Modal parathyro -->
     <div id="deleteModal" class="delete-modal">
         <div class="delete-modal-content">
             <div class="delete-modal-header">

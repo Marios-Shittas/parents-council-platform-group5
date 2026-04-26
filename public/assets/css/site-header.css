@@ -1,24 +1,27 @@
-/* Βασικά χρώματα για ενιαίο design. */
+/* Arxeio: public\assets\css\site-header.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         :root {
-            /* Χρώμα φόντου του header. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --header-bg: rgba(248, 249, 250, 0.95);
-            /* Λεπτή γραμμή/περίγραμμα του header. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --header-border: rgba(0, 0, 0, 0.06);
-            /* Κύριο μπλε χρώμα brand. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --brand-color: #1a3a5c;
-            /* Βασικό χρώμα κειμένου. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --text-main: #3f4a56;
-            /* Πιο έντονο χρώμα για hover/active. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --text-strong: #152536;
-            /* Απαλό hover φόντο στα links. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --link-hover-bg: #eef3f8;
-            /* Απαλό active φόντο (κρατήθηκε για πιθανή χρήση). */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --link-active-bg: #e6edf5;
-            /* Μπλε gradient ίδιο με το hero panel. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             --nav-row-bg: linear-gradient(135deg, #102f52 0%, #1a3a5c 55%, #0057a8 100%);
         }
 
-        /* Scoped βάση για να μη βασίζεται το header σε global κανόνες της main.css. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .site-header,
         .site-header * {
             box-sizing: border-box;
@@ -37,7 +40,7 @@
             font-family: 'Lato', sans-serif;
         }
 
-        /* Κολλάει πάνω όταν κάνουμε scroll και μένει πάντα ορατό. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar {
             position: sticky;
             top: 0;
@@ -52,7 +55,7 @@
             overflow-y: visible;
         }
 
-        /* Ίδια διακριτική μπλε γραμμή και κάτω από το navbar. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar::after {
             content: "";
             position: absolute;
@@ -66,7 +69,7 @@
             pointer-events: none;
         }
 
-        /* Στυλ λογοτύπου. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .logo-stack {
             display: inline-flex;
             align-items: center;
@@ -87,7 +90,7 @@
             box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
         }
 
-        /* Κείμενο δίπλα στο λογότυπο. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .brand-text {
             display: block;
             justify-content: center;
@@ -106,13 +109,13 @@
             min-width: 0;
         }
 
-        /* Λίγο κενό ανάμεσα στα menu items. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-item {
             margin: 0 .18rem;
             flex: 0 0 auto;
         }
 
-        /* Βασικό στυλ links menu. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-link {
             font-family: 'Lato', sans-serif;
             font-weight: 600;
@@ -127,7 +130,7 @@
             font-size: 1rem;
         }
 
-        /* Ίδιο πλάτος στο icon ώστε να φαίνονται όλα ευθυγραμμισμένα. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-link i {
             width: 1rem;
             text-align: center;
@@ -150,22 +153,22 @@
             font-size: 1rem;
         }
 
-        /* Hover κατάσταση για πιο καθαρό feedback στον χρήστη. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-link:hover {
             background: rgba(255, 255, 255, 0.14);
             color: #ffffff !important;
-            /* Μικρή κίνηση για πιο "ζωντανό" αποτέλεσμα. */
+            /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
             transform: translateY(-1px);
         }
 
-        /* Όταν η σελίδα είναι ενεργή, φαίνεται καθαρά. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .active > .nav-link {
             background: rgba(255, 255, 255, 0.08);
             color: #ffffff !important;
             font-weight: 700;
         }
 
-        /* Μικρή μπλε μπάρα κάτω από το ενεργό link. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-link-content {
             position: relative;
             display: inline-flex;
@@ -183,7 +186,7 @@
             background: rgba(255, 255, 255, 0.82);
         }
 
-        /* Κουμπί login. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .site-header .login-btn,
         .site-header .login-btn.btn,
         .site-header .login-btn.btn-sm {
@@ -304,7 +307,7 @@
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         }
 
-        /* Μικρότερο κενό ανάμεσα στο λογότυπο και το menu. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-brand {
             position: relative;
             margin: 0 0 1rem;
@@ -319,7 +322,7 @@
             min-width: 0;
         }
 
-        /* Το menu πιάνει όλο το διαθέσιμο πλάτος πιο ισορροπημένα. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-collapse {
             width: 100%;
             min-width: 0;
@@ -473,7 +476,7 @@
             white-space: nowrap;
         }
 
-        /* Βελτίωση προσβασιμότητας για πληκτρολόγιο (Tab). */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         .navbar-nav .nav-link:focus-visible,
         .login-btn:focus-visible,
         .utility-icon-link:focus-visible,
@@ -583,7 +586,7 @@
             }
         }
 
-        /* Ρυθμίσεις για κινητό/tablet. */
+        /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
         @media (max-width: 1199.98px) {
             .navbar {
                 padding: .65rem 0;

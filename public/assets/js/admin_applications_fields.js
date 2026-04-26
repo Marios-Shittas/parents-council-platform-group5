@@ -1,5 +1,8 @@
+// Arxeio: public\assets\js\admin_applications_pedia.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Διαχείριση πεδίων φόρμας για διαδημιουργία αιτήσεων
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 (function() {
@@ -56,7 +59,7 @@
     }
 
     /**
-     * Προσθέτει ένα νέο πεδίο φόρμας στη διεπαφή
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function addFormField(fieldName = '', fieldType = 'text', isRequired = true) {
         const fieldId = fieldIdCounter++;
@@ -71,7 +74,7 @@
     }
 
     /**
-     * Αφαιρεί ένα πεδίο φόρμας
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function removeFormField(fieldId) {
         formFields = formFields.filter(f => f.id !== fieldId);
@@ -79,7 +82,7 @@
     }
 
     /**
-     * Ενημερώνει ένα πεδίο φόρμας
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function updateFormField(fieldId, fieldName, fieldType, isRequired) {
         const field = formFields.find(f => f.id === fieldId);
@@ -92,7 +95,7 @@
     }
 
     /**
-     * Ξαναδημιουργεί τη λίστα των πεδίων στη διεπαφή
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function renderFormFields() {
         if (!onlineFormFieldsContainer) return;
@@ -176,7 +179,7 @@
     }
 
     /**
-     * Δημοσιεύει την αίτηση με όλα τα στοιχεία
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function publishApplication() {
         const title = (createApplicationTitle?.value || '').trim();
@@ -228,7 +231,7 @@
     }
 
     /**
-     * Απαλλαγή HTML ειδικών χαρακτήρων
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function escapeHtml(text) {
         const map = {

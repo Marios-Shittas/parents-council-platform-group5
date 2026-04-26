@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\subscription.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Styles gia ti selida syndromis kai tis kartes paketwn. */
+/* Rythmizei subscription plans, pliromi CTA, state messages kai responsive layout. */
 .subscription-wrapper {
     max-width: 600px;
     margin: 50px auto;

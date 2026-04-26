@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-photos.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('gallery-images');
     var preview = document.getElementById('parents-upload-preview');

@@ -1,4 +1,7 @@
-// Contact form component with React
+// Arxeio: public\assets\js\epikoinonia.jsx
+// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// Contact forma component me React
 const EpikoinoniaForm = () => {
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && e.ctrlKey) {
@@ -11,11 +14,11 @@ const EpikoinoniaForm = () => {
     );
 };
 
-// Mount the component when DOM is ready
+// Mount to component otan DOM is diavasmay
 document.addEventListener('DOMContentLoaded', function() {
-    // Note: The form is rendered server-side in PHP
-    // This component is here for potential future React integration
-    // The keyboard shortcut is handled by inline event listener below
+    // Note: To forma is rendered server-side in PHP
+    // This component is here gia potential future React integration
+    // To keyboard syntomeusi is handled apo inline ekdilosi listener below
     
     const messageTextarea = document.getElementById('message');
     if (messageTextarea) {

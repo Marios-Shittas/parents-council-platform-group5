@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\EshopJCC.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora payment flow, opote kratame ta redirects/responses synexi me ton provider.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {

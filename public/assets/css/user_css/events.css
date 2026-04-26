@@ -1,6 +1,9 @@
-/* ===== EVENTS PAGE — MODERN REDESIGN ===== */
+/* Arxeio: public\assets\css\user_css\events.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
 
-/* ---- Section Titles ---- */
+/* ---- Section Titloss ---- */
 .events-section-title {
     font-family: 'Montserrat', sans-serif;
     font-size: 1.35rem;
@@ -57,7 +60,7 @@
     font-size: 0.94rem;
 }
 
-/* ---- Event Card ---- */
+/* ---- Ekdilosi Card ---- */
 .event-card {
     border: none;
     border-radius: 18px;
@@ -75,7 +78,7 @@
     box-shadow: 0 14px 36px rgba(0,0,0,0.14);
 }
 
-/* ---- Image Area ---- */
+/* ---- Eikona Area ---- */
 .event-card-img-wrap {
     position: relative;
     height: 230px;
@@ -136,7 +139,7 @@
     height: 14px;
 }
 
-/* Date badge */
+/* Imerominia badge */
 .event-date-badge {
     position: absolute;
     top: 12px;
@@ -168,7 +171,7 @@
     backdrop-filter: blur(4px);
 }
 
-/* Past event overlay label */
+/* Past ekdilosi overlay label */
 .event-past-label {
     position: absolute;
     bottom: 10px;
@@ -269,7 +272,7 @@
     transform: translateY(-1px);
 }
 
-/* Past events section — slightly muted */
+/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
 .section-past .event-card {
     opacity: 0.82;
 }
@@ -278,7 +281,7 @@
     opacity: 1;
 }
 
-/* ---- Modal ---- */
+/* ---- Modal parathyro ---- */
 .event-modal .modal-content {
     border: none;
     border-radius: 18px;
@@ -318,7 +321,7 @@
     color: #ffffff;
 }
 
-/* Modal carousel container */
+/* Modal parathyro carousel container */
 .event-modal .carousel {
     border-radius: 12px;
     overflow: hidden;
@@ -341,7 +344,7 @@
     width: 100%;
 }
 
-/* Modal carousel controls — always visible */
+/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
 .event-modal .carousel-control-prev,
 .event-modal .carousel-control-next {
     width: 42px;
@@ -381,7 +384,7 @@
     background-color: #fff;
 }
 
-/* Event meta info box (date/time) */
+/* Ekdilosi meta info box (imerominia/time) */
 .modal-event-meta {
     display: flex;
     gap: 24px;

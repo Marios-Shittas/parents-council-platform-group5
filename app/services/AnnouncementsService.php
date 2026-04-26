@@ -1,6 +1,9 @@
 <?php
+// Arxeio: app\services\AnnouncementsService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * AnnouncementsService - Handles all announcement-related database operations
+ * AnnouncementsService - xeirizetai oles tis leitourgies anakoinoseon sti vasi
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -25,10 +28,10 @@ class AnnouncementsService {
     }
 
     /**
-     * Get all announcements with their images
-     * @param int $limit Optional limit for pagination
-     * @param int $offset Optional offset for pagination
-     * @return array Array of announcements with images
+     * Pairnei ola anakoinoseis me tis eikones
+     * @param int $limit - Proairetiko orio gia pagination
+     * @param int $offset - Proairetiko offset gia pagination
+     * @return array - Pinakas me anakoinoseis me eikones
      */
     public function getAllAnnouncements($limit = null, $offset = 0) {
         $sql = "SELECT a.*,
@@ -70,9 +73,9 @@ class AnnouncementsService {
     }
     
     /**
-     * Get a single announcement by ID
-     * @param int $id Announcement ID
-     * @return array|null Announcement data or null if not found
+     * Pairnei mia anakoinosi apo ID
+     * @param int $id - Anakoinosi ID
+     * @return array|null - Anakoinosi dedomena i null an den vrethei
      */
     public function getAnnouncementById($id) {
         $sql = "SELECT a.*,
@@ -98,12 +101,12 @@ class AnnouncementsService {
     }
     
     /**
-     * Create a new announcement
-     * @param string $title Announcement title
-     * @param string $description Announcement description
-     * @param string $announcementDate Announcement date (Y-m-d format)
-     * @param string $publishDate Publish date (Y-m-d format)
-     * @return int|false The new announcement ID or false on failure
+     * Dimiourgei mia nea anakoinosi
+     * @param string $title - Anakoinosi titlos
+     * @param string $description - Anakoinosi perigrafi
+     * @param string $announcementDate - Anakoinosi imerominia (Y-m-d morfi)
+     * @param string $publishDate - Dimosievei imerominia (Y-m-d morfi)
+     * @return int|false - To neo id anakoinosis ID i false se apotixia
      */
     public function createAnnouncement($title, $description, $announcementDate, $publishDate, $gdprNotice = '') {
         $sql = "INSERT INTO Announcements (announcement_title, announcement_date, announcement_description, gdpr_notice, publish_date) 
@@ -120,13 +123,13 @@ class AnnouncementsService {
     }
     
     /**
-     * Update an existing announcement
-     * @param int $id Announcement ID
-     * @param string $title Announcement title
-     * @param string $description Announcement description
-     * @param string $announcementDate Announcement date (Y-m-d format)
-     * @param string $publishDate Publish date (Y-m-d format)
-     * @return bool True on success, false on failure
+     * Enimeronei mia yparxousa anakoinosi
+     * @param int $id - Anakoinosi ID
+     * @param string $title - Anakoinosi titlos
+     * @param string $description - Anakoinosi perigrafi
+     * @param string $announcementDate - Anakoinosi imerominia (Y-m-d morfi)
+     * @param string $publishDate - Dimosievei imerominia (Y-m-d morfi)
+     * @return bool - True se epitixia, false se apotixia
      */
     public function updateAnnouncement($id, $title, $description, $announcementDate, $publishDate, $gdprNotice = '') {
         $sql = "UPDATE Announcements 
@@ -144,9 +147,9 @@ class AnnouncementsService {
     }
     
     /**
-     * Delete an announcement
-     * @param int $id Announcement ID
-     * @return bool True on success, false on failure
+     * Diagrafei mia anakoinosi
+     * @param int $id - Anakoinosi ID
+     * @return bool - True se epitixia, false se apotixia
      */
     public function deleteAnnouncement($id) {
         // Oi eikones diagrafontai aytomata logo CASCADE.
@@ -159,10 +162,10 @@ class AnnouncementsService {
     }
     
     /**
-     * Add an image to an announcement
-     * @param int $announcementId Announcement ID
-     * @param string $imagePath Path to the image file
-     * @return bool True on success, false on failure
+     * Prosthetei mia eikona se mia anakoinosi
+     * @param int $announcementId - Anakoinosi ID
+     * @param string $imagePath - Path pros to eikona arxeio
+     * @return bool - True se epitixia, false se apotixia
      */
     public function addImage($announcementId, $imagePath) {
         $currentImagesCount = $this->countImages($announcementId);
@@ -183,9 +186,9 @@ class AnnouncementsService {
     }
     
     /**
-     * Delete an image from an announcement
-     * @param int $imageId Image ID
-     * @return bool True on success, false on failure
+     * Diagrafei mia eikona apo mia anakoinosi
+     * @param int $imageId - Eikona ID
+     * @return bool - True se epitixia, false se apotixia
      */
     public function deleteImage($imageId) {
         $sql = "DELETE FROM AnnouncementsImages WHERE an_image_id = ?";
@@ -197,9 +200,9 @@ class AnnouncementsService {
     }
     
     /**
-     * Get images for an announcement
-     * @param int $announcementId Announcement ID
-     * @return array Array of image data
+     * Pairnei eikones gia mia anakoinosi
+     * @param int $announcementId - Anakoinosi ID
+     * @return array - Pinakas me eikona dedomena
      */
     public function getImages($announcementId) {
         $sql = "SELECT * FROM AnnouncementsImages WHERE announcement_id = ?";
@@ -299,8 +302,8 @@ class AnnouncementsService {
     }
     
     /**
-     * Get total count of announcements
-     * @return int Total count
+     * Pairnei synoliko metrisis gia anakoinoseis
+     * @return int - Synoliki metrisi
      */
     public function getTotalCount() {
         $sql = "SELECT COUNT(*) as count FROM Announcements";
@@ -310,9 +313,9 @@ class AnnouncementsService {
     }
     
     /**
-     * Search announcements by title or description
-     * @param string $query Search query
-     * @return array Array of matching announcements
+     * Psaxnei anakoinoseis apo titlos i perigrafi
+     * @param string $query - Psaxnei query
+     * @return array - Pinakas me tairiazouses anakoinoseis
      */
     public function searchAnnouncements($query) {
         $sql = "SELECT a.*,

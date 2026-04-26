@@ -34,9 +34,7 @@ var SUBMISSION_MODE_LABELS = {
     upload: '???�as�a ???e???'
 };
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   IN-PAGE APPLIED TRACKING  (resets on page reload — DB is the source of truth)
-───────────────────────────────────────────────────────────────────────────── */
+/* IN-PAGE APPLIED TRACKING (resets on page reload DB is the source of truth) */
 const _justApplied = new Set(); // appIds submitted during this page session
 
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -552,9 +550,7 @@ function buildField(field) {
            control + '</div>';
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   SHOW VIEW MODAL  – handles both PHP-rendered DB rows and JS-submitted rows
-───────────────────────────────────────────────────────────────────────────── */
+/* SHOW VIEW MODAL handles both PHP-rendered DB rows and JS-submitted rows */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
     var rows = getDisplayableSubmissionEntries(submissionDataObj).map(function (entry) {
@@ -589,9 +585,7 @@ function showToast() {
     setTimeout(function () { toast.hidden = true; }, 4000);
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   MODAL STATE  – shared between "show" & "submit" handlers
-───────────────────────────────────────────────────────────────────────────── */
+/* MODAL STATE shared between "show" & "submit" handlers */
 var _modal = {};
 var _viewAppId = 0;
 
@@ -1303,7 +1297,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ── Anoigma modal: populate header + dynamic fields ─────────────────── */
+    /* Anoigma modal: populate header kai dynamic fields. */
     $('#submitModal').on('show.bs.modal', function (event) {
         var btn      = $(event.relatedTarget);
         var appId    = parseInt(btn.data('application-id'), 10);
@@ -1408,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ── Clear form on modal kleisimo ─────────────────────────────────────── */
+    /* Clear form on modal kleisimo. */
     $('#submitModal').on('hidden.bs.modal', function () {
         var container = document.getElementById('modal-dynamic-fields');
         if (container) container.innerHTML = '';
@@ -1417,7 +1411,7 @@ document.addEventListener('DOMContentLoaded', function () {
         _modal = {};
     });
 
-    /* ── Submit button: POST to PHP via anaktisi() ───────────────────────── */
+    /* Submit button: POST to PHP via anaktisi(). */
     document.getElementById('modal-submit-btn').addEventListener('click', function () {
         if (!canSubmitApplications) {
             showCenterNotice('? ?p?�??? de? e??a? d?a??s?�? a?t? t? st??�?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???�?ste ?a??.');
@@ -1537,7 +1531,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ── Provoli submission details (event delegation on tbody) ──────────── */
+    /* Provoli submission details. */
     var tbody = document.getElementById('submissions-tbody');
     if (tbody) {
         tbody.addEventListener('click', function (e) {

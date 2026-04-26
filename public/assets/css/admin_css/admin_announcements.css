@@ -1,8 +1,11 @@
+/* Arxeio: public\assets\css\admin_css\admin_announcements.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
 /**
- * Admin Announcements - aligned with admin events layout
+ * Admin Anakoinoseis - aligned me admin ekdiloseis layout
  */
 
-/* Image preview container for announcement images */
+/* Eikona pelegxo container gia anakoinosi eikones */
 .image-preview {
     display: flex;
     flex-wrap: wrap;
@@ -16,14 +19,14 @@
     margin-top: 10px;
 }
 
-/* Individual image item in preview */
+/* Individual eikona item in pelegxo */
 .image-preview-item {
     position: relative;
     width: 100px;
     height: 100px;
 }
 
-/* Image display in preview */
+/* Eikona display in pelegxo */
 .image-preview-item img {
     width: 100%;
     height: 100%;
@@ -31,7 +34,7 @@
     border-radius: 8px;
 }
 
-/* Delete button for each image */
+/* Diagrafei button gia each eikona */
 .image-preview-item .delete-btn {
     position: absolute;
     top: -8px;
@@ -97,7 +100,7 @@
     background: #bf2f3d;
 }
 
-/* Thumbnail in announcements table */
+/* Thumbnail in anakoinoseis pinakas */
 .thumbnail {
     width: 72px;
     height: 72px;
@@ -106,42 +109,42 @@
     border: 1px solid #dfe5ee;
 }
 
-/* Modal styles aligned with events admin */
-#createModal .modal-header,
-#editModal .modal-header {
+/* Modal parathyro styles aligned me ekdiloseis admin */
+#createModal parathyro .modal-header,
+#editModal parathyro .modal-header {
     background: #0057a8;
     color: white;
 }
 
-#createModal .modal-header .close,
-#editModal .modal-header .close {
+#createModal parathyro .modal-header .close,
+#editModal parathyro .modal-header .close {
     color: white;
     opacity: 0.8;
     text-shadow: none;
 }
 
-#createModal .modal-header .close:hover,
-#editModal .modal-header .close:hover {
+#createModal parathyro .modal-header .close:hover,
+#editModal parathyro .modal-header .close:hover {
     opacity: 1;
 }
 
-#createModal .modal-footer .btn-secondary-custom,
-#editModal .modal-footer .btn-secondary-custom {
+#createModal parathyro .modal-footer .btn-secondary-custom,
+#editModal parathyro .modal-footer .btn-secondary-custom {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-#createModal .modal-footer .btn-secondary-custom:hover,
-#createModal .modal-footer .btn-secondary-custom:focus,
-#editModal .modal-footer .btn-secondary-custom:hover,
-#editModal .modal-footer .btn-secondary-custom:focus {
+#createModal parathyro .modal-footer .btn-secondary-custom:hover,
+#createModal parathyro .modal-footer .btn-secondary-custom:focus,
+#editModal parathyro .modal-footer .btn-secondary-custom:hover,
+#editModal parathyro .modal-footer .btn-secondary-custom:focus {
     background: #c62828;
     border-color: #c62828;
     color: #ffffff;
 }
 
-/* Modal content rounded corners */
-#createModal .modal-content,
-#editModal .modal-content {
+/* Modal parathyro content rounded corners */
+#createModal parathyro .modal-content,
+#editModal parathyro .modal-content {
     border: none;
     border-radius: 18px;
     overflow: hidden;
@@ -153,7 +156,7 @@
     color: #333;
 }
 
-/* Admin announcements table tuning */
+/* Admin anakoinoseis pinakas tuning */
 .admin-table {
     table-layout: auto;
 }
@@ -363,8 +366,8 @@
         align-self: flex-end;
     }
 
-    #createModal .modal-dialog,
-    #editModal .modal-dialog {
+    #createModal parathyro .modal-dialog,
+    #editModal parathyro .modal-dialog {
         margin: 0.5rem;
     }
 

@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\includes\footer.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/site_context.php';
 require_once __DIR__ . '/../viewmodels/FooterViewModel.php';
 
@@ -7,13 +10,13 @@ $footer_links = $footerViewModel->buildLinks();
 ?>
 <link rel="stylesheet" href="<?php echo site_asset_url('css/site-footer.css'); ?>">
 
-<!-- Κεντρικό footer του site. -->
+<!-- Kentriko footer tou site. -->
 <footer class="site-footer">
    <div class="footer-main">
        <div class="container">
            <div class="row">
 
-               <!-- 1η στήλη: brand + βασικά στοιχεία σχολείου. -->
+               <!-- 1i stili: brand kai vasika stoixeia sxoleiou. -->
                <div class="col-lg-5 col-md-12 mb-4 mb-lg-3 pr-lg-4">
                    <div class="footer-badge">Parents Council</div>
                    <div class="footer-brand">
@@ -23,7 +26,7 @@ $footer_links = $footerViewModel->buildLinks();
                    <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg.ag.athanasiou@gmail.com</span></div>
                </div>
 
-               <!-- 2η στήλη: γρήγορα links πλοήγησης. -->
+               <!-- 2i stili: grigora links ploigisis. -->
                <div class="col-lg-4 col-md-6 mb-4 mb-lg-3">
                    <h5 class="footer-title">Γρήγοροι Σύνδεσμοι</h5>
                    <ul class="footer-links">
@@ -33,7 +36,7 @@ $footer_links = $footerViewModel->buildLinks();
                    </ul>
                </div>
 
-               <!-- 3η στήλη: στοιχεία επικοινωνίας. -->
+               <!-- 3i stili: stoixeia epikoinonias. -->
                <div class="col-lg-3 col-md-6 mb-3">
                    <h5 class="footer-title">Επικοινωνία</h5>
                    <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>Τηλεομοιότυπο: 25694755</span></div>
@@ -45,7 +48,7 @@ $footer_links = $footerViewModel->buildLinks();
        </div>
    </div>
 
-   <!-- Κάτω γραμμή copyright / trademark. -->
+   <!-- Kato grammi copyright / trademark. -->
    <div class="footer-bottom">
        <div class="container">
            <div class="footer-bottom-wrap">

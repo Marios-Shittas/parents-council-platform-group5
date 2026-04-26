@@ -1,4 +1,9 @@
+// Arxeio: public\assets\js\payments.jsx
+// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// React selida gia plirotes kai istoriko pliromon tou xristi.
 function Payments() {
+    // Ta states xorizoun proionta, kalathi, epilegmena megethi kai feedback gia checkout.
     const [products, setProducts] = React.useState([]);
     const [cart, setCart] = React.useState([]);
     const [selectedSizes, setSelectedSizes] = React.useState({});
@@ -13,6 +18,7 @@ function Payments() {
         variant: 'warning'
     });
 
+    // Kentrika endpoints tis selidas gia na allazoun eykola an metakinithei kapoio service.
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
@@ -26,6 +32,7 @@ function Payments() {
     };
 
     function getSizeLabel(sizeValue, labels = {}) {
+        // Prota koitame custom labels apo backend, meta peftoume sta default labels.
         if (!sizeValue) {
             return '';
         }
@@ -38,6 +45,7 @@ function Payments() {
     }
 
     function normalizeSizeOption(sizeOption) {
+        // Dexomaste size options eite san object eite san plain string apo palia dedomena.
         if (sizeOption && typeof sizeOption === 'object') {
             const value = String(sizeOption.value || '').trim();
             const label = String(sizeOption.label || value).trim();
@@ -71,6 +79,7 @@ function Payments() {
     }
 
     function getPaymentFeedback(status, message) {
+        // Metatrepei to pliromi status se titlos/message/variant gia to notice UI.
         const normalizedStatus = (status || '').toLowerCase();
         const normalizedMessage = (message || '').trim() || 'Η πληρωμή σας ενημερώθηκε.';
 
@@ -106,6 +115,7 @@ function Payments() {
     }
 
     const clearPaymentResultParams = React.useCallback(() => {
+        // Afairoume ta pliromi params apo to URL gia na min ksanemfanistei to notice me refresh.
         const params = new URLSearchParams(window.location.search);
         params.delete("payment_status");
         params.delete("payment_message");
@@ -116,6 +126,7 @@ function Payments() {
     }, []);
 
     const consumePaymentResult = React.useCallback(() => {
+        // Diavazei to apotelesma pliromis pou gyrise apo JCC redirect.
         const params = new URLSearchParams(window.location.search);
         const paymentStatus = params.get("payment_status");
         const paymentMessage = params.get("payment_message");
@@ -139,6 +150,7 @@ function Payments() {
     }, []);
 
     React.useEffect(() => {
+        // Kleidonei to body scroll oso einai anoikto modal/notice.
         if (!notice.open) {
             return undefined;
         }
@@ -156,6 +168,7 @@ function Payments() {
     }, []);
 
     React.useEffect(() => {
+        // Arxiko load: pairnoume proionta apo to proion service.
         fetch(productsUrl)
             .then(res => res.json())
             .then(data => setProducts(data))
@@ -163,6 +176,7 @@ function Payments() {
     }, []);
 
     const loadCart = React.useCallback(() => {
+        // Fernei to kalathi apo to JSON endpoint kai kratame mono ta items pou xreiazetai to UI.
         setCartLoading(true);
 
         fetch(`${cartUrl}?action=get`)
@@ -208,6 +222,7 @@ function Payments() {
     }, [consumePaymentResult, loadCart]);
 
     function postCartAction(formData) {
+        // Koini helper gia add/upimerominia/remove/clear oste na min diplonoume fetch logic.
         return fetch(cartUrl, {
             method: "POST",
             headers: {
@@ -243,6 +258,7 @@ function Payments() {
     }
 
     function addToCart(product) {
+        // Elegxei an xreiazetai megethos prin stalei add request sto kalathi API.
         const availableSizes = getProductSizeOptions(product);
         const requiresSize = Boolean(product.has_sizes) && availableSizes.length > 0;
         const selectedSize = selectedSizes[product.product_id] || '';
@@ -332,6 +348,7 @@ function Payments() {
     }
 
     function handleCheckout() {
+        // Ksekinaei checkout sto JCC service kai meta kanei redirect sto pliromi URL.
         if (cart.length === 0) {
             showNotice('Το καλάθι είναι κενό!', {
                 title: 'Δεν υπάρχει παραγγελία',
