@@ -9,9 +9,9 @@ function ensureNoticeElements() {
     overlay.className = 'page-notice-overlay';
     overlay.innerHTML = '' +
         '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
+            '<h3 class="page-notice-title" id="page-notice-title">Î•Î¹Î´Î¿Ï€Î¿Î¯Î·ÏƒÎ·</h3>' +
+            '<div class="page-notice-message" id="page-notice-message">â€”</div>' +
+            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Î•Î½Ï„Î¬Î¾ÎµÎ¹</button></div>' +
         '</div>';
 
     overlay.addEventListener('click', function (event) {
@@ -51,8 +51,8 @@ function showNotice(message, options) {
     if (opts.variant === 'error') card.classList.add('is-error');
     if (opts.variant === 'warning') card.classList.add('is-warning');
 
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
+    title.textContent = opts.title || 'Î•Î¹Î´Î¿Ï€Î¿Î¯Î·ÏƒÎ·';
+    body.textContent = message || 'Î£Ï…Î½Î­Î²Î· Î­Î½Î± Î±Ï€ÏÏŒÏƒÎ¼ÎµÎ½Î¿ ÏƒÏ†Î¬Î»Î¼Î±.';
 
     overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
     document.body.style.overflow = 'hidden';
@@ -69,11 +69,11 @@ function showConfirm(message, onConfirm, options) {
 
     overlay.innerHTML = '' +
         '<div class="page-confirm-card" role="dialog" aria-modal="true">' +
-            '<h3 class="page-confirm-title">' + (opts.title || 'Επιβεβαίωση') + '</h3>' +
-            '<div class="page-confirm-message">' + (message || 'Είστε σίγουροι;') + '</div>' +
+            '<h3 class="page-confirm-title">' + (opts.title || 'Î•Ï€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·') + '</h3>' +
+            '<div class="page-confirm-message">' + (message || 'Î•Î¯ÏƒÏ„Îµ ÏƒÎ¯Î³Î¿Ï…ÏÎ¿Î¹;') + '</div>' +
             '<div class="page-confirm-actions">' +
-                '<button type="button" data-action="cancel" class="page-confirm-btn page-confirm-btn--cancel">Όχι</button>' +
-                '<button type="button" data-action="confirm" class="page-confirm-btn page-confirm-btn--confirm">Ναι</button>' +
+                '<button type="button" data-action="cancel" class="page-confirm-btn page-confirm-btn--cancel">ÎŒÏ‡Î¹</button>' +
+                '<button type="button" data-action="confirm" class="page-confirm-btn page-confirm-btn--confirm">ÎÎ±Î¹</button>' +
             '</div>' +
         '</div>';
 
@@ -111,7 +111,7 @@ function showConfirm(message, onConfirm, options) {
 
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function deleteEventImage(imageId, eventId) {
-    showConfirm('Διαγραφή εικόνας;', function () {
+    showConfirm('Î”Î¹Î±Î³ÏÎ±Ï†Î® ÎµÎ¹ÎºÏŒÎ½Î±Ï‚;', function () {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '';
@@ -137,7 +137,7 @@ function deleteEventImage(imageId, eventId) {
         document.body.appendChild(form);
         form.submit();
     }, {
-        title: 'Επιβεβαίωση διαγραφής'
+        title: 'Î•Ï€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ· Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚'
     });
 }
 
@@ -168,15 +168,15 @@ function validateEventImageFile(file) {
     const fileExt = (file.name.split('.').pop() || '').toLowerCase();
 
     if (!allowedExtensions.includes(fileExt)) {
-        warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
+        warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î­Î³ÎºÏ…ÏÎ· ÎµÏ€Î­ÎºÏ„Î±ÏƒÎ·. Î•Ï€Î¹Ï„ÏÎ­Ï€Î¿Î½Ï„Î±Î¹ Î¼ÏŒÎ½Î¿ JPG, JPEG, PNG, GIF.`);
     }
 
     if (file.size > maxFileSize) {
-        warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
+        warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" ÎµÎ¯Î½Î±Î¹ Ï€Î¿Î»Ï Î¼ÎµÎ³Î¬Î»Î¿ (${(file.size / 1024 / 1024).toFixed(2)}MB). ÎœÎ­Î³Î¹ÏƒÏ„Î¿ Î¼Î­Î³ÎµÎ¸Î¿Ï‚: 5MB.`);
     }
 
     if (!String(file.type || '').startsWith('image/')) {
-        warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
+        warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î´ÎµÎ½ Ï†Î±Î¯Î½ÎµÏ„Î±Î¹ Î½Î± ÎµÎ¯Î½Î±Î¹ ÎµÎ¹ÎºÏŒÎ½Î±.`);
     }
 
     return warnings;
@@ -212,7 +212,7 @@ function renderEventImagePreview(preview, stagedFiles, onRemove) {
         deleteBtn.type = 'button';
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.setAttribute('aria-label', `Î‘Ï†Î±Î¯ÏÎµÏƒÎ· ${file.name}`);
         deleteBtn.addEventListener('click', function () {
             onRemove(index);
         });
@@ -279,7 +279,7 @@ function setupEventImageInput(input, previewId) {
         }
 
         if (existingCount >= eventImageLimit) {
-            warnings.push(`Η εκδήλωση έχει ήδη ${eventImageLimit} φωτογραφίες. Διαγράψτε πρώτα κάποια εικόνα για να προσθέσετε νέα.`);
+            warnings.push(`Î— ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ· Î­Ï‡ÎµÎ¹ Î®Î´Î· ${eventImageLimit} Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯ÎµÏ‚. Î”Î¹Î±Î³ÏÎ¬ÏˆÏ„Îµ Ï€ÏÏŽÏ„Î± ÎºÎ¬Ï€Î¿Î¹Î± ÎµÎ¹ÎºÏŒÎ½Î± Î³Î¹Î± Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î½Î­Î±.`);
         } else {
             incomingFiles.forEach((file) => {
                 const fileKey = getEventImageFileKey(file);
@@ -291,14 +291,14 @@ function setupEventImageInput(input, previewId) {
                 }
 
                 if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
+                    warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î­Ï‡ÎµÎ¹ Î®Î´Î· ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯.`);
                     return;
                 }
 
                 if (existingCount + stagedFiles.length >= eventImageLimit) {
                     if (!reachedLimit) {
                         const remainingSlots = Math.max(0, eventImageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη φωτογραφία/ες σε αυτή την εκδήλωση.`);
+                        warnings.push(`ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î¼ÏŒÎ½Î¿ ${remainingSlots} Î±ÎºÏŒÎ¼Î· Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯Î±/ÎµÏ‚ ÏƒÎµ Î±Ï…Ï„Î® Ï„Î·Î½ ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ·.`);
                         reachedLimit = true;
                     }
                     return;
@@ -314,8 +314,8 @@ function setupEventImageInput(input, previewId) {
         updateInputState();
 
         if (warnings.length > 0) {
-            showNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: 'Έλεγχος αρχείων',
+            showNotice('Î ÏÎ¿ÎµÎ¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚:\n\n' + warnings.join('\n\n'), {
+                title: 'ÎˆÎ»ÎµÎ³Ï‡Î¿Ï‚ Î±ÏÏ‡ÎµÎ¯Ï‰Î½',
                 variant: 'warning'
             });
         }
@@ -337,8 +337,8 @@ document.querySelectorAll('[data-delete-event-image]').forEach(function (button)
 document.querySelectorAll('form.js-confirm-submit').forEach(function (form) {
     form.addEventListener('submit', function (event) {
         event.preventDefault();
-        const message = form.getAttribute('data-confirm-message') || 'Είστε σίγουροι;';
-        const title = form.getAttribute('data-confirm-title') || 'Επιβεβαίωση';
+        const message = form.getAttribute('data-confirm-message') || 'Î•Î¯ÏƒÏ„Îµ ÏƒÎ¯Î³Î¿Ï…ÏÎ¿Î¹;';
+        const title = form.getAttribute('data-confirm-title') || 'Î•Ï€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·';
 
         showConfirm(message, function () {
             form.submit();

@@ -1,3 +1,8 @@
+// Arxeio: public\assets\js\home-page-calendar.jsx
+// Rolos: Xeirizetai dynamic kommatia tis arxikis selidas kai fernei dedomena apo backend services.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// React calendar gia tin arxiki: deixnei ekdiloseis, anakoinoseis kai argies ana imera.
+// Ta labels einai stathera arrays gia na min ta ksanaypologizoume se kathe render.
 const MONTHS = [
   "Ιανουάριος",
   "Φεβρουάριος",
@@ -21,6 +26,7 @@ const TYPE_LABELS = {
 };
 
 function getTypeLabel(item) {
+  // Kathe item exei type apo backend, alliws peftei se geniko label.
   return TYPE_LABELS[item?.type] || "ΚΑΤΑΧΩΡΙΣΗ";
 }
 
@@ -42,6 +48,7 @@ class Calendar extends React.Component {
   }
 
   componentDidMount() {
+    // Fortonei to enopoihmeno calendar feed apo PHP service.
     fetch('/parents-council-platform-group5/app/services/CalendarEventsService.php')
       .then(result => result.json())
       .then(data => this.setState({ events: data }))
@@ -59,6 +66,7 @@ class Calendar extends React.Component {
   render() {
     const { m, y, events, selectedDay } = this.state;
 
+    // Ypologizoume ta kena cells prin tin 1i tou mina gia na stithei sosta to grid.
     const firstDay = new Date(y, m, 1).getDay();
     const daysInMonth = new Date(y, m + 1, 0).getDate();
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
@@ -68,6 +76,7 @@ class Calendar extends React.Component {
 
     const today = new Date();
 
+    // Filtrarei ta items pou tairiazoun me tin imera pou patise o xristis.
     const selectedEvents = selectedDay ? events.filter(event => {
       const eventDate = new Date(event.date);
       return eventDate.getDate() === selectedDay &&

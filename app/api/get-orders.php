@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\api\get-orders.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {

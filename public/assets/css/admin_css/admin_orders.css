@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_orders.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services. */
+/* Styles gia tin admin selida paraggelion kai tin provoli paraggelia leptomereies. */
+/* Rythmizei layout, paraggelia cards, status badges kai responsive provoli ton paraggelion. */
 .orders-layout {
     display: block;
 }

@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\SubscriptionJcc.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora payment flow, opote kratame ta redirects/responses synexi me ton provider.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');

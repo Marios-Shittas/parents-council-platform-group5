@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-eshop.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 document.addEventListener('DOMContentLoaded', function () {
             const deleteButtons = document.querySelectorAll('.delete-product-btn');
             const deleteProductIdInput = document.getElementById('deleteProductId');

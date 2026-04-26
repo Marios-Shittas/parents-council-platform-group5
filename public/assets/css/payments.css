@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\payments.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Styles gia ti selida pliromon kai to kalathi. */
+/* Rythmizei proion grid, kalathi summary, checkout controls kai feedback modals. */
 .wholecart {
     background: linear-gradient(135deg, #0a2463 0%, #1566d1 50%, #6592db 100%);
     color: #fff;

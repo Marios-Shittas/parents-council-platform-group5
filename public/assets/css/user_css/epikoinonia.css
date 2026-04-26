@@ -1,3 +1,6 @@
+/* Arxeio: public\assets\css\user_css\epikoinonia.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
 .epikoinonia-page,
 .epikoinonia-page h1,
 .epikoinonia-page h2,
@@ -117,7 +120,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Compact text for phone and email cards */
+/* Compact text gia phone kai email cards */
 .contact-card-phone,
 .contact-card-email {
     padding: 20px !important;

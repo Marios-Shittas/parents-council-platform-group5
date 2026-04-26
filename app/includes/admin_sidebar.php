@@ -1,8 +1,16 @@
 <?php
+// Arxeio: app\includes\admin_sidebar.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
+// Ftiaxnei to admin sidebar kai pernaei ta links pou vlepoun oi diaxeiristes.
+// To viewmodel mazevei trexousa selida kai metrites badge, oste to HTML na meinei katharo.
 require_once __DIR__ . '/../viewmodels/AdminSidebarViewModel.php';
 
+// An yparxei mysqli connection apo tin selida, to dinoume sto viewmodel gia zontanes metriseis.
 $adminSidebarViewModel = new AdminSidebarViewModel(isset($conn) && $conn instanceof mysqli ? $conn : null);
 $adminSidebarData = $adminSidebarViewModel->build();
+
+// Ta parakato values xrisimopoiountai gia active menu item kai mikra notification badges.
 $currentPage = $adminSidebarData['current_page'];
 $epikoinoniaBadgeText = $adminSidebarData['epikoinonia_badge_text'];
 $usersBadgeText = $adminSidebarData['users_badge_text'];
@@ -33,6 +41,7 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
 
     <ul class="nav flex-column">
 
+        <!-- Kathe link elegxei to trexousa selida gia na parei tin active klasi. -->
         <li class="nav-item">
             <a class="nav-link <?php echo $currentPage === 'home.php' ? 'active' : ''; ?>" href="home.php">
                 <i class="fas fa-home"></i>
@@ -79,6 +88,7 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
             <a class="nav-link <?php echo $currentPage === 'applications.php' ? 'active' : ''; ?>" href="applications.php">
                 <i class="fas fa-file-alt"></i>
                 <span class="admin-nav-label">Αιτήσεις</span>
+                <!-- To badge emfanizetai mono otan yparxoun aitiseis pou theloun prosoxi. -->
                 <?php if ($applicationsBadgeText !== ''): ?>
                     <span class="admin-notification-badge" aria-label="Νέες αιτήσεις προς έλεγχο: <?php echo htmlspecialchars($applicationsBadgeText); ?>"><?php echo htmlspecialchars($applicationsBadgeText); ?></span>
                 <?php endif; ?>
@@ -96,6 +106,7 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
             <a class="nav-link <?php echo $currentPage === 'Orders.php' ? 'active' : ''; ?>" href="Orders.php">
                 <i class="fas fa-receipt"></i>
                 <span class="admin-nav-label">Παραγγελίες</span>
+                <!-- To badge voitha ton admin na dei grigora nees plirwmenes paraggelies. -->
                 <?php if ($ordersBadgeText !== ''): ?>
                     <span class="admin-notification-badge" aria-label="Νέες πληρωμένες παραγγελίες: <?php echo htmlspecialchars($ordersBadgeText); ?>"><?php echo htmlspecialchars($ordersBadgeText); ?></span>
                 <?php endif; ?>
@@ -106,6 +117,7 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
             <a class="nav-link <?php echo $currentPage === 'epikoinonia.php' ? 'active' : ''; ?>" href="epikoinonia.php">
                 <i class="fas fa-envelope"></i>
                 <span class="admin-nav-label">Επικοινωνία</span>
+                <!-- To badge deixnei nea minimata epikoinonias pou den exoun diavastei. -->
                 <?php if ($epikoinoniaBadgeText !== ''): ?>
                     <span class="admin-notification-badge" aria-label="Νέα μηνύματα επικοινωνίας: <?php echo htmlspecialchars($epikoinoniaBadgeText); ?>"><?php echo htmlspecialchars($epikoinoniaBadgeText); ?></span>
                 <?php endif; ?>
@@ -130,4 +142,5 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
 
 </nav>
 
+<!-- To JS kanei anoigma/kleisimo to sidebar kai xrisimopoiei to xristes badge text apo dedomena attribute. -->
 <script src="../assets/js/admin-sidebar.js" data-users-badge-text="<?php echo htmlspecialchars($usersBadgeText, ENT_QUOTES, 'UTF-8'); ?>" defer></script>

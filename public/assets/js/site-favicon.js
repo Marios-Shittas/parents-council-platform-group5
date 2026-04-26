@@ -1,5 +1,8 @@
+// Arxeio: public\assets\js\site-favicon.js
+// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
 (function () {
-    // Fortonei favicon apo data attributes gia na min exoume inline JavaScript sta PHP views.
+    // Fortonei favicon apo dedomena attributes gia na min exoume inline JavaScript sta PHP views.
     function initFavicon(script) {
         if (!script) return;
 

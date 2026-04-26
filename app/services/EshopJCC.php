@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\EshopJCC.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora payment flow, opote kratame ta redirects/responses synexi me ton provider.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -55,11 +58,11 @@ class EshopJccService
     {
         auth_require_role('parent', [
             'mode' => $respondWithJson ? 'json' : 'redirect',
-            'message' => 'Μόνο λογαριασμοί γονέα μπορούν να ολοκληρώσουν αγορές.',
+            'message' => 'ÎœÏŒÎ½Î¿ Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼Î¿Î¯ Î³Î¿Î½Î­Î± Î¼Ï€Î¿ÏÎ¿ÏÎ½ Î½Î± Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÏƒÎ¿Ï…Î½ Î±Î³Î¿ÏÎ­Ï‚.',
         ]);
 
         if (!$this->eshopSettingsService->isShopVisible()) {
-            $this->respondCheckoutError($respondWithJson, 'Το κατάστημα είναι προσωρινά μη διαθέσιμο. Coming soon.', 403);
+            $this->respondCheckoutError($respondWithJson, 'Î¤Î¿ ÎºÎ±Ï„Î¬ÏƒÏ„Î·Î¼Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¿ÏƒÏ‰ÏÎ¹Î½Î¬ Î¼Î· Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î¿. Coming soon.', 403);
             return;
         }
 
@@ -72,7 +75,7 @@ class EshopJccService
 
             $order = $this->getPendingOrderForCheckout($userId);
             if ($order === null) {
-                throw new RuntimeException('Δεν βρέθηκε ενεργή παραγγελία για πληρωμή.');
+                throw new RuntimeException('Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ ÎµÎ½ÎµÏÎ³Î® Ï€Î±ÏÎ±Î³Î³ÎµÎ»Î¯Î± Î³Î¹Î± Ï€Î»Î·ÏÏ‰Î¼Î®.');
             }
 
             $orderId = (int) $order['order_id'];
@@ -80,7 +83,7 @@ class EshopJccService
             $itemsCount = (int) $order['items_count'];
 
             if ($itemsCount <= 0 || $totalPrice <= 0) {
-                throw new RuntimeException('Το καλάθι είναι κενό ή το ποσό πληρωμής δεν είναι έγκυρο.');
+                throw new RuntimeException('Î¤Î¿ ÎºÎ±Î»Î¬Î¸Î¹ ÎµÎ¯Î½Î±Î¹ ÎºÎµÎ½ÏŒ Î® Ï„Î¿ Ï€Î¿ÏƒÏŒ Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿.');
             }
 
             $customerEmail = $this->getUserEmail($userId);
@@ -149,7 +152,7 @@ class EshopJccService
         }
 
         if ($gatewayOrderId === '' || $paymentId <= 0 || $orderId <= 0) {
-            $this->redirectToEshop('failed', 'Λείπουν απαραίτητα στοιχεία πληρωμής.');
+            $this->redirectToEshop('failed', 'Î›ÎµÎ¯Ï€Î¿Ï…Î½ Î±Ï€Î±ÏÎ±Î¯Ï„Î·Ï„Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚.');
             return;
         }
 
@@ -158,7 +161,7 @@ class EshopJccService
         try {
             $paymentContext = $this->getPaymentContext($paymentId, $orderId);
             if ($paymentContext === null) {
-                throw new RuntimeException('Δεν βρέθηκε η πληρωμή ή η παραγγελία.');
+                throw new RuntimeException('Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ Î· Ï€Î»Î·ÏÏ‰Î¼Î® Î® Î· Ï€Î±ÏÎ±Î³Î³ÎµÎ»Î¯Î±.');
             }
 
             $userId = (int) $paymentContext['user_id'];
@@ -809,18 +812,18 @@ class EshopJccService
     private function buildRedirectMessage(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
-            return 'Η πληρωμή σας ολοκληρώθηκε με επιτυχία.';
+            return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® ÏƒÎ±Ï‚ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ Î¼Îµ ÎµÏ€Î¹Ï„Ï…Ï‡Î¯Î±.';
         }
 
         if ($paymentStatus === 'pending') {
-            return 'Η πληρωμή σας παραμένει σε αναμονή επιβεβαίωσης.';
+            return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® ÏƒÎ±Ï‚ Ï€Î±ÏÎ±Î¼Î­Î½ÎµÎ¹ ÏƒÎµ Î±Î½Î±Î¼Î¿Î½Î® ÎµÏ€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·Ï‚.';
         }
 
         if ($paymentStatus === 'refunded') {
-            return 'Η πληρωμή σας σημειώθηκε ως επιστροφή.';
+            return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® ÏƒÎ±Ï‚ ÏƒÎ·Î¼ÎµÎ¹ÏŽÎ¸Î·ÎºÎµ Ï‰Ï‚ ÎµÏ€Î¹ÏƒÏ„ÏÎ¿Ï†Î®.';
         }
 
-        return 'Η πληρωμή σας δεν ολοκληρώθηκε.';
+        return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® ÏƒÎ±Ï‚ Î´ÎµÎ½ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ.';
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.

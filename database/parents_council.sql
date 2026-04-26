@@ -1,3 +1,6 @@
+-- Arxeio: database\parents_council.sql
+-- Rolos: Periexei SQL schema i seed data gia ti vasi dedomenon tou project.
+-- Simeiosi: Trexei se database context, ara allages edo theloun prosoxi se schema/data compatibility.
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;

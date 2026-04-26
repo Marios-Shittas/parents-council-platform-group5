@@ -1,6 +1,9 @@
+// Arxeio: public\assets\js\admin-users.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-auto-submit-on-change]').forEach(function (field) {
-        // Kanei submit to parent form otan allazei select me data attribute.
+        // Kanei submit to goneas forma otan allazei select me dedomena attribute.
         field.addEventListener('change', function () {
             if (field.form) {
                 field.form.submit();
@@ -150,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
             usersNavLink.appendChild(badge);
         }
 
-        badge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + badgeText);
+        badge.setAttribute('aria-label', 'ÎÎ­ÎµÏ‚ ÎµÎ³Î³ÏÎ±Ï†Î­Ï‚ Ï‡ÏÎ·ÏƒÏ„ÏŽÎ½: ' + badgeText);
         badge.textContent = badgeText;
     }
 
@@ -369,21 +372,21 @@ document.addEventListener('DOMContentLoaded', function () {
             isDeleteUserFinalConfirmed = false;
 
             var status = button.getAttribute('data-user-status') || 'pending';
-            var statusLabel = button.getAttribute('data-user-status-label') || 'Σε Αναμονή';
+            var statusLabel = button.getAttribute('data-user-status-label') || 'Î£Îµ Î‘Î½Î±Î¼Î¿Î½Î®';
             var orderCount = parseInt(button.getAttribute('data-user-order-count') || '0', 10);
             var paymentCount = parseInt(button.getAttribute('data-user-payment-count') || '0', 10);
             var hasHistory = orderCount > 0 || paymentCount > 0;
             var requiresExtraConfirmation = status === 'active' || status === 'rejected' || hasHistory;
 
             document.getElementById('delete_user_id').value = button.getAttribute('data-user-id') || '';
-            document.getElementById('delete_user_name').textContent = button.getAttribute('data-user-name') || '—';
-            document.getElementById('delete_user_email').textContent = button.getAttribute('data-user-email') || '—';
+            document.getElementById('delete_user_name').textContent = button.getAttribute('data-user-name') || 'â€”';
+            document.getElementById('delete_user_email').textContent = button.getAttribute('data-user-email') || 'â€”';
             deleteUserStatusField.value = status;
             deleteUserStatusLabelField.value = statusLabel;
 
             if (deleteUserExtraWarning && deleteUserWarningStatus && deleteUserHistoryWarning && deleteUserHistoryCounts) {
                 deleteUserWarningStatus.textContent = statusLabel;
-                deleteUserHistoryCounts.textContent = orderCount + ' παραγγελίες / ' + paymentCount + ' πληρωμές';
+                deleteUserHistoryCounts.textContent = orderCount + ' Ï€Î±ÏÎ±Î³Î³ÎµÎ»Î¯ÎµÏ‚ / ' + paymentCount + ' Ï€Î»Î·ÏÏ‰Î¼Î­Ï‚';
                 deleteUserExtraWarning.classList.toggle('d-none', !requiresExtraConfirmation);
                 deleteUserHistoryWarning.classList.toggle('d-none', !hasHistory);
             }
@@ -392,18 +395,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (deleteUserForm) {
             deleteUserForm.addEventListener('submit', function (event) {
                 var status = deleteUserStatusField ? deleteUserStatusField.value : '';
-                var statusLabel = deleteUserStatusLabelField ? deleteUserStatusLabelField.value : 'άγνωστη';
-                var userName = document.getElementById('delete_user_name').textContent || 'τον χρήστη';
+                var statusLabel = deleteUserStatusLabelField ? deleteUserStatusLabelField.value : 'Î¬Î³Î½Ï‰ÏƒÏ„Î·';
+                var userName = document.getElementById('delete_user_name').textContent || 'Ï„Î¿Î½ Ï‡ÏÎ®ÏƒÏ„Î·';
                 var hasHistory = deleteUserHistoryWarning && !deleteUserHistoryWarning.classList.contains('d-none');
 
                 if ((status === 'active' || status === 'rejected' || hasHistory) && !isDeleteUserFinalConfirmed) {
                     event.preventDefault();
 
-                    var confirmMessage = 'Ο χρήστης "' + userName + '" είναι σε κατάσταση "' + statusLabel + '".';
+                    var confirmMessage = 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ "' + userName + '" ÎµÎ¯Î½Î±Î¹ ÏƒÎµ ÎºÎ±Ï„Î¬ÏƒÏ„Î±ÏƒÎ· "' + statusLabel + '".';
                     if (hasHistory) {
-                        confirmMessage += ' Θα διαγραφούν επίσης οι σχετικές παραγγελίες και πληρωμές του.';
+                        confirmMessage += ' Î˜Î± Î´Î¹Î±Î³ÏÎ±Ï†Î¿ÏÎ½ ÎµÏ€Î¯ÏƒÎ·Ï‚ Î¿Î¹ ÏƒÏ‡ÎµÏ„Î¹ÎºÎ­Ï‚ Ï€Î±ÏÎ±Î³Î³ÎµÎ»Î¯ÎµÏ‚ ÎºÎ±Î¹ Ï€Î»Î·ÏÏ‰Î¼Î­Ï‚ Ï„Î¿Ï….';
                     }
-                    confirmMessage += ' Η ενέργεια αυτή είναι οριστική.';
+                    confirmMessage += ' Î— ÎµÎ½Î­ÏÎ³ÎµÎ¹Î± Î±Ï…Ï„Î® ÎµÎ¯Î½Î±Î¹ Î¿ÏÎ¹ÏƒÏ„Î¹ÎºÎ®.';
 
                     if (deleteUserFinalConfirmMessage) {
                         deleteUserFinalConfirmMessage.textContent = confirmMessage;
@@ -439,10 +442,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.js-open-create-child').forEach(function (button) {
         button.addEventListener('click', function () {
-            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-child me-2"></i>Προσθήκη Παιδιού';
+            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-child me-2"></i>Î ÏÎ¿ÏƒÎ¸Î®ÎºÎ· Î Î±Î¹Î´Î¹Î¿Ï';
             document.getElementById('child_form_action').value = 'create_child';
             document.getElementById('child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
-            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || '—';
+            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || 'â€”';
             document.getElementById('child_id').value = '';
             document.getElementById('child_name').value = '';
             document.getElementById('child_surname').value = '';
@@ -453,10 +456,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.js-open-edit-child').forEach(function (button) {
         button.addEventListener('click', function () {
-            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Επεξεργασία Παιδιού';
+            document.getElementById('childModalTitle').innerHTML = '<i class="fas fa-user-edit me-2"></i>Î•Ï€ÎµÎ¾ÎµÏÎ³Î±ÏƒÎ¯Î± Î Î±Î¹Î´Î¹Î¿Ï';
             document.getElementById('child_form_action').value = 'update_child';
             document.getElementById('child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
-            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || '—';
+            document.getElementById('child_parent_name_display').textContent = button.getAttribute('data-parent-name') || 'â€”';
             document.getElementById('child_id').value = button.getAttribute('data-child-id') || '';
             document.getElementById('child_name').value = button.getAttribute('data-child-name') || '';
             document.getElementById('child_surname').value = button.getAttribute('data-child-surname') || '';
@@ -469,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function () {
             document.getElementById('delete_child_parent_user_id').value = button.getAttribute('data-parent-id') || '';
             document.getElementById('delete_child_id').value = button.getAttribute('data-child-id') || '';
-            document.getElementById('delete_child_name').textContent = button.getAttribute('data-child-name') || '—';
+            document.getElementById('delete_child_name').textContent = button.getAttribute('data-child-name') || 'â€”';
         });
     });
 
@@ -481,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
+            var featureLabel = button.getAttribute('data-schedule-feature') || 'â€”';
             var startDate = button.getAttribute('data-schedule-start') || '';
             var endDate = button.getAttribute('data-schedule-end') || '';
             var formId = button.getAttribute('data-schedule-delete-form-id') || '';
@@ -491,11 +494,11 @@ document.addEventListener('DOMContentLoaded', function () {
             var formIdEl = document.getElementById('delete_schedule_form_id');
 
             if (featureEl) {
-                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
+                featureEl.textContent = 'Î›ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î±: ' + featureLabel;
             }
 
             if (datesEl) {
-                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
+                datesEl.textContent = 'Î”Î¹Î¬ÏƒÏ„Î·Î¼Î±: ' + (startDate || 'â€”') + ' Î­Ï‰Ï‚ ' + (endDate || 'â€”');
             }
 
             if (formIdEl) {

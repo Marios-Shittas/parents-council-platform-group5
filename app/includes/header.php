@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\includes\header.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_start();
 }
@@ -9,7 +12,7 @@ if (!headers_sent()) {
     header("Expires: 0");
 }
 
-// Elegxei an o xristis einai sindedemenos se prostτευomeni selida.
+// Elegxei an o xristis einai sindedemenos se prostÏ„ÎµÏ…omeni selida.
 $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';
@@ -27,19 +30,19 @@ $nav_items = $headerData['nav_items'];
 <link rel="stylesheet" href="<?php echo site_asset_url('css/site-header.css'); ?>">
 
 <header class="site-header">
-<!-- Κύριο navigation όλου του site. -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <nav class="navbar navbar-expand-xl navbar-light<?php echo site_is_parent() ? ' navbar-parent' : ' navbar-public'; ?>">
     <div class="container">
 
-        <!-- Λογότυπο + τίτλος σχολείου. -->
+        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
         <a class="navbar-brand d-flex align-items-center" href="<?php echo site_section_url('home.php'); ?>">
             <span class="logo-stack">
                 <img src="<?php echo site_asset_url('img/logo-icon.png'); ?>" alt="Logo">
             </span>
-            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">Σύνδεσμος Γονέων &amp; Κηδεμόνων Γυμνασίου Αγίου Αθανασίου</span>
+            <span class="brand-text" aria-label="<?php echo htmlspecialchars($site_title); ?>">Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î“Î¿Î½Î­Ï‰Î½ &amp; ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Ï‰Î½ Î“Ï…Î¼Î½Î±ÏƒÎ¯Î¿Ï… Î‘Î³Î¯Î¿Ï… Î‘Î¸Î±Î½Î±ÏƒÎ¯Î¿Ï…</span>
         </a>
 
-        <!-- Κουμπί που ανοίγει το menu σε κινητές συσκευές. -->
+        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar"
                 aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -47,14 +50,14 @@ $nav_items = $headerData['nav_items'];
 
         <div class="collapse navbar-collapse" id="mainNavbar">
 
-            <!-- Τα βασικά links του site στο κέντρο. -->
+            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
             <ul class="navbar-nav text-center">
-                <!-- Κάνουμε loop στο $nav_items για να αποφύγουμε επαναλαμβανόμενο HTML. -->
+                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                 <?php foreach ($nav_items as $item): ?>
-                    <!-- Ελέγχουμε αν το link αντιστοιχεί στην τωρινή σελίδα. -->
+                    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                     <?php $is_active = in_array($current_page, $item['match'], true); ?>
                     <li class="nav-item<?php echo $is_active ? ' active' : ''; ?>">
-                        <!-- aria-current βοηθάει accessibility (screen readers). -->
+                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                         <a class="nav-link<?php echo !empty($item['icon_only']) ? ' nav-link--icon-only' : ''; ?>"
                            href="<?php echo $item['href']; ?>"
                            aria-label="<?php echo htmlspecialchars($item['label']); ?>"
@@ -73,7 +76,7 @@ $nav_items = $headerData['nav_items'];
                 <?php endforeach; ?>
             </ul>
 
-            <!-- Δεξιά εργαλεία: login + shortcut. -->
+            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
             <div class="d-flex flex-column flex-xl-row align-items-stretch align-items-xl-center navbar-tools">
 
                 <?php if (site_is_parent()): ?>

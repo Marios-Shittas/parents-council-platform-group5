@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ResetPasswordService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 require_once __DIR__ . '/UsersService.php';
@@ -16,10 +19,10 @@ class ResetPasswordService {
     }
 
     /**
-     * Validate a password reset token
-     * @param string $token The reset token
-     * @param string $email The user's email
-     * @return bool True if token is valid and not expired
+     * Elegxei a password reset token
+     * @param string $token - To reset token
+     * @param string $email - To xristis's email
+     * @return bool - True an token is valid kai not expired
      */
     public function validatePasswordResetToken($token, $email) {
         $token = trim($token);
@@ -56,7 +59,7 @@ class ResetPasswordService {
         $token = $data['token'] ?? '';
         $newPassword = $data['newPassword'] ?? '';
 
-        // Validate token first
+        // Elegxei token first
         if (!$this->validatePasswordResetToken($token, $email)) {
             return [
                 'success' => false,
@@ -64,10 +67,10 @@ class ResetPasswordService {
             ];
         }
 
-        // Reset the password
+        // Reset to password
         $result = $this->usersService->resetPassword($email, $newPassword);
 
-        // Clear the token if reset was successful
+        // Clear to token an reset was successful
         if ($result['success']) {
             $stmt = $this->db->prepare("UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?");
             $stmt->bind_param("s", $email);

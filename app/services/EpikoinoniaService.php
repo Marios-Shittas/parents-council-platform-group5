@@ -1,6 +1,9 @@
 <?php
+// Arxeio: app\services\EpikoinoniaService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * EpikoinoniaService - Handles all contact form messages database operations
+ * EpikoinoniaService - Xeirizetai ola contact forma messages vasi operations
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -47,10 +50,10 @@ class EpikoinoniaService {
     }
     
     /**
-     * Get all contact messages with pagination
-     * @param int $limit Messages per page
-     * @param int $offset Pagination offset
-     * @return array Array of contact messages
+     * Pairnei ola contact messages me pagination
+     * @param int $limit - Messages per page
+     * @param int $offset - Pagination offset
+     * @return array - Pinakas me contact messages
      */
     public function getAllMessages($limit = 10, $offset = 0) {
         $sql = "SELECT * FROM contact_messages 
@@ -71,8 +74,8 @@ class EpikoinoniaService {
     }
     
     /**
-     * Get total count of messages
-     * @return int Total message count
+     * Pairnei synoliko metrisis gia messages
+     * @return int - Synoliko message count
      */
     public function getMessageCount() {
         $sql = "SELECT COUNT(*) as count FROM contact_messages";
@@ -82,8 +85,8 @@ class EpikoinoniaService {
     }
     
     /**
-     * Get unread message count
-     * @return int Unread message count
+     * Pairnei undiavasma message count
+     * @return int - Undiavasma message count
      */
     public function getUnreadMessageCount() {
         $sql = "SELECT COUNT(*) as count FROM contact_messages WHERE is_read = FALSE";
@@ -93,9 +96,9 @@ class EpikoinoniaService {
     }
     
     /**
-     * Get a single message by ID
-     * @param int $id Message ID
-     * @return array|null Message data or null if not found
+     * Pairnei mia message apo ID
+     * @param int $id - Message ID
+     * @return array|null - Message dedomena i null an den vrethei
      */
     public function getMessageById($id) {
         $sql = "SELECT * FROM contact_messages WHERE message_id = ?";
@@ -147,9 +150,9 @@ class EpikoinoniaService {
     }
     
     /**
-     * Mark a message as read
-     * @param int $id Message ID
-     * @return bool Success status
+     * Mark a message as diavasma
+     * @param int $id - Message ID
+     * @return bool - Success status
      */
     public function markAsRead($id) {
         $sql = "UPDATE contact_messages SET is_read = TRUE WHERE message_id = ?";
@@ -161,9 +164,9 @@ class EpikoinoniaService {
     }
     
     /**
-     * Delete a message
-     * @param int $id Message ID
-     * @return bool Success status
+     * Diagrafei a message
+     * @param int $id - Message ID
+     * @return bool - Success status
      */
     public function deleteMessage($id) {
         $sql = "DELETE FROM contact_messages WHERE message_id = ?";
@@ -175,9 +178,9 @@ class EpikoinoniaService {
     }
     
     /**
-     * Search messages by email or name
-     * @param string $searchTerm Search term
-     * @return array Array of matching messages
+     * Psaxnei messages apo email i name
+     * @param string $searchTerm - Psaxnei term
+     * @return array - Pinakas me tairiazouses messages
      */
     public function searchMessages($searchTerm) {
         $searchTerm = '%' . $searchTerm . '%';

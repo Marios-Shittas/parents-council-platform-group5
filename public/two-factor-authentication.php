@@ -1,4 +1,7 @@
-<?php 
+<?php
+// Arxeio: public\two-factor-authentication.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -7,7 +10,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-chec
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Check if user has pending 2FA
+// Elegxei an xristis has pending 2FA
 if (!isset($_SESSION['pending_2fa']) || !isset($_SESSION['temp_email'])) {
     header('Location: login.php');
     exit;

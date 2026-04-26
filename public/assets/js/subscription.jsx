@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\subscription.jsx
+// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
 function SubscriptionPage() {
 
     const [data, setData] = React.useState(null);

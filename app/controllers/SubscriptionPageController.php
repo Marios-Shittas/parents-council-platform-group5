@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\controllers\SubscriptionPageController.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 
 require_once __DIR__ . '/../includes/TokenValidator.php';
 
@@ -6,7 +9,7 @@ class SubscriptionPageController
 {
     private mysqli $conn;
     private TokenValidator $tokenValidator;
-    private string $tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
+    private string $tokenMessage = 'ÎŸ ÏƒÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿Ï‚ Î® Î­Ï‡ÎµÎ¹ Î»Î®Î¾ÎµÎ¹.';
 // Kanei inject to DB connection kai arxikopoiei to TokenValidator dependency gia elegxous token syndromis.
     public function __construct(mysqli $conn)
     {

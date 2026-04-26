@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-orders.jsx
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 function formatCurrency(value) {
     const safeValue = Number(value || 0);
     return new Intl.NumberFormat('el-GR', {
@@ -40,11 +43,11 @@ function markOrderAsSeenOnHover(row, updateCallback) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Update sidebar badge
+                // Enimeronei sidebar badge
                 if (data.pending_paid_orders_count !== undefined) {
                     updateOrdersNotificationBadge(data.pending_paid_orders_count);
                 }
-                // Update row state to mark as seen
+                // Enimeronei row state to mark as seen
                 if (updateCallback) {
                     updateCallback(orderId);
                 }
@@ -344,7 +347,7 @@ function AdminOrdersPage() {
                                                 <i className={`fas fa-chevron-${expandedOrderId === order.order_id ? 'down' : 'right'}`}></i>
                                             </td>
                                             <td>
-                                                #{order.order_id}
+                                                #{paraggelia.order_id}
                                                 {order.is_unseen && (
                                                     <span className="order-new-badge" style={{marginLeft: '8px', fontSize: '11px', backgroundColor: '#dc3545', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold'}}>
                                                         ΝΕΑ

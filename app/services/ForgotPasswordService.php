@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ForgotPasswordService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 use PHPMailer\PHPMailer\PHPMailer;
 
 require_once __DIR__ . '/../config/config.php';

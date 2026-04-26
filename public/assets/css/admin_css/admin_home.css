@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_home.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Styles gia tin admin arxiki selida kai ta dashboard widgets. */
+/* Kathorizei tin eikona tou dashboard: counters, panels, calendar kai quick admin sections. */
 body {
     background: #eef3f9;
 }

@@ -1,7 +1,10 @@
 <?php
+// Arxeio: public\admin\events.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 /**
- * Admin Events Management Page
- * Create, update, delete events and manage images
+ * Admin Ekdiloseis Management Page
+ * Dimiourgei, upimerominia, diagrafi ekdiloseis kai manage eikones
  */
 
 require_once __DIR__ . '/../../app/services/EventsService.php';

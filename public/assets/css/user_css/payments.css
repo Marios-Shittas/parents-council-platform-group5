@@ -1,3 +1,6 @@
+/* Arxeio: public\assets\css\user_css\payments.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
 /* ============================================
    SIZE SELECTOR STYLING
    ============================================ */
@@ -477,7 +480,7 @@
     transform: translateY(-1px);
 }
 
-/* Cart footer with total and checkout */
+/* Cart footer me synoliko kai checkout */
 .cart-footer {
     display: flex;
     align-items: center;

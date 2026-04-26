@@ -1,2 +1,7 @@
+# Arxeio: public\assets\Home_img\.gitignore
+# Rolos: Krataei sto git mono ta aparaitita arxeia kai agnoei generated/uploads/dependencies.
+# Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
+# Kratame ton fakelo sto git, alla oxi ta anevamena arxeia.
+# To !.gitignore epitrepsei na yparxei o fakelos akoma kai otan den exei eikones.
 *
 !.gitignore

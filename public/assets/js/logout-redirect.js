@@ -1,4 +1,4 @@
-// Katharizei kathe dynato tropo epistrofis se prostτευomenes selides
+// Katharizei kathe dynato tropo epistrofis se prostÏ„ÎµÏ…omenes selides
         (function() {
             // Katharizei synedria kai topiko apothikeftiko
             try {

@@ -9,9 +9,9 @@ function ensureDashboardNoticeElements() {
     overlay.className = 'page-notice-overlay';
     overlay.innerHTML = '' +
         '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
+            '<h3 class="page-notice-title" id="page-notice-title">Î•Î¹Î´Î¿Ï€Î¿Î¯Î·ÏƒÎ·</h3>' +
+            '<div class="page-notice-message" id="page-notice-message">â€”</div>' +
+            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Î•Î½Ï„Î¬Î¾ÎµÎ¹</button></div>' +
         '</div>';
 
     overlay.addEventListener('click', function (event) {
@@ -51,8 +51,8 @@ function showDashboardNotice(message, options) {
     if (opts.variant === 'error') card.classList.add('is-error');
     if (opts.variant === 'warning') card.classList.add('is-warning');
 
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
+    title.textContent = opts.title || 'Î•Î¹Î´Î¿Ï€Î¿Î¯Î·ÏƒÎ·';
+    body.textContent = message || 'Î£Ï…Î½Î­Î²Î· Î­Î½Î± Î±Ï€ÏÏŒÏƒÎ¼ÎµÎ½Î¿ ÏƒÏ†Î¬Î»Î¼Î±.';
 
     overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
     document.body.style.overflow = 'hidden';
@@ -103,7 +103,7 @@ function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
         deleteBtn.type = 'button';
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.setAttribute('aria-label', `Î‘Ï†Î±Î¯ÏÎµÏƒÎ· ${file.name}`);
         deleteBtn.addEventListener('click', function () {
             onRemove(index);
         });
@@ -156,7 +156,7 @@ function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
         deleteBtn.type = 'button';
         deleteBtn.className = 'attachment-remove-btn';
         deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
+        deleteBtn.setAttribute('aria-label', `Î‘Ï†Î±Î¯ÏÎµÏƒÎ· ${file.name}`);
         deleteBtn.addEventListener('click', function () {
             onRemove(index);
         });
@@ -216,36 +216,36 @@ function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
         }
 
         if (existingCount >= imageLimit) {
-            warnings.push(`Έχει ήδη συμπληρωθεί το όριο των ${imageLimit} εικόνων.`);
+            warnings.push(`ÎˆÏ‡ÎµÎ¹ Î®Î´Î· ÏƒÏ…Î¼Ï€Î»Î·ÏÏ‰Î¸ÎµÎ¯ Ï„Î¿ ÏŒÏÎ¹Î¿ Ï„Ï‰Î½ ${imageLimit} ÎµÎ¹ÎºÏŒÎ½Ï‰Î½.`);
         } else {
             incomingFiles.forEach((file) => {
                 const fileKey = getDashboardFileKey(file);
                 const fileExt = (file.name.split('.').pop() || '').toLowerCase();
 
                 if (!allowedExtensions.includes(fileExt)) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
+                    warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î­Î³ÎºÏ…ÏÎ· ÎµÏ€Î­ÎºÏ„Î±ÏƒÎ·. Î•Ï€Î¹Ï„ÏÎ­Ï€Î¿Î½Ï„Î±Î¹ Î¼ÏŒÎ½Î¿ JPG, JPEG, PNG, GIF.`);
                     return;
                 }
 
                 if (file.size > maxFileSize) {
-                    warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
+                    warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" ÎµÎ¯Î½Î±Î¹ Ï€Î¿Î»Ï Î¼ÎµÎ³Î¬Î»Î¿ (${(file.size / 1024 / 1024).toFixed(2)}MB). ÎœÎ­Î³Î¹ÏƒÏ„Î¿ Î¼Î­Î³ÎµÎ¸Î¿Ï‚: 5MB.`);
                     return;
                 }
 
                 if (!String(file.type || '').startsWith('image/')) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
+                    warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î´ÎµÎ½ Ï†Î±Î¯Î½ÎµÏ„Î±Î¹ Î½Î± ÎµÎ¯Î½Î±Î¹ ÎµÎ¹ÎºÏŒÎ½Î±.`);
                     return;
                 }
 
                 if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
+                    warnings.push(`Î¤Î¿ Î±ÏÏ‡ÎµÎ¯Î¿ "${file.name}" Î­Ï‡ÎµÎ¹ Î®Î´Î· ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯.`);
                     return;
                 }
 
                 if (existingCount + stagedFiles.length >= imageLimit) {
                     if (!reachedLimit) {
                         const remainingSlots = Math.max(0, imageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες.`);
+                        warnings.push(`ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î¼ÏŒÎ½Î¿ ${remainingSlots} Î±ÎºÏŒÎ¼Î· ÎµÎ¹ÎºÏŒÎ½Î±/ÎµÏ‚.`);
                         reachedLimit = true;
                     }
                     return;
@@ -261,7 +261,7 @@ function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
         updateInputState();
 
         if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+            showDashboardNotice('Î ÏÎ¿ÎµÎ¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚:\n\n' + warnings.join('\n\n'), {
                 title: noticeTitle,
                 variant: 'warning'
             });
@@ -310,22 +310,22 @@ function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
             const fileType = String(file.type || '');
 
             if (!allowedExtensions.includes(fileExt)) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
+                warnings.push(`Î¤Î¿ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î¿ "${file.name}" Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î­Î³ÎºÏ…ÏÎ· ÎµÏ€Î­ÎºÏ„Î±ÏƒÎ·. Î•Ï€Î¹Ï„ÏÎ­Ï€Î¿Î½Ï„Î±Î¹ Î¼ÏŒÎ½Î¿ PDF, JPG, JPEG, PNG.`);
                 return;
             }
 
             if (file.size > maxFileSize) {
-                warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
+                warnings.push(`Î¤Î¿ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î¿ "${file.name}" ÎµÎ¯Î½Î±Î¹ Ï€Î¿Î»Ï Î¼ÎµÎ³Î¬Î»Î¿ (${(file.size / 1024 / 1024).toFixed(2)}MB). ÎœÎ­Î³Î¹ÏƒÏ„Î¿ Î¼Î­Î³ÎµÎ¸Î¿Ï‚: 8MB.`);
                 return;
             }
 
             if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
+                warnings.push(`Î¤Î¿ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î¿ "${file.name}" Î´ÎµÎ½ Î­Ï‡ÎµÎ¹ Î­Î³ÎºÏ…ÏÎ¿ Ï„ÏÏ€Î¿ Î±ÏÏ‡ÎµÎ¯Î¿Ï….`);
                 return;
             }
 
             if (stagedKeys.has(fileKey)) {
-                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
+                warnings.push(`Î¤Î¿ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Î¿ "${file.name}" Î­Ï‡ÎµÎ¹ Î®Î´Î· ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯.`);
                 return;
             }
 
@@ -337,7 +337,7 @@ function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
         renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
 
         if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
+            showDashboardNotice('Î ÏÎ¿ÎµÎ¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚:\n\n' + warnings.join('\n\n'), {
                 title: noticeTitle,
                 variant: 'warning'
             });
@@ -345,6 +345,6 @@ function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
     });
 }
 
-setupDashboardImageInput(document.getElementById('calendar_event_images'), 'calendarEventImagePreview', 6, 'Έλεγχος εικόνων εκδήλωσης');
-setupDashboardImageInput(document.getElementById('calendar_announcement_images'), 'calendarAnnouncementImagePreview', 6, 'Έλεγχος εικόνων ανακοίνωσης');
-setupDashboardAttachmentInput(document.getElementById('calendar_announcement_attachments'), 'calendarAnnouncementAttachmentPreview', 'Έλεγχος συνημμένων ανακοίνωσης');
+setupDashboardImageInput(document.getElementById('calendar_event_images'), 'calendarEventImagePreview', 6, 'ÎˆÎ»ÎµÎ³Ï‡Î¿Ï‚ ÎµÎ¹ÎºÏŒÎ½Ï‰Î½ ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ·Ï‚');
+setupDashboardImageInput(document.getElementById('calendar_announcement_images'), 'calendarAnnouncementImagePreview', 6, 'ÎˆÎ»ÎµÎ³Ï‡Î¿Ï‚ ÎµÎ¹ÎºÏŒÎ½Ï‰Î½ Î±Î½Î±ÎºÎ¿Î¯Î½Ï‰ÏƒÎ·Ï‚');
+setupDashboardAttachmentInput(document.getElementById('calendar_announcement_attachments'), 'calendarAnnouncementAttachmentPreview', 'ÎˆÎ»ÎµÎ³Ï‡Î¿Ï‚ ÏƒÏ…Î½Î·Î¼Î¼Î­Î½Ï‰Î½ Î±Î½Î±ÎºÎ¿Î¯Î½Ï‰ÏƒÎ·Ï‚');

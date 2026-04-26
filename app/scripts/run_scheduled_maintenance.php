@@ -3,6 +3,10 @@
 
 declare(strict_types=1);
 
+// Arxeio: app\scripts\run_scheduled_maintenance.php
+// Rolos: CLI script pou trexei programmatismenes ergasies syntirisis gia to project.
+// Simeiosi: To shebang kai to declare(strict_types=1) prepei na menoun stin arxi gia sosto CLI/PHP parsing.
+
 if (PHP_SAPI !== 'cli') {
     http_response_code(403);
     echo "This script can only run from CLI." . PHP_EOL;

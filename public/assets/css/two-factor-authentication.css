@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\two-factor-authentication.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo. */
+/* Styles gia ti selida two factor authentication. */
+/* Rythmizei code input, resend button kai feedback minimata gia tin 2FA diadikasia. */
 .body {
     background-color: #EEF2F7;
 }
@@ -13,7 +18,7 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
 }
 
-#two-factor-title {
+#two-factor-titlos {
     text-align: left;
     margin: 20px 20px 10px;
     width: auto;
@@ -28,7 +33,7 @@
     color: #C0392B;
 }
 
-#success-message {
+#epitixia-message {
     color: #1D7D46;
 }
 
@@ -155,7 +160,7 @@
         min-height: 0;
     }
 
-    #two-factor-title {
+    #two-factor-titlos {
         margin: 10px 8px 6px;
     }
 

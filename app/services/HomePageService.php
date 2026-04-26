@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\HomePageService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * HomePageService
- * Αποθηκεύει και ανακτά το editable περιεχόμενο της αρχικής σελίδας.
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -63,7 +66,7 @@ class HomePageService
         $this->lastError = '';
 
         if (!isset($this->defaultSections[$sectionKey])) {
-            $this->lastError = 'Μη έγκυρο section key.';
+            $this->lastError = 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ section key.';
             return false;
         }
 
@@ -73,19 +76,19 @@ class HomePageService
 
         $contentJson = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($contentJson === false) {
-            $this->lastError = 'Αποτυχία μετατροπής δεδομένων σε JSON.';
+            $this->lastError = 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î¼ÎµÏ„Î±Ï„ÏÎ¿Ï€Î®Ï‚ Î´ÎµÎ´Î¿Î¼Î­Î½Ï‰Î½ ÏƒÎµ JSON.';
             return false;
         }
 
         $existsStmt = $this->conn->prepare('SELECT section_id FROM HomePageSections WHERE section_key = ? LIMIT 1');
         if (!$existsStmt) {
-            $this->lastError = 'Σφάλμα prepare lookup: ' . $this->conn->error;
+            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare lookup: ' . $this->conn->error;
             return false;
         }
 
         $existsStmt->bind_param('s', $sectionKey);
         if (!$existsStmt->execute()) {
-            $this->lastError = 'Σφάλμα execute lookup: ' . $existsStmt->error;
+            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± execute lookup: ' . $existsStmt->error;
             return false;
         }
 
@@ -97,7 +100,7 @@ class HomePageService
                     WHERE section_key = ?';
             $stmt = $this->conn->prepare($sql);
             if (!$stmt) {
-                $this->lastError = 'Σφάλμα prepare update: ' . $this->conn->error;
+                $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare update: ' . $this->conn->error;
                 return false;
             }
 
@@ -107,7 +110,7 @@ class HomePageService
                     VALUES (?, ?, ?, ?)';
             $stmt = $this->conn->prepare($sql);
             if (!$stmt) {
-                $this->lastError = 'Σφάλμα prepare insert: ' . $this->conn->error;
+                $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare insert: ' . $this->conn->error;
                 return false;
             }
 
@@ -115,7 +118,7 @@ class HomePageService
         }
 
         if (!$stmt->execute()) {
-            $this->lastError = 'Σφάλμα αποθήκευσης: ' . $stmt->error;
+            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± Î±Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·Ï‚: ' . $stmt->error;
             return false;
         }
 
@@ -167,51 +170,51 @@ class HomePageService
     {
         return [
             'banner_section' => [
-                'title' => 'Κεντρικές Εικόνες Αρχικής',
+                'title' => 'ÎšÎµÎ½Ï„ÏÎ¹ÎºÎ­Ï‚ Î•Î¹ÎºÏŒÎ½ÎµÏ‚ Î‘ÏÏ‡Î¹ÎºÎ®Ï‚',
                 'subtitle' => '',
                 'content' => [
                     'slides' => [
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1',
+                            'alt' => 'Î“Ï…Î¼Î½Î¬ÏƒÎ¹Î¿ Î‘Î³Î¯Î¿Ï… Î‘Î¸Î±Î½Î±ÏƒÎ¯Î¿Ï… - Î•Î¹ÎºÏŒÎ½Î± 1',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2',
+                            'alt' => 'Î“Ï…Î¼Î½Î¬ÏƒÎ¹Î¿ Î‘Î³Î¯Î¿Ï… Î‘Î¸Î±Î½Î±ÏƒÎ¯Î¿Ï… - Î•Î¹ÎºÏŒÎ½Î± 2',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3',
+                            'alt' => 'Î“Ï…Î¼Î½Î¬ÏƒÎ¹Î¿ Î‘Î³Î¯Î¿Ï… Î‘Î¸Î±Î½Î±ÏƒÎ¯Î¿Ï… - Î•Î¹ÎºÏŒÎ½Î± 3',
                         ],
                     ],
                 ],
             ],
             'hero_section' => [
-                'title' => 'Σύνδεσμος Γονέων & Κηδεμόνων Γυμνασίου Αγίου Αθανασίου',
-                'subtitle' => 'Στην ιστοσελίδα μας μπορείτε να ενημερώνεστε για όλες τις ανακοινώσεις, δράσεις και εκδηλώσεις του Συνδέσμου Γονέων. Μπορείτε να βρείτε χρήσιμες πληροφορίες, αιτήσεις, φωτογραφικό υλικό και πρωτοβουλίες που συμβάλλουν στη δημιουργία ενός καλύτερου σχολικού περιβάλλοντος για τα παιδιά μας.',
+                'title' => 'Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î“Î¿Î½Î­Ï‰Î½ & ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Ï‰Î½ Î“Ï…Î¼Î½Î±ÏƒÎ¯Î¿Ï… Î‘Î³Î¯Î¿Ï… Î‘Î¸Î±Î½Î±ÏƒÎ¯Î¿Ï…',
+                'subtitle' => 'Î£Ï„Î·Î½ Î¹ÏƒÏ„Î¿ÏƒÎµÎ»Î¯Î´Î± Î¼Î±Ï‚ Î¼Ï€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± ÎµÎ½Î·Î¼ÎµÏÏŽÎ½ÎµÏƒÏ„Îµ Î³Î¹Î± ÏŒÎ»ÎµÏ‚ Ï„Î¹Ï‚ Î±Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚, Î´ÏÎ¬ÏƒÎµÎ¹Ï‚ ÎºÎ±Î¹ ÎµÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚ Ï„Î¿Ï… Î£Ï…Î½Î´Î­ÏƒÎ¼Î¿Ï… Î“Î¿Î½Î­Ï‰Î½. ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Î²ÏÎµÎ¯Ï„Îµ Ï‡ÏÎ®ÏƒÎ¹Î¼ÎµÏ‚ Ï€Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚, Î±Î¹Ï„Î®ÏƒÎµÎ¹Ï‚, Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¹ÎºÏŒ Ï…Î»Î¹ÎºÏŒ ÎºÎ±Î¹ Ï€ÏÏ‰Ï„Î¿Î²Î¿Ï…Î»Î¯ÎµÏ‚ Ï€Î¿Ï… ÏƒÏ…Î¼Î²Î¬Î»Î»Î¿Ï…Î½ ÏƒÏ„Î· Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î¯Î± ÎµÎ½ÏŒÏ‚ ÎºÎ±Î»ÏÏ„ÎµÏÎ¿Ï… ÏƒÏ‡Î¿Î»Î¹ÎºÎ¿Ï Ï€ÎµÏÎ¹Î²Î¬Î»Î»Î¿Î½Ï„Î¿Ï‚ Î³Î¹Î± Ï„Î± Ï€Î±Î¹Î´Î¹Î¬ Î¼Î±Ï‚.',
                 'content' => [
-                    'kicker' => 'Καλωσορίσατε στην επίσημη ιστοσελίδα',
-                    'announcements_button_label' => 'Ανακοινώσεις',
-                    'events_button_label' => 'Εκδηλώσεις',
+                    'kicker' => 'ÎšÎ±Î»Ï‰ÏƒÎ¿ÏÎ¯ÏƒÎ±Ï„Îµ ÏƒÏ„Î·Î½ ÎµÏ€Î¯ÏƒÎ·Î¼Î· Î¹ÏƒÏ„Î¿ÏƒÎµÎ»Î¯Î´Î±',
+                    'announcements_button_label' => 'Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚',
+                    'events_button_label' => 'Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚',
                 ],
             ],
             'calendar_section' => [
-                'title' => 'Ημερολόγιο',
+                'title' => 'Î—Î¼ÎµÏÎ¿Î»ÏŒÎ³Î¹Î¿',
                 'subtitle' => '',
                 'content' => [],
             ],
             'announcements_section' => [
-                'title' => 'Τελευταίες Ανακοινώσεις',
+                'title' => 'Î¤ÎµÎ»ÎµÏ…Ï„Î±Î¯ÎµÏ‚ Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚',
                 'subtitle' => '',
                 'content' => [
-                    'button_label' => 'Όλες οι Ανακοινώσεις',
+                    'button_label' => 'ÎŒÎ»ÎµÏ‚ Î¿Î¹ Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚',
                 ],
             ],
             'events_section' => [
-                'title' => 'Τελευταίες Εκδηλώσεις',
+                'title' => 'Î¤ÎµÎ»ÎµÏ…Ï„Î±Î¯ÎµÏ‚ Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚',
                 'subtitle' => '',
                 'content' => [
-                    'button_label' => 'Όλες οι Εκδηλώσεις',
+                    'button_label' => 'ÎŒÎ»ÎµÏ‚ Î¿Î¹ Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚',
                 ],
             ],
         ];

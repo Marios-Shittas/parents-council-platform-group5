@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\home-banner-carousel.js
+// Rolos: Xeirizetai dynamic kommatia tis arxikis selidas kai fernei dedomena apo backend services.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
 document.addEventListener('DOMContentLoaded', function () {
     // Energopoiei to carousel tou homepage banner mono otan yparxoun polla slides.
     document.querySelectorAll('.home-school-banner__carousel').forEach(function (carousel) {

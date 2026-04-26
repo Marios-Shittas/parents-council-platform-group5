@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\ApplicationTemplateService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
  * ApplicationTemplateService
- * Manages reusable application templates for standard/recurring applications
+ * Diaxeirizetai reusable aitisi templates gia standard/epanalamvanomenes aitiseis
  */
 class ApplicationTemplateService {
     private $conn;
@@ -16,8 +19,8 @@ class ApplicationTemplateService {
     }
 
     /**
-     * Ensure the templates table exists for older installs that have not run the
-     * applications v2 migration yet.
+     * Eksasfalizei to templates pinakas yparxei gia palaioteres egkatastaseis that have not run to
+     * aitiseis v2 migration yet.
      */
     private function ensureTemplatesTableReady() {
         if ($this->templatesTableChecked) {
@@ -289,8 +292,8 @@ class ApplicationTemplateService {
     // ============================================================
     
     /**
-     * Seed system templates into database
-     * Call this once during installation
+     * Vazei arxika system templates mesa se vasi
+     * Kaleitai mia fora kata tin egkatastasi
      */
     public function seedDefaultTemplates() {
         $templates = $this->getDefaultTemplates();
@@ -321,58 +324,58 @@ class ApplicationTemplateService {
             // Protypo 1: Syndromi / Asfalisi
             [
                 'key' => 'subscription-insurance',
-                'name' => 'Συνδρομή / Ασφάλιση',
-                'description' => 'Ετήσια συνδρομή και ασφαλιστική κάλυψη μαθητή',
+                'name' => 'Î£Ï…Î½Î´ÏÎ¿Î¼Î® / Î‘ÏƒÏ†Î¬Î»Î¹ÏƒÎ·',
+                'description' => 'Î•Ï„Î®ÏƒÎ¹Î± ÏƒÏ…Î½Î´ÏÎ¿Î¼Î® ÎºÎ±Î¹ Î±ÏƒÏ†Î±Î»Î¹ÏƒÏ„Î¹ÎºÎ® ÎºÎ¬Î»Ï…ÏˆÎ· Î¼Î±Î¸Î·Ï„Î®',
                 'category' => 'standard',
                 'schema' => [
                     'sections' => [
                         [
-                            'title' => 'Στοιχεία Μαθητή',
+                            'title' => 'Î£Ï„Î¿Î¹Ï‡ÎµÎ¯Î± ÎœÎ±Î¸Î·Ï„Î®',
                             'fields' => [
                                 [
                                     'name' => 'student_name',
-                                    'label' => 'Ονοματεπώνυμο Μαθητή',
+                                    'label' => 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎœÎ±Î¸Î·Ï„Î®',
                                     'type' => 'text',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'student_birthdate',
-                                    'label' => 'Ημερομηνία Γέννησης',
+                                    'label' => 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î“Î­Î½Î½Î·ÏƒÎ·Ï‚',
                                     'type' => 'date',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'student_class',
-                                    'label' => 'Τμήμα / Τάξη',
+                                    'label' => 'Î¤Î¼Î®Î¼Î± / Î¤Î¬Î¾Î·',
                                     'type' => 'select',
                                     'required' => true,
-                                    'options' => ['A', 'B', 'C', 'Γ\''],
+                                    'options' => ['A', 'B', 'C', 'Î“\''],
                                     'help_text' => ''
                                 ]
                             ]
                         ],
                         [
-                            'title' => 'Στοιχεία Κηδεμόνα',
+                            'title' => 'Î£Ï„Î¿Î¹Ï‡ÎµÎ¯Î± ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Î±',
                             'fields' => [
                                 [
                                     'name' => 'guardian_name',
-                                    'label' => 'Ονοματεπώνυμο Κηδεμόνα',
+                                    'label' => 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Î±',
                                     'type' => 'text',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'guardian_phone',
-                                    'label' => 'Τηλέφωνο Επικοινωνίας',
+                                    'label' => 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿ Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
                                     'type' => 'tel',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'guardian_email',
-                                    'label' => 'Email Επικοινωνίας',
+                                    'label' => 'Email Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
                                     'type' => 'email',
                                     'required' => true,
                                     'help_text' => ''
@@ -380,58 +383,58 @@ class ApplicationTemplateService {
                             ]
                         ],
                         [
-                            'title' => 'Εγγραφές',
+                            'title' => 'Î•Î³Î³ÏÎ±Ï†Î­Ï‚',
                             'fields' => [
                                 [
                                     'name' => 'subscription_checkbox',
-                                    'label' => 'Συνδρομή στο Σύνδεσμο',
+                                    'label' => 'Î£Ï…Î½Î´ÏÎ¿Î¼Î® ÏƒÏ„Î¿ Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿',
                                     'type' => 'checkbox',
                                     'required' => false,
-                                    'help_text' => 'Αποδέχομαι τη συνδρομή'
+                                    'help_text' => 'Î‘Ï€Î¿Î´Î­Ï‡Î¿Î¼Î±Î¹ Ï„Î· ÏƒÏ…Î½Î´ÏÎ¿Î¼Î®'
                                 ],
                                 [
                                     'name' => 'insurance_checkbox',
-                                    'label' => 'Ασφαλιστική Κάλυψη',
+                                    'label' => 'Î‘ÏƒÏ†Î±Î»Î¹ÏƒÏ„Î¹ÎºÎ® ÎšÎ¬Î»Ï…ÏˆÎ·',
                                     'type' => 'checkbox',
                                     'required' => false,
-                                    'help_text' => 'Αποδέχομαι την ασφαλιστική κάλυψη'
+                                    'help_text' => 'Î‘Ï€Î¿Î´Î­Ï‡Î¿Î¼Î±Î¹ Ï„Î·Î½ Î±ÏƒÏ†Î±Î»Î¹ÏƒÏ„Î¹ÎºÎ® ÎºÎ¬Î»Ï…ÏˆÎ·'
                                 ]
                             ]
                         ],
                         [
-                            'title' => 'Συναίνεση Επικοινωνίας',
+                            'title' => 'Î£Ï…Î½Î±Î¯Î½ÎµÏƒÎ· Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
                             'fields' => [
                                 [
                                     'name' => 'consent_communication',
-                                    'label' => 'Λήψη Ειδοποιήσεων',
+                                    'label' => 'Î›Î®ÏˆÎ· Î•Î¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÏ‰Î½',
                                     'type' => 'radio',
                                     'required' => true,
-                                    'options' => ['Ναι', 'Όχι'],
-                                    'help_text' => 'Αποδέχομαι να λαμβάνω ειδοποιήσεις'
+                                    'options' => ['ÎÎ±Î¹', 'ÎŒÏ‡Î¹'],
+                                    'help_text' => 'Î‘Ï€Î¿Î´Î­Ï‡Î¿Î¼Î±Î¹ Î½Î± Î»Î±Î¼Î²Î¬Î½Ï‰ ÎµÎ¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚'
                                 ],
                                 [
                                     'name' => 'consent_viber',
                                     'label' => 'Viber Community',
                                     'type' => 'radio',
                                     'required' => true,
-                                    'options' => ['Ναι', 'Όχι'],
-                                    'help_text' => 'Αποδέχομαι συμμετοχή στην ομάδα Viber'
+                                    'options' => ['ÎÎ±Î¹', 'ÎŒÏ‡Î¹'],
+                                    'help_text' => 'Î‘Ï€Î¿Î´Î­Ï‡Î¿Î¼Î±Î¹ ÏƒÏ…Î¼Î¼ÎµÏ„Î¿Ï‡Î® ÏƒÏ„Î·Î½ Î¿Î¼Î¬Î´Î± Viber'
                                 ]
                             ]
                         ],
                         [
-                            'title' => 'Επιβεβαίωση',
+                            'title' => 'Î•Ï€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·',
                             'fields' => [
                                 [
                                     'name' => 'signature',
-                                    'label' => 'Υπογραφή Κηδεμόνα',
+                                    'label' => 'Î¥Ï€Î¿Î³ÏÎ±Ï†Î® ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Î±',
                                     'type' => 'signature',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'signature_date',
-                                    'label' => 'Ημερομηνία',
+                                    'label' => 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±',
                                     'type' => 'date',
                                     'required' => true,
                                     'help_text' => ''
@@ -445,37 +448,37 @@ class ApplicationTemplateService {
             // Protypo 2: Synainesi ekdilosis
             [
                 'key' => 'event-consent',
-                'name' => 'Συναίνεση Συμμετοχής σε Εκδήλωση',
-                'description' => 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα',
+                'name' => 'Î£Ï…Î½Î±Î¯Î½ÎµÏƒÎ· Î£Ï…Î¼Î¼ÎµÏ„Î¿Ï‡Î®Ï‚ ÏƒÎµ Î•ÎºÎ´Î®Î»Ï‰ÏƒÎ·',
+                'description' => 'ÎœÎ¿ÏÏ†Î® ÏƒÏ…Î½Î±Î¯Î½ÎµÏƒÎ·Ï‚ Î³Î¹Î± ÏƒÏ…Î¼Î¼ÎµÏ„Î¿Ï‡Î® ÏƒÎµ ÏƒÏ‡Î¿Î»Î¹ÎºÎ® ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ· Î® Î´ÏÎ±ÏƒÏ„Î·ÏÎ¹ÏŒÏ„Î·Ï„Î±',
                 'category' => 'event',
                 'schema' => [
                     'sections' => [
                         [
-                            'title' => 'Πληροφορίες Μαθητή',
+                            'title' => 'Î Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚ ÎœÎ±Î¸Î·Ï„Î®',
                             'fields' => [
                                 [
                                     'name' => 'student_name_event',
-                                    'label' => 'Ονοματεπώνυμο Μαθητή',
+                                    'label' => 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎœÎ±Î¸Î·Ï„Î®',
                                     'type' => 'text',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'student_class_event',
-                                    'label' => 'Τάξη/Τμήμα',
+                                    'label' => 'Î¤Î¬Î¾Î·/Î¤Î¼Î®Î¼Î±',
                                     'type' => 'select',
                                     'required' => true,
-                                    'options' => ['A', 'B', 'C', 'Γ\''],
+                                    'options' => ['A', 'B', 'C', 'Î“\''],
                                     'help_text' => ''
                                 ]
                             ]
                         ],
                         [
-                            'title' => 'Πληροφορίες Κηδεμόνα',
+                            'title' => 'Î Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚ ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Î±',
                             'fields' => [
                                 [
                                     'name' => 'guardian_name_event',
-                                    'label' => 'Ονοματεπώνυμο Κηδεμόνα',
+                                    'label' => 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Î±',
                                     'type' => 'text',
                                     'required' => true,
                                     'help_text' => ''
@@ -483,38 +486,38 @@ class ApplicationTemplateService {
                             ]
                         ],
                         [
-                            'title' => 'Συναίνεση',
+                            'title' => 'Î£Ï…Î½Î±Î¯Î½ÎµÏƒÎ·',
                             'fields' => [
                                 [
                                     'name' => 'consent',
-                                    'label' => 'Δηλώνω ότι:',
+                                    'label' => 'Î”Î·Î»ÏŽÎ½Ï‰ ÏŒÏ„Î¹:',
                                     'type' => 'radio',
                                     'required' => true,
-                                    'options' => ['Συναινώ', 'Δεν Συναινώ'],
+                                    'options' => ['Î£Ï…Î½Î±Î¹Î½ÏŽ', 'Î”ÎµÎ½ Î£Ï…Î½Î±Î¹Î½ÏŽ'],
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'comments',
-                                    'label' => 'Σχόλια / Παρατηρήσεις',
+                                    'label' => 'Î£Ï‡ÏŒÎ»Î¹Î± / Î Î±ÏÎ±Ï„Î·ÏÎ®ÏƒÎµÎ¹Ï‚',
                                     'type' => 'textarea',
                                     'required' => false,
-                                    'help_text' => 'Προαιρετικό'
+                                    'help_text' => 'Î ÏÎ¿Î±Î¹ÏÎµÏ„Î¹ÎºÏŒ'
                                 ]
                             ]
                         ],
                         [
-                            'title' => 'Υπογραφή',
+                            'title' => 'Î¥Ï€Î¿Î³ÏÎ±Ï†Î®',
                             'fields' => [
                                 [
                                     'name' => 'signature_event',
-                                    'label' => 'Υπογραφή',
+                                    'label' => 'Î¥Ï€Î¿Î³ÏÎ±Ï†Î®',
                                     'type' => 'signature',
                                     'required' => true,
                                     'help_text' => ''
                                 ],
                                 [
                                     'name' => 'signature_date_event',
-                                    'label' => 'Ημερομηνία',
+                                    'label' => 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±',
                                     'type' => 'date',
                                     'required' => true,
                                     'help_text' => ''

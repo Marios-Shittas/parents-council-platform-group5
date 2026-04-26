@@ -1,7 +1,13 @@
 <?php
+// Arxeio: public\cart.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
+// Public route gia to kalathi agoron.
+// Leitourgei san JSON API endpoint gia get/add/upimerominia/remove/clear sto kalathi.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Ola ta responses einai JSON gia na ta diavazei to frontend xoris HTML parsing.
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../app/services/CartService.php';
@@ -13,12 +19,15 @@ auth_require_role('parent', [
     'message' => 'Μόνο λογαριασμοί γονέα μπορούν να χρησιμοποιήσουν το καλάθι.'
 ]);
 
+// Kratame ton xristis apo to session gia na min mporei kapoios na peiraksei allo kalathi.
 $userId = (int)$_SESSION['user_id'];
 $cartService = new CartService();
 $eshopSettingsService = new EshopSettingsService();
 
+// To action mporei na erthei apo POST i GET, me default tin anagnosi tou kalathi.
 $action = $_POST['action'] ?? $_GET['action'] ?? 'get';
 
+// An to shop einai kleisto apo settings, stamataei kathe kalathi action.
 if (!$eshopSettingsService->isShopVisible()) {
     http_response_code(403);
     echo json_encode([
@@ -30,6 +39,7 @@ if (!$eshopSettingsService->isShopVisible()) {
 
 switch ($action) {
     case 'get':
+        // Epistrefei tin trexousa katastasi tou kalathiou.
         $cart = $cartService->getCart($userId);
 
         if ($cart === false) {
@@ -49,6 +59,7 @@ switch ($action) {
         exit;
 
     case 'add':
+        // Prosthetei proion sto kalathi, mazi me megethos an yparxei.
         $productId = (int)($_POST['product_id'] ?? 0);
         $quantity = (int)($_POST['quantity'] ?? 1);
         $size = trim((string)($_POST['size'] ?? ''));
@@ -83,6 +94,7 @@ switch ($action) {
         exit;
 
     case 'update':
+        // Allazei posotita gia ena idi yparxon item tou kalathi.
         $productId = (int)($_POST['product_id'] ?? 0);
         $size = trim((string)($_POST['size'] ?? ''));
         $quantity = (int)($_POST['quantity'] ?? 1);
@@ -117,6 +129,7 @@ switch ($action) {
         exit;
 
     case 'remove':
+        // Aferei ena sygkekrimeno proion/size apo to kalathi.
         $productId = (int)($_POST['product_id'] ?? 0);
         $size = trim((string)($_POST['size'] ?? ''));
 
@@ -150,6 +163,7 @@ switch ($action) {
         exit;
 
     case 'clear':
+        // Katharizei olo to kalathi tou syndedemenou gonea.
         $cleared = $cartService->clearCart($userId);
 
         if (!$cleared) {

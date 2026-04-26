@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-home-calendar.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 (function () {
     const root = document.getElementById('admin-calendar-app');
     if (!root) {
@@ -22,9 +25,9 @@
     };
 
     const typeLabels = {
-        holiday: 'Αργία',
-        event: 'Εκδήλωση',
-        announcement: 'Ανακοίνωση',
+        holiday: 'Î‘ÏÎ³Î¯Î±',
+        event: 'Î•ÎºÎ´Î®Î»Ï‰ÏƒÎ·',
+        announcement: 'Î‘Î½Î±ÎºÎ¿Î¯Î½Ï‰ÏƒÎ·',
     };
 
     const typeIcons = {
@@ -99,7 +102,7 @@
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatTime(value) {
         if (!value) {
-            return 'Χωρίς συγκεκριμένη ώρα';
+            return 'Î§Ï‰ÏÎ¯Ï‚ ÏƒÏ…Î³ÎºÎµÎºÏÎ¹Î¼Î­Î½Î· ÏŽÏÎ±';
         }
 
         return value;
@@ -180,7 +183,7 @@
             const isToday = isoDate === todayIso;
             const isSelected = isoDate === state.selectedDate;
 
-            let previewHtml = '<span class="day-preview-empty">Κενή μέρα</span>';
+            let previewHtml = '<span class="day-preview-empty">ÎšÎµÎ½Î® Î¼Î­ÏÎ±</span>';
             if (previewItem) {
                 const previewClass = previewItem.type === 'holiday'
                     ? 'holiday-preview'
@@ -224,10 +227,10 @@
                             <i class="${escapeHtml(typeIcons[item.type] || 'fas fa-circle')}"></i>
                             ${escapeHtml(typeLabels[item.type] || item.type)}
                         </span>
-                        <a class="day-item-link" href="${escapeHtml(item.source_url || '#')}">${escapeHtml(item.source_label || 'Άνοιγμα πάνελ')}</a>
+                        <a class="day-item-link" href="${escapeHtml(item.source_url || '#')}">${escapeHtml(item.source_label || 'Î†Î½Î¿Î¹Î³Î¼Î± Ï€Î¬Î½ÎµÎ»')}</a>
                     </div>
                     <h4>${escapeHtml(item.title)}</h4>
-                    <p>${escapeHtml(item.description || 'Δεν υπάρχει περιγραφή.')}</p>
+                    <p>${escapeHtml(item.description || 'Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡ÎµÎ¹ Ï€ÎµÏÎ¹Î³ÏÎ±Ï†Î®.')}</p>
                     <div class="day-item-meta">
                         <span><i class="far fa-calendar mr-1"></i>${escapeHtml(formatShortDate(item.date))}</span>
                         <span><i class="far fa-clock mr-1"></i>${escapeHtml(formatTime(item.time))}</span>
@@ -237,8 +240,8 @@
             : `
                 <div class="day-empty-state">
                     <i class="far fa-calendar-times"></i>
-                    <h4>Δεν υπάρχει καταχώριση για αυτή τη μέρα</h4>
-                    <p>Επίλεξε ένα από τα κουμπιά πιο κάτω για να προσθέσεις νέα εκδήλωση, ανακοίνωση ή αργία.</p>
+                    <h4>Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡ÎµÎ¹ ÎºÎ±Ï„Î±Ï‡ÏŽÏÎ¹ÏƒÎ· Î³Î¹Î± Î±Ï…Ï„Î® Ï„Î· Î¼Î­ÏÎ±</h4>
+                    <p>Î•Ï€Î¯Î»ÎµÎ¾Îµ Î­Î½Î± Î±Ï€ÏŒ Ï„Î± ÎºÎ¿Ï…Î¼Ï€Î¹Î¬ Ï€Î¹Î¿ ÎºÎ¬Ï„Ï‰ Î³Î¹Î± Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÎ¹Ï‚ Î½Î­Î± ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ·, Î±Î½Î±ÎºÎ¿Î¯Î½Ï‰ÏƒÎ· Î® Î±ÏÎ³Î¯Î±.</p>
                 </div>
             `;
 
@@ -246,27 +249,27 @@
             <div class="selected-day-panel card-custom">
                 <div class="selected-day-header">
                     <div>
-                        <p class="selected-day-kicker">Επιλεγμένη ημέρα</p>
+                        <p class="selected-day-kicker">Î•Ï€Î¹Î»ÎµÎ³Î¼Î­Î½Î· Î·Î¼Î­ÏÎ±</p>
                         <h3>${escapeHtml(formatLongDate(state.selectedDate))}</h3>
                     </div>
-                    <span class="selected-day-chip">${items.length} ${items.length === 1 ? 'εγγραφή' : 'εγγραφές'}</span>
+                    <span class="selected-day-chip">${items.length} ${items.length === 1 ? 'ÎµÎ³Î³ÏÎ±Ï†Î®' : 'ÎµÎ³Î³ÏÎ±Ï†Î­Ï‚'}</span>
                 </div>
 
                 <div class="selected-day-counts">
-                    <span class="mini-chip holiday-chip">Αργίες: ${counts.holiday}</span>
-                    <span class="mini-chip event-chip">Εκδηλώσεις: ${counts.event}</span>
-                    <span class="mini-chip announcement-chip">Ανακοινώσεις: ${counts.announcement}</span>
+                    <span class="mini-chip holiday-chip">Î‘ÏÎ³Î¯ÎµÏ‚: ${counts.holiday}</span>
+                    <span class="mini-chip event-chip">Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚: ${counts.event}</span>
+                    <span class="mini-chip announcement-chip">Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚: ${counts.announcement}</span>
                 </div>
 
                 <div class="selected-day-actions">
                     <button type="button" class="btn btn-primary-custom action-btn" data-open-modal="#createEventModal">
-                        <i class="fas fa-calendar-plus mr-1"></i>Νέα Εκδήλωση
+                        <i class="fas fa-calendar-plus mr-1"></i>ÎÎ­Î± Î•ÎºÎ´Î®Î»Ï‰ÏƒÎ·
                     </button>
                     <button type="button" class="btn btn-primary-custom action-btn" data-open-modal="#createAnnouncementModal">
-                        <i class="fas fa-bullhorn mr-1"></i>Νέα Ανακοίνωση
+                        <i class="fas fa-bullhorn mr-1"></i>ÎÎ­Î± Î‘Î½Î±ÎºÎ¿Î¯Î½Ï‰ÏƒÎ·
                     </button>
                     <button type="button" class="btn btn-primary-custom action-btn" data-open-modal="#createHolidayModal">
-                        <i class="fas fa-umbrella-beach mr-1"></i>Νέα Αργία
+                        <i class="fas fa-umbrella-beach mr-1"></i>ÎÎ­Î± Î‘ÏÎ³Î¯Î±
                     </button>
                 </div>
 
@@ -284,13 +287,13 @@
                 <section class="calendar-panel card-custom">
                     <div class="calendar-panel-header">
                         <div>
-                            <p class="calendar-panel-kicker">Ίδιο ημερολόγιο με το public home</p>
-                            <h2>Προβολή σχολικής δραστηριότητας ανά ημέρα</h2>
+                            <p class="calendar-panel-kicker">ÎŠÎ´Î¹Î¿ Î·Î¼ÎµÏÎ¿Î»ÏŒÎ³Î¹Î¿ Î¼Îµ Ï„Î¿ public home</p>
+                            <h2>Î ÏÎ¿Î²Î¿Î»Î® ÏƒÏ‡Î¿Î»Î¹ÎºÎ®Ï‚ Î´ÏÎ±ÏƒÏ„Î·ÏÎ¹ÏŒÏ„Î·Ï„Î±Ï‚ Î±Î½Î¬ Î·Î¼Î­ÏÎ±</h2>
                         </div>
                         <div class="calendar-legend">
-                            <span class="legend-item"><span class="legend-dot dot-event"></span>Εκδηλώσεις</span>
-                            <span class="legend-item"><span class="legend-dot dot-announcement"></span>Ανακοινώσεις</span>
-                            <span class="legend-item"><span class="legend-dot dot-holiday"></span>Αργίες</span>
+                            <span class="legend-item"><span class="legend-dot dot-event"></span>Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚</span>
+                            <span class="legend-item"><span class="legend-dot dot-announcement"></span>Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚</span>
+                            <span class="legend-item"><span class="legend-dot dot-holiday"></span>Î‘ÏÎ³Î¯ÎµÏ‚</span>
                         </div>
                     </div>
 

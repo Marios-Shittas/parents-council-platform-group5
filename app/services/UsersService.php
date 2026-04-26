@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\UsersService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
@@ -61,15 +64,15 @@ class UsersService
         $user = $this->getUserByEmail($email);
 
         if (!$user) {
-            return ['success' => false, 'message' => 'Μη έγκυρο email ή κωδικός πρόσβασης.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ email Î® ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ Ï€ÏÏŒÏƒÎ²Î±ÏƒÎ·Ï‚.'];
         }
 
         if ((string)($user['account_status'] ?? '') !== 'active') {
-            return ['success' => false, 'message' => 'Ο λογαριασμός σας δεν είναι ακόμα ενεργός.'];
+            return ['success' => false, 'message' => 'ÎŸ Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼ÏŒÏ‚ ÏƒÎ±Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î±ÎºÏŒÎ¼Î± ÎµÎ½ÎµÏÎ³ÏŒÏ‚.'];
         }
 
         if (!password_verify($inputPassword, $user['password'])) {
-            return ['success' => false, 'message' => 'Μη έγκυρο email ή κωδικός πρόσβασης.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ email Î® ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ Ï€ÏÏŒÏƒÎ²Î±ÏƒÎ·Ï‚.'];
         }
 
         $token = bin2hex(random_bytes(32));
@@ -81,7 +84,7 @@ class UsersService
             WHERE user_id = ?
         ");
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία δημιουργίας διακριτικού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î¯Î±Ï‚ Î´Î¹Î±ÎºÏÎ¹Ï„Î¹ÎºÎ¿Ï.'];
         }
         $stmt->bind_param("ssi", $token, $expiresAt, $user['user_id']);
         $stmt->execute();
@@ -102,7 +105,7 @@ class UsersService
             'user' => $user,
             'role' => $user['role'],
             'token' => $token,
-            'message' => 'Η σύνδεση ολοκληρώθηκε επιτυχώς.'
+            'message' => 'Î— ÏƒÏÎ½Î´ÎµÏƒÎ· Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'
         ];
     }
 
@@ -167,32 +170,32 @@ class UsersService
         $email = trim((string)$email);
         $user = $this->getUserByEmail($email);
         if (!$user || $email !== $user['email']) {
-            return ['success' => false, 'message' => 'Μη έγκυρο email.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ email.'];
         }
 
         if ((string)($user['account_status'] ?? '') !== 'active') {
-            return ['success' => false, 'message' => 'Ο λογαριασμός δεν είναι ενεργός.'];
+            return ['success' => false, 'message' => 'ÎŸ Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼ÏŒÏ‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ ÎµÎ½ÎµÏÎ³ÏŒÏ‚.'];
         }
 
-        return ['success' => true, 'message' => 'Ο σύνδεσμος στάλθηκε.'];
+        return ['success' => true, 'message' => 'ÎŸ ÏƒÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ ÏƒÏ„Î¬Î»Î¸Î·ÎºÎµ.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function resetPassword($email, $newPassword) 
     {
         if ($newPassword === '') {
-            return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να είναι κενός.'];
+            return ['success' => false, 'message' => 'ÎŸ ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎ¯Î½Î±Î¹ ÎºÎµÎ½ÏŒÏ‚.'];
         }
 
         if (preg_match('/\s/', $newPassword)) {
-            return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να περιέχει κενά.'];
+            return ['success' => false, 'message' => 'ÎŸ ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± Ï€ÎµÏÎ¹Î­Ï‡ÎµÎ¹ ÎºÎµÎ½Î¬.'];
         }
 
-        // At least 8 chars, with letters, numbers, and a special character.
+        // At least 8 chars, me letters, numbers, kai a special character.
         if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/', $newPassword)) {
             return [
                 'success' => false,
-                'message' => 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες και να περιλαμβάνει γράμματα, αριθμούς και 1 ειδικό χαρακτήρα.'
+                'message' => 'ÎŸ ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ Ï€ÏÎ­Ï€ÎµÎ¹ Î½Î± Î­Ï‡ÎµÎ¹ Ï„Î¿Ï…Î»Î¬Ï‡Î¹ÏƒÏ„Î¿Î½ 8 Ï‡Î±ÏÎ±ÎºÏ„Î®ÏÎµÏ‚ ÎºÎ±Î¹ Î½Î± Ï€ÎµÏÎ¹Î»Î±Î¼Î²Î¬Î½ÎµÎ¹ Î³ÏÎ¬Î¼Î¼Î±Ï„Î±, Î±ÏÎ¹Î¸Î¼Î¿ÏÏ‚ ÎºÎ±Î¹ 1 ÎµÎ¹Î´Î¹ÎºÏŒ Ï‡Î±ÏÎ±ÎºÏ„Î®ÏÎ±.'
             ];
         }
         
@@ -201,24 +204,24 @@ class UsersService
         $stmt = $this->conn->prepare ("UPDATE Users SET password = ? WHERE email = ?");
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας επαναφοράς κωδικού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ ÎµÏ€Î±Î½Î±Ï†Î¿ÏÎ¬Ï‚ ÎºÏ‰Î´Î¹ÎºÎ¿Ï.'];
         }
 
         $stmt->bind_param("ss", $hashedPassword, $email);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία επαναφοράς κωδικού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÏ€Î±Î½Î±Ï†Î¿ÏÎ¬Ï‚ ÎºÏ‰Î´Î¹ÎºÎ¿Ï.'];
         }
 
         $affected = $stmt->affected_rows;
         $stmt->close();
 
         if ($affected <= 0) {
-            return ['success' => false, 'message' => 'Δεν επαναφέρθηκε ο κωδικός.'];
+            return ['success' => false, 'message' => 'Î”ÎµÎ½ ÎµÏ€Î±Î½Î±Ï†Î­ÏÎ¸Î·ÎºÎµ Î¿ ÎºÏ‰Î´Î¹ÎºÏŒÏ‚.'];
         }
         
-        return ['success' => true, 'message' => 'Ο κωδικός επαναφέρθηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'ÎŸ ÎºÏ‰Î´Î¹ÎºÏŒÏ‚ ÎµÏ€Î±Î½Î±Ï†Î­ÏÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
 
     }
 
@@ -436,7 +439,7 @@ class UsersService
         if ($normalizedFeature === '') {
             return [
                 'is_open' => false,
-                'message' => 'Μη έγκυρη λειτουργία προγραμματισμού.',
+                'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ· Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± Ï€ÏÎ¿Î³ÏÎ±Î¼Î¼Î±Ï„Î¹ÏƒÎ¼Î¿Ï.',
             ];
         }
 
@@ -450,7 +453,7 @@ class UsersService
         if (!$stmt) {
             return [
                 'is_open' => false,
-                'message' => 'Η λειτουργία δεν είναι διαθέσιμη αυτή τη στιγμή.',
+                'message' => 'Î— Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î· Î±Ï…Ï„Î® Ï„Î· ÏƒÏ„Î¹Î³Î¼Î®.',
             ];
         }
 
@@ -463,7 +466,7 @@ class UsersService
         if (empty($schedules)) {
             return [
                 'is_open' => false,
-                'message' => 'Δεν υπάρχει ορισμένη περίοδος για τη λειτουργία αυτή.',
+                'message' => 'Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡ÎµÎ¹ Î¿ÏÎ¹ÏƒÎ¼Î­Î½Î· Ï€ÎµÏÎ¯Î¿Î´Î¿Ï‚ Î³Î¹Î± Ï„Î· Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± Î±Ï…Ï„Î®.',
             ];
         }
 
@@ -499,13 +502,13 @@ class UsersService
         if (empty($activePeriods)) {
             return [
                 'is_open' => false,
-                'message' => 'Η λειτουργία είναι ανενεργή. Δεν υπάρχουν ενεργές περίοδοι.',
+                'message' => 'Î— Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± ÎµÎ¯Î½Î±Î¹ Î±Î½ÎµÎ½ÎµÏÎ³Î®. Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ ÎµÎ½ÎµÏÎ³Î­Ï‚ Ï€ÎµÏÎ¯Î¿Î´Î¿Î¹.',
             ];
         }
 
         return [
             'is_open' => false,
-            'message' => 'Η λειτουργία είναι κλειστή αυτή τη στιγμή. Ενεργές περίοδοι: ' . implode(' | ', $activePeriods),
+            'message' => 'Î— Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± ÎµÎ¯Î½Î±Î¹ ÎºÎ»ÎµÎ¹ÏƒÏ„Î® Î±Ï…Ï„Î® Ï„Î· ÏƒÏ„Î¹Î³Î¼Î®. Î•Î½ÎµÏÎ³Î­Ï‚ Ï€ÎµÏÎ¯Î¿Î´Î¿Î¹: ' . implode(' | ', $activePeriods),
         ];
     }
 
@@ -513,7 +516,7 @@ class UsersService
     public function updateSystemSchedule(int $ssId, string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
-            return ['success' => false, 'message' => 'Μη έγκυρο πρόγραμμα.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î±.'];
         }
 
         $normalized = $this->normalizeScheduleInput($feature, $startDate, $endDate, $status);
@@ -533,19 +536,19 @@ class UsersService
         );
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας ενημέρωσης χρονοπρογράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï‡ÏÎ¿Î½Î¿Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         $stmt->bind_param('ssssi', $normalizedFeature, $normalizedStart, $normalizedEnd, $normalizedStatus, $ssId);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία ενημέρωσης προγράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         if ($stmt->affected_rows <= 0) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Το πρόγραμμα δεν βρέθηκε ή δεν άλλαξε.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ Î® Î´ÎµÎ½ Î¬Î»Î»Î±Î¾Îµ.'];
         }
 
         $stmt->close();
@@ -556,7 +559,7 @@ class UsersService
             "Updated system schedule #{$ssId}: {$normalizedFeature}, {$normalizedStart} - {$normalizedEnd} ({$normalizedStatus})."
         );
 
-        return ['success' => true, 'message' => 'Το πρόγραμμα ενημερώθηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î¤Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± ÎµÎ½Î·Î¼ÎµÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -578,14 +581,14 @@ class UsersService
         );
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας δημιουργίας χρονοπρογράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î¯Î±Ï‚ Ï‡ÏÎ¿Î½Î¿Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         $stmt->bind_param('ssss', $normalizedFeature, $normalizedStart, $normalizedEnd, $normalizedStatus);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία αποθήκευσης προγράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î±Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·Ï‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         $newScheduleId = (int)$stmt->insert_id;
@@ -597,31 +600,31 @@ class UsersService
             "Created system schedule #{$newScheduleId}: {$normalizedFeature}, {$normalizedStart} - {$normalizedEnd} ({$normalizedStatus})."
         );
 
-        return ['success' => true, 'message' => 'Προστέθηκε νέο πρόγραμμα επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î ÏÎ¿ÏƒÏ„Î­Î¸Î·ÎºÎµ Î½Î­Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteSystemSchedule(int $ssId, ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
-            return ['success' => false, 'message' => 'Μη έγκυρο πρόγραμμα.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î±.'];
         }
 
         $stmt = $this->conn->prepare('DELETE FROM SystemSchedule WHERE ss_id = ?');
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας διαγραφής προγράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         $stmt->bind_param('i', $ssId);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία διαγραφής προγράμματος.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         if ($stmt->affected_rows <= 0) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Το πρόγραμμα δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         $stmt->close();
@@ -632,7 +635,7 @@ class UsersService
             "Deleted system schedule #{$ssId}."
         );
 
-        return ['success' => true, 'message' => 'Το πρόγραμμα διαγράφηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î¤Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± Î´Î¹Î±Î³ÏÎ¬Ï†Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -651,15 +654,15 @@ class UsersService
         }
 
         if ($name === '' || $surname === '' || $email === '' || $password === '') {
-            return ['success' => false, 'message' => 'Συμπλήρωσε όλα τα υποχρεωτικά πεδία.'];
+            return ['success' => false, 'message' => 'Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎµ ÏŒÎ»Î± Ï„Î± Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ¬ Ï€ÎµÎ´Î¯Î±.'];
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Το email δεν είναι έγκυρο.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ email Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿.'];
         }
 
         if ($this->emailExists($email)) {
-            return ['success' => false, 'message' => 'Υπάρχει ήδη χρήστης με αυτό το email.'];
+            return ['success' => false, 'message' => 'Î¥Ï€Î¬ÏÏ‡ÎµÎ¹ Î®Î´Î· Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î¼Îµ Î±Ï…Ï„ÏŒ Ï„Î¿ email.'];
         }
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -678,14 +681,14 @@ class UsersService
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας δημιουργίας χρήστη.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î¯Î±Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.'];
         }
 
         $stmt->bind_param("sssssss", $name, $surname, $email, $hashedPassword, $phone, $role, $status);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία δημιουργίας χρήστη.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î¯Î±Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.'];
         }
 
         $newUserId = (int)$stmt->insert_id;
@@ -699,7 +702,7 @@ class UsersService
 
         return [
             'success' => true,
-            'message' => 'Ο χρήστης δημιουργήθηκε επιτυχώς.',
+            'message' => 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î®Î¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.',
             'user_id' => $newUserId,
         ];
     }
@@ -709,7 +712,7 @@ class UsersService
     {
         $existingUser = $this->getUserById($userId);
         if (!$existingUser) {
-            return ['success' => false, 'message' => 'Ο χρήστης δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         $name = trim((string)($data['name'] ?? ''));
@@ -722,15 +725,15 @@ class UsersService
         $status = $this->normalizeStatus((string)($data['account_status'] ?? $existingUser['account_status']));
 
         if ($name === '' || $surname === '' || $email === '') {
-            return ['success' => false, 'message' => 'Συμπλήρωσε όλα τα υποχρεωτικά πεδία.'];
+            return ['success' => false, 'message' => 'Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎµ ÏŒÎ»Î± Ï„Î± Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ¬ Ï€ÎµÎ´Î¯Î±.'];
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return ['success' => false, 'message' => 'Το email δεν είναι έγκυρο.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ email Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿.'];
         }
 
         if ($this->emailExists($email, $userId)) {
-            return ['success' => false, 'message' => 'Υπάρχει ήδη άλλος χρήστης με αυτό το email.'];
+            return ['success' => false, 'message' => 'Î¥Ï€Î¬ÏÏ‡ÎµÎ¹ Î®Î´Î· Î¬Î»Î»Î¿Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î¼Îµ Î±Ï…Ï„ÏŒ Ï„Î¿ email.'];
         }
 
         if ($role === 'admin') {
@@ -739,7 +742,7 @@ class UsersService
 
         $shouldTriggerRejectionFlow = ($role === 'parent' && $status === 'rejected');
         if ($shouldTriggerRejectionFlow && $rejectionMessage === '') {
-            return ['success' => false, 'message' => 'Συμπλήρωσε το μήνυμα απόρριψης για να σταλεί email στον γονέα.'];
+            return ['success' => false, 'message' => 'Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎµ Ï„Î¿ Î¼Î®Î½Ï…Î¼Î± Î±Ï€ÏŒÏÏÎ¹ÏˆÎ·Ï‚ Î³Î¹Î± Î½Î± ÏƒÏ„Î±Î»ÎµÎ¯ email ÏƒÏ„Î¿Î½ Î³Î¿Î½Î­Î±.'];
         }
 
         $shouldTriggerApprovalFlow = $this->shouldTriggerApprovalFlow($existingUser, $role, $status);
@@ -788,7 +791,7 @@ class UsersService
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας ενημέρωσης χρήστη.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.'];
         }
 
         try {
@@ -803,7 +806,7 @@ class UsersService
             call_user_func_array([$stmt, 'bind_param'], $bindValues);
 
             if (!$stmt->execute()) {
-                throw new RuntimeException('Αποτυχία ενημέρωσης χρήστη.');
+                throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.');
             }
 
             $stmt->close();
@@ -838,7 +841,7 @@ class UsersService
             if ($shouldTriggerApprovalFlow) {
                 return [
                     'success' => true,
-                    'message' => "Ο χρήστης εγκρίθηκε, δημιουργήθηκε σύνδεσμος πληρωμής και στάλθηκε email επιβεβαίωσης στο {$email}.",
+                    'message' => "ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ ÎµÎ³ÎºÏÎ¯Î¸Î·ÎºÎµ, Î´Î·Î¼Î¹Î¿Ï…ÏÎ³Î®Î¸Î·ÎºÎµ ÏƒÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚ ÎºÎ±Î¹ ÏƒÏ„Î¬Î»Î¸Î·ÎºÎµ email ÎµÏ€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·Ï‚ ÏƒÏ„Î¿ {$email}.",
                     'approval_email_sent' => true,
                     'approval_email' => $email,
                     'subscription_link' => $approvalLink,
@@ -848,13 +851,13 @@ class UsersService
             if ($shouldTriggerRejectionFlow) {
                 return [
                     'success' => true,
-                    'message' => "Ο χρήστης απορρίφθηκε και στάλθηκε email ενημέρωσης στο {$email}.",
+                    'message' => "ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î±Ï€Î¿ÏÏÎ¯Ï†Î¸Î·ÎºÎµ ÎºÎ±Î¹ ÏƒÏ„Î¬Î»Î¸Î·ÎºÎµ email ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ ÏƒÏ„Î¿ {$email}.",
                     'rejection_email_sent' => true,
                     'rejection_email' => $email,
                 ];
             }
 
-            return ['success' => true, 'message' => 'Ο χρήστης ενημερώθηκε επιτυχώς.'];
+            return ['success' => true, 'message' => 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ ÎµÎ½Î·Î¼ÎµÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
         } catch (Throwable $e) {
             if ($stmt instanceof mysqli_stmt) {
                 $stmt->close();
@@ -867,8 +870,8 @@ class UsersService
             return [
                 'success' => false,
                 'message' => $shouldTriggerApprovalFlow
-                    ? 'Αποτυχία έγκρισης χρήστη και αποστολής email: ' . $e->getMessage()
-                    : 'Αποτυχία ενημέρωσης χρήστη: ' . $e->getMessage(),
+                    ? 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î­Î³ÎºÏÎ¹ÏƒÎ·Ï‚ Ï‡ÏÎ®ÏƒÏ„Î· ÎºÎ±Î¹ Î±Ï€Î¿ÏƒÏ„Î¿Î»Î®Ï‚ email: ' . $e->getMessage()
+                    : 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·: ' . $e->getMessage(),
             ];
         }
     }
@@ -878,7 +881,7 @@ class UsersService
     {
         $existingUser = $this->getUserById($userId);
         if (!$existingUser) {
-            return ['success' => false, 'message' => 'Ο χρήστης δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         try {
@@ -889,19 +892,19 @@ class UsersService
 
             $stmt = $this->conn->prepare("DELETE FROM Users WHERE user_id = ?");
             if (!$stmt) {
-                throw new RuntimeException('Αποτυχία προετοιμασίας διαγραφής χρήστη.');
+                throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.');
             }
 
             $stmt->bind_param("i", $userId);
 
             if (!$stmt->execute()) {
                 $stmt->close();
-                throw new RuntimeException('Αποτυχία διαγραφής χρήστη.');
+                throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.');
             }
 
             if ($stmt->affected_rows <= 0) {
                 $stmt->close();
-                throw new RuntimeException('Δεν διαγράφηκε κάποιος χρήστης.');
+                throw new RuntimeException('Î”ÎµÎ½ Î´Î¹Î±Î³ÏÎ¬Ï†Î·ÎºÎµ ÎºÎ¬Ï€Î¿Î¹Î¿Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚.');
             }
 
             $stmt->close();
@@ -921,7 +924,7 @@ class UsersService
             "Deleted user #{$userId} ({$existingUser['email']})."
         );
 
-        return ['success' => true, 'message' => 'Ο χρήστης διαγράφηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'ÎŸ Ï‡ÏÎ®ÏƒÏ„Î·Ï‚ Î´Î¹Î±Î³ÏÎ¬Ï†Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1397,7 +1400,7 @@ class UsersService
     {
         $parent = $this->getUserById($parentUserId);
         if (!$parent || ($parent['role'] ?? '') !== 'parent') {
-            return ['success' => false, 'message' => 'Ο γονέας δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'ÎŸ Î³Î¿Î½Î­Î±Ï‚ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         $name = trim((string)($data['name'] ?? ''));
@@ -1406,11 +1409,11 @@ class UsersService
         $schoolClass = trim((string)($data['school_class'] ?? ''));
 
         if ($name === '' || $surname === '' || $dateOfBirth === '' || $schoolClass === '') {
-            return ['success' => false, 'message' => 'Συμπλήρωσε όλα τα στοιχεία του παιδιού.'];
+            return ['success' => false, 'message' => 'Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎµ ÏŒÎ»Î± Ï„Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï„Î¿Ï… Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         if (!$this->isValidDate($dateOfBirth)) {
-            return ['success' => false, 'message' => 'Η ημερομηνία γέννησης δεν είναι έγκυρη.'];
+            return ['success' => false, 'message' => 'Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î³Î­Î½Î½Î·ÏƒÎ·Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ·.'];
         }
 
         $stmt = $this->conn->prepare(
@@ -1419,14 +1422,14 @@ class UsersService
         );
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας προσθήκης παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Ï€ÏÎ¿ÏƒÎ¸Î®ÎºÎ·Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         $stmt->bind_param("issss", $parentUserId, $name, $surname, $dateOfBirth, $schoolClass);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία προσθήκης παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÏƒÎ¸Î®ÎºÎ·Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         $newChildId = (int)$stmt->insert_id;
@@ -1439,7 +1442,7 @@ class UsersService
             "Created child #{$newChildId} for parent #{$parentUserId}."
         );
 
-        return ['success' => true, 'message' => 'Το παιδί προστέθηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î¤Î¿ Ï€Î±Î¹Î´Î¯ Ï€ÏÎ¿ÏƒÏ„Î­Î¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1447,7 +1450,7 @@ class UsersService
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
         if (!$child) {
-            return ['success' => false, 'message' => 'Το παιδί δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ Ï€Î±Î¹Î´Î¯ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         $name = trim((string)($data['name'] ?? ''));
@@ -1456,11 +1459,11 @@ class UsersService
         $schoolClass = trim((string)($data['school_class'] ?? ''));
 
         if ($name === '' || $surname === '' || $dateOfBirth === '' || $schoolClass === '') {
-            return ['success' => false, 'message' => 'Συμπλήρωσε όλα τα στοιχεία του παιδιού.'];
+            return ['success' => false, 'message' => 'Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎµ ÏŒÎ»Î± Ï„Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï„Î¿Ï… Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         if (!$this->isValidDate($dateOfBirth)) {
-            return ['success' => false, 'message' => 'Η ημερομηνία γέννησης δεν είναι έγκυρη.'];
+            return ['success' => false, 'message' => 'Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î³Î­Î½Î½Î·ÏƒÎ·Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ·.'];
         }
 
         $stmt = $this->conn->prepare(
@@ -1470,14 +1473,14 @@ class UsersService
         );
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας ενημέρωσης παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         $stmt->bind_param("ssssii", $name, $surname, $dateOfBirth, $schoolClass, $childId, $parentUserId);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία ενημέρωσης παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ½Î·Î¼Î­ÏÏ‰ÏƒÎ·Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         $stmt->close();
@@ -1489,7 +1492,7 @@ class UsersService
             "Updated child #{$childId} for parent #{$parentUserId}."
         );
 
-        return ['success' => true, 'message' => 'Τα στοιχεία του παιδιού ενημερώθηκαν επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î¤Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï„Î¿Ï… Ï€Î±Î¹Î´Î¹Î¿Ï ÎµÎ½Î·Î¼ÎµÏÏŽÎ¸Î·ÎºÎ±Î½ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1497,7 +1500,7 @@ class UsersService
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
         if (!$child) {
-            return ['success' => false, 'message' => 'Το παιδί δεν βρέθηκε.'];
+            return ['success' => false, 'message' => 'Î¤Î¿ Ï€Î±Î¹Î´Î¯ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ.'];
         }
 
         $stmt = $this->conn->prepare(
@@ -1506,19 +1509,19 @@ class UsersService
         );
 
         if (!$stmt) {
-            return ['success' => false, 'message' => 'Αποτυχία προετοιμασίας διαγραφής παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Ï€ÏÎ¿ÎµÏ„Î¿Î¹Î¼Î±ÏƒÎ¯Î±Ï‚ Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         $stmt->bind_param("ii", $childId, $parentUserId);
 
         if (!$stmt->execute()) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Αποτυχία διαγραφής παιδιού.'];
+            return ['success' => false, 'message' => 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î´Î¹Î±Î³ÏÎ±Ï†Î®Ï‚ Ï€Î±Î¹Î´Î¹Î¿Ï.'];
         }
 
         if ($stmt->affected_rows <= 0) {
             $stmt->close();
-            return ['success' => false, 'message' => 'Δεν διαγράφηκε κάποιο παιδί.'];
+            return ['success' => false, 'message' => 'Î”ÎµÎ½ Î´Î¹Î±Î³ÏÎ¬Ï†Î·ÎºÎµ ÎºÎ¬Ï€Î¿Î¹Î¿ Ï€Î±Î¹Î´Î¯.'];
         }
 
         $stmt->close();
@@ -1530,7 +1533,7 @@ class UsersService
             "Deleted child #{$childId} for parent #{$parentUserId}."
         );
 
-        return ['success' => true, 'message' => 'Το παιδί διαγράφηκε επιτυχώς.'];
+        return ['success' => true, 'message' => 'Î¤Î¿ Ï€Î±Î¹Î´Î¯ Î´Î¹Î±Î³ÏÎ¬Ï†Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.'];
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1678,7 +1681,7 @@ class UsersService
     {
         $normalizedFeature = $this->normalizeScheduleFeature($feature);
         if ($normalizedFeature === '') {
-            return ['success' => false, 'message' => 'Μη έγκυρη λειτουργία προγράμματος.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ· Î»ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î± Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚.'];
         }
 
         $normalizedStart = trim($startDate);
@@ -1686,14 +1689,14 @@ class UsersService
         $normalizedStatus = in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
 
         if (!$this->isValidDateTime($normalizedStart) || !$this->isValidDateTime($normalizedEnd)) {
-            return ['success' => false, 'message' => 'Μη έγκυρες ημερομηνίες προγράμματος εγγραφών.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎµÏ‚ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯ÎµÏ‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚ ÎµÎ³Î³ÏÎ±Ï†ÏŽÎ½.'];
         }
 
         $startTs = strtotime($normalizedStart);
         $endTs = strtotime($normalizedEnd);
 
         if ($startTs === false || $endTs === false) {
-            return ['success' => false, 'message' => 'Μη έγκυρες ημερομηνίες προγράμματος εγγραφών.'];
+            return ['success' => false, 'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎµÏ‚ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯ÎµÏ‚ Ï€ÏÎ¿Î³ÏÎ¬Î¼Î¼Î±Ï„Î¿Ï‚ ÎµÎ³Î³ÏÎ±Ï†ÏŽÎ½.'];
         }
 
         if ($this->isSingleMomentScheduleFeature($normalizedFeature) && $endTs <= $startTs) {
@@ -1702,7 +1705,7 @@ class UsersService
         }
 
         if ($startTs > $endTs) {
-            return ['success' => false, 'message' => 'Η ημερομηνία έναρξης πρέπει να είναι πριν ή ίδια με την ημερομηνία λήξης.'];
+            return ['success' => false, 'message' => 'Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î­Î½Î±ÏÎ¾Î·Ï‚ Ï€ÏÎ­Ï€ÎµÎ¹ Î½Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¹Î½ Î® Î¯Î´Î¹Î± Î¼Îµ Ï„Î·Î½ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î»Î®Î¾Î·Ï‚.'];
         }
 
         return [
@@ -1753,8 +1756,8 @@ class UsersService
         }
 
         $currentStatus = (string)($existingUser['account_status'] ?? 'pending');
-        // Allow re-running the approval email/token flow for parent accounts
-        // unless they are already fully active.
+        // Allow re-running to approval email/token flow gia goneas accounts
+        // unless they are aldiavasmay fully active.
         return in_array($currentStatus, ['pending', 'rejected', 'approved', 'waiting_payment'], true);
     }
 
@@ -1816,7 +1819,7 @@ class UsersService
 
         if (!mail($email, $subject, $message, $headers)) {
             $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
-            throw new RuntimeException('Αποτυχία αποστολής email έγκρισης.' . $suffix);
+            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î±Ï€Î¿ÏƒÏ„Î¿Î»Î®Ï‚ email Î­Î³ÎºÏÎ¹ÏƒÎ·Ï‚.' . $suffix);
         }
     }
 
@@ -1842,17 +1845,17 @@ class UsersService
             $smtpFailureMessage = $smtpException->getMessage();
         }
 
-        $subject = 'Ενημέρωση για την αίτησή σας';
+        $subject = 'Î•Î½Î·Î¼Î­ÏÏ‰ÏƒÎ· Î³Î¹Î± Ï„Î·Î½ Î±Î¯Ï„Î·ÏƒÎ® ÏƒÎ±Ï‚';
         $message =
-            "Η αίτησή σας απορρίφθηκε από τον διαχειριστή.\n\n" .
-            "Μήνυμα διαχειριστή:\n" .
+            "Î— Î±Î¯Ï„Î·ÏƒÎ® ÏƒÎ±Ï‚ Î±Ï€Î¿ÏÏÎ¯Ï†Î¸Î·ÎºÎµ Î±Ï€ÏŒ Ï„Î¿Î½ Î´Î¹Î±Ï‡ÎµÎ¹ÏÎ¹ÏƒÏ„Î®.\n\n" .
+            "ÎœÎ®Î½Ï…Î¼Î± Î´Î¹Î±Ï‡ÎµÎ¹ÏÎ¹ÏƒÏ„Î®:\n" .
             $rejectionMessage . "\n\n" .
-            "Αν χρειάζεστε διευκρινίσεις, επικοινωνήστε με τον Σύνδεσμο Γονέων.";
+            "Î‘Î½ Ï‡ÏÎµÎ¹Î¬Î¶ÎµÏƒÏ„Îµ Î´Î¹ÎµÏ…ÎºÏÎ¹Î½Î¯ÏƒÎµÎ¹Ï‚, ÎµÏ€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î®ÏƒÏ„Îµ Î¼Îµ Ï„Î¿Î½ Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿ Î“Î¿Î½Î­Ï‰Î½.";
         $headers = 'From: ' . SMTP_FROM_NAME . ' <' . SMTP_FROM_EMAIL . '>';
 
         if (!mail($email, $subject, $message, $headers)) {
             $suffix = $smtpFailureMessage !== '' ? ' SMTP: ' . $smtpFailureMessage : '';
-            throw new RuntimeException('Αποτυχία αποστολής email απόρριψης.' . $suffix);
+            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î±Ï€Î¿ÏƒÏ„Î¿Î»Î®Ï‚ email Î±Ï€ÏŒÏÏÎ¹ÏˆÎ·Ï‚.' . $suffix);
         }
     }
 }

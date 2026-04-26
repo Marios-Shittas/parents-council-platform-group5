@@ -1,8 +1,14 @@
+// Arxeio: public\assets\js\home-page-announcements.jsx
+// Rolos: Xeirizetai dynamic kommatia tis arxikis selidas kai fernei dedomena apo backend services.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// React component pou fortonei kai deixnei tis teleftaies anakoinoseis stin arxiki.
 function Announcements() {
+    // Kratame ksexorista loading/error gia na deixnoume kathari katastasi sto UI.
     const [announcements, setAnnouncements] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(false);
 
+    // Kanei normalize tin imerominia apo MySQL string se morfi pou vlepoun oi xristes.
     const formatDate = (value) => {
         if (!value) return "Νέα ανακοίνωση";
         const date = new Date(String(value).replace(" ", "T"));
@@ -15,6 +21,7 @@ function Announcements() {
     };
 
     React.useEffect(() => {
+        // Fortonei tis anakoinoseis otan anoigei i arxiki selida.
         fetch('/parents-council-platform-group5/app/services/AnnouncementsService.php')
         .then(result => result.json())
         .then(data => {
@@ -28,6 +35,7 @@ function Announcements() {
         });
     }, []);
 
+    // Ta parakato early returns kratane to render aplo gia loading/error/empty states.
     if (loading) {
         return <p className="home-list-state">Φόρτωση ανακοινώσεων...</p>;
     }

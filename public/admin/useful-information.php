@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\useful-inmorfiion.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/UsefulInformationService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
