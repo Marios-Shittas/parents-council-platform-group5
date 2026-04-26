@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\includes\announcement_card.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/site_context.php';
 $annImages     = !empty($announcement['images']) ? $announcement['images'] : [$defaultImage];
 $annImageCount = count($announcement['images'] ?? []);
@@ -46,11 +43,11 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
 <div class="col-xl-4 col-md-6 mb-4">
     <div class="announcement-card">
 
-        <!-- Perioxi eikonas -->
+        <!-- Image area -->
         <div class="announcement-card-img-wrap">
 
             <?php if ($annImageCount > 1): ?>
-                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+                <!-- Mini carousel για πολλές φωτογραφίες -->
                 <div id="cardCarouselAnn<?php echo $announcement['announcement_id']; ?>" class="carousel slide" data-ride="carousel" data-interval="3500">
                     <div class="carousel-inner">
                         <?php foreach ($annImages as $i => $img): ?>
@@ -74,12 +71,12 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                      onerror="this.src='<?php echo $defaultImage; ?>'">
             <?php endif; ?>
 
-            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+            <!-- Ημερομηνία badge -->
             <div class="announcement-date-badge">
                 <i class="far fa-calendar-alt mr-1"></i><?php echo $annDayMonth; ?>
             </div>
 
-            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+            <!-- Photo count badge (μόνο αν >1 φωτογραφία) -->
             <?php if ($annImageCount > 1): ?>
                 <div class="announcement-photo-count">
                     <i class="fas fa-images mr-1"></i><?php echo $annImageCount; ?>
@@ -122,7 +119,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
     </div>
 </div>
 
-<!-- Modal parathyro -->
+<!-- Modal -->
 <div class="modal fade announcement-modal" id="announcementModal<?php echo $announcement['announcement_id']; ?>" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -144,7 +141,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
 
                 <?php if (!empty($announcement['images'])): ?>
                     <?php if (count($announcement['images']) > 1): ?>
-                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+                        <!-- Full carousel με indicators -->
                         <div id="modalCarouselAnn<?php echo $announcement['announcement_id']; ?>" class="carousel slide mb-4" data-ride="carousel">
                             <ol class="carousel-indicators">
                                 <?php foreach ($announcement['images'] as $i => $img): ?>
@@ -175,7 +172,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+                <!-- Ημερομηνία -->
                 <div class="modal-announcement-meta">
                     <div class="announcement-info">
                         <i class="far fa-calendar"></i>
@@ -187,7 +184,7 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                     </div>
                 </div>
 
-                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+                <!-- Περιγραφή -->
                 <div class="announcement-content">
                     <h6>Περιγραφή</h6>
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($announcement['announcement_description'] ?? '')); ?></p>

@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\admin-applications.js
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-template-editor-close]').forEach(function (button) {
         // Kleinei ton protypo editor xoris inline JavaScript sto PHP provoli.
@@ -72,12 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!Array.isArray(createInstructionSelectedFiles) || createInstructionSelectedFiles.length === 0) {
-            createInstructionFilesList.innerHTML = '<div class="text-muted small">Î”ÎµÎ½ Î­Ï‡Î¿Ï…Î½ ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯ Î±ÏÏ‡ÎµÎ¯Î±.</div>';
+            createInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>';
             return;
         }
 
         createInstructionFilesList.innerHTML = createInstructionSelectedFiles.map(function (file, index) {
-            var fileName = file && file.name ? String(file.name) : 'Î‘ÏÏ‡ÎµÎ¯Î¿';
+            var fileName = file && file.name ? String(file.name) : 'Αρχείο';
             return '' +
                 '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
                     '<div class="card-body py-2 px-3">' +
@@ -86,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
                             '</div>' +
                             '<button type="button" class="btn btn-sm btn-outline-danger js-remove-create-instruction-file" data-file-index="' + String(index) + '">' +
-                                '<i class="fas fa-trash-alt me-1"></i>Î‘Ï†Î±Î¯ÏÎµÏƒÎ·' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
                             '</button>' +
                         '</div>' +
                     '</div>' +
@@ -117,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (selectedFiles.length > 4) {
-                alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± ÎµÏ€Î¹Î»Î­Î¾ÎµÏ„Îµ Î­Ï‰Ï‚ 4 Î±ÏÏ‡ÎµÎ¯Î± Î¿Î´Î·Î³Î¹ÏŽÎ½.');
+                alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
                 createInstructionFiles.value = '';
                 createInstructionSelectedFiles = [];
                 renderCreateInstructionFilesList();
@@ -132,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (hasInvalidFile) {
-                alert('Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹ Î±ÏÏ‡ÎµÎ¯Ï‰Î½ Î¿Î´Î·Î³Î¹ÏŽÎ½: pdf, doc, docx.');
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
                 createInstructionFiles.value = '';
                 createInstructionSelectedFiles = [];
                 renderCreateInstructionFilesList();
@@ -244,13 +241,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var editApplicationFieldTypes = {
-        text: 'ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
+        text: 'Κείμενο',
         email: 'Email',
-        phone: 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿',
-        date: 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±',
-        textarea: 'ÎœÎµÎ³Î¬Î»Î¿ ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
+        phone: 'Τηλέφωνο',
+        date: 'Ημερομηνία',
+        textarea: 'Μεγάλο Κείμενο',
         checkbox: 'Tick Box',
-        file_upload: 'Î‘ÏÏ‡ÎµÎ¯Î¿'
+        file_upload: 'Αρχείο'
     };
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -356,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!Array.isArray(editApplicationFormSchema) || editApplicationFormSchema.length === 0) {
-            editFormFieldsContainer.innerHTML = '<div class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î±ÎºÏŒÎ¼Î· Ï€ÎµÎ´Î¯Î± Ï†ÏŒÏÎ¼Î±Ï‚.</div>';
+            editFormFieldsContainer.innerHTML = '<div class="text-muted">Δεν υπάρχουν ακόμη πεδία φόρμας.</div>';
             return;
         }
 
@@ -374,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '<div class="card-body py-2 px-3">' +
                     '<div class="row g-2 align-items-center">' +
                         '<div class="col-12 col-md-4">' +
-                            '<input type="text" class="form-control form-control-sm js-edit-app-field-name" value="' + escapeHtml(field.name || '') + '" placeholder="Ï€.Ï‡. ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿">' +
+                            '<input type="text" class="form-control form-control-sm js-edit-app-field-name" value="' + escapeHtml(field.name || '') + '" placeholder="π.χ. Ονοματεπώνυμο">' +
                         '</div>' +
                         '<div class="col-12 col-md-3">' +
                             '<select class="form-select form-select-sm js-edit-app-field-type">' + typeOptions + '</select>' +
@@ -382,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<div class="col-12 col-md-3">' +
                             '<div class="form-check">' +
                                 '<input type="checkbox" class="form-check-input js-edit-app-field-required" id="edit_app_required_' + String(index) + '"' + (field.required ? ' checked' : '') + '>' +
-                                '<label class="form-check-label" for="edit_app_required_' + String(index) + '">Î¥Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÏŒ</label>' +
+                                '<label class="form-check-label" for="edit_app_required_' + String(index) + '">Υποχρεωτικό</label>' +
                             '</div>' +
                         '</div>' +
                         '<div class="col-12 col-md-2 text-md-end">' +
@@ -438,14 +435,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function humanizeSubmissionDetailLabel(key) {
         var labels = {
-            parent_name: 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ Î“Î¿Î½Î­Î±',
-            parent_email: 'Email Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
-            parent_phone: 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿ Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
-            student_name: 'ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎœÎ±Î¸Î·Ï„Î®/ÎœÎ±Î¸Î®Ï„ÏÎ¹Î±Ï‚',
-            student_class: 'Î¤Î¼Î®Î¼Î± / Î¤Î¬Î¾Î·',
-            manual_application_text: 'ÎšÎµÎ¯Î¼ÎµÎ½Î¿ Î‘Î¯Ï„Î·ÏƒÎ·Ï‚',
-            applied_at: 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î¥Ï€Î¿Î²Î¿Î»Î®Ï‚',
-            _submission_mode: 'Î¤ÏÏŒÏ€Î¿Ï‚ Î¥Ï€Î¿Î²Î¿Î»Î®Ï‚'
+            parent_name: 'Ονοματεπώνυμο Γονέα',
+            parent_email: 'Email Επικοινωνίας',
+            parent_phone: 'Τηλέφωνο Επικοινωνίας',
+            student_name: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας',
+            student_class: 'Τμήμα / Τάξη',
+            manual_application_text: 'Κείμενο Αίτησης',
+            applied_at: 'Ημερομηνία Υποβολής',
+            _submission_mode: 'Τρόπος Υποβολής'
         };
 
         return labels[key] || String(key || '').replace(/_/g, ' ');
@@ -504,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatSubmissionDetailValue(key, value, fieldMeta, uploadedFileLinksByName) {
         if (key === '_submission_mode') {
-            return value === 'manual' ? 'Online Î£Ï…Î¼Ï€Î»Î®ÏÏ‰ÏƒÎ·' : 'Î‘Î½Î­Î²Î±ÏƒÎ¼Î± Î‘ÏÏ‡ÎµÎ¯Î¿Ï…';
+            return value === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
         }
 
         var raw = Array.isArray(value) ? value.join(', ') : String(value == null ? '' : value);
@@ -517,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!raw) {
-            return 'â€”';
+            return '—';
         }
 
         if (normalizedType === 'file_upload') {
@@ -533,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function buildSubmissionDetailHtml(fields, fieldDefinitions, uploadedFileLinks) {
         if (!fields || typeof fields !== 'object') {
-            return '<div class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï†ÏŒÏÎ¼Î±Ï‚.</div>';
+            return '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
         }
 
         var fieldDefinitionsLookup = buildSubmissionFieldDefinitionsLookup(fieldDefinitions);
@@ -559,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var formattedValue = formatSubmissionDetailValue(key, value, fieldMeta, uploadedFileLinksByName);
                 var isCheckbox = fieldMeta && fieldMeta.type === 'checkbox';
 
-                if (formattedValue === 'â€”' && !isCheckbox) {
+                if (formattedValue === '—' && !isCheckbox) {
                     return;
                 }
 
@@ -591,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var fieldMeta = fieldDefinitionsLookup[key] || null;
             var label = fieldMeta && fieldMeta.name ? fieldMeta.name : humanizeSubmissionDetailLabel(key);
             var formattedValue = formatSubmissionDetailValue(key, value, fieldMeta, uploadedFileLinksByName);
-            if (formattedValue === 'â€”') {
+            if (formattedValue === '—') {
                 return;
             }
 
@@ -600,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '</span><strong>' + formattedValue + '</strong></div>';
         });
 
-        return html || '<div class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï†ÏŒÏÎ¼Î±Ï‚.</div>';
+        return html || '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -613,12 +610,12 @@ document.addEventListener('DOMContentLoaded', function () {
         var stagedFiles = Array.isArray(pendingFiles) ? pendingFiles : [];
 
         if (existingDocs.length === 0 && stagedFiles.length === 0) {
-            editFilesList.innerHTML = '<div class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î±ÏÏ‡ÎµÎ¯Î± Î³Î¹Î± Î±Ï…Ï„Î® Ï„Î·Î½ Î±Î¯Ï„Î·ÏƒÎ·.</div>';
+            editFilesList.innerHTML = '<div class="text-muted">Δεν υπάρχουν αρχεία για αυτή την αίτηση.</div>';
             return;
         }
 
         var existingHtml = existingDocs.map(function (doc) {
-            var fileName = doc && doc.name ? doc.name : 'Î‘ÏÏ‡ÎµÎ¯Î¿';
+            var fileName = doc && doc.name ? doc.name : 'Αρχείο';
             var fileUrl = doc && doc.url ? doc.url : '#';
             var documentId = doc && doc.id ? String(doc.id) : '0';
 
@@ -632,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             '<form method="POST" class="js-delete-doc-form m-0">' +
                                 '<input type="hidden" name="action" value="delete_document">' +
                                 '<input type="hidden" name="ap_document_id" value="' + escapeHtml(documentId) + '">' +
-                                '<button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt me-1"></i>Î‘Ï†Î±Î¯ÏÎµÏƒÎ·</button>' +
+                                '<button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt me-1"></i>Αφαίρεση</button>' +
                             '</form>' +
                         '</div>' +
                     '</div>' +
@@ -640,7 +637,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
 
         var stagedHtml = stagedFiles.map(function (file) {
-            var stagedName = file && file.name ? String(file.name) : 'ÎÎ­Î¿ Î±ÏÏ‡ÎµÎ¯Î¿';
+            var stagedName = file && file.name ? String(file.name) : 'Νέο αρχείο';
 
             return '' +
                 '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
@@ -649,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             '<div class="fw-semibold text-primary">' +
                                 '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(stagedName) +
                             '</div>' +
-                            '<span class="badge bg-primary-subtle text-primary">Î£Îµ Î±Î½Î±Î¼Î¿Î½Î® Î±Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·Ï‚</span>' +
+                            '<span class="badge bg-primary-subtle text-primary">Σε αναμονή αποθήκευσης</span>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -659,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function () {
         editFilesList.querySelectorAll('.js-delete-doc-form').forEach(function (form) {
             form.addEventListener('submit', function (event) {
                 if (!deleteDocumentConfirmModal) {
-                    if (confirm('Î˜Î­Î»ÎµÏ„Îµ ÏƒÎ¯Î³Î¿Ï…ÏÎ± Î½Î± Î±Ï†Î±Î¹ÏÎ­ÏƒÎµÏ„Îµ Î±Ï…Ï„ÏŒ Ï„Î¿ Î±ÏÏ‡ÎµÎ¯Î¿;')) {
+                    if (confirm('Θέλετε σίγουρα να αφαιρέσετε αυτό το αρχείο;')) {
                         return;
                     }
                     event.preventDefault();
@@ -720,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(function (payload) {
                 if (!payload || payload.success !== true) {
-                    throw new Error(payload && payload.message ? payload.message : 'Î£Ï†Î¬Î»Î¼Î± ÎºÎ±Ï„Î¬ Ï„Î· Î´Î¹Î±Î³ÏÎ±Ï†Î® Ï„Î¿Ï… Î±ÏÏ‡ÎµÎ¯Î¿Ï….');
+                    throw new Error(payload && payload.message ? payload.message : 'Σφάλμα κατά τη διαγραφή του αρχείου.');
                 }
 
                 var docIdInput = formToSubmit.querySelector('input[name="ap_document_id"]');
@@ -734,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderEditApplicationFiles(editApplicationExistingFiles, getCurrentStagedInstructionFiles());
             })
             .catch(function (error) {
-                alert(error && error.message ? error.message : 'Î£Ï†Î¬Î»Î¼Î± ÎºÎ±Ï„Î¬ Ï„Î· Î´Î¹Î±Î³ÏÎ±Ï†Î® Ï„Î¿Ï… Î±ÏÏ‡ÎµÎ¯Î¿Ï….');
+                alert(error && error.message ? error.message : 'Σφάλμα κατά τη διαγραφή του αρχείου.');
             });
         });
     }
@@ -755,7 +752,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var remainingSlots = Math.max(0, 4 - editApplicationExistingFiles.length);
             if (selectedFiles.length > remainingSlots) {
-                alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î­Ï‰Ï‚ ' + String(remainingSlots) + ' Î±ÎºÏŒÎ¼Î· Î±ÏÏ‡ÎµÎ¯Î±.');
+                alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία.');
                 editInstructionFiles.value = '';
                 renderEditApplicationFiles(editApplicationExistingFiles, []);
                 return;
@@ -769,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (hasInvalidFile) {
-                alert('Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹: pdf, doc, docx.');
+                alert('Επιτρεπόμενοι τύποι: pdf, doc, docx.');
                 editInstructionFiles.value = '';
                 renderEditApplicationFiles(editApplicationExistingFiles, []);
                 return;
@@ -834,7 +831,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (editFormFieldsTabButton) {
                 editFormFieldsTabButton.disabled = !editApplicationIsPublished;
-                editFormFieldsTabButton.title = editApplicationIsPublished ? '' : 'Î”Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î¿ Î¼ÏŒÎ½Î¿ Î³Î¹Î± Î´Î·Î¼Î¿ÏƒÎ¹ÎµÏ…Î¼Î­Î½ÎµÏ‚ Î±Î¹Ï„Î®ÏƒÎµÎ¹Ï‚';
+                editFormFieldsTabButton.title = editApplicationIsPublished ? '' : 'Διαθέσιμο μόνο για δημοσιευμένες αιτήσεις';
             }
 
             renderEditApplicationFormFields();
@@ -868,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var editCloseDateValue = editApplicationCloseDateInput ? String(editApplicationCloseDateInput.value || '').trim() : '';
             if (editOpenDateValue === '') {
                 event.preventDefault();
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚ ÎµÎ¯Î½Î±Î¹ Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ®.');
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
                 if (editApplicationOpenDateInput) {
                     editApplicationOpenDateInput.focus();
                 }
@@ -876,7 +873,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (editCloseDateValue !== '' && editCloseDateValue < editOpenDateValue) {
                 event.preventDefault();
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± ÎºÎ»ÎµÎ¹ÏƒÎ¯Î¼Î±Ï„Î¿Ï‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¹Î½ Î±Ï€ÏŒ Ï„Î·Î½ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚.');
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
                 if (editApplicationCloseDateInput) {
                     editApplicationCloseDateInput.focus();
                 }
@@ -901,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (stagedFiles.length > remainingSlots) {
                     event.preventDefault();
-                    alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î­Ï‰Ï‚ ' + String(remainingSlots) + ' Î±ÎºÏŒÎ¼Î· Î±ÏÏ‡ÎµÎ¯Î±.');
+                    alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία.');
 
                     var filesTabButton = document.getElementById('edit-files-tab');
                     if (filesTabButton && window.bootstrap && bootstrap.Tab) {
@@ -961,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!button) return;
 
             var applicationId = button.getAttribute('data-application-id') || '';
-            var applicationTitle = button.getAttribute('data-application-title') || 'â€”';
+            var applicationTitle = button.getAttribute('data-application-title') || '—';
 
             var deleteIdInput = document.getElementById('delete_application_id');
             var deleteTitleDisplay = document.getElementById('delete_application_title_display');
@@ -1004,8 +1001,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var userIdInput = form.querySelector('input[name="user_id"]');
             var returnViewInput = form.querySelector('input[name="return_view_submissions"]');
             var returnSortInput = form.querySelector('input[name="return_submission_sort"]');
-            var applicationTitle = form.getAttribute('data-application-title') || 'â€”';
-            var parentName = form.getAttribute('data-parent-name') || 'â€”';
+            var applicationTitle = form.getAttribute('data-application-title') || '—';
+            var parentName = form.getAttribute('data-parent-name') || '—';
 
             if (deleteSubmissionApplicationId) {
                 deleteSubmissionApplicationId.value = applicationIdInput ? applicationIdInput.value : '';
@@ -1023,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteSubmissionReturnScroll.value = String(window.scrollY || window.pageYOffset || 0);
             }
             if (deleteSubmissionDetails) {
-                deleteSubmissionDetails.textContent = 'Î‘Î¯Ï„Î·ÏƒÎ·: ' + applicationTitle + ' | Î“Î¿Î½Î­Î±Ï‚: ' + parentName;
+                deleteSubmissionDetails.textContent = 'Αίτηση: ' + applicationTitle + ' | Γονέας: ' + parentName;
             }
 
             deleteSubmissionModal.show();
@@ -1105,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         badge.textContent = badgeText;
-        badge.setAttribute('aria-label', 'ÎÎ­ÎµÏ‚ Î±Î¹Ï„Î®ÏƒÎµÎ¹Ï‚ Ï€ÏÎ¿Ï‚ Î­Î»ÎµÎ³Ï‡Î¿: ' + String(waitingCount));
+        badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1132,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         badge.textContent = badgeText;
-        badge.setAttribute('aria-label', 'ÎÎ­ÎµÏ‚ Î±Î¹Ï„Î®ÏƒÎµÎ¹Ï‚ Ï€ÏÎ¿Ï‚ Î­Î»ÎµÎ³Ï‡Î¿: ' + String(waitingCount));
+        badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1217,20 +1214,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 var data = JSON.parse(raw);
-                document.getElementById('detail_application_title').textContent = data.application_title || 'â€”';
-                document.getElementById('detail_parent_name').textContent = data.parent_name || data.parent_account || 'â€”';
-                document.getElementById('detail_submitted_at').textContent = data.submitted_at || 'â€”';
+                document.getElementById('detail_application_title').textContent = data.application_title || '—';
+                document.getElementById('detail_parent_name').textContent = data.parent_name || data.parent_account || '—';
+                document.getElementById('detail_submitted_at').textContent = data.submitted_at || '—';
 
                 var fields = data.submission_data || {};
                 var fieldDefinitions = Array.isArray(data.form_field_definitions) ? data.form_field_definitions : [];
                 var uploadedFileLinks = Array.isArray(data.uploaded_file_links) ? data.uploaded_file_links : [];
                 var html = buildSubmissionDetailHtml(fields, fieldDefinitions, uploadedFileLinks);
-                detailFields.innerHTML = html || '<div class="text-muted">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î´Î¹Î±Î¸Î­ÏƒÎ¹Î¼Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï†ÏŒÏÎ¼Î±Ï‚.</div>';
+                detailFields.innerHTML = html || '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
 
                 currentSubmissionNoteKey = getSubmissionNoteKey(data.application_id, data.user_id);
                 noteField.value = localStorage.getItem(currentSubmissionNoteKey) || '';
             } catch (error) {
-                detailFields.innerHTML = '<div class="text-danger">Î”ÎµÎ½ Î®Ï„Î±Î½ Î´Ï…Î½Î±Ï„Î® Î· Ï†ÏŒÏÏ„Ï‰ÏƒÎ· Ï„Ï‰Î½ Î»ÎµÏ€Ï„Î¿Î¼ÎµÏÎµÎ¹ÏŽÎ½.</div>';
+                detailFields.innerHTML = '<div class="text-danger">Δεν ήταν δυνατή η φόρτωση των λεπτομερειών.</div>';
             }
         });
     });
@@ -1241,11 +1238,11 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem(currentSubmissionNoteKey, noteField.value || '');
             noteSaveButton.classList.remove('btn-outline-primary');
             noteSaveButton.classList.add('btn-success');
-            noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Î‘Ï€Î¿Î¸Î·ÎºÎµÏÏ„Î·ÎºÎµ';
+            noteSaveButton.innerHTML = '<i class="fas fa-check me-1"></i>Αποθηκεύτηκε';
             window.setTimeout(function () {
                 noteSaveButton.classList.remove('btn-success');
                 noteSaveButton.classList.add('btn-outline-primary');
-                noteSaveButton.innerHTML = '<i class="fas fa-save me-1"></i>Î‘Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ· Î£Î·Î¼ÎµÎ¯Ï‰ÏƒÎ·Ï‚';
+                noteSaveButton.innerHTML = '<i class="fas fa-save me-1"></i>Αποθήκευση Σημείωσης';
             }, 1800);
         });
     }
@@ -1294,13 +1291,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const templatesData = Array.isArray(window.ADMIN_APPLICATIONS_TEMPLATES_DATA) ? window.ADMIN_APPLICATIONS_TEMPLATES_DATA : [];
 
     const fieldTypes = {
-        'text': 'ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
+        'text': 'Κείμενο',
         'email': 'Email',
-        'phone': 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿',
-        'date': 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±',
+        'phone': 'Τηλέφωνο',
+        'date': 'Ημερομηνία',
         'checkbox': 'Tick Box',
-        'textarea': 'ÎœÎµÎ³Î¬Î»Î¿ ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
-        'file_upload': 'Î‘ÏÏ‡ÎµÎ¯Î¿'
+        'textarea': 'Μεγάλο Κείμενο',
+        'file_upload': 'Αρχείο'
     };
 
     let currentFormSchema = [];
@@ -1389,12 +1386,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!Array.isArray(createTemplateSelectedFiles) || createTemplateSelectedFiles.length === 0) {
-            createTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Î”ÎµÎ½ Î­Ï‡Î¿Ï…Î½ ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯ Î±ÏÏ‡ÎµÎ¯Î±.</div>';
+            createTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν έχουν επιλεγεί αρχεία.</div>';
             return;
         }
 
         createTemplateInstructionFilesList.innerHTML = createTemplateSelectedFiles.map((file, index) => {
-            const fileName = file && file.name ? String(file.name) : 'Î‘ÏÏ‡ÎµÎ¯Î¿';
+            const fileName = file && file.name ? String(file.name) : 'Αρχείο';
             return '' +
                 '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
                     '<div class="card-body py-2 px-3">' +
@@ -1403,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
                             '</div>' +
                             '<button type="button" class="btn btn-sm btn-outline-danger js-remove-create-template-file" data-file-index="' + String(index) + '">' +
-                                '<i class="fas fa-trash-alt me-1"></i>Î‘Ï†Î±Î¯ÏÎµÏƒÎ·' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
                             '</button>' +
                         '</div>' +
                     '</div>' +
@@ -1470,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stagedFiles = Array.isArray(editTemplateSelectedFiles) ? editTemplateSelectedFiles : [];
 
         if (existingFiles.length === 0 && stagedFiles.length === 0) {
-            editTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Î”ÎµÎ½ Ï…Ï€Î¬ÏÏ‡Î¿Ï…Î½ Î±ÏÏ‡ÎµÎ¯Î± Î¿Î´Î·Î³Î¹ÏŽÎ½.</div>';
+            editTemplateInstructionFilesList.innerHTML = '<div class="text-muted small">Δεν υπάρχουν αρχεία οδηγιών.</div>';
             if (editTemplateRemovedInstructionFiles) {
                 editTemplateRemovedInstructionFiles.value = '[]';
             }
@@ -1478,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const existingHtml = existingFiles.map((file, index) => {
-            const fileName = file && file.name ? String(file.name) : 'Î‘ÏÏ‡ÎµÎ¯Î¿';
+            const fileName = file && file.name ? String(file.name) : 'Αρχείο';
             const fileUrl = file && file.url ? String(file.url) : '#';
             return '' +
                 '<div class="card border-0 bg-light">' +
@@ -1488,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<i class="fas fa-file-alt me-1"></i>' + escapeHtml(fileName) +
                             '</a>' +
                             '<button type="button" class="btn btn-sm btn-outline-danger js-remove-edit-template-existing-file" data-file-index="' + String(index) + '">' +
-                                '<i class="fas fa-trash-alt me-1"></i>Î‘Ï†Î±Î¯ÏÎµÏƒÎ·' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
                             '</button>' +
                         '</div>' +
                     '</div>' +
@@ -1496,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
 
         const stagedHtml = stagedFiles.map((file, index) => {
-            const fileName = file && file.name ? String(file.name) : 'ÎÎ­Î¿ Î±ÏÏ‡ÎµÎ¯Î¿';
+            const fileName = file && file.name ? String(file.name) : 'Νέο αρχείο';
             return '' +
                 '<div class="card border-0" style="background:#eef6ff; border:1px dashed #9fc2ea !important;">' +
                     '<div class="card-body py-2 px-3">' +
@@ -1505,7 +1502,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<i class="fas fa-file-upload me-1"></i>' + escapeHtml(fileName) +
                             '</div>' +
                             '<button type="button" class="btn btn-sm btn-outline-danger js-remove-edit-template-staged-file" data-file-index="' + String(index) + '">' +
-                                '<i class="fas fa-trash-alt me-1"></i>Î‘Ï†Î±Î¯ÏÎµÏƒÎ·' +
+                                '<i class="fas fa-trash-alt me-1"></i>Αφαίρεση' +
                             '</button>' +
                         '</div>' +
                     '</div>' +
@@ -1513,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
 
         const slotsLeft = Math.max(0, 4 - existingFiles.length);
-        const slotsInfo = '<div class="text-muted small">Î”Î¹Î±Î¸Î­ÏƒÎ¹Î¼ÎµÏ‚ Î¸Î­ÏƒÎµÎ¹Ï‚ Î³Î¹Î± Î½Î­Î± Î±ÏÏ‡ÎµÎ¯Î±: ' + String(slotsLeft) + ' / 4</div>';
+        const slotsInfo = '<div class="text-muted small">Διαθέσιμες θέσεις για νέα αρχεία: ' + String(slotsLeft) + ' / 4</div>';
         editTemplateInstructionFilesList.innerHTML = existingHtml + stagedHtml + slotsInfo;
 
         editTemplateInstructionFilesList.querySelectorAll('.js-remove-edit-template-existing-file').forEach((button) => {
@@ -1606,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card-body py-2 px-3">
                     <div class="row g-2 align-items-center">
                         <div class="col-12 col-md-4">
-                            <input type="text" class="form-control form-control-sm field-name" value="${field.name || ''}" placeholder="Ï€.Ï‡. ÏŒÎ½Î¿Î¼Î± Ï€ÎµÎ´Î¯Î¿Ï…">
+                            <input type="text" class="form-control form-control-sm field-name" value="${field.name || ''}" placeholder="π.χ. όνομα πεδίου">
                         </div>
                         <div class="col-12 col-md-3">
                             <select class="form-select form-select-sm field-type">
@@ -1618,7 +1615,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 col-md-3">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input field-required" id="required_${index}" ${field.required ? 'checked' : ''}>
-                                <label class="form-check-label" for="required_${index}">Î¥Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÏŒ</label>
+                                <label class="form-check-label" for="required_${index}">Υποχρεωτικό</label>
                             </div>
                         </div>
                         <div class="col-12 col-md-2 text-md-end">
@@ -1676,7 +1673,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card-body py-2 px-3">
                     <div class="row g-2 align-items-center">
                         <div class="col-12 col-md-4">
-                            <input type="text" class="form-control form-control-sm create-field-name" value="${field.name || ''}" placeholder="Ï€.Ï‡. ÎŸÎ½Î¿Î¼Î±Ï„ÎµÏ€ÏŽÎ½Ï…Î¼Î¿ ÎœÎ±Î¸Î·Ï„Î®">
+                            <input type="text" class="form-control form-control-sm create-field-name" value="${field.name || ''}" placeholder="π.χ. Ονοματεπώνυμο Μαθητή">
                         </div>
                         <div class="col-12 col-md-3">
                             <select class="form-select form-select-sm create-field-type">
@@ -1686,7 +1683,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-12 col-md-3">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input create-field-required" id="create_required_${index}" ${field.required ? 'checked' : ''}>
-                                <label class="form-check-label" for="create_required_${index}">Î¥Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÏŒ</label>
+                                <label class="form-check-label" for="create_required_${index}">Υποχρεωτικό</label>
                             </div>
                         </div>
                         <div class="col-12 col-md-2 text-md-end">
@@ -1825,7 +1822,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const remainingSlots = Math.max(0, 4 - editTemplateExistingInstructionFiles.length);
             if (selectedFiles.length > remainingSlots) {
-                alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î­Ï‰Ï‚ ' + String(remainingSlots) + ' Î±ÎºÏŒÎ¼Î· Î±ÏÏ‡ÎµÎ¯Î± Î¿Î´Î·Î³Î¹ÏŽÎ½.');
+                alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία οδηγιών.');
                 editTemplateInstructionFiles.value = '';
                 editTemplateSelectedFiles = [];
                 renderEditTemplateInstructionFilesList();
@@ -1840,7 +1837,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (hasInvalidFile) {
-                alert('Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹ Î±ÏÏ‡ÎµÎ¯Ï‰Î½ Î¿Î´Î·Î³Î¹ÏŽÎ½: pdf, doc, docx.');
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
                 editTemplateInstructionFiles.value = '';
                 editTemplateSelectedFiles = [];
                 renderEditTemplateInstructionFilesList();
@@ -1864,7 +1861,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (selectedFiles.length > 4) {
-                alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± ÎµÏ€Î¹Î»Î­Î¾ÎµÏ„Îµ Î­Ï‰Ï‚ 4 Î±ÏÏ‡ÎµÎ¯Î± Î¿Î´Î·Î³Î¹ÏŽÎ½.');
+                alert('Μπορείτε να επιλέξετε έως 4 αρχεία οδηγιών.');
                 createTemplateInstructionFiles.value = '';
                 createTemplateSelectedFiles = [];
                 renderCreateTemplateInstructionFilesList();
@@ -1879,7 +1876,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (hasInvalidFile) {
-                alert('Î•Ï€Î¹Ï„ÏÎµÏ€ÏŒÎ¼ÎµÎ½Î¿Î¹ Ï„ÏÏ€Î¿Î¹ Î±ÏÏ‡ÎµÎ¯Ï‰Î½ Î¿Î´Î·Î³Î¹ÏŽÎ½: pdf, doc, docx.');
+                alert('Επιτρεπόμενοι τύποι αρχείων οδηγιών: pdf, doc, docx.');
                 createTemplateInstructionFiles.value = '';
                 createTemplateSelectedFiles = [];
                 renderCreateTemplateInstructionFilesList();
@@ -1900,14 +1897,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const editOpenDateValue = editTemplateOpenDate ? String(editTemplateOpenDate.value || '').trim() : '';
             const editCloseDateValue = editTemplateCloseDate ? String(editTemplateCloseDate.value || '').trim() : '';
             if (editOpenDateValue === '') {
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚ ÎµÎ¯Î½Î±Î¹ Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ®.');
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
                 if (editTemplateOpenDate) {
                     editTemplateOpenDate.focus();
                 }
                 return;
             }
             if (editCloseDateValue !== '' && editCloseDateValue < editOpenDateValue) {
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± ÎºÎ»ÎµÎ¹ÏƒÎ¯Î¼Î±Ï„Î¿Ï‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¹Î½ Î±Ï€ÏŒ Ï„Î·Î½ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚.');
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
                 if (editTemplateCloseDate) {
                     editTemplateCloseDate.focus();
                 }
@@ -1929,7 +1926,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const remainingSlots = Math.max(0, 4 - editTemplateExistingInstructionFiles.length);
             if (editTemplateSelectedFiles.length > remainingSlots) {
-                alert('ÎœÏ€Î¿ÏÎµÎ¯Ï„Îµ Î½Î± Ï€ÏÎ¿ÏƒÎ¸Î­ÏƒÎµÏ„Îµ Î­Ï‰Ï‚ ' + String(remainingSlots) + ' Î±ÎºÏŒÎ¼Î· Î±ÏÏ‡ÎµÎ¯Î± Î¿Î´Î·Î³Î¹ÏŽÎ½.');
+                alert('Μπορείτε να προσθέσετε έως ' + String(remainingSlots) + ' ακόμη αρχεία οδηγιών.');
                 return;
             }
 
@@ -1977,7 +1974,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (deleteTemplateNamePreview) {
                 deleteTemplateNamePreview.textContent = editTemplateName && editTemplateName.value
                     ? editTemplateName.value
-                    : 'Î•Ï€Î¹Î»ÎµÎ³Î¼Î­Î½Î¿ Ï€ÏÏŒÏ„Ï…Ï€Î¿';
+                    : 'Επιλεγμένο πρότυπο';
             }
 
             if (deleteTemplateConfirmModal) {
@@ -2015,7 +2012,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const createOpenDateValue = createTemplateOpenDate ? String(createTemplateOpenDate.value || '').trim() : '';
             const createCloseDateValue = createTemplateCloseDate ? String(createTemplateCloseDate.value || '').trim() : '';
             if (createOpenDateValue === '') {
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚ ÎµÎ¯Î½Î±Î¹ Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ®.');
+                alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
                 if (createTemplateOpenDate) {
                     createTemplateOpenDate.focus();
                 }
@@ -2023,7 +2020,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             if (createCloseDateValue !== '' && createCloseDateValue < createOpenDateValue) {
-                alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± ÎºÎ»ÎµÎ¹ÏƒÎ¯Î¼Î±Ï„Î¿Ï‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¹Î½ Î±Ï€ÏŒ Ï„Î·Î½ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚.');
+                alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
                 if (createTemplateCloseDate) {
                     createTemplateCloseDate.focus();
                 }

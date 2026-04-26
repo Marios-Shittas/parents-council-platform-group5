@@ -1,13 +1,10 @@
-/* Arxeio: public\assets\css\site-footer.css
-   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
-   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Scoped βάση για να απομονώνεται το footer από global main.css κανόνες. */
    .site-footer,
    .site-footer * {
        box-sizing: border-box;
    }
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Κύριο footer block (όλο το κάτω μέρος της σελίδας). */
    .site-footer {
        margin-top: 56px;
        background: #f7f9fc;
@@ -17,7 +14,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Μικρή μπλε γραμμή πάνω από το footer για σύνδεση με το header. */
    .site-footer::before {
        content: "";
        position: absolute;
@@ -30,19 +27,19 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Περιορίζει το πλάτος για να μην "απλώνει" πολύ σε μεγάλες οθόνες. */
    .site-footer .container {
        max-width: 1320px;
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Επάνω ζώνη footer (οι 3 στήλες). */
    .footer-main {
        padding: 38px 0 22px;
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Τίτλοι στηλών (π.χ. Γρήγοροι Σύνδεσμοι, Επικοινωνία). */
    .footer-title {
        font-family: 'Montserrat', sans-serif;
        font-weight: 700;
@@ -53,7 +50,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Γενικό κείμενο footer. */
    .footer-text {
        font-size: 0.93rem;
        color: #475569;
@@ -62,13 +59,13 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Block για όνομα σχολείου. */
    .footer-brand {
        margin-bottom: 20px;
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Κύριος τίτλος σχολείου στο footer. */
    .footer-brand-title {
        font-family: 'Montserrat', sans-serif;
        font-size: 1.35rem;
@@ -78,13 +75,13 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Το badge δεν χρησιμοποιείται τώρα, το κρατάμε κρυφό για μελλοντική χρήση. */
    .footer-badge {
        display: none;
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Κάθε γραμμή με icon + κείμενο (διεύθυνση, email, τηλέφωνο). */
    .footer-line {
        display: flex;
        align-items: flex-start;
@@ -92,7 +89,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Σταθερό πλάτος icon για σωστή στοίχιση. */
    .footer-line i {
        width: 18px;
        margin-right: 8px;
@@ -101,7 +98,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Grid για γρήγορους συνδέσμους (2 στήλες σε desktop). */
    .footer-links {
        list-style: none;
        padding: 0;
@@ -112,7 +109,7 @@
        max-width: 320px;
    }
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Εμφάνιση links στο footer. */
    .footer-links a {
        font-family: 'Lato', sans-serif;
        color: #475569;
@@ -124,14 +121,14 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Hover στο link: πιο σκούρο και ελάχιστη μετακίνηση. */
    .footer-links a:hover {
        color: #1a3a5c;
        transform: translateX(2px);
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Κάτω άσπρη μπάρα με copyright/trademark. */
    .footer-bottom {
        font-family: 'Lato', sans-serif;
        border-top: 1px solid #dbe3ec;
@@ -142,7 +139,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* 2 στοιχεία στην κάτω μπάρα: αριστερά κείμενο, δεξιά policy. */
    .footer-bottom-wrap {
        display: flex;
        justify-content: space-between;
@@ -151,7 +148,7 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Κουμπί About στο footer. */
    .footer-about-btn {
        font-family: 'Lato', sans-serif;
        background: none;
@@ -169,71 +166,71 @@
    }
 
 
-   /* Link "Ola rights reserved.". */
+   /* Link "All rights reserved.". */
    .footer-policy {
        color: #5f6f82;
        text-decoration: none;
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Hover στο policy link. */
    .footer-policy:hover {
        color: #1a3a5c;
        text-decoration: none;
    }
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-   #aboutModal parathyro .modal-titlos {
+   /* Ο τίτλος του About modal μένει σταθερά λευκός. */
+   #aboutModal .modal-title {
        font-family: 'Montserrat', sans-serif;
        color: #ffffff !important;
    }
 
-   #aboutModal parathyro .modal-body,
-   #aboutModal parathyro .modal-footer,
-   #aboutModal parathyro .btn {
+   #aboutModal .modal-body,
+   #aboutModal .modal-footer,
+   #aboutModal .btn {
        font-family: 'Lato', sans-serif;
    }
 
-   #aboutModal parathyro .about-people {
+   #aboutModal .about-people {
        padding-left: 1.1rem;
        margin-bottom: 1rem;
    }
 
-   #aboutModal parathyro .about-people li {
+   #aboutModal .about-people li {
        margin-bottom: .45rem;
    }
 
-   #aboutModal parathyro .about-people a {
+   #aboutModal .about-people a {
        color: #1a3a5c;
        font-weight: 700;
        text-decoration: none;
    }
 
-   #aboutModal parathyro .about-people a:hover {
+   #aboutModal .about-people a:hover {
        color: #0f5ea8;
        text-decoration: underline;
    }
 
-   #aboutModal parathyro .modal-header .close {
+   #aboutModal .modal-header .close {
        color: #ffffff;
        opacity: 1;
        transition: color .2s ease, transform .2s ease;
    }
 
-   #aboutModal parathyro .modal-header .close:hover {
+   #aboutModal .modal-header .close:hover {
        color: #dc3545;
        transform: scale(1.05);
    }
 
-   #aboutModal parathyro .modal-footer .btn-secondary {
+   #aboutModal .modal-footer .btn-secondary {
        border-color: #c7d1db;
        background: #eef2f6;
        color: #344055;
        transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
    }
 
-   #aboutModal parathyro .modal-footer .btn-secondary:hover,
-   #aboutModal parathyro .modal-footer .btn-secondary:focus {
+   #aboutModal .modal-footer .btn-secondary:hover,
+   #aboutModal .modal-footer .btn-secondary:focus {
        background: #dc3545;
        border-color: #dc3545;
        color: #ffffff;
@@ -241,15 +238,15 @@
    }
 
 
-   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   /* Mobile βελτιώσεις footer. */
    @media (max-width: 991.98px) {
-       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       /* Λίγο πιο μικρό padding πάνω/κάτω σε κινητό. */
        .footer-main {
            padding: 32px 0 16px;
        }
 
 
-       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       /* Οι σύνδεσμοι γίνονται 1 στήλη για να διαβάζονται εύκολα. */
        .footer-links {
            grid-template-columns: 1fr;
            gap: 7px;
@@ -257,7 +254,7 @@
        }
 
 
-       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       /* Το κάτω row σπάει κάθετα για να μη στριμώχνεται. */
        .footer-bottom-wrap {
            flex-direction: column;
            text-align: center;

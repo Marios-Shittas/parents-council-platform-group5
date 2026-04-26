@@ -1,35 +1,32 @@
-/* Arxeio: public\assets\css\admin_css\admin_applications.css
-   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
-   Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika. */
 /**
- * Admin Aitiseis - Aitiseis sigkekrimeno styles only
- * Page-only CSS related to aitiseis functionality
+ * Admin Applications - Applications specific styles only
+ * Page-only CSS related to applications functionality
  */
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Header της σελίδας: ευθυγράμμιση τίτλου + κουμπιών */
 .admin-page-header {
     align-items: flex-end;
     gap: 1rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Grid με τα στατιστικά cards (επάνω μέρος) */
 .stats-grid {
     margin-bottom: 1.5rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Βασικό card στατιστικών: περίγραμμα και clipping για το icon */
 .stat-card {
     position: relative;
     overflow: hidden;
     border: 1px solid #e3ebf4;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Σχετική θέση για να τοποθετείται σωστά το απόλυτο icon */
 .stat-card .card-body {
     position: relative;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Ετικέτα στατιστικού (π.χ. "Σύνολο") */
 .stat-label {
     display: block;
     color: #607286;
@@ -40,7 +37,7 @@
     margin-bottom: 0.5rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Μεγάλος αριθμός στατιστικού */
 .stat-value {
     font-size: 2rem;
     line-height: 1;
@@ -48,7 +45,7 @@
     color: #163a63;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Κυκλικό/τετράγωνο icon δεξιά στα stat cards */
 .stat-icon {
     position: absolute;
     top: 1rem;
@@ -63,25 +60,25 @@
     justify-content: center;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Χρωματισμοί card τύπου info */
 .stat-card-info .stat-icon,
 .stat-card-info .stat-value {
     color: #0c6ea8;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Χρωματισμοί card τύπου success */
 .stat-card-success .stat-icon,
 .stat-card-success .stat-value {
     color: #1e7f4f;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Χρωματισμοί card τύπου danger */
 .stat-card-danger .stat-icon,
 .stat-card-danger .stat-value {
     color: #b33a47;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Toolbar πάνω από πίνακες/ενότητες */
 .section-toolbar {
     display: flex;
     justify-content: space-between;
@@ -90,12 +87,12 @@
     flex-wrap: wrap;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Βασικός πίνακας dashboard */
 .admin-dashboard-table {
     margin-bottom: 0;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Header γραμμή πίνακα: background + typography */
 .admin-dashboard-table thead th {
     background: #f4f7fb;
     color: #183f6b;
@@ -104,13 +101,13 @@
     white-space: nowrap;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Κελιά πίνακα: κάθετη στοίχιση + separator */
 .admin-dashboard-table tbody td {
     vertical-align: middle;
     border-bottom: 1px solid #edf2f7;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Αφαίρεση τελευταίου border στην τελευταία γραμμή */
 .admin-dashboard-table tbody tr:last-child td {
     border-bottom: 0;
 }
@@ -149,7 +146,7 @@
     color: #245f99;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Truncate 2 γραμμών για μακρύ κείμενο τίτλου/περιγραφής */
 .text-truncate-two-lines {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -159,20 +156,20 @@
     max-width: 340px;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Box εμφάνισης επιλεγμένης αίτησης */
 .application-box {
     background: #fff;
     border-radius: 16px;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Actions στην ενότητα submissions (κουμπιά/form controls) */
 .submission-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.45rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Μηδενισμός default margin στα inline forms */
 .submission-actions form {
     margin: 0;
 }
@@ -243,7 +240,7 @@
     pointer-events: none;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Card λεπτομερειών (πάνω blocks με label/value) */
 .detail-card {
     height: 100%;
     padding: 0.95rem 1rem;
@@ -252,7 +249,7 @@
     border: 1px solid #e4ebf3;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Label μέσα στο detail-card */
 .detail-card span {
     display: block;
     color: #6c7d90;
@@ -262,20 +259,20 @@
     margin-bottom: 0.35rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Value μέσα στο detail-card */
 .detail-card strong {
     color: #163a63;
     font-size: 1rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Grid για custom πεδία submission details */
 .detail-fields-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.9rem;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Κάθε item πεδίου στο details grid */
 .detail-field-item {
     padding: 0.85rem 0.95rem;
     border-radius: 12px;
@@ -283,7 +280,7 @@
     border: 1px solid #e6edf4;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Label μέσα σε detail-field-item */
 .detail-field-item span {
     display: block;
     color: #718395;
@@ -292,7 +289,7 @@
     text-transform: uppercase;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Value μέσα σε detail-field-item */
 .detail-field-item strong {
     color: #20364d;
     word-break: break-word;
@@ -323,112 +320,112 @@
     opacity: 1;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Dropdown forms: αφαίρεση extra margin για καθαρό layout */
 .dropdown-menu form {
     margin: 0;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Κάνουμε pointer τα dropdown items */
 .dropdown-menu .dropdown-item {
     cursor: pointer;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Πιο συμπαγές empty state */
 .small-empty {
     padding: 30px 20px;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-content {
+/* Περιορισμός ύψους στα μεγάλα modals create/edit */
+#createApplicationModal .modal-content {
     max-height: calc(100vh - 2rem);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-header {
+/* Header μόνο του create modal: μπλε background */
+#createApplicationModal .modal-header {
     background: #1f7aec;
     border-bottom: 0;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-header .modal-titlos,
-#createApplicationModal parathyro .modal-header .modal-titlos i {
+/* Τίτλος και icon του create modal σε λευκό */
+#createApplicationModal .modal-header .modal-title,
+#createApplicationModal .modal-header .modal-title i {
     color: #ffffff;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-header .btn-close {
+/* Λευκό close icon στο create modal */
+#createApplicationModal .modal-header .btn-close {
     filter: invert(1) grayscale(1) brightness(2);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-body {
+/* Scrollable σώμα modal για μικρές οθόνες */
+#createApplicationModal .modal-body {
     overflow-y: auto;
     max-height: calc(100vh - 210px);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#createApplicationModal parathyro .modal-header,
-#createApplicationModal parathyro .modal-footer,
-#editApplicationModal parathyro .modal-header,
-#editApplicationModal parathyro .modal-footer {
+/* Header/footer να μην συμπιέζονται όταν το body scrollάρει */
+#createApplicationModal .modal-header,
+#createApplicationModal .modal-footer,
+#editApplicationModal .modal-header,
+#editApplicationModal .modal-footer {
     flex-shrink: 0;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
-#editApplicationModal parathyro .modal-dialog {
+/* Πιο compact edit modal για να χωράει χωρίς εσωτερικό scroll στις περισσότερες οθόνες */
+#editApplicationModal .modal-dialog {
     max-width: 900px;
 }
 
-#editApplicationModal parathyro .modal-header,
-#editApplicationModal parathyro .modal-footer {
+#editApplicationModal .modal-header,
+#editApplicationModal .modal-footer {
     padding: 0.55rem 0.9rem;
 }
 
-#editApplicationModal parathyro .modal-body {
+#editApplicationModal .modal-body {
     padding: 0.8rem 0.9rem;
 }
 
-#editApplicationModal parathyro .modal-footer {
+#editApplicationModal .modal-footer {
     background: #ffffff;
     border-top: 1px solid #e4e9f0;
 }
 
-#createApplicationModal parathyro .modal-footer .btn-secondary-custom:hover,
-#createApplicationModal parathyro .modal-footer .btn-secondary-custom:focus,
-#editApplicationModal parathyro .modal-footer .btn-secondary-custom:hover,
-#editApplicationModal parathyro .modal-footer .btn-secondary-custom:focus {
+#createApplicationModal .modal-footer .btn-secondary-custom:hover,
+#createApplicationModal .modal-footer .btn-secondary-custom:focus,
+#editApplicationModal .modal-footer .btn-secondary-custom:hover,
+#editApplicationModal .modal-footer .btn-secondary-custom:focus {
     background: #dc3545;
     border-color: #dc3545;
     color: #fff;
     box-shadow: none;
 }
 
-#editApplicationModal parathyro .nav-tabs .nav-link {
+#editApplicationModal .nav-tabs .nav-link {
     padding: 0.35rem 0.65rem;
     font-size: 0.86rem;
 }
 
-#editApplicationModal parathyro .forma-label {
+#editApplicationModal .form-label {
     margin-bottom: 0.2rem;
     font-size: 0.88rem;
 }
 
-#editApplicationModal parathyro .forma-control,
-#editApplicationModal parathyro .forma-select,
-#editApplicationModal parathyro .forma-text,
-#editApplicationModal parathyro .btn-sm {
+#editApplicationModal .form-control,
+#editApplicationModal .form-select,
+#editApplicationModal .form-text,
+#editApplicationModal .btn-sm {
     font-size: 0.85rem;
 }
 
-#editApplicationModal parathyro .card-body {
+#editApplicationModal .card-body {
     padding: 0.55rem 0.7rem;
 }
 
-#edit_application_perigrafi {
+#edit_application_description {
     min-height: 96px;
 }
 
-#diagrafiSubmissionModal parathyro .modal-dialog {
+#deleteSubmissionModal .modal-dialog {
     max-width: 560px;
 }
 
@@ -496,14 +493,14 @@
     font-weight: 700;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Fallback scroll μόνο σε πολύ μικρό ύψος viewport */
 @media (max-height: 760px) {
-    #editApplicationModal parathyro .modal-dialog {
+    #editApplicationModal .modal-dialog {
         margin: 0.5rem auto;
     }
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Tablet breakpoint: header αριστερή στοίχιση και full-width truncate */
 @media (max-width: 991.98px) {
     .admin-dashboard-table {
         min-width: 980px;
@@ -518,7 +515,7 @@
     }
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Mobile breakpoint: μικρότερο stat value + stacked actions */
 @media (max-width: 767.98px) {
     .stats-grid {
         row-gap: 0.85rem;
@@ -575,21 +572,21 @@
         grid-template-columns: 1fr;
     }
 
-    #createApplicationModal parathyro .modal-dialog,
-    #editApplicationModal parathyro .modal-dialog,
-    #submissionDetailModal parathyro .modal-dialog {
+    #createApplicationModal .modal-dialog,
+    #editApplicationModal .modal-dialog,
+    #submissionDetailModal .modal-dialog {
         max-width: calc(100vw - 1rem);
         margin: 0.5rem auto;
     }
 
-    #editApplicationModal parathyro .nav-tabs {
+    #editApplicationModal .nav-tabs {
         flex-wrap: nowrap;
         overflow-x: auto;
         overflow-y: hidden;
         scrollbar-width: thin;
     }
 
-    #editApplicationModal parathyro .nav-tabs .nav-link {
+    #editApplicationModal .nav-tabs .nav-link {
         white-space: nowrap;
     }
 

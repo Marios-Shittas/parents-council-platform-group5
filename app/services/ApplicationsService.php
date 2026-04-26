@@ -1,9 +1,6 @@
 <?php
-// Arxeio: app\services\ApplicationsService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * ApplicationsService - xeirizetai oles tis leitourgies aitiseon sti vasi
+ * ApplicationsService - Handles all application-related database operations
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -20,8 +17,8 @@ class ApplicationsService {
     }
 
     /**
-     * Eksasfalizei ypovoles pinakas ypostirizei monimi admin diavasma state.
-     * @return bool - True otan admin_seen_at yparxei
+     * Ensure submissions table supports persistent admin read state.
+     * @return bool True when admin_seen_at exists
      */
     private function ensureSubmissionSeenColumn() {
         if ($this->hasAdminSeenAtColumn !== null) {
@@ -50,8 +47,8 @@ class ApplicationsService {
     // ============================================
     
     /**
-     * Pairnei ola aitiseis me document count
-     * @return array - Pinakas me aitiseis
+     * Get all applications with document count
+     * @return array Array of applications
      */
     public function getAllApplications() {
         $sql = "SELECT 
@@ -75,9 +72,9 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei mia aitisi apo ID
-     * @param int $id - Aitisi ID
-     * @return array|null - Aitisi dedomena i null an den vrethei
+     * Get a single application by ID
+     * @param int $id Application ID
+     * @return array|null Application data or null if not found
      */
     public function getApplicationById($id) {
         $sql = "SELECT * FROM Applications WHERE application_id = ?";
@@ -90,10 +87,10 @@ class ApplicationsService {
     }
     
     /**
-     * Dimiourgei mia nea aitisi
-     * @param string $title - Aitisi titlos
-     * @param string $description - Aitisi perigrafi
-     * @return int|false - To neo id aitisis ID i false se apotixia
+     * Create a new application
+     * @param string $title Application title
+     * @param string $description Application description
+     * @return int|false The new application ID or false on failure
      */
     public function createApplication($title, $description) {
         $sql = "INSERT INTO Applications (application_title, application_description) VALUES (?, ?)";
@@ -108,11 +105,11 @@ class ApplicationsService {
     }
     
     /**
-     * Enimeronei mia yparxousa aitisi
-     * @param int $id - Aitisi ID
-     * @param string $title - Aitisi titlos
-     * @param string $description - Aitisi perigrafi
-     * @return bool - True se epitixia, false se apotixia
+     * Update an existing application
+     * @param int $id Application ID
+     * @param string $title Application title
+     * @param string $description Application description
+     * @return bool True on success, false on failure
      */
     public function updateApplication($id, $title, $description) {
         $sql = "UPDATE Applications 
@@ -126,9 +123,9 @@ class ApplicationsService {
     }
     
     /**
-     * Diagrafei mia aitisi
-     * @param int $id - Aitisi ID
-     * @return bool - True se epitixia, false se apotixia
+     * Delete an application
+     * @param int $id Application ID
+     * @return bool True on success, false on failure
      */
     public function deleteApplication($id) {
         $sql = "DELETE FROM Applications WHERE application_id = ?";
@@ -143,8 +140,8 @@ class ApplicationsService {
     // ============================================
     
     /**
-     * Pairnei ola documents grouped apo aitisi
-     * @return array - Pinakas me documents grouped apo application_id
+     * Get all documents grouped by application
+     * @return array Array of documents grouped by application_id
      */
     public function getDocumentsByApplication() {
         $sql = "SELECT ap_document_id, application_id, file_path 
@@ -162,9 +159,9 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei documents gia a sigkekrimeno aitisi
-     * @param int $applicationId - Aitisi ID
-     * @return array - Pinakas me documents
+     * Get documents for a specific application
+     * @param int $applicationId Application ID
+     * @return array Array of documents
      */
     public function getDocuments($applicationId) {
         $sql = "SELECT * FROM ApplicationsDocuments WHERE application_id = ?";
@@ -177,8 +174,8 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei ola documents me aitisi leptomereies
-     * @return array - Pinakas me documents
+     * Get all documents with application details
+     * @return array Array of documents
      */
     public function getAllDocuments() {
         $sql = "SELECT 
@@ -195,10 +192,10 @@ class ApplicationsService {
     }
     
     /**
-     * Prosthetei a document se mia aitisi
-     * @param int $applicationId - Aitisi ID
-     * @param string $filePath - Path pros to document arxeio
-     * @return bool - True se epitixia, false se apotixia
+     * Add a document to an application
+     * @param int $applicationId Application ID
+     * @param string $filePath Path to the document file
+     * @return bool True on success, false on failure
      */
     public function addDocument($applicationId, $filePath) {
         $sql = "INSERT INTO ApplicationsDocuments (application_id, file_path) VALUES (?, ?)";
@@ -209,9 +206,9 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei document apo ID
-     * @param int $documentId - Document ID
-     * @return array|null - Document dedomena i null an den vrethei
+     * Get document by ID
+     * @param int $documentId Document ID
+     * @return array|null Document data or null if not found
      */
     public function getDocumentById($documentId) {
         $sql = "SELECT * FROM ApplicationsDocuments WHERE ap_document_id = ?";
@@ -224,9 +221,9 @@ class ApplicationsService {
     }
     
     /**
-     * Diagrafei a document apo mia aitisi
-     * @param int $documentId - Document ID
-     * @return bool - True se epitixia, false se apotixia
+     * Delete a document from an application
+     * @param int $documentId Document ID
+     * @return bool True on success, false on failure
      */
     public function deleteDocument($documentId) {
         $sql = "DELETE FROM ApplicationsDocuments WHERE ap_document_id = ?";
@@ -237,10 +234,10 @@ class ApplicationsService {
     }
 
     /**
-     * Enimeronei mia yparxousa document path.
-     * @param int $documentId - Document ID
-     * @param string $filePath - Neo arxeio path
-     * @return bool - True se epitixia, false se apotixia
+     * Update an existing document path.
+     * @param int $documentId Document ID
+     * @param string $filePath New file path
+     * @return bool True on success, false on failure
      */
     public function updateDocumentPath($documentId, $filePath) {
         $sql = "UPDATE ApplicationsDocuments SET file_path = ? WHERE ap_document_id = ?";
@@ -255,10 +252,10 @@ class ApplicationsService {
     // ============================================
     
     /**
-     * Elegxei an xristis aldiavasmay submitted mia aitisi
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @return bool - True an aldiavasmay submitted, false otherwise
+     * Check if user already submitted an application
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @return bool True if already submitted, false otherwise
      */
     public function hasUserSubmitted($applicationId, $userId) {
         $sql = "SELECT 1 FROM Submissions WHERE application_id = ? AND user_id = ?";
@@ -282,23 +279,23 @@ class ApplicationsService {
     }
 
     /**
-     * Dimiourgei mia nea ypovoli me JSON forma dedomena (xoris ypoxreotiko arxeio)
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @param string $submissionDataJson - JSON-encoded forma pedia
-     * @return bool - True se epitixia, false se apotixia
+     * Create a new submission with JSON form data (no file required)
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @param string $submissionDataJson JSON-encoded form fields
+     * @return bool True on success, false on failure
      */
     public function createSubmissionWithData($applicationId, $userId, $submissionDataJson) {
         return $this->createSubmissionWithDataAndFile($applicationId, $userId, $submissionDataJson, null);
     }
 
     /**
-     * Dimiourgei mia nea ypovoli me JSON forma dedomena kai proairetiko uploaded arxeio path.
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @param string $submissionDataJson - JSON-encoded forma pedia
-     * @param string|null $filePath - Proairetiko uploaded arxeio path
-     * @return bool - True se epitixia, false se apotixia
+     * Create a new submission with JSON form data and optional uploaded file path.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @param string $submissionDataJson JSON-encoded form fields
+     * @param string|null $filePath Optional uploaded file path
+     * @return bool True on success, false on failure
      */
     public function createSubmissionWithDataAndFile($applicationId, $userId, $submissionDataJson, $filePath = null) {
         if ($filePath === null || $filePath === '') {
@@ -317,9 +314,9 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei xristis's ypovoles
-     * @param int $userId - Xristis ID
-     * @return array - Pinakas me ypovoles
+     * Get user's submissions
+     * @param int $userId User ID
+     * @return array Array of submissions
      */
     public function getUserSubmissions($userId) {
         $sql = "SELECT 
@@ -343,8 +340,8 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei ola ypovoles me xristis kai aitisi leptomereies
-     * @return array - Pinakas me ypovoles
+     * Get all submissions with user and application details
+     * @return array Array of submissions
      */
     public function getAllSubmissions() {
         $hasSeenColumn = $this->ensureSubmissionSeenColumn();
@@ -371,8 +368,8 @@ class ApplicationsService {
     }
 
     /**
-     * Pairnei metrisis gia ypovoles that are still anamoni elegxo.
-     * @return int - Synoliko anamoni ypovoles
+     * Get count of submissions that are still waiting review.
+     * @return int Total waiting submissions
      */
     public function getWaitingSubmissionCount() {
         if ($this->ensureSubmissionSeenColumn()) {
@@ -391,9 +388,9 @@ class ApplicationsService {
     }
 
     /**
-     * Pairnei undiavasma anamoni ypovoles count gia a sigkekrimeno aitisi.
-     * @param int $applicationId - Aitisi ID
-     * @return int - Synoliko anamoni undiavasma ypovoles gia aitisi
+     * Get unread waiting submissions count for a specific application.
+     * @param int $applicationId Application ID
+     * @return int Total waiting unread submissions for application
      */
     public function getWaitingSubmissionCountByApplication($applicationId) {
         if ($this->ensureSubmissionSeenColumn()) {
@@ -426,10 +423,10 @@ class ApplicationsService {
     }
 
     /**
-     * Mark a anamoni ypovoli as seen apo admin.
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @return bool - True otan query executes successfully
+     * Mark a waiting submission as seen by admin.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @return bool True when query executes successfully
      */
     public function markSubmissionAsSeen($applicationId, $userId) {
         if (!$this->ensureSubmissionSeenColumn()) {
@@ -453,11 +450,11 @@ class ApplicationsService {
     }
     
     /**
-     * Enimeronei ypovoli status
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @param string $status - Status (anamoni, approved, rejected)
-     * @return bool - True se epitixia, false se apotixia
+     * Update submission status
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @param string $status Status (waiting, approved, rejected)
+     * @return bool True on success, false on failure
      */
     public function updateSubmissionStatus($applicationId, $userId, $status) {
         $sql = "UPDATE Submissions 
@@ -471,10 +468,10 @@ class ApplicationsService {
     }
 
     /**
-     * Diagrafei a ypovoli so xristis can submit again.
-     * @param int $applicationId - Aitisi ID
-     * @param int $userId - Xristis ID
-     * @return bool - True se epitixia, false se apotixia
+     * Delete a submission so user can submit again.
+     * @param int $applicationId Application ID
+     * @param int $userId User ID
+     * @return bool True on success, false on failure
      */
     public function deleteSubmission($applicationId, $userId) {
         $sql = "DELETE FROM Submissions WHERE application_id = ? AND user_id = ?";
@@ -484,8 +481,8 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei synoliko metrisis gia aitiseis
-     * @return int - Synoliki metrisi
+     * Get total count of applications
+     * @return int Total count
      */
     public function getTotalCount() {
         $sql = "SELECT COUNT(*) as count FROM Applications";
@@ -499,9 +496,9 @@ class ApplicationsService {
     // ============================================
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
-     * @param int $applicationId - Parametros tis leitourgias.
-     * @return array - Epistrofi tis leitourgias.
+     * Λήψη όλων των πεδίων φόρμας για μια αίτηση
+     * @param int $applicationId ID της αίτησης
+     * @return array Πίνακας με τα πεδία
      */
     public function getApplicationFormFields($applicationId) {
         $sql = "SELECT * FROM ApplicationsFormFields 
@@ -520,13 +517,13 @@ class ApplicationsService {
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
-     * @param int $applicationId - Parametros tis leitourgias.
-     * @param string $fieldName - Parametros tis leitourgias.
-     * @param string $fieldType - Parametros tis leitourgias.
-     * @param int $fieldOrder - Parametros tis leitourgias.
-     * @param bool $isRequired - Parametros tis leitourgias.
-     * @return bool - Epistrofi tis leitourgias.
+     * Προσθήκη νέου πεδίου φόρμας
+     * @param int $applicationId ID της αίτησης
+     * @param string $fieldName Όνομα του πεδίου
+     * @param string $fieldType Τύπος του πεδίου (text, email, tel, κ.λπ.)
+     * @param int $fieldOrder Σειρά εμφάνισης
+     * @param bool $isRequired Απαιτείται ή όχι;
+     * @return bool Επιτυχία ή αποτυχία
      */
     public function addFormField($applicationId, $fieldName, $fieldType = 'text', $fieldOrder = 0, $isRequired = true) {
         $sql = "INSERT INTO ApplicationsFormFields 
@@ -539,12 +536,12 @@ class ApplicationsService {
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
-     * @param int $fieldId - Parametros tis leitourgias.
-     * @param string $fieldName - Parametros tis leitourgias.
-     * @param string $fieldType - Parametros tis leitourgias.
-     * @param bool $isRequired - Parametros tis leitourgias.
-     * @return bool - Epistrofi tis leitourgias.
+     * Ενημέρωση πεδίου φόρμας
+     * @param int $fieldId ID του πεδίου
+     * @param string $fieldName Νέο όνομα
+     * @param string $fieldType Νέος τύπος
+     * @param bool $isRequired Απαιτείται ή όχι;
+     * @return bool Επιτυχία ή αποτυχία
      */
     public function updateFormField($fieldId, $fieldName, $fieldType = 'text', $isRequired = true) {
         $sql = "UPDATE ApplicationsFormFields 
@@ -557,9 +554,9 @@ class ApplicationsService {
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
-     * @param int $fieldId - Parametros tis leitourgias.
-     * @return bool - Epistrofi tis leitourgias.
+     * Διαγραφή πεδίου φόρμας
+     * @param int $fieldId ID του πεδίου
+     * @return bool Επιτυχία ή αποτυχία
      */
     public function deleteFormField($fieldId) {
         $sql = "DELETE FROM ApplicationsFormFields WHERE field_id = ?";
@@ -569,9 +566,9 @@ class ApplicationsService {
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
-     * @param array $fieldIds - Parametros tis leitourgias.
-     * @return bool - Epistrofi tis leitourgias.
+     * Αναδιάταξη των πεδίων
+     * @param array $fieldIds Πίνακας με τα IDs των πεδίων στη σωστή σειρά
+     * @return bool Επιτυχία ή αποτυχία
      */
     public function reorderFormFields($fieldIds) {
         foreach ($fieldIds as $order => $fieldId) {
@@ -688,7 +685,7 @@ class ApplicationsService {
     }
     
     /**
-     * Dimosievei aitisi (change status apo draft to dimosievmenes)
+     * Publish application (change status from draft to published)
      */
     public function publishApplication($applicationId) {
         $sql = "UPDATE Applications SET status = 'published', updated_at = NOW() WHERE application_id = ?";
@@ -708,7 +705,7 @@ class ApplicationsService {
     }
     
     /**
-     * Prosthetei attachment to aitisi
+     * Add attachment to application
      */
     public function addApplicationAttachment($applicationId, $filePath, $originalFilename) {
         // Anakta tin megalyteri seira taksinomisis.
@@ -734,7 +731,7 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei ta attachments gia aitisi
+     * Get attachments for application
      */
     public function getApplicationAttachments($applicationId) {
         $sql = "SELECT * FROM ApplicationAttachments WHERE application_id = ? ORDER BY upload_order ASC";
@@ -836,7 +833,7 @@ class ApplicationsService {
     }
     
     /**
-     * Pairnei dimosievmenes aitiseis (gia goneas portal)
+     * Get published applications (for parent portal)
      */
     public function getPublishedApplications() {
         $sql = "SELECT a.* FROM Applications a 

@@ -1,9 +1,6 @@
 <?php
-// Arxeio: app\services\EventsService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * EventsService - Xeirizetai ola ekdilosi-related vasi operations
+ * EventsService - Handles all event-related database operations
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -29,10 +26,10 @@ class EventsService {
     }
     
     /**
-     * Pairnei ola ekdiloseis me tis eikones
-     * @param int $limit - Proairetiko orio gia pagination
-     * @param int $offset - Proairetiko offset gia pagination
-     * @return array - Pinakas me ekdiloseis me eikones
+     * Get all events with their images
+     * @param int $limit Optional limit for pagination
+     * @param int $offset Optional offset for pagination
+     * @return array Array of events with images
      */
     public function getAllEvents($limit = null, $offset = 0) {
         $sql = "SELECT e.*, 
@@ -63,8 +60,8 @@ class EventsService {
     }
     
     /**
-     * Pairnei upcoming ekdiloseis (future ekdiloseis only)
-     * @return array - Pinakas me upcoming ekdiloseis
+     * Get upcoming events (future events only)
+     * @return array Array of upcoming events
      */
     public function getUpcomingEvents() {
         $sql = "SELECT e.*, 
@@ -87,8 +84,8 @@ class EventsService {
     }
 
     /**
-     * Pairnei past ekdiloseis
-     * @return array - Pinakas me past ekdiloseis
+     * Get past events
+     * @return array Array of past events
      */
     public function getPastEvents() {
         $sql = "SELECT e.*, 
@@ -111,9 +108,9 @@ class EventsService {
     }
     
     /**
-     * Pairnei mia ekdilosi apo ID
-     * @param int $id - Ekdilosi ID
-     * @return array|null - Ekdilosi dedomena i null an den vrethei
+     * Get a single event by ID
+     * @param int $id Event ID
+     * @return array|null Event data or null if not found
      */
     public function getEventById($id) {
         $sql = "SELECT e.*, 
@@ -137,12 +134,12 @@ class EventsService {
     }
     
     /**
-     * Dimiourgei mia nea ekdilosi
-     * @param string $title - Ekdilosi titlos
-     * @param string $description - Ekdilosi perigrafi
-     * @param string $eventDate - Ekdilosi imerominia kai time (Y-m-d H:i:s morfi)
-     * @param string $publishDate - Dimosievei imerominia (Y-m-d morfi)
-     * @return int|false - To neo ekdilosi ID i false se apotixia
+     * Create a new event
+     * @param string $title Event title
+     * @param string $description Event description
+     * @param string $eventDate Event date and time (Y-m-d H:i:s format)
+     * @param string $publishDate Publish date (Y-m-d format)
+     * @return int|false The new event ID or false on failure
      */
     public function createEvent($title, $description, $eventDate, $publishDate, $gdprNotice = '') {
         $sql = "INSERT INTO Events (event_title, event_description, gdpr_notice, event_date, publish_date) 
@@ -159,13 +156,13 @@ class EventsService {
     }
     
     /**
-     * Enimeronei mia yparxousa ekdilosi
-     * @param int $id - Ekdilosi ID
-     * @param string $title - Ekdilosi titlos
-     * @param string $description - Ekdilosi perigrafi
-     * @param string $eventDate - Ekdilosi imerominia kai time (Y-m-d H:i:s morfi)
-     * @param string $publishDate - Dimosievei imerominia (Y-m-d morfi)
-     * @return bool - True se epitixia, false se apotixia
+     * Update an existing event
+     * @param int $id Event ID
+     * @param string $title Event title
+     * @param string $description Event description
+     * @param string $eventDate Event date and time (Y-m-d H:i:s format)
+     * @param string $publishDate Publish date (Y-m-d format)
+     * @return bool True on success, false on failure
      */
     public function updateEvent($id, $title, $description, $eventDate, $publishDate, $gdprNotice = '') {
         $sql = "UPDATE Events 
@@ -183,9 +180,9 @@ class EventsService {
     }
     
     /**
-     * Diagrafei mia ekdilosi
-     * @param int $id - Ekdilosi ID
-     * @return bool - True se epitixia, false se apotixia
+     * Delete an event
+     * @param int $id Event ID
+     * @return bool True on success, false on failure
      */
     public function deleteEvent($id) {
         // Oi eikones diagrafontai aytomata logo CASCADE.
@@ -198,15 +195,15 @@ class EventsService {
     }
     
     /**
-     * Prosthetei mia eikona se mia ekdilosi
-     * @param int $eventId - Ekdilosi ID
-     * @param string $imagePath - Path pros to eikona arxeio
-     * @return bool - True se epitixia, false se apotixia
+     * Add an image to an event
+     * @param int $eventId Event ID
+     * @param string $imagePath Path to the image file
+     * @return bool True on success, false on failure
      */
     public function addImage($eventId, $imagePath) {
         $currentImagesCount = $this->countImages($eventId);
         if ($currentImagesCount >= $this->getMaxImagesPerEvent()) {
-            $this->lastOperationError = 'ÎœÏ€Î¿ÏÎ¿ÏÎ½ Î½Î± Î±Ï€Î¿Î¸Î·ÎºÎµÏ…Ï„Î¿ÏÎ½ Î­Ï‰Ï‚ ' . $this->getMaxImagesPerEvent() . ' Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯ÎµÏ‚ Î±Î½Î¬ ÎµÎºÎ´Î®Î»Ï‰ÏƒÎ·.';
+            $this->lastOperationError = 'Μπορούν να αποθηκευτούν έως ' . $this->getMaxImagesPerEvent() . ' φωτογραφίες ανά εκδήλωση.';
             return false;
         }
 
@@ -216,15 +213,15 @@ class EventsService {
         $stmt->bind_param("is", $eventId, $imagePath);
 
         $executed = $stmt->execute();
-        $this->lastOperationError = $executed ? '' : 'Î£Ï†Î¬Î»Î¼Î± ÎºÎ±Ï„Î¬ Ï„Î·Î½ Î±Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ· Ï„Î·Ï‚ ÎµÎ¹ÎºÏŒÎ½Î±Ï‚ ÏƒÏ„Î· Î²Î¬ÏƒÎ· Î´ÎµÎ´Î¿Î¼Î­Î½Ï‰Î½.';
+        $this->lastOperationError = $executed ? '' : 'Σφάλμα κατά την αποθήκευση της εικόνας στη βάση δεδομένων.';
 
         return $executed;
     }
     
     /**
-     * Diagrafei mia eikona apo an ekdilosi
-     * @param int $imageId - Eikona ID
-     * @return bool - True se epitixia, false se apotixia
+     * Delete an image from an event
+     * @param int $imageId Image ID
+     * @return bool True on success, false on failure
      */
     public function deleteImage($imageId) {
         $sql = "DELETE FROM EventsImages WHERE ev_image_id = ?";
@@ -236,9 +233,9 @@ class EventsService {
     }
     
     /**
-     * Pairnei eikones gia an ekdilosi
-     * @param int $eventId - Ekdilosi ID
-     * @return array - Pinakas me eikona dedomena
+     * Get images for an event
+     * @param int $eventId Event ID
+     * @return array Array of image data
      */
     public function getImages($eventId) {
         $sql = "SELECT * FROM EventsImages WHERE event_id = ?";
@@ -265,8 +262,8 @@ class EventsService {
     }
     
     /**
-     * Pairnei synoliko metrisis gia ekdiloseis
-     * @return int - Synoliki metrisi
+     * Get total count of events
+     * @return int Total count
      */
     public function getTotalCount() {
         $sql = "SELECT COUNT(*) as count FROM Events";
@@ -276,9 +273,9 @@ class EventsService {
     }
     
     /**
-     * Psaxnei ekdiloseis apo titlos i perigrafi
-     * @param string $query - Psaxnei query
-     * @return array - Pinakas me tairiazouses ekdiloseis
+     * Search events by title or description
+     * @param string $query Search query
+     * @return array Array of matching events
      */
     public function searchEvents($query) {
         $sql = "SELECT e.*, 

@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\admin-sidebar.js
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 (function () {
         if (window.__adminSidebarToggleBound) return;
         window.__adminSidebarToggleBound = true;
@@ -21,7 +18,7 @@
             if (usersNavLink && !usersNavLink.querySelector('.admin-notification-badge')) {
                 var usersBadge = document.createElement('span');
                 usersBadge.className = 'admin-notification-badge';
-                usersBadge.setAttribute('aria-label', 'ÎÎ­ÎµÏ‚ ÎµÎ³Î³ÏÎ±Ï†Î­Ï‚ Ï‡ÏÎ·ÏƒÏ„ÏŽÎ½: ' + usersBadgeText);
+                usersBadge.setAttribute('aria-label', 'Νέες εγγραφές χρηστών: ' + usersBadgeText);
                 usersBadge.textContent = usersBadgeText;
                 usersNavLink.appendChild(usersBadge);
             }

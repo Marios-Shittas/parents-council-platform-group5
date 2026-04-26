@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\admin\home.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/EventsService.php';
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
 require_once __DIR__ . '/../../app/services/HomePageService.php';
@@ -21,7 +18,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
-// Leitourgia adminCalendarIsValidIsoImerominia: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia adminCalendarIsValidIsoDate: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarIsValidIsoDate($value)
 {
     return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1;

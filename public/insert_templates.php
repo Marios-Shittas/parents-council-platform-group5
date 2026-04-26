@@ -1,12 +1,6 @@
 <?php
-// Arxeio: public\insert_templates.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
-// Voithitiko script gia na perastoun arxika templates aitiseon.
-// Trexei xeirokinita otan theloume na valoume sample/system templates sti vasi.
 require_once __DIR__ . '/../app/config/db.php';
 
-// Kathe template exei key, onoma, perigrafi, katigoria kai JSON schema gia ta pedia tis formaas.
 $templates = [
     [
         'key' => 'event_consent_' . time(),
@@ -43,7 +37,6 @@ $templates = [
 ];
 
 foreach($templates as $t) {
-    // Vazoume ta templates os system templates gia na ksexorizoun apo osa ftiaxnei o admin.
     $sql = "INSERT INTO ApplicationTemplates (template_key, name, description, category, form_schema, is_system_template) VALUES (?, ?, ?, ?, ?, 1)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('sssss', $t['key'], $t['name'], $t['desc'], $t['cat'], $t['schema']);

@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\admin-epikoinonia.js
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 let pendingDeleteForm = null;
         
         // Emfanizei modal epivevaiosis prin ti diagrafi.

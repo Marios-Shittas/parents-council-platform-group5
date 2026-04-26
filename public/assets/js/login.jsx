@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\login.jsx
-// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
-// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
 const { useState } = React;
 
 /* SHOW/HIDE PASSWORD */

@@ -1,21 +1,21 @@
 "use strict";
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    FORM FIELD TEMPLATES  (keyed by formType)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 const FORM_FIELDS = {
     general: []
 };
 
 const SUBMISSION_FIELD_LABELS = {
-    parent_name: '???ï¿½atep???ï¿½? G???a',
+    parent_name: '???�atep???�? G???a',
     parent_email: 'Email ?p????????a?',
     parent_phone: '????f??? ?p????????a?',
-    student_name: '???ï¿½atep???ï¿½? ?a??t?/?a??t??a?',
-    student_class: '?ï¿½?ï¿½a / ????',
-    manual_application_text: '?e?ï¿½e?? ??t?s??',
-    applied_at: '?ï¿½e??ï¿½???a ?p?ï¿½????',
-    _submission_mode: '???p?? ?p?ï¿½????'
+    student_name: '???�atep???�? ?a??t?/?a??t??a?',
+    student_class: '?�?�a / ????',
+    manual_application_text: '?e?�e?? ??t?s??',
+    applied_at: '?�e??�???a ?p?�????',
+    _submission_mode: '???p?? ?p?�????'
 };
 
 const APP_META = [
@@ -30,13 +30,13 @@ const APP_META = [
 var MAX_SUBMISSION_FILES = 4;
 var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
 var SUBMISSION_MODE_LABELS = {
-    manual: 'Online S?ï¿½p????s?',
-    upload: '???ï¿½asï¿½a ???e???'
+    manual: 'Online S?�p????s?',
+    upload: '???�as�a ???e???'
 };
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   IN-PAGE APPLIED TRACKING  (resets on page reload â€” DB is the source of truth)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────────────────────────────────────────────────────────────────────
+   IN-PAGE APPLIED TRACKING  (resets on page reload — DB is the source of truth)
+───────────────────────────────────────────────────────────────────────────── */
 const _justApplied = new Set(); // appIds submitted during this page session
 
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -44,9 +44,9 @@ function isJsApplied(appId) {
     return _justApplied.has(appId);
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    HELPERS
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getMeta(index) {
     return APP_META[((index % APP_META.length) + APP_META.length) % APP_META.length];
@@ -245,8 +245,8 @@ function getAppTitleById(appId) {
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getDraftStudentInfo(draftData) {
     return {
-        studentName: draftData && draftData.student_name ? draftData.student_name : 'â€”',
-        studentClass: draftData && draftData.student_class ? draftData.student_class : 'â€”'
+        studentName: draftData && draftData.student_name ? draftData.student_name : '—',
+        studentClass: draftData && draftData.student_class ? draftData.student_class : '—'
     };
 }
 
@@ -352,9 +352,9 @@ function getApplicationWindowStatus(openDate, closeDate) {
     return 'open';
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    BADGE / TAG HTML BUILDERS
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function cardStatusBadge(status) {
     var map = {
@@ -380,10 +380,10 @@ function submissionStatusBadge(status) {
     return '<span class="sub-status-badge ' + s.cls + '">' + escHtml(s.label) + '</span>';
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   AUGMENT CARDS  â€“ inject status badge, category tag, and date row into every
+/* ─────────────────────────────────────────────────────────────────────────────
+   AUGMENT CARDS  – inject status badge, category tag, and date row into every
    seira imerominias se kathe kartela aitisis pou erxetai apo PHP.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function augmentCards() {
     document.querySelectorAll('.app-card-wrapper').forEach(function (card) {
@@ -459,10 +459,10 @@ function augmentCards() {
     });
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    RENDER NEWLY-SUBMITTED ROWS  (rows added this page session, before reload)
    DB-rendered rows are already in the tbody from PHP.
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function addSubmissionRow(sub) {
     var tbody = document.getElementById('submissions-tbody');
@@ -495,9 +495,9 @@ function addSubmissionRow(sub) {
     if (table)  table.hidden = false;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    BUILD ONE FORM FIELD
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function buildField(field) {
     var req = field.required
@@ -509,7 +509,7 @@ function buildField(field) {
     if (field.type === 'checkbox') {
         showTopLabel = false;
         control = '<label class="application-checkbox-row" for="field_' + escHtml(field.name) + '">' +
-                  '<span class="application-checkbox-text">ï¿½ ' + escHtml(field.label) + req + '</span>' +
+                  '<span class="application-checkbox-text">� ' + escHtml(field.label) + req + '</span>' +
                   '<input type="checkbox" id="field_' + escHtml(field.name) + '" class="application-checkbox-input" name="' + field.name + '" value="1"' +
                   (field.required ? ' required' : '') + ' aria-label="' + escHtml(field.label) + '">' +
                   '</label>';
@@ -517,7 +517,7 @@ function buildField(field) {
         control = '<input type="file" class="form-control" name="' + field.name + '" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"' +
                   (field.required ? ' required' : '') + '>';
     } else if (field.type === 'tel') {
-        control = '<input type="tel" class="form-control js-phone-only" name="' + field.name + '" inputmode="numeric" pattern="[0-9]{6,15}" minlength="6" maxlength="15" autocomplete="tel" title="???? a???ï¿½?? (6-15 ??f?a)"' +
+        control = '<input type="tel" class="form-control js-phone-only" name="' + field.name + '" inputmode="numeric" pattern="[0-9]{6,15}" minlength="6" maxlength="15" autocomplete="tel" title="???? a???�?? (6-15 ??f?a)"' +
                   (field.required ? ' required' : '') + '>';
     } else if (field.type === 'select') {
         var opts = (field.options && Array.isArray(field.options)) 
@@ -552,9 +552,9 @@ function buildField(field) {
            control + '</div>';
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   SHOW VIEW MODAL  â€“ handles both PHP-rendered DB rows and JS-submitted rows
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHOW VIEW MODAL  – handles both PHP-rendered DB rows and JS-submitted rows
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showViewModalFromData(appTitle, submissionDataObj, statusKey, submittedAt) {
     var rows = getDisplayableSubmissionEntries(submissionDataObj).map(function (entry) {
@@ -562,7 +562,7 @@ function showViewModalFromData(appTitle, submissionDataObj, statusKey, submitted
                escHtml(entry.label) + '</th><td><strong>' + escHtml(entry.value) + '</strong></td></tr>';
     }).join('');
 
-    var submittedLabel = submittedAt || submissionDataObj.applied_at || 'â€”';
+    var submittedLabel = submittedAt || submissionDataObj.applied_at || '—';
     rows += '<tr><th class="text-muted font-weight-normal" style="width:45%">\u0397\u03bc\u03b5\u03c1\u03bf\u03bc\u03b7\u03bd\u03af\u03b1 \u03a5\u03c0\u03bf\u03b2\u03bf\u03bb\u03ae\u03c2</th><td><strong>' +
             escHtml(submittedLabel) + '</strong></td></tr>';
 
@@ -578,9 +578,9 @@ function showViewModalFromData(appTitle, submissionDataObj, statusKey, submitted
     $('#viewModal').modal('show');
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    SHOW SUCCESS TOAST
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showToast() {
     var toast = document.getElementById('submission-toast');
@@ -589,15 +589,15 @@ function showToast() {
     setTimeout(function () { toast.hidden = true; }, 4000);
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   MODAL STATE  â€“ shared between "show" & "submit" handlers
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────────────────────────────────────────────────────────────────────
+   MODAL STATE  – shared between "show" & "submit" handlers
+───────────────────────────────────────────────────────────────────────────── */
 var _modal = {};
 var _viewAppId = 0;
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/* ─────────────────────────────────────────────────────────────────────────────
    DOM READY
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+───────────────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function () {
     var canSubmitApplications = document.body && document.body.dataset
         ? document.body.dataset.applicationsCanSubmit === '1'
@@ -715,11 +715,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function showCenterNotice(messageText) {
         if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
-            window.alert(messageText || 'Sf??ï¿½a.');
+            window.alert(messageText || 'Sf??�a.');
             return;
         }
 
-        applicationNoticeMessage.textContent = messageText || 'Sf??ï¿½a.';
+        applicationNoticeMessage.textContent = messageText || 'Sf??�a.';
         applicationNoticeBackdrop.classList.add('is-visible');
         applicationNoticeBox.classList.add('is-visible');
 
@@ -843,7 +843,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function getSubmissionFilesValidationMessage(files, requireAtLeastOne) {
         var selectedFiles = Array.isArray(files) ? files : [];
         if (requireAtLeastOne && selectedFiles.length === 0) {
-            return '?a?a?a?? ep????te t??????st?? ??a a??e?? p??? t?? ?p?ï¿½???.';
+            return '?a?a?a?? ep????te t??????st?? ??a a??e?? p??? t?? ?p?�???.';
         }
 
         if (selectedFiles.length > MAX_SUBMISSION_FILES) {
@@ -854,7 +854,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var fileName = String(selectedFiles[i].name || '');
             var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
             if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
-                return '?p?t?ep?ï¿½e??? t?p?? a??e???: pdf, doc, docx, jpg, jpeg, png.';
+                return '?p?t?ep?�e??? t?p?? a??e???: pdf, doc, docx, jpg, jpeg, png.';
             }
         }
 
@@ -973,14 +973,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!canSubmitApplications) {
-            viewModalSubmitBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>???s????? ï¿½? d?a??s?ï¿½?';
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>???s????? �? d?a??s?�?';
             return;
         }
 
         var normalizedMode = normalizeSubmissionMode(mode);
         viewModalSubmitBtn.innerHTML = normalizedMode === 'manual'
-            ? '<i class="fas fa-keyboard mr-1"></i>?p?ï¿½??? Online ??t?s??'
-            : '<i class="fas fa-paper-plane mr-1"></i>?p?ï¿½??? ??t?s??';
+            ? '<i class="fas fa-keyboard mr-1"></i>?p?�??? Online ??t?s??'
+            : '<i class="fas fa-paper-plane mr-1"></i>?p?�??? ??t?s??';
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1016,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var submitBtn = card.querySelector('.submit-btn');
         if (!submitBtn || submitBtn.disabled) {
             var reason = submitBtn ? (submitBtn.dataset.unavailableReason || '') : '';
-            showUnavailableBox(reason || '? a?t?s? de? ??e? a????e? a??ï¿½a.');
+            showUnavailableBox(reason || '? a?t?s? de? ??e? a????e? a??�a.');
             return;
         }
 
@@ -1082,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (viewManualFields) {
-            viewManualFields.innerHTML = '<div class="text-muted small py-2">F??t?s? ped??? f??ï¿½a?...</div>';
+            viewManualFields.innerHTML = '<div class="text-muted small py-2">F??t?s? ped??? f??�a?...</div>';
         }
 
         _modal.manualFieldsLoading = true;
@@ -1106,7 +1106,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var uploadNoteEl = document.querySelector('#application-view-upload .application-view-upload-note');
         if (uploadNoteEl) {
-            uploadNoteEl.innerHTML = '?pa?te?ta? t??????st?? 1 a??e??. ?p?t?ep?ï¿½e??? t?p??: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.';
+            uploadNoteEl.innerHTML = '?pa?te?ta? t??????st?? 1 a??e??. ?p?t?ep?�e??? t?p??: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.';
         }
 
         if (viewModalSubmitBtn) {
@@ -1124,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (submitButton.disabled || submitButton.dataset.unavailableReason) {
                     e.preventDefault();
                     e.stopPropagation();
-                    showUnavailableBox(submitButton.dataset.unavailableReason || '? a?t?s? de? e??a? d?a??s?ï¿½?.');
+                    showUnavailableBox(submitButton.dataset.unavailableReason || '? a?t?s? de? e??a? d?a??s?�?.');
                 }
                 return;
             }
@@ -1193,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!_modal.appId) return;
 
             if (!canSubmitApplications) {
-                showCenterNotice('? ?p?ï¿½??? de? e??a? d?a??s?ï¿½? a?t? t? st??ï¿½?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???ï¿½?ste ?a??.');
+                showCenterNotice('? ?p?�??? de? e??a? d?a??s?�? a?t? t? st??�?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???�?ste ?a??.');
                 return;
             }
 
@@ -1208,12 +1208,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (selectedMode === 'manual') {
                 if (_modal.manualFieldsLoading) {
-                    showCenterNotice('G??eta? f??t?s? t?? ped???. ?e??ï¿½??ete ???a de?te???epta ?a? d???ï¿½?ste ?a??.');
+                    showCenterNotice('G??eta? f??t?s? t?? ped???. ?e??�??ete ???a de?te???epta ?a? d???�?ste ?a??.');
                     return;
                 }
 
                 if (!viewManualForm) {
-                    showCenterNotice('?e? e??a? d?a??s?ï¿½? ? online f??ï¿½a a?t? t? st??ï¿½?.');
+                    showCenterNotice('?e? e??a? d?a??s?�? ? online f??�a a?t? t? st??�?.');
                     return;
                 }
 
@@ -1270,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 setApplicationSubmitButtonText(selectedMode);
 
                 if (!json.success) {
-                    showCenterNotice(json.message || 'Sf??ï¿½a.');
+                    showCenterNotice(json.message || 'Sf??�a.');
                     return;
                 }
 
@@ -1298,12 +1298,12 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(function () {
                 viewModalSubmitBtn.disabled = false;
                 setApplicationSubmitButtonText(selectedMode);
-                showCenterNotice('Sf??ï¿½a d??t???. ?eï¿½a???e?te ?t? ? d?a??ï¿½?st?? t???e? ?a? d???ï¿½?ste ?a??.');
+                showCenterNotice('Sf??�a d??t???. ?e�a???e?te ?t? ? d?a??�?st?? t???e? ?a? d???�?ste ?a??.');
             });
         });
     }
 
-    /* â”€â”€ Anoigma modal: populate header + dynamic fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Anoigma modal: populate header + dynamic fields ─────────────────── */
     $('#submitModal').on('show.bs.modal', function (event) {
         var btn      = $(event.relatedTarget);
         var appId    = parseInt(btn.data('application-id'), 10);
@@ -1408,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* â”€â”€ Clear form on modal kleisimo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Clear form on modal kleisimo ─────────────────────────────────────── */
     $('#submitModal').on('hidden.bs.modal', function () {
         var container = document.getElementById('modal-dynamic-fields');
         if (container) container.innerHTML = '';
@@ -1417,10 +1417,10 @@ document.addEventListener('DOMContentLoaded', function () {
         _modal = {};
     });
 
-    /* â”€â”€ Submit button: POST to PHP via anaktisi() â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Submit button: POST to PHP via anaktisi() ───────────────────────── */
     document.getElementById('modal-submit-btn').addEventListener('click', function () {
         if (!canSubmitApplications) {
-            showCenterNotice('? ?p?ï¿½??? de? e??a? d?a??s?ï¿½? a?t? t? st??ï¿½?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???ï¿½?ste ?a??.');
+            showCenterNotice('? ?p?�??? de? e??a? d?a??s?�? a?t? t? st??�?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???�?ste ?a??.');
             return;
         }
 
@@ -1474,10 +1474,10 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(function (json) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?ï¿½???';
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?�???';
 
             if (!json.success) {
-                showCenterNotice(json.message || 'Sf??ï¿½a.');
+                showCenterNotice(json.message || 'Sf??�a.');
                 return;
             }
 
@@ -1495,16 +1495,16 @@ document.addEventListener('DOMContentLoaded', function () {
             addSubmissionRow({
                 appId:        _modal.appId,
                 appTitle:     _modal.appTitle,
-                studentName:  data.student_name  || 'â€”',
-                studentClass: data.student_class || 'â€”',
+                studentName:  data.student_name  || '—',
+                studentClass: data.student_class || '—',
                 submissionMode: data._submission_mode || 'manual',
                 submittedDate: new Date().toLocaleDateString('el-GR')
             });
         })
         .catch(function (err) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?ï¿½???';
-            showCenterNotice('Sf??ï¿½a d??t???. ?eï¿½a???e?te ?t? ? d?a??ï¿½?st?? t???e? ?a? d???ï¿½?ste ?a??.');
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?�???';
+            showCenterNotice('Sf??�a d??t???. ?e�a???e?te ?t? ? d?a??�?st?? t???e? ?a? d???�?ste ?a??.');
         });
     });
 
@@ -1537,7 +1537,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* â”€â”€ Provoli submission details (event delegation on tbody) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── Provoli submission details (event delegation on tbody) ──────────── */
     var tbody = document.getElementById('submissions-tbody');
     if (tbody) {
         tbody.addEventListener('click', function (e) {
@@ -1560,7 +1560,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     var parsed = JSON.parse(raw);
                     showViewModalFromData(title, parsed, status, submittedAt);
                 } catch (err) {
-                    showCenterNotice('?e? e??a? d??at? ? eï¿½f???s? ?ept?ï¿½e?e???.');
+                    showCenterNotice('?e? e??a? d??at? ? e�f???s? ?ept?�e?e???.');
                 }
             }
 

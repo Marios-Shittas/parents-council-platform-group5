@@ -1,11 +1,6 @@
-// Arxeio: public\assets\js\two-factor-authentication.jsx
-// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
-// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
-// React formaa gia elegxo kodika two factor authentication.
 const { useState } = React;
 
 function TwoFactorForm() {
-  // Kratame state gia kodika, feedback kai loading flags gia ta dio async actions.
   const [code, setCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState(window.initialTwoFactorSuccess || '');
@@ -13,7 +8,6 @@ function TwoFactorForm() {
   const [isResending, setIsResending] = useState(false);
 
   const sendCodeAgain = async () => {
-    // POST sto service simainei "steile neo 2FA code" gia to trexon session.
     setErrorMessage('');
     setSuccessMessage('');
     setIsResending(true);
@@ -40,7 +34,6 @@ function TwoFactorForm() {
   };
 
   const handleSubmit = async (event) => {
-    // PUT sto service simainei "elegxe ton kodika pou evale o xristis".
     event.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
@@ -92,7 +85,6 @@ function TwoFactorForm() {
   };
 
   const handleCodeKeyDown = (event) => {
-    // Epitetai submit me Enter mono otan o kodikas exei to sosto mikos.
     if (event.key === 'Enter') {
       event.preventDefault();
       if (!isLoading && code.trim().length === 8) {

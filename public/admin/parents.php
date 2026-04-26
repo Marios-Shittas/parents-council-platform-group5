@@ -1,23 +1,16 @@
 <?php
-// Arxeio: public\admin\parents.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
-// Admin selida gia epexergasia tou periexomenou "Syndesmos Goneon".
-// Apo edo o admin allazei text, lista, board archive kai stoixeia pou fainontai sto public/goneas view.
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// No-cache gia na min meinei admin content ston browser meta apo logout.
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
 header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    // An den einai admin, gyrnaei sto login kai stamataei i selida.
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
 }
@@ -50,7 +43,6 @@ function parentsAdminFixedPageHeaderIcon()
 // Leitourgia parentsAdminTextareaToList: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToList($value)
 {
-    // Kathe grammi tou textarea ginetai ena item sti lista, ta kena agnoountai.
     $lines = explode("\n", parentsAdminTextarea($value));
     $items = [];
 
@@ -67,7 +59,6 @@ function parentsAdminTextareaToList($value)
 // Leitourgia parentsAdminTextareaToRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToRows($value, array $keys)
 {
-    // Xrisimopoieitai gia pinakes pou grafontai sto textarea me separator "|".
     $lines = explode("\n", parentsAdminTextarea($value));
     $rows = [];
 
@@ -105,7 +96,6 @@ function parentsAdminListToTextarea($items)
 // Leitourgia parentsAdminRowsToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminRowsToTextarea($rows, array $keys)
 {
-    // Kanei ta apothikevmena rows pali text gia na ta dei/epexergastei o admin sto textarea.
     if (!is_array($rows)) {
         return '';
     }
@@ -137,7 +127,6 @@ function parentsAdminRowsToTextarea($rows, array $keys)
 // Leitourgia parentsAdminMergeBoardArchiveReferenceRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
-    // Krataei osa exei idi o admin kai prosthetei missing reference years apo ta apothikevmena dedomena.
     $mergedRows = is_array($rows) ? $rows : [];
     $existingYears = [];
 
@@ -178,7 +167,6 @@ function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenc
 // Leitourgia parentsAdminGroupBoardArchiveRowsByYear: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
 {
-    // Omadopoiei to archive ana xronia gia na fanei kathara sto pelegxo/UI.
     $groupedRows = [];
 
     foreach ($rows as $row) {

@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\services\SessionCheck.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * Endpoint elegxou syndedemenis synedrias
  * Epistrefei JSON pou deixnei an o xristis paramenei syndedemenos

@@ -1,7 +1,4 @@
-<?php
-// Arxeio: app\services\LoginService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
+<?php 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

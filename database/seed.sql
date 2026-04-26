@@ -1,6 +1,3 @@
--- Arxeio: database\seed.sql
--- Rolos: Periexei SQL schema i seed data gia ti vasi dedomenon tou project.
--- Simeiosi: Trexei se database context, ara allages edo theloun prosoxi se schema/data compatibility.
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
@@ -24,7 +21,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Vasi: `parents_council`
+-- Database: `parents_council`
 --
 
 
@@ -34,7 +31,7 @@ INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcem
 (3, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
 
 --
--- Dumping dedomena gia pinakas `AnnouncementAttachments`
+-- Dumping data for table `AnnouncementAttachments`
 --
 
 INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
@@ -43,7 +40,7 @@ INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file
 (3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
 
 --
--- Dumping dedomena gia pinakas `AnnouncementsImages`
+-- Dumping data for table `AnnouncementsImages`
 --
 
 INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path`) VALUES
@@ -53,7 +50,7 @@ INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path
 (4, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639c39c_1776170851.png');
 
 --
--- Dumping dedomena gia pinakas `Xristes`
+-- Dumping data for table `Users`
 --
 
 INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_number`, `number_of_children`, `role`, `account_status`, `token`, `token_expiry`, `created_at`) VALUES
@@ -62,7 +59,7 @@ INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_n
 (3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '+35799445566', 1, 'parent', 'waiting_payment', NULL, NULL, '2026-04-11 19:03:11');
 
 --
--- Dumping dedomena gia pinakas `ApplicationTemplates`
+-- Dumping data for table `ApplicationTemplates`
 --
 
 INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `description`, `category`, `form_schema`, `is_system_template`, `created_at`, `updated_at`) VALUES
@@ -70,7 +67,7 @@ INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `desc
 (2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
 
 --
--- Dumping dedomena gia pinakas `Aitiseis`
+-- Dumping data for table `Applications`
 --
 
 INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`, `title`, `application_description`, `description`, `submission_type`, `academic_year`, `open_date`, `due_date`, `status`, `allow_online_submission`, `allow_file_submission`, `require_signature`, `form_schema`, `target_audience`, `created_by`, `created_at`, `updated_at`) VALUES
@@ -78,7 +75,7 @@ INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`
 (2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11');
 
 --
--- Dumping dedomena gia pinakas `ApplicationsDocuments`
+-- Dumping data for table `ApplicationsDocuments`
 --
 
 INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
@@ -86,7 +83,7 @@ INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_p
 (2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
 
 --
--- Dumping dedomena gia pinakas `Children`
+-- Dumping data for table `Children`
 --
 
 INSERT INTO `Children` (`child_id`, `user_id`, `name`, `surname`, `date_of_birth`, `school_class`) VALUES
@@ -95,7 +92,7 @@ INSERT INTO `Children` (`child_id`, `user_id`, `name`, `surname`, `date_of_birth
 (3, 3, 'Mike', 'Smith', '2016-02-11', '4A');
 
 --
--- Dumping dedomena gia pinakas `EpikoinoniaPageSections`
+-- Dumping data for table `EpikoinoniaPageSections`
 --
 
 INSERT INTO `EpikoinoniaPageSections` (`section_id`, `section_key`, `section_title`, `section_subtitle`, `content_json`, `updated_at`) VALUES
@@ -112,7 +109,7 @@ INSERT INTO EventsImages (ev_image_id, event_id, image_path) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg');
 
 --
--- Dumping dedomena gia pinakas `HomeBannerSlides`
+-- Dumping data for table `HomeBannerSlides`
 --
 
 INSERT INTO `HomeBannerSlides` (`slide_id`, `image_path`, `alt_text`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
@@ -121,7 +118,7 @@ INSERT INTO `HomeBannerSlides` (`slide_id`, `image_path`, `alt_text`, `sort_orde
 (3, '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 3', 3, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27');
 
 --
--- Dumping dedomena gia pinakas `HomePageSections`
+-- Dumping data for table `HomePageSections`
 --
 
 INSERT INTO `HomePageSections` (`section_id`, `section_key`, `section_title`, `section_subtitle`, `content_json`, `updated_at`) VALUES
@@ -132,7 +129,7 @@ INSERT INTO `HomePageSections` (`section_id`, `section_key`, `section_title`, `s
 (5, 'banner_section', 'Banner Αρχικής', '', '{\"slides\":[{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de461935c6e8.55358859.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 1\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de49201f29e2.96931567.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 2\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de47d4c95ee6.67743613.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 3\",\"hidden\":false}]}', '2026-04-14 14:03:12');
 
 --
--- Dumping dedomena gia pinakas `Logs`
+-- Dumping data for table `Logs`
 --
 
 INSERT INTO `Logs` (`log_id`, `user_id`, `action`, `description`, `created_at`) VALUES
@@ -156,14 +153,14 @@ INSERT INTO `Logs` (`log_id`, `user_id`, `action`, `description`, `created_at`) 
 (18, 1, 'ADMIN_USER_DELETED', 'Deleted user #5 (mariosshittas@gmail.com).', '2026-04-14 15:38:55');
 
 --
--- Dumping dedomena gia pinakas `Orders`
+-- Dumping data for table `Orders`
 --
 
 INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order_status`) VALUES
 (1, 2, 0.00, '2026-04-11 22:21:41', 'pending');
 
 --
--- Dumping dedomena gia pinakas `ParentsPageGalleryImages`
+-- Dumping data for table `ParentsPageGalleryImages`
 --
 
 INSERT INTO `ParentsPageGalleryImages` (`image_id`, `full_image_path`, `thumb_image_path`, `alt_text`, `sort_order`, `created_at`) VALUES
@@ -175,7 +172,7 @@ INSERT INTO `ParentsPageGalleryImages` (`image_id`, `full_image_path`, `thumb_im
 (6, 'https://gym-ag-athanasios-lem.schools.ac.cy/data/uploads/documents/2025-2026/march/1/2.jpg', 'https://gym-ag-athanasios-lem.schools.ac.cy/data/thumbs/documents/2025-2026/march/1/i18npic.C240x240.2.jpg', 'Φωτογραφικό υλικό σχολείου', 6, '2026-04-11 19:03:11');
 
 --
--- Dumping dedomena gia pinakas `ParentsPageSections`
+-- Dumping data for table `ParentsPageSections`
 --
 
 INSERT INTO `ParentsPageSections` (`section_id`, `section_key`, `section_title`, `section_subtitle`, `content_json`, `updated_at`) VALUES
@@ -190,7 +187,7 @@ INSERT INTO `ParentsPageSections` (`section_id`, `section_key`, `section_title`,
 (9, 'board_archive_section', 'Συμβούλια ανά Σχολική Χρονιά', 'Αρχείο προηγούμενων και τρεχουσών συνθέσεων του Διοικητικού Συμβουλίου.', '{\"eyebrow\":\"Αρχείο Συμβουλίων\",\"year_label\":\"Σχολική Χρονιά\",\"position_label\":\"Θέση\",\"name_label\":\"Ονοματεπώνυμο\",\"rows\":[{\"year\":\"2025-2026\",\"role\":\"ΠΡΟΕΔΡΟΣ\",\"name\":\"Μιχάλης Αριστείδου\"},{\"year\":\"2025-2026\",\"role\":\"ΑΝΤΙΠΡΟΕΔΡΟΣ\",\"name\":\"Μάριος Γαβριηλίδης\"},{\"year\":\"2025-2026\",\"role\":\"ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Βάσια Μέζου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Σπυρούλα Χαραλάμπους\"},{\"year\":\"2025-2026\",\"role\":\"ΤΑΜΙΑΣ\",\"name\":\"Γιάννα Παπαϊωάννου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΤΑΜΙΑΣ\",\"name\":\"Αρίστη Θεοδοσίου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χαρά Χριστοδούλου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χρίστος Αριστοδήμου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Πέτρος Κοντογιάννης\"}]}', '2026-04-11 19:03:11');
 
 --
--- Dumping dedomena gia pinakas `Payments`
+-- Dumping data for table `Payments`
 --
 
 INSERT INTO `Payments` (`payment_id`, `user_id`, `amount`, `payment_date`, `payment_status`, `payment_type`, `transaction_id`) VALUES
@@ -199,14 +196,14 @@ INSERT INTO `Payments` (`payment_id`, `user_id`, `amount`, `payment_date`, `paym
 (102, 2, 15.00, '2026-04-13 20:27:08', 'pending', 'insurance', NULL);
 
 --
--- Dumping dedomena gia pinakas `PricingSettings`
+-- Dumping data for table `PricingSettings`
 --
 
 INSERT INTO `PricingSettings` (`id`, `subscription_price`, `insurance_price`, `updated_at`) VALUES
 (1, 20.00, 7.50, '2026-04-11 19:03:11');
 
 --
--- Dumping dedomena gia pinakas `Products`
+-- Dumping data for table `Products`
 --
 
 INSERT INTO `Products` (`product_id`, `product_name`, `product_description`, `price`) VALUES
@@ -215,7 +212,7 @@ INSERT INTO `Products` (`product_id`, `product_name`, `product_description`, `pr
 (3, 'Notebook', 'A4 lined notebook', 3.50);
 
 --
--- Dumping dedomena gia pinakas `ProductsImages`
+-- Dumping data for table `ProductsImages`
 --
 
 INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
@@ -224,7 +221,7 @@ INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
 (3, 3, '/parents-council-platform-group5/public/assets/Products_img/default-product.svg');
 
 --
--- Dumping dedomena gia pinakas `Ypovoles`
+-- Dumping data for table `Submissions`
 --
 
 INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `sub_status`) VALUES
@@ -232,7 +229,7 @@ INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_conte
 (2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', 'waiting');
 
 --
--- Dumping dedomena gia pinakas `SystemSchedule`
+-- Dumping data for table `SystemSchedule`
 --
 
 INSERT INTO `SystemSchedule` (`ss_id`, `feature`, `start_date`, `end_date`, `ss_status`) VALUES
@@ -240,7 +237,7 @@ INSERT INTO `SystemSchedule` (`ss_id`, `feature`, `start_date`, `end_date`, `ss_
 (2, 'registration', '2026-03-01 00:00:00', '2026-03-31 23:59:59', 'active');
 
 --
--- Dumping dedomena gia pinakas `UsefulInmorfiionSections`
+-- Dumping data for table `UsefulInformationSections`
 --
 
 INSERT INTO `UsefulInformationSections` (`section_id`, `section_key`, `section_title`, `section_subtitle`, `content_json`, `updated_at`) VALUES

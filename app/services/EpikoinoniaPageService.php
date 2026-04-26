@@ -1,10 +1,7 @@
 <?php
-// Arxeio: app\services\EpikoinoniaPageService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * EpikoinoniaPageService
- * Sxolio: voithitiko sxolio gia ton parakato kodika.
+ * Αποθηκεύει και ανακτά το περιεχόμενο της δημόσιας σελίδας "Επικοινωνία".
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -64,7 +61,7 @@ class EpikoinoniaPageService
         $this->lastError = '';
 
         if (!isset($this->defaultSections[$sectionKey])) {
-            $this->lastError = 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ section key.';
+            $this->lastError = 'Μη έγκυρο section key.';
             return false;
         }
 
@@ -74,19 +71,19 @@ class EpikoinoniaPageService
 
         $contentJson = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($contentJson === false) {
-            $this->lastError = 'Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î¼ÎµÏ„Î±Ï„ÏÎ¿Ï€Î®Ï‚ Î´ÎµÎ´Î¿Î¼Î­Î½Ï‰Î½ ÏƒÎµ JSON.';
+            $this->lastError = 'Αποτυχία μετατροπής δεδομένων σε JSON.';
             return false;
         }
 
         $existsStmt = $this->conn->prepare('SELECT section_id FROM EpikoinoniaPageSections WHERE section_key = ? LIMIT 1');
         if (!$existsStmt) {
-            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare lookup: ' . $this->conn->error;
+            $this->lastError = 'Σφάλμα prepare lookup: ' . $this->conn->error;
             return false;
         }
 
         $existsStmt->bind_param('s', $sectionKey);
         if (!$existsStmt->execute()) {
-            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± execute lookup: ' . $existsStmt->error;
+            $this->lastError = 'Σφάλμα execute lookup: ' . $existsStmt->error;
             return false;
         }
 
@@ -98,7 +95,7 @@ class EpikoinoniaPageService
                     WHERE section_key = ?';
             $stmt = $this->conn->prepare($sql);
             if (!$stmt) {
-                $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare update: ' . $this->conn->error;
+                $this->lastError = 'Σφάλμα prepare update: ' . $this->conn->error;
                 return false;
             }
 
@@ -108,7 +105,7 @@ class EpikoinoniaPageService
                     VALUES (?, ?, ?, ?)';
             $stmt = $this->conn->prepare($sql);
             if (!$stmt) {
-                $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± prepare insert: ' . $this->conn->error;
+                $this->lastError = 'Σφάλμα prepare insert: ' . $this->conn->error;
                 return false;
             }
 
@@ -116,7 +113,7 @@ class EpikoinoniaPageService
         }
 
         if (!$stmt->execute()) {
-            $this->lastError = 'Î£Ï†Î¬Î»Î¼Î± Î±Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·Ï‚: ' . $stmt->error;
+            $this->lastError = 'Σφάλμα αποθήκευσης: ' . $stmt->error;
             return false;
         }
 
@@ -168,28 +165,28 @@ class EpikoinoniaPageService
     {
         return [
             'page_header' => [
-                'title' => 'Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±',
-                'subtitle' => 'Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î®ÏƒÏ„Îµ Î¼Î±Î¶Î¯ Î¼Î±Ï‚ Î³Î¹Î± Î¿Ï€Î¿Î¹Î±Î´Î®Ï€Î¿Ï„Îµ ÎµÏÏŽÏ„Î·ÏƒÎ· Î® Ï€Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯Î±.',
+                'title' => 'Επικοινωνία',
+                'subtitle' => 'Επικοινωνήστε μαζί μας για οποιαδήποτε ερώτηση ή πληροφορία.',
                 'content' => [
-                    'eyebrow' => 'Î¥Ï€Î¿ÏƒÏ„Î®ÏÎ¹Î¾Î· ÎšÎ±Î¹ Î£Ï„Î¿Î¹Ï‡ÎµÎ¯Î±',
+                    'eyebrow' => 'Υποστήριξη Και Στοιχεία',
                     'icon' => 'fas fa-envelope',
                 ],
             ],
             'contact_info' => [
-                'title' => 'Î Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚ Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±Ï‚',
-                'subtitle' => 'Î’ÏÎµÎ¯Ï„Îµ Ï„Î· Î´Î¹ÎµÏÎ¸Ï…Î½ÏƒÎ·, Ï„Î± Ï„Î·Î»Î­Ï†Ï‰Î½Î±, Ï„Î¿ email ÎºÎ±Î¹ Ï„Î¿ Ï‰ÏÎ¬ÏÎ¹Î¿ Ï„Î·Ï‚ ÏƒÏ‡Î¿Î»Î¹ÎºÎ®Ï‚ Î¼Î¿Î½Î¬Î´Î±Ï‚.',
+                'title' => 'Πληροφορίες Επικοινωνίας',
+                'subtitle' => 'Βρείτε τη διεύθυνση, τα τηλέφωνα, το email και το ωράριο της σχολικής μονάδας.',
                 'content' => [
                     'cards' => [
                         [
-                            'title' => 'Î”Î¹ÎµÏÎ¸Ï…Î½ÏƒÎ·',
-                            'text' => "Î§ÏÎ¯ÏƒÏ„Î¿Ï… Î Î±Ï€Î±Î´Î¿ÏÏÎ· 50\n4105 Î†Î³Î¹Î¿Ï‚ Î‘Î¸Î±Î½Î¬ÏƒÎ¹Î¿Ï‚, Î›ÎµÎ¼ÎµÏƒÏŒÏ‚",
+                            'title' => 'Διεύθυνση',
+                            'text' => "Χρίστου Παπαδούρη 50\n4105 Άγιος Αθανάσιος, Λεμεσός",
                             'icon' => 'fas fa-map-marker-alt',
                             'link_label' => '',
                             'link_url' => '',
                         ],
                         [
-                            'title' => 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿',
-                            'text' => "Î¤Î·Î»Î­Ï†Ï‰Î½Î±: 25694750, 25694752\nÎ¤Î·Î»ÎµÎ¿Î¼Î¿Î¹ÏŒÏ„Ï…Ï€Î¿: 25694755",
+                            'title' => 'Τηλέφωνο',
+                            'text' => "Τηλέφωνα: 25694750, 25694752\nΤηλεομοιότυπο: 25694755",
                             'icon' => 'fas fa-phone',
                             'link_label' => '',
                             'link_url' => '',
@@ -202,8 +199,8 @@ class EpikoinoniaPageService
                             'link_url' => 'mailto:gym-ag-athanasios-lem@schools.ac.cy',
                         ],
                         [
-                            'title' => 'ÎÏÎµÏ‚ Î›ÎµÎ¹Ï„Î¿Ï…ÏÎ³Î¯Î±Ï‚',
-                            'text' => 'Î”ÎµÏ…-Î Î±Ï - 7.30-13.35',
+                            'title' => 'Ώρες Λειτουργίας',
+                            'text' => 'Δευ-Παρ - 7.30-13.35',
                             'icon' => 'fas fa-clock',
                             'link_label' => '',
                             'link_url' => '',
@@ -212,24 +209,24 @@ class EpikoinoniaPageService
                 ],
             ],
             'map_section' => [
-                'title' => 'Î’ÏÎµÎ¯Ï„Îµ Î¼Î±Ï‚ ÏƒÏ„Î¿ Î§Î¬ÏÏ„Î·',
-                'subtitle' => 'Î— Ï„Î¿Ï€Î¿Î¸ÎµÏƒÎ¯Î± Ï„Î·Ï‚ ÏƒÏ‡Î¿Î»Î¹ÎºÎ®Ï‚ Î¼Î¿Î½Î¬Î´Î±Ï‚ ÏƒÏ„Î¿ Google Maps.',
+                'title' => 'Βρείτε μας στο Χάρτη',
+                'subtitle' => 'Η τοποθεσία της σχολικής μονάδας στο Google Maps.',
                 'content' => [
                     'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3279.4575341666614!2d33.0611131!3d34.7188599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14e734bc13013dc9%3A0x9c01ea2ef75a5b4d!2zzpPPhc68zr3OrM-DzrnOvyDOkc6zzq_Ov8-FIM6RzrjOsc69zrHPg86vzr_PhQ!5e0!3m2!1sel!2s!4v1773496500123!5m2!1sel!2s',
                 ],
             ],
             'form_section' => [
-                'title' => 'Î£Ï„ÎµÎ¯Î»Ï„Îµ Î¼Î±Ï‚ ÎœÎ®Î½Ï…Î¼Î±',
-                'subtitle' => 'Î£Ï…Î¼Ï€Î»Î·ÏÏŽÏƒÏ„Îµ Ï„Î· Ï†ÏŒÏÎ¼Î± ÎºÎ±Î¹ Î¸Î± ÎµÏ€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î®ÏƒÎ¿Ï…Î¼Îµ Î¼Î±Î¶Î¯ ÏƒÎ±Ï‚ Ï„Î¿ ÏƒÏ…Î½Ï„Î¿Î¼ÏŒÏ„ÎµÏÎ¿ Î´Ï…Î½Î±Ï„ÏŒ.',
+                'title' => 'Στείλτε μας Μήνυμα',
+                'subtitle' => 'Συμπληρώστε τη φόρμα και θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό.',
                 'content' => [
                     'description' => '',
-                    'button_text' => 'Î‘Ï€Î¿ÏƒÏ„Î¿Î»Î® ÎœÎ·Î½ÏÎ¼Î±Ï„Î¿Ï‚',
-                    'success_message' => 'Î¤Î¿ Î¼Î®Î½Ï…Î¼Î¬ ÏƒÎ±Ï‚ Î»Î®Ï†Î¸Î·ÎºÎµ. Î˜Î± ÏƒÎ±Ï‚ Î±Ï€Î±Î½Ï„Î®ÏƒÎ¿Ï…Î¼Îµ Ï„Î¿ ÏƒÏ…Î½Ï„Î¿Î¼ÏŒÏ„ÎµÏÎ¿ Î´Ï…Î½Î±Ï„ÏŒ.',
+                    'button_text' => 'Αποστολή Μηνύματος',
+                    'success_message' => 'Το μήνυμά σας λήφθηκε. Θα σας απαντήσουμε το συντομότερο δυνατό.',
                 ],
             ],
             'social_section' => [
-                'title' => 'Î’ÏÎµÎ¯Ï„Îµ Î¼Î±Ï‚ ÏƒÏ„Î± social networks',
-                'subtitle' => 'Î‘ÎºÎ¿Î»Î¿Ï…Î¸Î®ÏƒÏ„Îµ Ï„Î¹Ï‚ ÎµÏ€Î¯ÏƒÎ·Î¼ÎµÏ‚ ÏƒÎµÎ»Î¯Î´ÎµÏ‚ Î¼Î±Ï‚ Î³Î¹Î± Î½Î­Î± ÎºÎ±Î¹ ÎµÎ½Î·Î¼ÎµÏÏŽÏƒÎµÎ¹Ï‚.',
+                'title' => 'Βρείτε μας στα social networks',
+                'subtitle' => 'Ακολουθήστε τις επίσημες σελίδες μας για νέα και ενημερώσεις.',
                 'content' => [
                     'items' => [
                         [

@@ -1,9 +1,4 @@
-// Arxeio: public\assets\js\subscription-result.jsx
-// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
-// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
-// React selida apotelesmatos syndromis meta tin epistrofi apo tin pliromi.
 function SubscriptionResultPage() {
-    // To state kratataei loading/result/error gia tin epivevaiosi tis pliromis.
     const [state, setState] = React.useState({
         type: "loading",
         title: "Επεξεργασία πληρωμής",
@@ -13,7 +8,6 @@ function SubscriptionResultPage() {
     });
 
     React.useEffect(() => {
-        // Meta to redirect apo JCC, stelnei ta params sto backend gia epivevaiosi.
         const params = window.SUBSCRIPTION_RESULT_PARAMS || {};
         const query = new URLSearchParams(params).toString();
         const endpoint = "/parents-council-platform-group5/app/services/SubscriptionJcc.php?" + query;
@@ -79,7 +73,6 @@ function SubscriptionResultPage() {
     }, []);
 
     function renderIcon(type) {
-        // Epilegei symbolo me vasi tin katastasi pou epestrepse to backend.
         if (type === "success") return "\u2713";
         if (type === "pending") return "!";
         if (type === "failed") return "\u00d7";

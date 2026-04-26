@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\subscription-result.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 $orderId = trim((string) ($_GET['orderId'] ?? $_GET['mdOrder'] ?? ''));

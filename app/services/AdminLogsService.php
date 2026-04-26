@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\services\AdminLogsService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');

@@ -1,14 +1,11 @@
-/* Arxeio: public\assets\css\register.css
-   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
-   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Page wrapper ── */
 .register-page {
     background: #f0f2f5;
     min-height: 60vh;
     padding: 32px 0 48px;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Intro text ── */
 .register-intro {
     color: #4b5563;
     font-size: 0.88rem;
@@ -19,7 +16,7 @@
     color: #1f2937;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Section card ── */
 .register-section-card {
     background: #ffffff;
     border: 1px solid #e2e6ea;
@@ -33,7 +30,7 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Card header ── */
 .register-card-header {
     display: flex;
     align-items: center;
@@ -79,7 +76,7 @@
     margin: 0;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Labels ── */
 .register-section-card label {
     color: #6b7280;
     font-size: 0.7rem;
@@ -90,7 +87,7 @@
     white-space: nowrap;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Form group inline ── */
 .register-section-card .form-group-inline {
     display: flex;
     align-items: center;
@@ -113,7 +110,7 @@
     gap: 6px;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Inputs ── */
 .register-section-card input.form-control,
 .register-phone-shell {
     background: #f8f9fa !important;
@@ -187,7 +184,7 @@
     color: #dc3545;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Consent rows ── */
 .consent-row {
     display: flex;
     align-items: flex-start;
@@ -222,7 +219,7 @@
     box-shadow: 0 10px 24px rgba(34, 197, 94, 0.08);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Buttons ── */
 .btn-register-add {
     background: #fff;
     border: 1.5px dashed #cbd5e1;
@@ -273,7 +270,7 @@
     transform: translateY(-1px);
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Success modal ── */
 .register-success-modal {
     position: fixed;
     inset: 0;
@@ -377,7 +374,7 @@
     }
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ── Responsive ── */
 @media (max-width: 576px) {
     .register-page {
         padding: 20px 0 30px;

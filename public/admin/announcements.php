@@ -1,11 +1,8 @@
 <?php
-// Arxeio: public\admin\announcements.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 /**
- * Sxolio: voithitiko sxolio gia ton parakato kodika.
- * Sxolio: voithitiko sxolio gia ton parakato kodika.
- * Sxolio: voithitiko sxolio gia ton parakato kodika.
+ * Σελίδα διαχείρισης ανακοινώσεων (admin)
+ * Εδώ ο διαχειριστής μπορεί να δημιουργήσει, να αλλάξει, να διαγράψει
+ * ανακοινώσεις και να ανεβάσει εικόνες.
  */
 
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
@@ -248,11 +245,11 @@ $message = $_SESSION['flash_message'] ?? '';
 $messageType = $_SESSION['flash_message_type'] ?? '';
 unset($_SESSION['flash_message'], $_SESSION['flash_message_type']);
 
-// Sxolio: voithitiko sxolio gia ton parakato kodika.
+// Επεξεργασία της φόρμας όταν πατηθεί submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
+    // Δημιουργία νέας ανακοίνωσης
     if ($action === 'create') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
@@ -267,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $announcementId);
                 [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $announcementId);
                 
-                // Sxolio: voithitiko sxolio gia ton parakato kodika.
+                // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
                 if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
                     $message = "Η ανακοίνωση δημιουργήθηκε επιτυχώς";
                     if ($uploadedCount > 0) {
@@ -281,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message = 'Η ανακοίνωση δημιουργήθηκε επιτυχώς (χωρίς εικόνες ή συνημμένα).';
                 }
                 
-                // Sxolio: voithitiko sxolio gia ton parakato kodika.
+                // Αν υπάρχουν λάθη σε αρχεία, τα δείχνουμε μαζεμένα
                 $allUploadErrors = array_merge($uploadErrors, $attachmentErrors);
                 if (!empty($allUploadErrors)) {
                     $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $allUploadErrors) . '</li></ul>';
@@ -299,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
+    // Ενημέρωση υπάρχουσας ανακοίνωσης
     if ($action === 'update') {
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
@@ -313,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [$uploadedCount, $uploadErrors] = uploadAnnouncementImages($announcementsService, $id);
                 [$uploadedAttachmentsCount, $attachmentErrors] = uploadAnnouncementAttachments($announcementsService, $id);
                 
-                // Sxolio: voithitiko sxolio gia ton parakato kodika.
+                // Φτιάχνουμε μήνυμα επιτυχίας ανάλογα με το πόσες εικόνες μπήκαν
                 if ($uploadedCount > 0 || $uploadedAttachmentsCount > 0) {
                     $message = "Η ανακοίνωση ενημερώθηκε επιτυχώς";
                     if ($uploadedCount > 0) {
@@ -327,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message = 'Η ανακοίνωση ενημερώθηκε επιτυχώς!';
                 }
                 
-                // Sxolio: voithitiko sxolio gia ton parakato kodika.
+                // Αν υπάρχουν λάθη σε αρχεία, τα δείχνουμε μαζεμένα
                 $allUploadErrors = array_merge($uploadErrors, $attachmentErrors);
                 if (!empty($allUploadErrors)) {
                     $message .= '<br><strong>Προβλήματα με τα αρχεία:</strong><ul><li>' . implode('</li><li>', $allUploadErrors) . '</li></ul>';
@@ -342,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
+    // Διαγραφή ανακοίνωσης
     if ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);
 
@@ -372,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
+    // Διαγραφή μίας εικόνας από ανακοίνωση
     if ($action === 'delete_image') {
         $imageId = (int)($_POST['image_id'] ?? 0);
         $imageToDelete = null;
@@ -420,8 +417,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
-    // Sxolio: voithitiko sxolio gia ton parakato kodika.
+    // PRG: Αποθηκεύουμε μήνυμα στο session και κάνουμε redirect,
+    // ώστε το refresh να ΜΗΝ ξαναστείλει το ίδιο POST.
     if ($message === '') {
         $message = 'Η ενέργεια ολοκληρώθηκε.';
         $messageType = 'info';
@@ -450,7 +447,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Sxolio: voithitiko sxolio gia ton parakato kodika.
+// Αν ζητήθηκε edit από το URL, φορτώνουμε τα δεδομένα για επεξεργασία
 $editAnnouncement = null;
 $editImages = [];
 $editAttachments = [];
@@ -463,7 +460,7 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// Sxolio: voithitiko sxolio gia ton parakato kodika.
+// Φορτώνουμε όλες τις ανακοινώσεις για τον πίνακα
 $announcements = $announcementsService->getAllAnnouncements();
 ?>
 <!DOCTYPE html>
@@ -472,13 +469,13 @@ $announcements = $announcementsService->getAllAnnouncements();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+    <!-- Γραμματοσειρές -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 
-    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+    <!-- Βασικά styles Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
-    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+    <!-- Εικονίδια -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link rel="stylesheet" href="../assets/css/main.css">
@@ -507,7 +504,7 @@ $announcements = $announcementsService->getAllAnnouncements();
             <?php endif; ?>
         </div>
 
-        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+        <!-- Μήνυμα επιτυχίας/λάθους -->
         <?php if ($message): ?>
             <div class="alert alert-<?php echo $messageType; ?> alert-dismissible fade show" role="alert">
                 <?php echo $message; ?>
@@ -518,7 +515,7 @@ $announcements = $announcementsService->getAllAnnouncements();
         <?php endif; ?>
 
         <?php if ($editAnnouncement): ?>
-            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+            <!-- Φόρμα επεξεργασίας ανακοίνωσης -->
             <div class="card card-custom p-4 mb-4">
                 <h4 class="mb-4"><i class="fas fa-edit mr-2"></i>Επεξεργασία Ανακοίνωσης</h4>
                 
@@ -555,7 +552,7 @@ $announcements = $announcementsService->getAllAnnouncements();
                         <textarea class="form-control form-control-custom" id="edit_gdpr_notice" name="gdpr_notice" rows="3"><?php echo htmlspecialchars($editAnnouncement['gdpr_notice'] ?? getDefaultAnnouncementGdprNotice()); ?></textarea>
                     </div>
                     
-                    <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+                    <!-- Οι εικόνες που υπάρχουν ήδη -->
                     <?php if (!empty($editImages)): ?>
                         <div class="form-group">
                             <label><strong>Υπάρχουσες Εικόνες</strong></label>
@@ -643,7 +640,7 @@ $announcements = $announcementsService->getAllAnnouncements();
             </div>
         <?php endif; ?>
 
-        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+        <!-- Πίνακας με όλες τις ανακοινώσεις -->
         <div class="card card-custom">
             <div class="card-body p-0">
                 <?php if (empty($announcements)): ?>
@@ -714,7 +711,7 @@ $announcements = $announcementsService->getAllAnnouncements();
     </main>
 </div>
 
-<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+<!-- Παράθυρο (modal) για νέα ανακοίνωση -->
 <div class="modal fade modal-custom" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">

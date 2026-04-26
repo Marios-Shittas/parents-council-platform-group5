@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\admin\Orders.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 if (session_status() === PHP_SESSION_NONE) {
 	session_start();
 }
@@ -16,7 +13,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 	exit;
 }
 
-// Xeirizetai AJAX requests gia mark_order_seen
+// Handle AJAX requests for mark_order_seen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 	$action = $_POST['action'];
 	

@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\services\CartService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/product_sizes.php';

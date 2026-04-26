@@ -1,8 +1,5 @@
-// Arxeio: public\assets\js\admin_applications_pedia.js
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Sxolio: voithitiko sxolio gia ton parakato kodika.
+ * Διαχείριση πεδίων φόρμας για διαδημιουργία αιτήσεων
  */
 
 (function() {
@@ -10,13 +7,13 @@
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     const FIELD_TYPES = {
-        'text': 'ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
+        'text': 'Κείμενο',
         'email': 'Email',
-        'phone': 'Î¤Î·Î»Î­Ï†Ï‰Î½Î¿',
-        'date': 'Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±',
+        'phone': 'Τηλέφωνο',
+        'date': 'Ημερομηνία',
         'checkbox': 'Tick Box',
-        'textarea': 'ÎœÎµÎ³Î¬Î»Î¿ ÎšÎµÎ¯Î¼ÎµÎ½Î¿',
-        'file_upload': 'Î‘ÏÏ‡ÎµÎ¯Î¿'
+        'textarea': 'Μεγάλο Κείμενο',
+        'file_upload': 'Αρχείο'
     };
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -59,7 +56,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Προσθέτει ένα νέο πεδίο φόρμας στη διεπαφή
      */
     function addFormField(fieldName = '', fieldType = 'text', isRequired = true) {
         const fieldId = fieldIdCounter++;
@@ -74,7 +71,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Αφαιρεί ένα πεδίο φόρμας
      */
     function removeFormField(fieldId) {
         formFields = formFields.filter(f => f.id !== fieldId);
@@ -82,7 +79,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Ενημερώνει ένα πεδίο φόρμας
      */
     function updateFormField(fieldId, fieldName, fieldType, isRequired) {
         const field = formFields.find(f => f.id === fieldId);
@@ -95,7 +92,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Ξαναδημιουργεί τη λίστα των πεδίων στη διεπαφή
      */
     function renderFormFields() {
         if (!onlineFormFieldsContainer) return;
@@ -112,11 +109,11 @@
                     <div class="card-body py-3">
                         <div class="row g-2 align-items-end">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small mb-1">ÎŒÎ½Î¿Î¼Î± Î ÎµÎ´Î¯Î¿Ï…</label>
-                                <input type="text" class="form-control form-control-sm field-name" value="${escapeHtml(field.name)}" placeholder="Ï€.Ï‡. ÎŒÎ½Î¿Î¼Î±">
+                                <label class="form-label small mb-1">Όνομα Πεδίου</label>
+                                <input type="text" class="form-control form-control-sm field-name" value="${escapeHtml(field.name)}" placeholder="π.χ. Όνομα">
                             </div>
                             <div class="col-12 col-md-3">
-                                <label class="form-label small mb-1">Î¤ÏÏ€Î¿Ï‚</label>
+                                <label class="form-label small mb-1">Τύπος</label>
                                 <select class="form-select form-select-sm field-type">
                                     ${Object.entries(FIELD_TYPES).map(([val, label]) => 
                                         `<option value="${val}" ${field.type === val ? 'selected' : ''}>${label}</option>`
@@ -127,13 +124,13 @@
                                 <div class="form-check mt-3">
                                     <input class="form-check-input field-required" type="checkbox" id="field_required_${field.id}" ${field.required ? 'checked' : ''}>
                                     <label class="form-check-label" for="field_required_${field.id}">
-                                        <small>Î¥Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÏŒ</small>
+                                        <small>Υποχρεωτικό</small>
                                     </label>
                                 </div>
                             </div>
                             <div class="col-12 col-md-3 text-md-end">
                                 <button type="button" class="btn btn-sm btn-outline-danger remove-field-btn" data-field-id="${field.id}">
-                                    <i class="fas fa-trash-alt me-1"></i>Î”Î¹Î±Î³ÏÎ±Ï†Î®
+                                    <i class="fas fa-trash-alt me-1"></i>Διαγραφή
                                 </button>
                             </div>
                         </div>
@@ -179,7 +176,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Δημοσιεύει την αίτηση με όλα τα στοιχεία
      */
     function publishApplication() {
         const title = (createApplicationTitle?.value || '').trim();
@@ -188,19 +185,19 @@
         const closeDate = (createApplicationCloseDate?.value || '').trim();
 
         if (!title) {
-            alert('ÎŸ Ï„Î¯Ï„Î»Î¿Ï‚ Ï„Î·Ï‚ Î±Î¯Ï„Î·ÏƒÎ·Ï‚ ÎµÎ¯Î½Î±Î¹ Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÏŒÏ‚.');
+            alert('Ο τίτλος της αίτησης είναι υποχρεωτικός.');
             createApplicationTitle?.focus();
             return;
         }
 
         if (!openDate) {
-            alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚ ÎµÎ¯Î½Î±Î¹ Ï…Ï€Î¿Ï‡ÏÎµÏ‰Ï„Î¹ÎºÎ®.');
+            alert('Η ημερομηνία ανοίγματος είναι υποχρεωτική.');
             createApplicationOpenDate?.focus();
             return;
         }
 
         if (closeDate && closeDate < openDate) {
-            alert('Î— Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± ÎºÎ»ÎµÎ¹ÏƒÎ¯Î¼Î±Ï„Î¿Ï‚ Î´ÎµÎ½ Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎ¯Î½Î±Î¹ Ï€ÏÎ¹Î½ Î±Ï€ÏŒ Ï„Î·Î½ Î·Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î± Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚.');
+            alert('Η ημερομηνία κλεισίματος δεν μπορεί να είναι πριν από την ημερομηνία ανοίγματος.');
             createApplicationCloseDate?.focus();
             return;
         }
@@ -231,7 +228,7 @@
     }
 
     /**
-     * Sxolio: voithitiko sxolio gia ton parakato kodika.
+     * Απαλλαγή HTML ειδικών χαρακτήρων
      */
     function escapeHtml(text) {
         const map = {

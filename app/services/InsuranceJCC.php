@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\services\InsuranceJCC.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora payment flow, opote kratame ta redirects/responses synexi me ton provider.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -52,7 +49,7 @@ class InsuranceJccService
 
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         if ($userId <= 0) {
-            $this->redirectToProfile('failed', 'Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ ÎµÎ½ÎµÏÎ³ÏŒÏ‚ Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼ÏŒÏ‚.');
+            $this->redirectToProfile('failed', 'Δεν βρέθηκε ενεργός λογαριασμός.');
             return;
         }
 
@@ -61,12 +58,12 @@ class InsuranceJccService
 
             $childIds = $this->getPendingInsuranceChildrenIds($userId);
             if (empty($childIds)) {
-                throw new RuntimeException('Î— Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î± Î­Ï‡ÎµÎ¹ Î®Î´Î· Ï€Î»Î·ÏÏ‰Î¸ÎµÎ¯ Î³Î¹Î± ÏŒÎ»Î± Ï„Î± Ï€Î±Î¹Î´Î¹Î¬.');
+                throw new RuntimeException('Η ασφάλεια έχει ήδη πληρωθεί για όλα τα παιδιά.');
             }
 
             $insurancePrice = $this->getInsurancePrice();
             if ($insurancePrice <= 0) {
-                throw new RuntimeException('Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ Î­Î³ÎºÏ…ÏÎ· Ï„Î¹Î¼Î® Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î±Ï‚.');
+                throw new RuntimeException('Δεν βρέθηκε έγκυρη τιμή ασφάλειας.');
             }
 
             $amount = $insurancePrice * count($childIds);
@@ -116,14 +113,14 @@ class InsuranceJccService
         }
 
         if ($gatewayOrderId === '' || $paymentId <= 0) {
-            $this->redirectToProfile('failed', 'Î›ÎµÎ¯Ï€Î¿Ï…Î½ Î±Ï€Î±ÏÎ±Î¯Ï„Î·Ï„Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï€Î»Î·ÏÏ‰Î¼Î®Ï‚.');
+            $this->redirectToProfile('failed', 'Λείπουν απαραίτητα στοιχεία πληρωμής.');
             return;
         }
 
         try {
             $payment = $this->getInsurancePayment($paymentId);
             if ($payment === null) {
-                throw new RuntimeException('Î”ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ Ï€Î»Î·ÏÏ‰Î¼Î® Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î±Ï‚.');
+                throw new RuntimeException('Δεν βρέθηκε πληρωμή ασφάλειας.');
             }
 
             $userId = (int) ($payment['user_id'] ?? 0);
@@ -541,14 +538,14 @@ class InsuranceJccService
     private function buildRedirectMessage(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
-            return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î±Ï‚ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚.';
+            return 'Η πληρωμή ασφάλειας ολοκληρώθηκε επιτυχώς.';
         }
 
         if ($paymentStatus === 'pending') {
-            return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® ÎµÎ¯Î½Î±Î¹ ÏƒÎµ Î±Î½Î±Î¼Î¿Î½Î® ÎµÏ€Î¹Î²ÎµÎ²Î±Î¯Ï‰ÏƒÎ·Ï‚ Î±Ï€ÏŒ Ï„Î·Î½ Ï„ÏÎ¬Ï€ÎµÎ¶Î±.';
+            return 'Η πληρωμή είναι σε αναμονή επιβεβαίωσης από την τράπεζα.';
         }
 
-        return 'Î— Ï€Î»Î·ÏÏ‰Î¼Î® Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î±Ï‚ Î´ÎµÎ½ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ.';
+        return 'Η πληρωμή ασφάλειας δεν ολοκληρώθηκε.';
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.

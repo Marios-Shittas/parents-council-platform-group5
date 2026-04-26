@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\services\RegisteringService.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 ini_set('display_errors', '1');
@@ -45,7 +42,7 @@ class RegisteringService
         if ($payload === null) {
             $this->respond(400, [
                 'success' => false,
-                'message' => 'ÎœÎ· Î­Î³ÎºÏ…ÏÎ± Î´ÎµÎ´Î¿Î¼Î­Î½Î± Î±Î¹Ï„Î®Î¼Î±Ï„Î¿Ï‚.',
+                'message' => 'Μη έγκυρα δεδομένα αιτήματος.',
             ]);
             return;
         }
@@ -63,7 +60,7 @@ class RegisteringService
         if ($this->emailExists($email)) {
             $this->respond(409, [
                 'success' => false,
-                'message' => 'Î¤Î¿ email Ï‡ÏÎ·ÏƒÎ¹Î¼Î¿Ï€Î¿Î¹ÎµÎ¯Ï„Î±Î¹ Î®Î´Î·.',
+                'message' => 'Το email χρησιμοποιείται ήδη.',
             ]);
             return;
         }
@@ -74,7 +71,7 @@ class RegisteringService
         if ($this->phoneExists($phone)) {
             $this->respond(409, [
                 'success' => false,
-                'message' => 'Î¤Î¿ Ï„Î·Î»Î­Ï†Ï‰Î½Î¿ Ï‡ÏÎ·ÏƒÎ¹Î¼Î¿Ï€Î¿Î¹ÎµÎ¯Ï„Î±Î¹ Î®Î´Î·.',
+                'message' => 'Το τηλέφωνο χρησιμοποιείται ήδη.',
             ]);
             return;
         }
@@ -93,14 +90,14 @@ class RegisteringService
 
             $this->respond(200, [
                 'success' => true,
-                'message' => 'Î— ÎµÎ³Î³ÏÎ±Ï†Î® ÏƒÎ±Ï‚ ÎºÎ±Ï„Î±Ï‡Ï‰ÏÎ®Î¸Î·ÎºÎµ ÎµÏ€Î¹Ï„Ï…Ï‡ÏŽÏ‚. Î˜Î± ÎµÎ½Î·Î¼ÎµÏÏ‰Î¸ÎµÎ¯Ï„Îµ Î¼Î­ÏƒÏ‰ email ÏŒÏ„Î±Î½ ÎµÎ³ÎºÏÎ¹Î¸ÎµÎ¯ Î±Ï€ÏŒ Ï„Î¿Î½ Î´Î¹Î±Ï‡ÎµÎ¹ÏÎ¹ÏƒÏ„Î®.',
+                'message' => 'Η εγγραφή σας καταχωρήθηκε επιτυχώς. Θα ενημερωθείτε μέσω email όταν εγκριθεί από τον διαχειριστή.',
             ]);
         } catch (Throwable $e) {
             $this->conn->rollback();
 
             $this->respond(500, [
                 'success' => false,
-                'message' => 'Î£Ï†Î¬Î»Î¼Î±: ' . $e->getMessage(),
+                'message' => 'Σφάλμα: ' . $e->getMessage(),
             ]);
         }
     }
@@ -123,39 +120,39 @@ class RegisteringService
         $requiredFields = ['first_name', 'last_name', 'email', 'phone', 'children'];
         foreach ($requiredFields as $field) {
             if (!array_key_exists($field, $payload)) {
-                return 'Î›ÎµÎ¯Ï€Î¿Ï…Î½ Î±Ï€Î±ÏÎ±Î¯Ï„Î·Ï„Î± Ï€ÎµÎ´Î¯Î± Î±Ï€ÏŒ Ï„Î· Ï†ÏŒÏÎ¼Î±.';
+                return 'Λείπουν απαραίτητα πεδία από τη φόρμα.';
             }
         }
 
         if (!filter_var((string) $payload['email'], FILTER_VALIDATE_EMAIL)) {
-            return 'Î¤Î¿ email Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿.';
+            return 'Το email δεν είναι έγκυρο.';
         }
 
         if ($this->normalizePhone((string) $payload['phone']) === null) {
-            return 'Î¤Î¿ ÎºÎ¹Î½Î·Ï„ÏŒ Ï€ÏÎ­Ï€ÎµÎ¹ Î½Î± Î´Î·Î»Ï‰Î¸ÎµÎ¯ ÏƒÏ„Î· Î¼Î¿ÏÏ†Î® +357 ÎºÎ±Î¹ 8ÏˆÎ®Ï†Î¹Î¿Ï‚ Î±ÏÎ¹Î¸Î¼ÏŒÏ‚.';
+            return 'Το κινητό πρέπει να δηλωθεί στη μορφή +357 και 8ψήφιος αριθμός.';
         }
 
         if (filter_var($payload['consent'] ?? false, FILTER_VALIDATE_BOOLEAN) !== true) {
-            return 'Î ÏÎ­Ï€ÎµÎ¹ Î½Î± Î±Ï€Î¿Î´ÎµÏ‡Ï„ÎµÎ¯Ï„Îµ Ï„Î·Î½ Ï€Î¿Î»Î¹Ï„Î¹ÎºÎ® Î±Ï€Î¿ÏÏÎ®Ï„Î¿Ï….';
+            return 'Πρέπει να αποδεχτείτε την πολιτική απορρήτου.';
         }
 
         if (filter_var($payload['viber_consent'] ?? false, FILTER_VALIDATE_BOOLEAN) !== true) {
-            return 'Î ÏÎ­Ï€ÎµÎ¹ Î½Î± Î±Ï€Î¿Î´ÎµÏ‡Ï„ÎµÎ¯Ï„Îµ ÎºÎ±Î¹ Ï„Î· ÏƒÏ…Î¼Î¼ÎµÏ„Î¿Ï‡Î® ÏƒÏ„Î·Î½ Î¿Î¼Î¬Î´Î± Viber Î³Î¹Î± Î½Î± Î¿Î»Î¿ÎºÎ»Î·ÏÏ‰Î¸ÎµÎ¯ Î· ÎµÎ³Î³ÏÎ±Ï†Î®.';
+            return 'Πρέπει να αποδεχτείτε και τη συμμετοχή στην ομάδα Viber για να ολοκληρωθεί η εγγραφή.';
         }
 
         if (!is_array($payload['children']) || count($payload['children']) === 0) {
-            return 'Î ÏÎ­Ï€ÎµÎ¹ Î½Î± ÎºÎ±Ï„Î±Ï‡Ï‰ÏÎ·Î¸ÎµÎ¯ Ï„Î¿Ï…Î»Î¬Ï‡Î¹ÏƒÏ„Î¿Î½ Î­Î½Î± Ï€Î±Î¹Î´Î¯.';
+            return 'Πρέπει να καταχωρηθεί τουλάχιστον ένα παιδί.';
         }
 
         foreach ($payload['children'] as $child) {
             if (!is_array($child)) {
-                return 'Î¤Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Ï€Î±Î¹Î´Î¹Î¿Ï Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ±.';
+                return 'Τα στοιχεία παιδιού δεν είναι έγκυρα.';
             }
 
             $childFields = ['child_name', 'child_last_name', 'child_dob', 'child_class'];
             foreach ($childFields as $field) {
                 if (empty(trim((string) ($child[$field] ?? '')))) {
-                    return 'Î£Ï…Î¼Ï€Î»Î·ÏÏŽÏƒÏ„Îµ ÏŒÎ»Î± Ï„Î± ÏƒÏ„Î¿Î¹Ï‡ÎµÎ¯Î± Î³Î¹Î± ÎºÎ¬Î¸Îµ Ï€Î±Î¹Î´Î¯.';
+                    return 'Συμπληρώστε όλα τα στοιχεία για κάθε παιδί.';
                 }
             }
         }
@@ -179,7 +176,7 @@ class RegisteringService
     {
         $check = $this->conn->prepare('SELECT user_id FROM Users WHERE email = ?');
         if ($check === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ»Î­Î³Ï‡Î¿Ï… email.');
+            throw new RuntimeException('Αποτυχία ελέγχου email.');
         }
 
         $check->bind_param('s', $email);
@@ -196,7 +193,7 @@ class RegisteringService
     {
         $check = $this->conn->prepare('SELECT user_id FROM Users WHERE phone_number = ?');
         if ($check === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎµÎ»Î­Î³Ï‡Î¿Ï… Ï„Î·Î»ÎµÏ†ÏŽÎ½Î¿Ï….');
+            throw new RuntimeException('Αποτυχία ελέγχου τηλεφώνου.');
         }
 
         $check->bind_param('s', $phone);
@@ -219,7 +216,7 @@ class RegisteringService
         );
 
         if ($stmtUser === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎºÎ±Ï„Î±Ï‡ÏŽÏÎ·ÏƒÎ·Ï‚ Ï‡ÏÎ®ÏƒÏ„Î·.');
+            throw new RuntimeException('Αποτυχία καταχώρησης χρήστη.');
         }
 
         $stmtUser->bind_param('sssssi', $name, $surname, $email, $placeholderPassword, $phone, $childrenCount);
@@ -238,7 +235,7 @@ class RegisteringService
         );
 
         if ($stmtChild === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎºÎ±Ï„Î±Ï‡ÏŽÏÎ·ÏƒÎ·Ï‚ Ï€Î±Î¹Î´Î¹ÏŽÎ½.');
+            throw new RuntimeException('Αποτυχία καταχώρησης παιδιών.');
         }
 
         foreach ($children as $child) {
@@ -265,7 +262,7 @@ class RegisteringService
         );
 
         if ($stmtLog === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÎºÎ±Ï„Î±Î³ÏÎ±Ï†Î®Ï‚ log ÎµÎ³Î³ÏÎ±Ï†Î®Ï‚.');
+            throw new RuntimeException('Αποτυχία καταγραφής log εγγραφής.');
         }
 
         $stmtLog->bind_param('iss', $userId, $action, $description);
@@ -283,7 +280,7 @@ class RegisteringService
         );
 
         if ($stmt === false) {
-            throw new RuntimeException('Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± ÏƒÏ…Î³Ï‡ÏÎ¿Î½Î¹ÏƒÎ¼Î¿Ï Î±ÏÎ¹Î¸Î¼Î¿Ï Ï€Î±Î¹Î´Î¹ÏŽÎ½.');
+            throw new RuntimeException('Αποτυχία συγχρονισμού αριθμού παιδιών.');
         }
 
         $stmt->bind_param('ii', $userId, $userId);
@@ -354,7 +351,7 @@ class RegisteringService
 
         return [
             'is_open' => false,
-            'message' => 'ÎŸÎ¹ ÎµÎ³Î³ÏÎ±Ï†Î­Ï‚ ÎµÎ¯Î½Î±Î¹ ÎºÎ»ÎµÎ¹ÏƒÏ„Î­Ï‚. Î”Î¹Î±Î¸Î­ÏƒÎ¹Î¼ÎµÏ‚ Ï€ÎµÏÎ¯Î¿Î´Î¿Î¹: ' . implode(' | ', $activePeriods),
+            'message' => 'Οι εγγραφές είναι κλειστές. Διαθέσιμες περίοδοι: ' . implode(' | ', $activePeriods),
         ];
     }
 

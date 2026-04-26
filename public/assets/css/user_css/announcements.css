@@ -1,9 +1,6 @@
-/* Arxeio: public\assets\css\user_css\announcements.css
-   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
-   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* ===== ANNOUNCEMENTS PAGE — MODERN REDESIGN ===== */
 
-/* ---- Section Titlos ---- */
+/* ---- Section Title ---- */
 .note-card {
     display: flex;
     align-items: flex-start;
@@ -54,7 +51,7 @@
     flex-shrink: 0;
 }
 
-/* ---- Anakoinosi Card ---- */
+/* ---- Announcement Card ---- */
 .announcement-card {
     border: none;
     border-radius: 18px;
@@ -72,7 +69,7 @@
     box-shadow: 0 14px 36px rgba(0,0,0,0.14);
 }
 
-/* ---- Eikona Area ---- */
+/* ---- Image Area ---- */
 .announcement-card-img-wrap {
     position: relative;
     height: 230px;
@@ -133,7 +130,7 @@
     height: 14px;
 }
 
-/* Imerominia badge */
+/* Date badge */
 .announcement-date-badge {
     position: absolute;
     top: 12px;
@@ -281,7 +278,7 @@
     transform: translateY(-1px);
 }
 
-/* ---- Modal parathyro ---- */
+/* ---- Modal ---- */
 .announcement-modal .modal-content {
     border: none;
     border-radius: 18px;
@@ -334,7 +331,7 @@
     color: #ffffff;
 }
 
-/* Modal parathyro carousel container */
+/* Modal carousel container */
 .announcement-modal .carousel {
     border-radius: 12px;
     overflow: hidden;
@@ -357,7 +354,7 @@
     width: 100%;
 }
 
-/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+/* Modal carousel controls — always visible */
 .announcement-modal .carousel-control-prev,
 .announcement-modal .carousel-control-next {
     width: 42px;
@@ -397,7 +394,7 @@
     background-color: #fff;
 }
 
-/* Anakoinosi meta info box */
+/* Announcement meta info box */
 .modal-announcement-meta {
     display: flex;
     gap: 24px;

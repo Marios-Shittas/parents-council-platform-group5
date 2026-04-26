@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\admin\users.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -74,7 +71,7 @@ function scheduleFeatureLabel(string $feature): string
     return $map[$feature] ?? $feature;
 }
 
-// Leitourgia normalizeImerominiaTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia normalizeDateTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeDateTimeLocalInput(string $value): ?string
 {
     $trimmed = trim($value);
@@ -85,7 +82,7 @@ function normalizeDateTimeLocalInput(string $value): ?string
     $dateTime = DateTime::createFromFormat('d/m/Y H:i', $trimmed);
 
     if (!$dateTime instanceof DateTime) {
-        // Keep backward compatibility in case to browser still submits imerominiatime-local morfi.
+        // Keep backward compatibility in case the browser still submits datetime-local format.
         $dateTime = DateTime::createFromFormat('Y-m-d\\TH:i', $trimmed);
         if (!$dateTime instanceof DateTime) {
             return null;
@@ -95,7 +92,7 @@ function normalizeDateTimeLocalInput(string $value): ?string
     return $dateTime->format('Y-m-d H:i:s');
 }
 
-// Leitourgia toImerominiaTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia toDateTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
 function toDateTimeLocalValue(?string $value): string
 {
     if (!is_string($value) || trim($value) === '') {
@@ -120,13 +117,13 @@ function redirectWithFlash(string $message, string $type = 'info', int $manageCh
     exit;
 }
 
-// Leitourgia morfiRoleLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatRoleLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatRoleLabel(string $role): string
 {
     return $role === 'admin' ? 'Διαχειριστής' : 'Γονέας';
 }
 
-// Leitourgia morfiStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatStatusLabel(string $status): string
 {
     $map = [
@@ -165,7 +162,7 @@ function statusBadgeClass(string $status): string
     }
 }
 
-// Leitourgia morfiOrderStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatOrderStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatOrderStatusLabel(string $status): string
 {
     $map = [
@@ -190,7 +187,7 @@ function orderStatusBadgeClass(string $status): string
     }
 }
 
-// Leitourgia morfiPaymentStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatPaymentStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatPaymentStatusLabel(string $status): string
 {
     $map = [
@@ -218,7 +215,7 @@ function paymentStatusBadgeClass(string $status): string
     }
 }
 
-// Leitourgia morfiPaymentTypeLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatPaymentTypeLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatPaymentTypeLabel(string $type): string
 {
     $map = [
@@ -236,7 +233,7 @@ function exportCellText(string $value): string
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
-// Leitourgia morfiExportImerominia: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia formatExportDate: xeirizetai to antistoixo kommati tis selidas i tou service.
 function formatExportDate(?string $value): string
 {
     if (!is_string($value) || trim($value) === '') {

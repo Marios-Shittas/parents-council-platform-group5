@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\viewmodels\HeaderViewModel.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 
 require_once __DIR__ . '/../includes/site_context.php';
 
@@ -15,11 +12,11 @@ class HeaderViewModel
         $navItems = $this->buildNavItems();
 
         return [
-            'site_title' => 'Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î“Î¿Î½Î­Ï‰Î½ & ÎšÎ·Î´ÎµÎ¼ÏŒÎ½Ï‰Î½',
+            'site_title' => 'Σύνδεσμος Γονέων & Κηδεμόνων',
             'current_page' => $currentPage,
-            'portal_label' => site_is_parent() ? 'Î§ÏŽÏÎ¿Ï‚ Î“Î¿Î½Î­Î±' : 'Î”Î·Î¼ÏŒÏƒÎ¹Î± Î ÏÎ»Î·',
+            'portal_label' => site_is_parent() ? 'Χώρος Γονέα' : 'Δημόσια Πύλη',
             'profile_item' => [
-                'label' => 'Î¤Î¿ Î ÏÎ¿Ï†Î¯Î» ÎœÎ¿Ï…',
+                'label' => 'Το Προφίλ Μου',
                 'href' => site_section_url('profile.php'),
                 'icon' => 'fas fa-user-circle',
                 'match' => ['profile.php'],
@@ -33,37 +30,37 @@ class HeaderViewModel
     {
         $navItems = [
             [
-                'label' => 'Î‘ÏÏ‡Î¹ÎºÎ®',
+                'label' => 'Αρχική',
                 'href' => site_section_url('home.php'),
                 'icon' => 'fas fa-home',
                 'match' => ['home.php', 'index.php', ''],
             ],
             [
-                'label' => 'Î£ÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î“Î¿Î½Î­Ï‰Î½',
+                'label' => 'Σύνδεσμος Γονέων',
                 'href' => site_section_url('parents.php'),
                 'icon' => 'fas fa-users',
                 'match' => ['parents.php'],
             ],
             [
-                'label' => 'Î‘Î½Î±ÎºÎ¿Î¹Î½ÏŽÏƒÎµÎ¹Ï‚',
+                'label' => 'Ανακοινώσεις',
                 'href' => site_section_url('announcements.php'),
                 'icon' => 'fas fa-bullhorn',
                 'match' => ['announcements.php'],
             ],
             [
-                'label' => 'Î•ÎºÎ´Î·Î»ÏŽÏƒÎµÎ¹Ï‚',
+                'label' => 'Εκδηλώσεις',
                 'href' => site_section_url('events.php'),
                 'icon' => 'fas fa-calendar-alt',
                 'match' => ['events.php', 'event.php'],
             ],
             [
-                'label' => 'Î§ÏÎ®ÏƒÎ¹Î¼ÎµÏ‚ Î Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚',
+                'label' => 'Χρήσιμες Πληροφορίες',
                 'href' => site_section_url('useful-information.php'),
                 'icon' => 'fas fa-info-circle',
                 'match' => ['useful-information.php'],
             ],
             [
-                'label' => 'Î‘Î¹Ï„Î®ÏƒÎµÎ¹Ï‚',
+                'label' => 'Αιτήσεις',
                 'href' => site_section_url('applications.php'),
                 'icon' => 'fas fa-file-alt',
                 'match' => ['applications.php'],
@@ -72,7 +69,7 @@ class HeaderViewModel
 
         if (site_is_parent()) {
             $navItems[] = [
-                'label' => 'ÎšÎ±Ï„Î¬ÏƒÏ„Î·Î¼Î±',
+                'label' => 'Κατάστημα',
                 'href' => site_section_url('eshop.php'),
                 'icon' => 'fas fa-store',
                 'match' => ['eshop.php'],
@@ -80,7 +77,7 @@ class HeaderViewModel
         }
 
         $navItems[] = [
-            'label' => 'Î•Ï€Î¹ÎºÎ¿Î¹Î½Ï‰Î½Î¯Î±',
+            'label' => 'Επικοινωνία',
             'href' => site_section_url('epikoinonia.php'),
             'icon' => 'fas fa-envelope',
             'match' => ['epikoinonia.php'],
@@ -88,7 +85,7 @@ class HeaderViewModel
 
         if (site_is_parent()) {
             $navItems[] = [
-                'label' => 'Î¦Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯ÎµÏ‚',
+                'label' => 'Φωτογραφίες',
                 'href' => site_section_url('photos.php'),
                 'icon' => 'fas fa-camera',
                 'match' => ['photos.php'],

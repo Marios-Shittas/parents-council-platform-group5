@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\reset-password.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
 declare(strict_types=1);
 
 if (session_status() === PHP_SESSION_NONE) {

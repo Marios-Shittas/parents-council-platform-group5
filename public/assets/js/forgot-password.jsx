@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\forgot-password.jsx
-// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
-// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
 /* FORGOT PASSWORD FUNCTIONALITY */
 function handleForgotPassword() {
   const email = document.getElementById("email-input").value;

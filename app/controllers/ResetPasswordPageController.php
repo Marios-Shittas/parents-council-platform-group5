@@ -1,7 +1,4 @@
 <?php
-// Arxeio: app\controllers\ResetPasswordPageController.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 
 class ResetPasswordPageController
 {
@@ -24,7 +21,7 @@ class ResetPasswordPageController
             'token_json' => json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'email_json' => json_encode($email, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'is_valid_token' => $this->isTokenValid($email, $token),
-            'token_message' => 'ÎŸ ÏƒÏÎ½Î´ÎµÏƒÎ¼Î¿Ï‚ Î´ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î­Î³ÎºÏ…ÏÎ¿Ï‚ Î® Î­Ï‡ÎµÎ¹ Î»Î®Î¾ÎµÎ¹.',
+            'token_message' => 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.',
             'service_url' => rtrim(APP_BASE_URL, '/') . '/app/services/ResetPasswordService.php',
         ];
     }

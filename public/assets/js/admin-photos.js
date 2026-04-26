@@ -1,6 +1,3 @@
-// Arxeio: public\assets\js\admin-photos.js
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('gallery-images');
     var preview = document.getElementById('parents-upload-preview');
@@ -13,12 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
             preview.innerHTML = '';
 
             if (!files || files.length === 0) {
-                status.textContent = 'Î”ÎµÎ½ Î­Ï‡Î¿Ï…Î½ ÎµÏ€Î¹Î»ÎµÎ³ÎµÎ¯ Î±ÎºÏŒÎ¼Î· Î±ÏÏ‡ÎµÎ¯Î±.';
+                status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
                 dropzone.classList.remove('is-active');
                 return;
             }
 
-            status.textContent = files.length + (files.length === 1 ? ' Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯Î± Î­Ï„Î¿Î¹Î¼Î· Î³Î¹Î± Î±Î½Î­Î²Î±ÏƒÎ¼Î±.' : ' Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯ÎµÏ‚ Î­Ï„Î¿Î¹Î¼ÎµÏ‚ Î³Î¹Î± Î±Î½Î­Î²Î±ÏƒÎ¼Î±.');
+            status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
             dropzone.classList.add('is-active');
 
             Array.prototype.forEach.call(files, function (file) {
@@ -68,10 +65,10 @@ document.addEventListener('DOMContentLoaded', function () {
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
                 pendingGalleryDeleteForm = form;
-                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯Î±';
+                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'φωτογραφία';
                 galleryDeletePath.textContent = form.getAttribute('data-image-path') || '';
                 galleryDeleteThumb.src = form.getAttribute('data-image-thumb') || '';
-                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'Ï†Ï‰Ï„Î¿Î³ÏÎ±Ï†Î¯Î±';
+                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'φωτογραφία';
                 galleryDeleteSource.textContent = form.getAttribute('data-image-source') || '';
                 jQuery('#deleteGalleryImageConfirmModal').modal('show');
             });

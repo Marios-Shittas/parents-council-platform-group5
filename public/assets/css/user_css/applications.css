@@ -1,23 +1,20 @@
-/* Arxeio: public\assets\css\user_css\applications.css
-   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
-   Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika. */
-/* Aitiseis Page Styles */
+/* Applications Page Styles */
 
 /* ===== APPLICATION CARD STYLES ===== */
-/* .aitiseis-card = to white card containers gia main sections */
+/* .applications-card = the white card containers for main sections */
 .applications-card {
     border: none;
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* .section-titlos = to heading text gia each main section ("Available Aitiseis", "My Ypovoles") */
+/* .section-title = the heading text for each main section ("Available Applications", "My Submissions") */
 .section-title {
     font-weight: 700;
     margin-bottom: 20px;
 }
 
-/* .aitisi-item = individual aitisi boxes within to grid */
+/* .application-item = individual application boxes within the grid */
 .application-item {
     background: #fff;
     border: 1px solid #eef1f5;
@@ -28,19 +25,19 @@
     flex-direction: column;
 }
 
-/* .aitisi-titlos = to titlos apo each aitisi */
+/* .application-title = the title of each application */
 .application-title {
     font-weight: 700;
     margin-bottom: 8px;
 }
 
-/* .aitisi-perigrafi = to perigrafi text apo each aitisi */
+/* .application-description = the description text of each application */
 .application-description {
     color: #6c757d;
     min-height: 90px;
 }
 
-/* .doc-badge = to small blue badge showing document count */
+/* .doc-badge = the small blue badge showing document count */
 .doc-badge {
     background: #e7f1ff;
     color: #0d6efd;
@@ -50,19 +47,19 @@
     font-weight: 700;
 }
 
-/* .submit-btn = to "Submit Aitisi" button */
+/* .submit-btn = the "Submit Application" button */
 .submit-btn {
     margin-top: auto;
 }
 
 /* ===== INSTRUCTIONS SIDEBAR ===== */
-/* .instructions-list = to bullet list in to instructions sidebar */
+/* .instructions-list = the bullet list in the instructions sidebar */
 .instructions-list li {
     margin-bottom: 10px;
 }
 
 /* ===== UPLOAD STYLES ===== */
-/* .upload-box = to arxeio upload area in to modal */
+/* .upload-box = the file upload area in the modal */
 .upload-box {
     border: 2px dashed #ced4da;
     border-radius: 14px;
@@ -71,7 +68,7 @@
 }
 
 /* ===== STATUS BADGES ===== */
-/* .status-badge = to status indicators gia submitted aitiseis */
+/* .status-badge = the status indicators for submitted applications */
 .status-badge {
     display: inline-block;
     padding: 6px 12px;
@@ -81,19 +78,19 @@
     text-transform: capitalize;
 }
 
-/* .status-anamoni = yellow badge gia aitiseis anamoni gia elegxo */
+/* .status-waiting = yellow badge for applications waiting for review */
 .status-waiting {
     background: #fff3cd;
     color: #856404;
 }
 
-/* .status-approved = green badge gia approved aitiseis */
+/* .status-approved = green badge for approved applications */
 .status-approved {
     background: #d4edda;
     color: #155724;
 }
 
-/* .status-rejected = red badge gia rejected aitiseis */
+/* .status-rejected = red badge for rejected applications */
 .status-rejected {
     background: #f8d7da;
     color: #721c24;
@@ -231,7 +228,7 @@
     display: block;
 }
 
-/* ===== SUBMISSION STATUS BADGES (pinakas level) ===== */
+/* ===== SUBMISSION STATUS BADGES (table level) ===== */
 .sub-status-badge {
     display: inline-block;
     padding: 4px 11px;
@@ -265,7 +262,7 @@
     color: #721c24;
 }
 
-/* Keep to page header card aligned me to main aitiseis cards on desktop. */
+/* Keep the page header card aligned with the main applications cards on desktop. */
 @media (min-width: 1200px) {
     body[data-applications-can-submit] .public-page-header__card {
         width: 91.666667%;
@@ -275,7 +272,7 @@
 }
 
 /* ===== ENHANCED SUBMISSIONS TABLE ===== */
-#ypovoles-pinakas {
+#submissions-table {
     margin-bottom: 0;
 }
 
@@ -321,7 +318,7 @@
 }
 
 /* ===== SUCCESS TOAST ===== */
-#ypovoli-toast .alert {
+#submission-toast .alert {
     border-radius: 12px;
     min-width: 280px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
@@ -391,16 +388,16 @@
     outline-offset: 2px;
 }
 
-/* Keep native arxeio selector button visually inside to input frame. */
-#applicationViewModal parathyro input[type="arxeio"].forma-control,
-#submitModal parathyro input[type="arxeio"].forma-control {
+/* Keep native file selector button visually inside the input frame. */
+#applicationViewModal input[type="file"].form-control,
+#submitModal input[type="file"].form-control {
     padding: 0.375rem 0.75rem;
     line-height: 1.5;
     overflow: hidden;
 }
 
-#applicationViewModal parathyro input[type="arxeio"].forma-control::arxeio-selector-button,
-#submitModal parathyro input[type="arxeio"].forma-control::arxeio-selector-button {
+#applicationViewModal input[type="file"].form-control::file-selector-button,
+#submitModal input[type="file"].form-control::file-selector-button {
     margin: -0.375rem 0.75rem -0.375rem -0.75rem;
     padding: 0.375rem 0.85rem;
     border: 0;
@@ -411,8 +408,8 @@
     font-weight: 600;
 }
 
-#applicationViewModal parathyro input[type="arxeio"].forma-control::-webkit-arxeio-upload-button,
-#submitModal parathyro input[type="arxeio"].forma-control::-webkit-arxeio-upload-button {
+#applicationViewModal input[type="file"].form-control::-webkit-file-upload-button,
+#submitModal input[type="file"].form-control::-webkit-file-upload-button {
     margin: -0.375rem 0.75rem -0.375rem -0.75rem;
     padding: 0.375rem 0.85rem;
     border: 0;
@@ -441,7 +438,7 @@
     }
 }
 
-/* Extracted apo app/views/pages/aitiseis.php */
+/* Extracted from app/views/pages/applications.php */
 .post-card {
             cursor: pointer;
             overflow: hidden;
@@ -527,26 +524,26 @@
             text-decoration: none;
         }
 
-        #applicationViewModal parathyro .modal-content {
+        #applicationViewModal .modal-content {
             border: 0;
             border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 18px 44px rgba(18, 41, 70, 0.18);
         }
 
-        #applicationViewModal parathyro .modal-header {
+        #applicationViewModal .modal-header {
             background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
             border-bottom: 0;
         }
 
-        #applicationViewModal parathyro .modal-titlos,
-        #applicationViewModal parathyro .modal-header .close {
+        #applicationViewModal .modal-title,
+        #applicationViewModal .modal-header .close {
             color: #ffffff;
             text-shadow: none;
             opacity: 1;
         }
 
-        #applicationViewModal parathyro .modal-body {
+        #applicationViewModal .modal-body {
             background: #f8fbff;
         }
 
@@ -565,13 +562,13 @@
             margin-bottom: 12px;
         }
 
-        #aitisi-view-attachments-list {
+        #application-view-attachments-list {
             list-style: none;
             margin-bottom: 0;
             padding-left: 0;
         }
 
-        #aitisi-view-attachments-list li {
+        #application-view-attachments-list li {
             margin-bottom: 10px;
             line-height: 1.35;
             background: #f7fbff;
@@ -580,11 +577,11 @@
             padding: 10px 12px;
         }
 
-        #aitisi-view-attachments-list li:last-child {
+        #application-view-attachments-list li:last-child {
             margin-bottom: 0;
         }
 
-        #aitisi-view-attachments-list a {
+        #application-view-attachments-list a {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -713,7 +710,7 @@
             resize: vertical;
         }
 
-        #aitisi-view-upload {
+        #application-view-upload {
             background: #ffffff;
             border: 1px solid #dce9f8;
             border-radius: 12px;
@@ -721,7 +718,7 @@
             box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
         }
 
-        #aitisi-view-upload .upload-titlos {
+        #application-view-upload .upload-title {
             display: flex;
             align-items: center;
             gap: 9px;
@@ -731,7 +728,7 @@
             font-size: 1.05rem;
         }
 
-        #aitisi-view-upload .upload-titlos i {
+        #application-view-upload .upload-title i {
             width: 18px;
             text-align: center;
         }
@@ -747,7 +744,7 @@
             color: #304c6f;
         }
 
-        #aitisi-view-arxeio-input {
+        #application-view-file-input {
             border: 1px solid #b9d1ef;
             background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
             border-radius: 10px;
@@ -757,8 +754,8 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
         }
 
-        #aitisi-view-arxeio-input::arxeio-selector-button,
-        #aitisi-view-arxeio-input::-webkit-arxeio-upload-button {
+        #application-view-file-input::file-selector-button,
+        #application-view-file-input::-webkit-file-upload-button {
             border: 0;
             background: linear-gradient(135deg, #2c73c8 0%, #1d5faa 100%);
             color: #ffffff;
@@ -772,7 +769,7 @@
             transition: background 0.2s ease, transform 0.2s ease;
         }
 
-        #aitisi-view-selected-arxeia {
+        #application-view-selected-files {
             list-style: none;
             margin-top: 14px;
             margin-bottom: 0;
@@ -781,11 +778,11 @@
             font-size: 0.9rem;
         }
 
-        #aitisi-view-selected-arxeia:empty {
+        #application-view-selected-files:empty {
             display: none;
         }
 
-        #aitisi-view-selected-arxeia li {
+        #application-view-selected-files li {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -798,11 +795,11 @@
             font-weight: 600;
         }
 
-        #aitisi-view-selected-arxeia li:last-child {
+        #application-view-selected-files li:last-child {
             margin-bottom: 0;
         }
 
-        #aitisi-view-selected-arxeia li i {
+        #application-view-selected-files li i {
             color: #2b76cc;
         }
 
@@ -822,24 +819,24 @@
             margin-right: 6px;
         }
 
-        #submitModal parathyro .modal-dialog {
+        #submitModal .modal-dialog {
             margin: 0.75rem auto;
         }
 
-        #submitModal parathyro .modal-content {
+        #submitModal .modal-content {
             max-height: calc(100vh - 1.5rem);
         }
 
-        #submitModal parathyro .modal-header {
+        #submitModal .modal-header {
             background: #1f7aec;
             border-bottom: 0;
         }
 
-        #submitModal parathyro .modal-titlos {
+        #submitModal .modal-title {
             color: #ffffff;
         }
 
-        #aitisi-notice-box {
+        #application-notice-box {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -854,7 +851,7 @@
             outline: none;
         }
 
-        #aitisi-notice-box.is-visible {
+        #application-notice-box.is-visible {
             display: block;
         }
 
@@ -908,49 +905,49 @@
             font-weight: 700;
         }
 
-        #submitModal parathyro .modal-header .close {
+        #submitModal .modal-header .close {
             color: #ffffff;
             opacity: 1;
             text-shadow: none;
         }
 
-        #submitModal parathyro .modal-header .close:hover {
+        #submitModal .modal-header .close:hover {
             color: #ffffff;
             opacity: 0.85;
         }
 
-        #submitModal parathyro .modal-body {
+        #submitModal .modal-body {
             overflow-y: auto;
         }
 
-        #aitisi-unavailable-modal .modal-content {
+        #application-unavailable-modal .modal-content {
             border: 0;
             border-radius: 14px;
             box-shadow: 0 14px 40px rgba(15, 31, 50, 0.2);
         }
 
-        #aitisi-unavailable-modal .modal-body {
+        #application-unavailable-modal .modal-body {
             padding: 1.4rem 1.2rem 1rem;
             text-align: center;
             color: #1f3550;
             font-weight: 700;
         }
 
-        #aitisi-unavailable-modal .modal-footer {
+        #application-unavailable-modal .modal-footer {
             border-top: 0;
             justify-content: center;
             padding-top: 0;
             padding-bottom: 1rem;
         }
 
-        #modal-ypovoli-arxeio {
+        #modal-submission-file {
             font-size: 0.9rem;
             line-height: 1.2;
             padding: 0.28rem 0.5rem;
         }
 
-        #modal-ypovoli-arxeio::arxeio-selector-button,
-        #modal-ypovoli-arxeio::-webkit-arxeio-upload-button {
+        #modal-submission-file::file-selector-button,
+        #modal-submission-file::-webkit-file-upload-button {
             font-size: 0.82rem;
             line-height: 1.2;
             padding: 0.28rem 0.62rem;

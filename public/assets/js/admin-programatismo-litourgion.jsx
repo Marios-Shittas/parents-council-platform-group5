@@ -1,9 +1,4 @@
-// Arxeio: public\assets\js\admin-programatismo-litourgion.jsx
-// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
-// Voithitikes leitourgies kai React UI gia ton programmatismo leitourgion sto admin.
 function formatLogDateTime(value) {
-    // Metatrepei MySQL imerominiatime se topiki imerominia/ora gia provoli sto log.
     if (!value) {
         return '-';
     }
@@ -23,7 +18,6 @@ function formatLogDateTime(value) {
 }
 
 function AdminProgramatismoLitourgionLogSearch() {
-    // To root element krataei initial dedomena attributes apo PHP gia email/filter.
     const rootElement = document.getElementById('admin-programatismo-log-search-root');
     const initialEmail = (rootElement?.dataset.initialEmail || '').trim();
     const [email, setEmail] = React.useState(initialEmail);
@@ -34,7 +28,6 @@ function AdminProgramatismoLitourgionLogSearch() {
     const [logs, setLogs] = React.useState([]);
 
     React.useEffect(() => {
-        // An yparxei initial email apo URL/PHP, trexei automata tin anazitisi.
         if (initialEmail) {
             void handleSearch(initialEmail, false);
         }

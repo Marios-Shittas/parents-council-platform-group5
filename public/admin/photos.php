@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\admin\photos.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -48,7 +45,7 @@ function resolvePhotosGalleryFilePath($imagePath)
     return getPhotosGalleryUploadDir() . basename((string)$imagePath);
 }
 
-// Leitourgia diagrafiPhotosGalleryFileIfExists: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia deletePhotosGalleryFileIfExists: xeirizetai to antistoixo kommati tis selidas i tou service.
 function deletePhotosGalleryFileIfExists($imagePath)
 {
     if (!isLocalPhotosGalleryPath($imagePath)) {

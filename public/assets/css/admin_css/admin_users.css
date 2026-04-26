@@ -1,28 +1,23 @@
-/* Arxeio: public\assets\css\admin_css\admin_users.css
-   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
-   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
-/* Styles gia tin admin diaxeirisi xriston kai filtraron. */
-/* Rythmizei xristis pinakas, filters, badges, export controls kai mobile anagnosimotita. */
 :root {
-    --xristes-accent: #1f7aec;
-    --xristes-accent-dark: #1267d1;
-    --xristes-accent-soft: #eef5ff;
-    --xristes-accent-border: #d4e2f6;
-    --xristes-text: #183f6b;
-    --xristes-text-muted: #64748b;
-    --xristes-surface: #ffffff;
-    --xristes-surface-alt: #f8fafc;
-    --xristes-surface-soft: #f3f6fb;
-    --xristes-border: #dfe5ee;
-    --xristes-epitixia-bg: #d4edda;
-    --xristes-epitixia-text: #155724;
-    --xristes-info-bg: #e8f1fd;
-    --xristes-info-text: #29527a;
-    --xristes-warning-bg: #fff3cd;
-    --xristes-warning-text: #856404;
-    --xristes-danger-bg: #f8d7da;
-    --xristes-danger-text: #721c24;
-    --xristes-shadow-soft: 0 8px 20px rgba(0,0,0,0.04);
+    --users-accent: #1f7aec;
+    --users-accent-dark: #1267d1;
+    --users-accent-soft: #eef5ff;
+    --users-accent-border: #d4e2f6;
+    --users-text: #183f6b;
+    --users-text-muted: #64748b;
+    --users-surface: #ffffff;
+    --users-surface-alt: #f8fafc;
+    --users-surface-soft: #f3f6fb;
+    --users-border: #dfe5ee;
+    --users-success-bg: #d4edda;
+    --users-success-text: #155724;
+    --users-info-bg: #e8f1fd;
+    --users-info-text: #29527a;
+    --users-warning-bg: #fff3cd;
+    --users-warning-text: #856404;
+    --users-danger-bg: #f8d7da;
+    --users-danger-text: #721c24;
+    --users-shadow-soft: 0 8px 20px rgba(0,0,0,0.04);
 }
 
 .admin-page-header {
@@ -68,10 +63,10 @@
     --bs-btn-active-color: #fff;
     --bs-btn-focus-color: #fff;
     --bs-btn-disabled-color: #fff;
-    --bs-btn-bg: var(--xristes-accent);
-    --bs-btn-hover-bg: var(--xristes-accent);
-    --bs-btn-active-bg: var(--xristes-accent);
-    --bs-btn-focus-bg: var(--xristes-accent);
+    --bs-btn-bg: var(--users-accent);
+    --bs-btn-hover-bg: var(--users-accent);
+    --bs-btn-active-bg: var(--users-accent);
+    --bs-btn-focus-bg: var(--users-accent);
     --bs-btn-border-color: transparent;
     --bs-btn-hover-border-color: transparent;
     --bs-btn-active-border-color: transparent;

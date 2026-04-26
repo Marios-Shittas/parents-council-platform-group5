@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\admin\eshop.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 

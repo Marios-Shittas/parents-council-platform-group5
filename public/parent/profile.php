@@ -1,7 +1,4 @@
 <?php
-// Arxeio: public\parent\profile.php
-// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
-// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../app/includes/auth.php';
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
@@ -12,7 +9,7 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 auth_require_role('parent');
 
-// Leitourgia parentProfileMorfiAccountStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia parentProfileFormatAccountStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatAccountStatusLabel(string $status): string
 {
     $map = [
@@ -43,7 +40,7 @@ function parentProfileAccountStatusClass(string $status): string
     }
 }
 
-// Leitourgia parentProfileMorfiOrderStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia parentProfileFormatOrderStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatOrderStatusLabel(string $status): string
 {
     $map = [
@@ -68,7 +65,7 @@ function parentProfileOrderStatusClass(string $status): string
     }
 }
 
-// Leitourgia parentProfileMorfiPaymentStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia parentProfileFormatPaymentStatusLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatPaymentStatusLabel(string $status): string
 {
     $map = [
@@ -96,7 +93,7 @@ function parentProfilePaymentStatusClass(string $status): string
     }
 }
 
-// Leitourgia parentProfileMorfiPaymentTypeLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Leitourgia parentProfileFormatPaymentTypeLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentProfileFormatPaymentTypeLabel(string $type): string
 {
     $map = [
