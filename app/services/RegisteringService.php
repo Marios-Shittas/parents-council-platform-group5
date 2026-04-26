@@ -300,8 +300,8 @@ class RegisteringService
 
         if ($stmt === false) {
             return [
-                'is_open' => false,
-                'message' => 'Η υπηρεσία εγγραφών δεν είναι διαθέσιμη αυτή τη στιγμή.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
 
@@ -312,8 +312,8 @@ class RegisteringService
 
         if (empty($schedules)) {
             return [
-                'is_open' => false,
-                'message' => 'Δεν έχει οριστεί περίοδος εγγραφών από τον διαχειριστή.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
         $now = time();
@@ -342,9 +342,10 @@ class RegisteringService
         }
 
         if (empty($activePeriods)) {
+            // No active schedule rows: registration remains open.
             return [
-                'is_open' => false,
-                'message' => 'Οι εγγραφές είναι κλειστές. Δεν υπάρχουν ενεργές περίοδοι εγγραφών.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
 

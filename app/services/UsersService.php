@@ -150,58 +150,15 @@ class UsersService
     // Leitourgia runScheduledUsersCleanup: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function runScheduledUsersCleanup(): int
     {
-        $gate = $this->isSystemFeatureOpen('delete_users');
-        if (empty($gate['is_open'])) {
-            return 0;
-        }
-
-        $result = $this->conn->query(
-            "SELECT user_id
-             FROM Users
-             WHERE role <> 'admin'"
-        );
-
-        if (!$result) {
-            return 0;
-        }
-
-        $deletedCount = 0;
-        while ($row = $result->fetch_assoc()) {
-            $userId = (int)($row['user_id'] ?? 0);
-            if ($userId <= 0) {
-                continue;
-            }
-
-            $deleteResult = $this->deleteUserByAdmin($userId, null);
-            if (!empty($deleteResult['success'])) {
-                $deletedCount++;
-            }
-        }
-
-        return $deletedCount;
+        // System actions were intentionally disabled.
+        return 0;
     }
 
     // Leitourgia runScheduledSubmissionsCleanup: xeirizetai to antistoixo kommati tis selidas i tou service.
     private function runScheduledSubmissionsCleanup(): int
     {
-        $gate = $this->isSystemFeatureOpen('cleanup_submissions');
-        if (empty($gate['is_open'])) {
-            return 0;
-        }
-
-        $deletedCount = 0;
-
-        $submissionsResult = $this->conn->query('DELETE FROM Submissions');
-        if ($submissionsResult) {
-            $deletedCount += max(0, (int)$this->conn->affected_rows);
-        }
-
-        $applicationSubmissionsResult = $this->conn->query('DELETE FROM ApplicationSubmissions');
-        if ($applicationSubmissionsResult) {
-            $deletedCount += max(0, (int)$this->conn->affected_rows);
-        }
-
-        return $deletedCount;
+        // System actions were intentionally disabled.
+        return 0;
     }
 
     // Leitourgia forgot: xeirizetai to antistoixo kommati tis selidas i tou service.

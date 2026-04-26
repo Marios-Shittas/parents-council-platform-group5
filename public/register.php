@@ -21,8 +21,8 @@ function registrationWindowState(mysqli $conn): array
 
     if (!$stmt) {
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
@@ -34,8 +34,8 @@ function registrationWindowState(mysqli $conn): array
 
     if (empty($schedules)) {
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
@@ -66,9 +66,10 @@ function registrationWindowState(mysqli $conn): array
     }
 
     if (empty($formattedPeriods)) {
+        // No active schedule rows: registration remains open.
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
