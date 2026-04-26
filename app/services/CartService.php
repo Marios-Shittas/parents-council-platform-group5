@@ -7,14 +7,14 @@ class CartService
 {
     private $conn;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
-    // Leitourgia getOrCreateCart: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getOrCreateCart($userId)
     {
         $userId = (int)$userId;
@@ -57,7 +57,7 @@ class CartService
         return false;
     }
 
-    // Leitourgia getCart: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getCart($userId)
     {
         $orderId = $this->getOrCreateCart($userId);
@@ -121,7 +121,7 @@ class CartService
         ];
     }
 
-    // Leitourgia addToCart: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function addToCart($userId, $productId, $quantity = 1, $size = '')
     {
         $userId = (int)$userId;
@@ -233,7 +233,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
-    // Leitourgia updateCartItem: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateCartItem($userId, $productId, $size, $quantity)
     {
         $userId = (int)$userId;
@@ -279,7 +279,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
-    // Leitourgia removeFromCart: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function removeFromCart($userId, $productId, $size)
     {
         $userId = (int)$userId;
@@ -319,7 +319,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
-    // Leitourgia clearCart: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function clearCart($userId)
     {
         $userId = (int)$userId;
@@ -348,7 +348,7 @@ class CartService
         return $this->updateOrderTotal($orderId, 0);
     }
 
-    // Leitourgia refreshOrderTotal: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function refreshOrderTotal($orderId)
     {
         $orderId = (int)$orderId;
@@ -375,7 +375,7 @@ class CartService
         return $this->updateOrderTotal($orderId, $total);
     }
 
-    // Leitourgia updateOrderTotal: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function updateOrderTotal($orderId, $total)
     {
         $orderId = (int)$orderId;

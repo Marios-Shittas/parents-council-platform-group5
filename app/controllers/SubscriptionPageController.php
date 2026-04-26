@@ -7,15 +7,14 @@ class SubscriptionPageController
     private mysqli $conn;
     private TokenValidator $tokenValidator;
     private string $tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
-
-    // Pairnei DB connection kai etoimazei ton token validator.
+// Kanei inject to DB connection kai arxikopoiei to TokenValidator dependency gia elegxous token syndromis.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
-
-    // Ftiaxnei ta view data gia ti selida syndromis.
+// Ftiaxnei olo to provoli payload tis selidas syndromis, me raw token,
+// JSON-safe token, validity flag kai minima gia mi-egkyro token.
     public function viewData(): array
     {
         $token = trim((string) ($_GET['token'] ?? ''));
@@ -27,8 +26,8 @@ class SubscriptionPageController
             'token_message' => $this->tokenMessage,
         ];
     }
-
-    // Elegxei an to token borei na plirosei tin syndromi tou parent.
+// Elegxei oti to token antistoixei se parent account me status waiting_payment
+// kai oti to token den exei lixeis.
     private function isTokenValid(string $token): bool
     {
         return $this->tokenValidator->isTokenValid($token, 'parent', 'waiting_payment', true);

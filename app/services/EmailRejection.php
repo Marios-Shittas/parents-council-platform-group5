@@ -13,7 +13,7 @@ class EmailRejection
     private string $fromName;
     private int $timeout;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(array $config)
     {
         $this->host = trim((string)($config['host'] ?? ''));
@@ -38,7 +38,7 @@ class EmailRejection
         }
     }
 
-    // Leitourgia sendRejectionEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendRejectionEmail(string $toEmail, string $adminMessage): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -74,7 +74,7 @@ class EmailRejection
         throw new RuntimeException('Failed to send rejection email.');
     }
 
-    // Leitourgia sendViaSmtpMode: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendViaSmtpMode(string $mode, string $toEmail, string $subject, string $body): void
     {
         $socket = $this->openConnection($mode);
@@ -113,7 +113,7 @@ class EmailRejection
         }
     }
 
-    // Leitourgia resolveTransportModes: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveTransportModes(): array
     {
         if ($this->encryption === 'ssl' || $this->encryption === 'smtps') {
@@ -135,13 +135,13 @@ class EmailRejection
         return ['starttls', 'smtps', 'none'];
     }
 
-    // Leitourgia shouldUseStartTls: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function shouldUseStartTls(string $mode): bool
     {
         return $mode === 'starttls';
     }
 
-    // Leitourgia openConnection: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function openConnection(string $mode)
     {
         $transport = $mode === 'smtps' ? 'ssl://' : 'tcp://';
@@ -172,7 +172,7 @@ class EmailRejection
         return $socket;
     }
 
-    // Leitourgia buildMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildMessage(string $toEmail, string $subject, string $body): string
     {
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -191,14 +191,14 @@ class EmailRejection
         return implode("\r\n", $headers) . "\r\n\r\n" . $body;
     }
 
-    // Leitourgia command: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function command($socket, string $command, array $expectedCodes): string
     {
         $this->write($socket, $command . "\r\n");
         return $this->expect($socket, $expectedCodes);
     }
 
-    // Leitourgia write: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function write($socket, string $payload): void
     {
         $written = fwrite($socket, $payload);
@@ -207,7 +207,7 @@ class EmailRejection
         }
     }
 
-    // Leitourgia expect: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function expect($socket, array $expectedCodes): string
     {
         $response = '';

@@ -16,14 +16,14 @@ class ForgotPasswordService {
     private $db;
     private $tokenExpirationMinutes = 600;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         $this->usersService = new UsersService();
         global $conn;
         $this->db = $conn;
     }
 
-    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest() {
         header('Content-Type: application/json');
 
@@ -54,7 +54,7 @@ class ForgotPasswordService {
         return $result;
     }
 
-    // Leitourgia generateAndStoreToken: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function generateAndStoreToken($email) {
         try {
             $token = bin2hex(random_bytes(32));
@@ -77,7 +77,7 @@ class ForgotPasswordService {
         }
     }
 
-    // Leitourgia clearResetToken: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function clearResetToken($email): void
     {
         $stmt = $this->db->prepare("UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?");
@@ -90,7 +90,7 @@ class ForgotPasswordService {
         $stmt->close();
     }
 
-    // Leitourgia sendResetEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendResetEmail($name, $email, $token) {
         try {
             $subject = $this->resetEmailSubject();
@@ -154,19 +154,19 @@ class ForgotPasswordService {
         return false;
     }
 
-    // Leitourgia buildResetLink: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildResetLink(string $email, string $token): string
     {
         return rtrim(APP_BASE_URL, '/') . '/public/reset-password.php?email=' . urlencode($email) . '&token=' . urlencode($token);
     }
 
-    // Leitourgia resetEmailSubject: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resetEmailSubject(): string
     {
         return 'Ξεχασα τον κωδικο';
     }
 
-    // Leitourgia buildResetEmailBody: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildResetEmailBody(string $name, string $resetLink): string
     {
         $safeName = htmlspecialchars(trim($name) !== '' ? trim($name) : 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');

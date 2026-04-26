@@ -9,7 +9,7 @@ class EpikoinoniaService {
     private $conn;
     private static $tableChecked = false;
     
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
@@ -17,7 +17,7 @@ class EpikoinoniaService {
     }
 
     /**
-     * Ensure the contact_messages table exists
+     * Ensure the contact_messages pinakas exists
      */
     private function ensureContactMessagesTable() {
         if (self::$tableChecked) {
@@ -113,16 +113,16 @@ class EpikoinoniaService {
     }
     
     /**
-     * Create a new contact message
-     * @param string $name Sender name
-     * @param string $email Sender email
-     * @param string $phone Sender phone
-     * @param string $subject Message subject
-     * @param string $message Message content
-     * @return int|false The new message ID or false on failure
+     * Dimiourgei neo minima epikoinonias
+     * @param string $name Onoma apostolea
+     * @param string $email Email apostolea
+     * @param string $phone Tilefono apostolea
+     * @param string $subject Thema minimatos
+     * @param string $message Periexomeno minimatos
+     * @return int|false To neo ID minimatos i false se apotyxia
      */
     public function createMessage($name, $email, $phone, $subject, $message) {
-        // Remove all leading and trailing whitespace (including newlines)
+        // Afairei kena stin arxi kai sto telos (mazi me allages grammis)
         $name = preg_replace('/^\s+|\s+$/u', '', $name);
         $email = preg_replace('/^\s+|\s+$/u', '', $email);
         $phone = preg_replace('/^\s+|\s+$/u', '', $phone);

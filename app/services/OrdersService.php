@@ -11,7 +11,7 @@ class OrdersService
 {
     private mysqli $conn;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
@@ -50,7 +50,7 @@ class OrdersService
         return $stmt->execute();
     }
 
-    // Leitourgia clearProductOrderHistory: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function clearProductOrderHistory(): array
     {
         $stats = [
@@ -113,7 +113,7 @@ class OrdersService
         }
     }
 
-    // Leitourgia deleteProductOrderHistory: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteProductOrderHistory(int $orderId): array
     {
         if ($orderId <= 0) {
@@ -196,7 +196,7 @@ class OrdersService
         }
     }
 
-    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
@@ -253,7 +253,7 @@ class OrdersService
         ]);
     }
 
-    // Leitourgia getPaidOrders: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPaidOrders(): array
     {
         $sql = "
@@ -286,7 +286,7 @@ class OrdersService
         return $orders;
     }
 
-    // Leitourgia getItemsByOrderIds: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getItemsByOrderIds(array $orderIds): array
     {
         if (empty($orderIds)) {
@@ -342,7 +342,7 @@ class OrdersService
         return $itemsByOrderId;
     }
 
-    // Leitourgia getTotalsByProduct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getTotalsByProduct(): array
     {
         $sql = "
@@ -377,7 +377,7 @@ class OrdersService
         return $totals;
     }
 
-    // Leitourgia getPaidOrderForDeletion: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPaidOrderForDeletion(int $orderId): ?array
     {
         $stmt = $this->conn->prepare("
@@ -401,7 +401,7 @@ class OrdersService
         return is_array($row) ? $row : null;
     }
 
-    // Leitourgia findProductPaymentIdsForOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function findProductPaymentIdsForOrder(int $orderId, int $userId, float $totalPrice): array
     {
         $idsFromLogs = $this->findProductPaymentIdsForOrderFromLogs($orderId, $userId);
@@ -477,7 +477,7 @@ class OrdersService
         return $paymentIds;
     }
 
-    // Leitourgia findProductPaymentIdsForOrderFromLogs: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function findProductPaymentIdsForOrderFromLogs(int $orderId, int $userId): array
     {
         $stmt = $this->conn->prepare("
@@ -515,7 +515,7 @@ class OrdersService
         return $paymentIds;
     }
 
-    // Leitourgia countRows: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function countRows(string $sql): int
     {
         $result = $this->conn->query($sql);
@@ -528,7 +528,7 @@ class OrdersService
         return (int)($row['total'] ?? 0);
     }
 
-    // Leitourgia respond: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $payload): void
     {
         header('Content-Type: application/json; charset=utf-8');

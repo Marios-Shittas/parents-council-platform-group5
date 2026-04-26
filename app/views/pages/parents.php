@@ -6,19 +6,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Leitourgia parentsPageRenderMultiline: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageRenderMultiline($value)
 {
     return nl2br(htmlspecialchars(parentsPageNormalizeText($value), ENT_QUOTES, 'UTF-8'));
 }
 
-// Leitourgia parentsPageNormalizeText: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageNormalizeText($value)
 {
     return is_array($value) ? '' : trim((string)$value);
 }
 
-// Leitourgia parentsPageSanitizeList: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeList($items)
 {
     if (!is_array($items)) {
@@ -35,7 +35,7 @@ function parentsPageSanitizeList($items)
     return $sanitizedItems;
 }
 
-// Leitourgia parentsPageSanitizeRows: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeRows($rows)
 {
     if (!is_array($rows)) {
@@ -48,7 +48,7 @@ function parentsPageSanitizeRows($rows)
             foreach ($row as $key => $cell) {
                 $sanitizedRow[$key] = parentsPageNormalizeText($cell);
             }
-            // Only add non-empty rows
+            // Only add non-empty grammes
             if (count(array_filter($sanitizedRow, function ($cell) { return $cell !== ''; })) > 0) {
                 $sanitizedRows[] = $sanitizedRow;
             }
@@ -57,7 +57,7 @@ function parentsPageSanitizeRows($rows)
     return $sanitizedRows;
 }
 
-// Leitourgia parentsPageSanitizeScheduleBlocks: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeScheduleBlocks($blocks)
 {
     if (!is_array($blocks)) {
@@ -85,7 +85,7 @@ function parentsPageSanitizeScheduleBlocks($blocks)
     return $sanitizedBlocks;
 }
 
-// Leitourgia parentsPageGroupArchiveRowsByYear: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageGroupArchiveRowsByYear($rows)
 {
     $grouped = [];
@@ -106,7 +106,7 @@ function parentsPageGroupArchiveRowsByYear($rows)
     return $grouped;
 }
 
-// Leitourgia parentsPageMergeBoardArchiveReferenceRows: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
     $mergedRows = parentsPageSanitizeRows($rows);

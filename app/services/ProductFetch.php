@@ -16,13 +16,13 @@ if (!$eshopSettingsService->isShopVisible()) {
     exit;
 }
 
-// Leitourgia getDefaultProductImagePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getDefaultProductImagePath(): string
 {
     return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
 }
 
-// Leitourgia resolveProductImagePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function resolveProductImagePath(string $imagePath): string
 {
     $imagePath = trim($imagePath);
@@ -35,7 +35,7 @@ function resolveProductImagePath(string $imagePath): string
     return file_exists($absolutePath) ? resolveProductImagePublicUrl($imagePath) : getDefaultProductImagePath();
 }
 
-// Leitourgia resolveProductImageAbsolutePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function resolveProductImageAbsolutePath(string $imagePath): string
 {
     $projectRoot = dirname(__DIR__, 2);
@@ -44,7 +44,7 @@ function resolveProductImageAbsolutePath(string $imagePath): string
     return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
 }
 
-// Leitourgia resolveProductImagePublicUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function resolveProductImagePublicUrl(string $imagePath): string
 {
     $publicRelativePath = resolveProductImagePublicRelativePath($imagePath);
@@ -54,7 +54,7 @@ function resolveProductImagePublicUrl(string $imagePath): string
         : '/parents-council-platform-group5/public/' . $publicRelativePath;
 }
 
-// Leitourgia resolveProductImagePublicRelativePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function resolveProductImagePublicRelativePath(string $imagePath): string
 {
     $normalized = trim(str_replace('\\', '/', $imagePath));

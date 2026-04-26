@@ -1,5 +1,5 @@
 (function () {
-    // Metaferoume mikra PHP configs sto window xoris inline JavaScript.
+    // Metaferoume mikra PHP configs sto xroniko perithorio xoris inline JavaScript.
     function applyConfig(script) {
         if (!script) return;
 

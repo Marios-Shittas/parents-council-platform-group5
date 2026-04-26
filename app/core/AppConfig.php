@@ -2,7 +2,8 @@
 
 class AppConfig
 {
-    // Diavazei proxy/server times kai girnaei tin proti kathari timi.
+// Diavazei timi request/server me proxy-awareness, kanei trim kai epistrefei mono to proto entry
+// otan yparxoun comma-separated headers (syxno se forwarded headers).
     public static function detectRequestValue(string $primaryKey, string $fallbackKey = ''): string
     {
         $value = trim((string) ($_SERVER[$primaryKey] ?? ''));
@@ -19,8 +20,8 @@ class AppConfig
 
         return '';
     }
-
-    // Ftiaxnei to base URL apo env variables i apo to trexon request.
+// Ypologizei canonical base URL efarmogis me proteraiotita: APP_BASE_URL env prwta,
+// alliws scheme/host apo proxy i server vars kai telika infer path apo to script location.
     public static function detectBaseUrl(): string
     {
         $configuredBaseUrl = trim((string) getenv('APP_BASE_URL'));

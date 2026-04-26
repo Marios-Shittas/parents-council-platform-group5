@@ -6,14 +6,14 @@ class ProductsService
 {
     private $conn;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
-    // Leitourgia getAllProducts: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getAllProducts()
     {
         $sql = "
@@ -47,7 +47,7 @@ class ProductsService
         return $products;
     }
 
-    // Leitourgia getProductById: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getProductById($id)
     {
         $id = (int)$id;
@@ -91,7 +91,7 @@ class ProductsService
         return false;
     }
 
-    // Leitourgia createProduct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function createProduct($name, $description, $price)
     {
         $name = trim($name);
@@ -116,7 +116,7 @@ class ProductsService
         return false;
     }
 
-    // Leitourgia updateProduct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateProduct($id, $name, $description, $price)
     {
         $id = (int)$id;
@@ -139,7 +139,7 @@ class ProductsService
         return $stmt->execute();
     }
 
-    // Leitourgia addProductImage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function addProductImage($productId, $imagePath)
     {
         $productId = (int)$productId;
@@ -159,7 +159,7 @@ class ProductsService
         return $stmt->execute();
     }
 
-    // Leitourgia replaceProductImage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function replaceProductImage($productId, $imagePath)
     {
         $productId = (int)$productId;
@@ -219,7 +219,7 @@ class ProductsService
         }
     }
 
-    // Leitourgia deleteProductImages: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteProductImages($productId)
     {
         $productId = (int)$productId;
@@ -238,7 +238,7 @@ class ProductsService
         return $stmt->execute();
     }
 
-    // Leitourgia productExistsInOrders: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function productExistsInOrders($productId)
     {
         $productId = (int)$productId;
@@ -277,7 +277,7 @@ class ProductsService
         return false;
     }
 
-    // Leitourgia deleteProduct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteProduct($productId)
     {
         $productId = (int)$productId;
@@ -363,7 +363,7 @@ class ProductsService
         }
     }
 
-    // Leitourgia cleanupDraftProductReferences: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function cleanupDraftProductReferences($productId): void
     {
         $productId = (int)$productId;
@@ -404,7 +404,7 @@ class ProductsService
         }
     }
 
-    // Leitourgia getDraftProductPaymentIds: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDraftProductPaymentIds($productId): array
     {
         $productId = (int)$productId;
@@ -439,7 +439,7 @@ class ProductsService
         return array_values(array_unique($paymentIds));
     }
 
-    // Leitourgia getDraftOrderIdsForProduct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDraftOrderIdsForProduct($productId): array
     {
         $productId = (int)$productId;
@@ -473,7 +473,7 @@ class ProductsService
         return array_values(array_unique($orderIds));
     }
 
-    // Leitourgia refreshOrderTotal: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function refreshOrderTotal($orderId): void
     {
         $orderId = (int)$orderId;
@@ -501,7 +501,7 @@ class ProductsService
         $stmt->close();
     }
 
-    // Leitourgia getProductImagePaths: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getProductImagePaths($productId)
     {
         $productId = (int)$productId;
@@ -530,7 +530,7 @@ class ProductsService
         return $imagePaths;
     }
 
-    // Leitourgia deleteImageFiles: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function deleteImageFiles(array $imagePaths)
     {
         $publicRoot = realpath(__DIR__ . '/../../public');
@@ -552,7 +552,7 @@ class ProductsService
         }
     }
 
-    // Leitourgia resolveProductImagePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveProductImagePath(string $imagePath): string
     {
         $imagePath = trim($imagePath);
@@ -567,7 +567,7 @@ class ProductsService
             : $this->getDefaultProductImagePath();
     }
 
-    // Leitourgia resolveProductImageAbsolutePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveProductImageAbsolutePath(string $imagePath): string
     {
         $projectRoot = dirname(__DIR__, 2);
@@ -576,7 +576,7 @@ class ProductsService
         return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
     }
 
-    // Leitourgia resolveProductImagePublicUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveProductImagePublicUrl(string $imagePath): string
     {
         $publicRelativePath = $this->resolveProductImagePublicRelativePath($imagePath);
@@ -586,7 +586,7 @@ class ProductsService
             : '/parents-council-platform-group5/public/' . $publicRelativePath;
     }
 
-    // Leitourgia resolveProductImagePublicRelativePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveProductImagePublicRelativePath(string $imagePath): string
     {
         $normalized = trim(str_replace('\\', '/', $imagePath));
@@ -618,7 +618,7 @@ class ProductsService
         return ltrim($normalized, '/');
     }
 
-    // Leitourgia getDefaultProductImagePath: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDefaultProductImagePath(): string
     {
         return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';

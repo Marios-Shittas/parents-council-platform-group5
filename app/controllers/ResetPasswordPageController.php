@@ -3,14 +3,13 @@
 class ResetPasswordPageController
 {
     private mysqli $conn;
-
-    // Krataei DB connection gia ton elegxo tou reset token.
+// Apothikevei to DB connection dependency pou xrisimopoieitai gia elegxo ownership/lixis reset token.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
-
-    // Ftiaxnei ola ta dedomena pou xreiazetai to reset password view.
+// Ftiaxnei olokliromeno provoli-model payload gia to reset page: raw values, JSON-safe values,
+// token validity flag, proepilegmeno minima mi-egkyrou token kai ypiresia endpoint URL.
     public function viewData(): array
     {
         $token = trim((string) ($_GET['token'] ?? ''));
@@ -26,8 +25,7 @@ class ResetPasswordPageController
             'service_url' => rtrim(APP_BASE_URL, '/') . '/app/services/ResetPasswordService.php',
         ];
     }
-
-    // Elegxei sto database an to reset token einai akoma egkyro.
+// Epivevaionei to reset token ston pinaka Xristes me email+token kai apaitei mi-ligmeno token_expiry.
     private function isTokenValid(string $email, string $token): bool
     {
         if ($token === '' || $email === '') {

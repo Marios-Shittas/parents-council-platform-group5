@@ -8,15 +8,14 @@ class TwoFactorAuthService
 {
     private mysqli $conn;
     private int $tokenExpirationMinutes = 10;
-
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Arxikopoiei to ypiresia me to koinoxristo MySQL connection pou orizetai sto bootstrap (global $conn).
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
-
-    // Leitourgia send2FACode: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Elegxei email/token, apothikevei 2FA token + lixi ston pinaka Xristes, paragei 8-char kwdiko
+// gia ton xristi kai ton apostellei me email meso ApprovalMailer. Epistrefei payload epityxias/apotyxias.
     public function send2FACode(string $email, string $name, string $token): array
     {
         $email = trim($email);
@@ -69,8 +68,8 @@ class TwoFactorAuthService
             return ['success' => false, 'message' => 'Αποτυχία αποστολής κωδικού 2FA.'];
         }
     }
-
-    // Leitourgia verify2FACode: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Fortonei token/lixi xristi, aporriptei missing i expired eggrafes, sygkrinei ton kwdiko xristi
+// me ton paragogomeno kwdiko (xwris diafora pezon/kefalaiwn) kai katharizei ta 2FA dedomena meta to success.
     public function verify2FACode(string $email, string $code): array
     {
         $stmt = $this->conn->prepare('SELECT token, token_expiry FROM Users WHERE email = ? LIMIT 1');
@@ -101,8 +100,7 @@ class TwoFactorAuthService
         $this->clear2FAData($email);
         return ['success' => true, 'message' => 'Η επαλήθευση 2FA ολοκληρώθηκε επιτυχώς.'];
     }
-
-    // Leitourgia clear2FAData: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function clear2FAData(string $email): void
     {
         $stmt = $this->conn->prepare('UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?');
@@ -114,8 +112,8 @@ class TwoFactorAuthService
         $stmt->execute();
         $stmt->close();
     }
-
-    // Leitourgia derive8CharCodeFromToken: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Dimiourgei me stathero tropo 8-char kwdiko apo to token: pairnei to index 0,
+// meta kathe 4o xarakthra kai telos symplirwnei tis theseis se seira.
     private function derive8CharCodeFromToken(string $token): string
     {
         $token = trim($token);

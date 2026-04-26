@@ -24,12 +24,12 @@
             }
         }
 
-        // Leitourgia isMobile: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function isMobile() {
             return mobileQuery.matches;
         }
 
-        // Leitourgia getDesktopCollapsedPreference: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function getDesktopCollapsedPreference() {
             try {
                 return window.localStorage.getItem('adminSidebarDesktopCollapsed') === 'true';
@@ -38,16 +38,16 @@
             }
         }
 
-        // Leitourgia setDesktopCollapsedPreference: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function setDesktopCollapsedPreference(isCollapsed) {
             try {
                 window.localStorage.setItem('adminSidebarDesktopCollapsed', String(isCollapsed));
             } catch (error) {
-                // Ignore storage failures and keep the UI functional.
+                // Agnoei sfalmata apothikefsis gia na paramenei leitourgiko to perivallon.
             }
         }
 
-        // Leitourgia updateToggleButton: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function updateToggleButton(isOpen) {
             var shouldShowToggle = isMobile()
                 ? !wrapper.classList.contains('sidebar-open')
@@ -56,7 +56,7 @@
             toggleButton.setAttribute('aria-expanded', String(isOpen));
         }
 
-        // Leitourgia setSidebarOpen: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function setSidebarOpen(isOpen, options) {
             var settings = options || {};
 
@@ -77,19 +77,19 @@
             updateToggleButton(isOpen);
         }
 
-        // Leitourgia closeSidebar: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function closeSidebar() {
             setSidebarOpen(false);
         }
 
-        // Leitourgia isSidebarVisible: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function isSidebarVisible() {
             return isMobile()
                 ? wrapper.classList.contains('sidebar-open')
                 : !wrapper.classList.contains('sidebar-collapsed');
         }
 
-        // Leitourgia handleToggle: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function handleToggle() {
             if (isMobile()) {
                 setSidebarOpen(!wrapper.classList.contains('sidebar-open'));
@@ -118,7 +118,7 @@
             }
         });
 
-        // Leitourgia syncSidebarState: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function syncSidebarState() {
             if (isMobile()) {
                 wrapper.classList.remove('sidebar-collapsed');

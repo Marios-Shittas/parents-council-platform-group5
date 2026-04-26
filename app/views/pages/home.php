@@ -27,7 +27,7 @@ $eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Ε
 $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
 
 if (!function_exists('home_public_content_url_exists')) {
-    // Leitourgia home_public_content_url_exists: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function home_public_content_url_exists(string $url): bool
     {
         $path = (string)parse_url($url, PHP_URL_PATH);

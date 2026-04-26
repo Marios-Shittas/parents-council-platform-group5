@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../core/AuthSession.php';
 
 if (!function_exists('auth_start_session')) {
-    // Ksekinaei session meso tis AuthSession klasis.
+// Thin compatibility wrapper pou ksekina to synedria meso tou AuthSession OO layer.
     function auth_start_session(): void
     {
         (new AuthSession())->start();
@@ -11,7 +11,7 @@ if (!function_exists('auth_start_session')) {
 }
 
 if (!function_exists('auth_user_id')) {
-    // Girnaei to trexon user id apo to session.
+// Epistrefei to authenticated xristis id apo to synedria meso tou kentrikou AuthSession API.
     function auth_user_id(): int
     {
         return (new AuthSession())->userId();
@@ -19,7 +19,7 @@ if (!function_exists('auth_user_id')) {
 }
 
 if (!function_exists('auth_user_role')) {
-    // Girnaei ton trexon user role apo to session.
+// Epistrefei to role string tou synedria oste ta role reads na einai consistency se legacy code.
     function auth_user_role(): string
     {
         return (new AuthSession())->userRole();
@@ -27,7 +27,7 @@ if (!function_exists('auth_user_role')) {
 }
 
 if (!function_exists('auth_redirect_url_for_current_role')) {
-    // Epilegei redirect URL analoga me ton rolo tou user.
+// Kanei delegate ton ypologismo role-based redirect stin kentriki logiki tou AuthSession.
     function auth_redirect_url_for_current_role(): string
     {
         return (new AuthSession())->redirectUrlForCurrentRole();
@@ -35,7 +35,7 @@ if (!function_exists('auth_redirect_url_for_current_role')) {
 }
 
 if (!function_exists('auth_require_role')) {
-    // Prostatevei routes pou apaiteitai sygkekrimenos rolos.
+// Legacy-friendly authorization guard pou epivalei required role me redirect i JSON behavior.
     function auth_require_role(string $requiredRole, array $options = []): void
     {
         (new AuthSession())->requireRole($requiredRole, $options);

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const deleteProductIdInput = document.getElementById('deleteProductId');
             const deleteProductName = document.getElementById('deleteProductName');
 
-            // Leitourgia splitCustomSizes: krataei tin antistoixi symperifora tou UI.
+            // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
             function splitCustomSizes(value) {
                 return String(value || '')
                     .split(/[\r\n,;]+/)
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .filter(Boolean);
             }
 
-            // Leitourgia bindCustomSizeBuilder: krataei tin antistoixi symperifora tou UI.
+            // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
             function bindCustomSizeBuilder(scopeEl) {
                 const builder = scopeEl.querySelector('.js-custom-size-builder');
 
@@ -27,14 +27,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 const hiddenField = builder.querySelector('.js-custom-size-options');
                 let values = splitCustomSizes(hiddenField ? hiddenField.value : '');
 
-                // Leitourgia syncHiddenField: krataei tin antistoixi symperifora tou UI.
+                // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
                 function syncHiddenField() {
                     if (hiddenField) {
                         hiddenField.value = values.join('\n');
                     }
                 }
 
-                // Leitourgia render: krataei tin antistoixi symperifora tou UI.
+                // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
                 function render() {
                     if (!chips) {
                         syncHiddenField();
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     syncHiddenField();
                 }
 
-                // Leitourgia addValue: krataei tin antistoixi symperifora tou UI.
+                // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
                 function addValue(shouldFocus) {
                     if (!input) {
                         return;
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             }
 
-            // Leitourgia bindSizeVisibility: krataei tin antistoixi symperifora tou UI.
+            // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
             function bindSizeVisibility(scopeEl) {
                 if (!scopeEl) {
                     return;

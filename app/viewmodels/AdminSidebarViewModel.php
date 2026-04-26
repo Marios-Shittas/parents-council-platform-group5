@@ -3,14 +3,13 @@
 class AdminSidebarViewModel
 {
     private ?mysqli $conn;
-
-    // Krataei optional DB connection gia services pou tin xreiazontai.
+// Dexetai optional DB connection pou xrisimopoieitai apo services me explicit mysqli injection.
     public function __construct(?mysqli $conn = null)
     {
         $this->conn = $conn;
     }
-
-    // Ftiaxnei ta badges kai tin active katastasi tou admin sidebar.
+// Synkentronei olous tous counters tou admin sidebar (messages/xristes/applications/orders)
+// kai epistrefei current page marker mazi me preformatted badge texts.
     public function build(): array
     {
         $unreadContactMessages = $this->safeCount(function (): int {
@@ -50,8 +49,7 @@ class AdminSidebarViewModel
             'orders_badge_text' => $this->formatBadge($pendingPaidOrders),
         ];
     }
-
-    // Trexei counter services xoris na rixnei olo to admin UI an kati apotyxei.
+// Trexei ton resolver asfales; an ypiresia rixei exception, epistrefei 0 gia na meinei stathero to sidebar UI.
     private function safeCount(callable $resolver): int
     {
         try {
@@ -60,8 +58,7 @@ class AdminSidebarViewModel
             return 0;
         }
     }
-
-    // Morfopoiei ta badges oste na min ftiaxnoun megala noumera sto sidebar.
+// Metatrepei to raw arithmitiko count se compact badge text (keno sto 0, cap sto 10+).
     private function formatBadge(int $count): string
     {
         if ($count <= 0) {

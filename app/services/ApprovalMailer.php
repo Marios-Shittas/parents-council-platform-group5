@@ -11,7 +11,7 @@ class ApprovalMailer
     private string $fromName;
     private int $timeout;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(array $config)
     {
         $this->host = trim((string)($config['host'] ?? ''));
@@ -36,7 +36,7 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia sendApprovalEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendApprovalEmail(string $toEmail, string $link): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -82,7 +82,7 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia sendHtmlEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendHtmlEmail(string $toEmail, string $subject, string $htmlBody): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -133,7 +133,7 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia sendTextEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendTextEmail(string $toEmail, string $subject, string $textBody): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -184,7 +184,7 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia sendActivationCredentialsEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendActivationCredentialsEmail(string $toEmail, string $temporaryPassword): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -234,19 +234,19 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia activationCredentialsSubject: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public static function activationCredentialsSubject(): string
     {
         return 'Ο λογαριασμός σας ενεργοποιήθηκε';
     }
 
-    // Leitourgia approvalEmailSubject: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public static function approvalEmailSubject(): string
     {
         return 'Η αίτησή σας εγκρίθηκε';
     }
 
-    // Leitourgia approvalEmailHtmlBody: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public static function approvalEmailHtmlBody(string $link): string
     {
         $safeLink = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -258,7 +258,7 @@ class ApprovalMailer
             '<p>Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.</p>';
     }
 
-    // Leitourgia approvalEmailTextBody: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public static function approvalEmailTextBody(string $link): string
     {
         return
@@ -268,7 +268,7 @@ class ApprovalMailer
             "Ο σύνδεσμος ισχύει για περιορισμένο χρονικό διάστημα.";
     }
 
-    // Leitourgia activationCredentialsBody: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public static function activationCredentialsBody(string $temporaryPassword): string
     {
         return
@@ -277,7 +277,7 @@ class ApprovalMailer
             "Μπορείτε να τον αλλάξετε οποιαδήποτε στιγμή από τη σελίδα Ξέχασα κωδικό (Forgot Password).";
     }
 
-    // Leitourgia openConnection: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function openConnection()
     {
         $transport = ($this->encryption === 'ssl' || $this->encryption === 'smtps' || $this->port === 465)
@@ -310,7 +310,7 @@ class ApprovalMailer
         return $socket;
     }
 
-    // Leitourgia buildMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildMessage(string $toEmail, string $subject, string $body): string
     {
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -329,7 +329,7 @@ class ApprovalMailer
         return implode("\r\n", $headers) . "\r\n\r\n" . $body;
     }
 
-    // Leitourgia buildHtmlMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildHtmlMessage(string $toEmail, string $subject, string $body): string
     {
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -348,14 +348,14 @@ class ApprovalMailer
         return implode("\r\n", $headers) . "\r\n\r\n" . $body;
     }
 
-    // Leitourgia command: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function command($socket, string $command, array $expectedCodes): string
     {
         $this->write($socket, $command . "\r\n");
         return $this->expect($socket, $expectedCodes);
     }
 
-    // Leitourgia write: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function write($socket, string $payload): void
     {
         $written = fwrite($socket, $payload);
@@ -364,7 +364,7 @@ class ApprovalMailer
         }
     }
 
-    // Leitourgia expect: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function expect($socket, array $expectedCodes): string
     {
         $response = '';

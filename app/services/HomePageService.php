@@ -11,8 +11,8 @@ class HomePageService
     private $conn;
     private $defaultSections;
     private $lastError = '';
-
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei bootstrap tou ypiresia: fortwnei DB handle, etoimazei proepilegmeno section schema,
+// eksasfalizei oti yparxei pinakas kai kanei arxikopoisi sta missing proepilegmena.
     public function __construct()
     {
         global $conn;
@@ -22,8 +22,7 @@ class HomePageService
         $this->ensureTable();
         $this->ensureDefaultSections();
     }
-
-    // Leitourgia getAllSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei merged homepage sections opou to DB periexomeno kanei override sta proepilegmena ana section key.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -51,15 +50,14 @@ class HomePageService
 
         return $sections;
     }
-
-    // Leitourgia getSection: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei ena section ana key apo to merged section map.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
-
-    // Leitourgia updateSection: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei validate to section key, normalopoiei UTF-8 payload, serialopoiei JSON periexomeno,
+// kai ekteli upsert (enimerosi i eisagogi) gia to target homepage section.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -123,14 +121,12 @@ class HomePageService
 
         return true;
     }
-
-    // Leitourgia getLastError: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei to teleftaio human-readable validation i persistence error tou ypiresia.
     public function getLastError()
     {
         return $this->lastError;
     }
-
-    // Leitourgia ensureTable: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Dimiourgei ton HomePageSections pinakas kai uniqueness constraint sto section_key.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS HomePageSections (
@@ -146,8 +142,7 @@ class HomePageService
 
         $this->conn->query($sql);
     }
-
-    // Leitourgia ensureDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei eisagogi ta proepilegmeno sections mono otan leipoun, xwris na peirazei hdh customized periexomeno.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -167,8 +162,7 @@ class HomePageService
             $this->updateSection($sectionKey, $section['title'], $section['subtitle'], $section['content']);
         }
     }
-
-    // Leitourgia buildDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Orizei to canonical homepage periexomeno blueprint gia first-time setup kai fallback reads.
     private function buildDefaultSections()
     {
         return [
@@ -222,8 +216,7 @@ class HomePageService
             ],
         ];
     }
-
-    // Leitourgia normalizeUtf8: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Recursively katharizei arrays/strings se valid UTF-8 gia na apofeygontai DB/JSON encoding failures.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

@@ -2,31 +2,28 @@
 
 class AuthSession
 {
-    // Ksekinaei session mono an den exei idi anoiksei.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
     }
-
-    // Girnaei to logged-in user id i 0 an den iparxei session.
+// Epistrefei to xristis id apo to synedria kai epistrefei 0 an den yparxei syndedemenos xristis.
     public function userId(): int
     {
         $this->start();
 
         return (int) ($_SESSION['user_id'] ?? 0);
     }
-
-    // Girnaei ton rolo tou trexontos xristi.
+// Epistrefei ton rolo tou trexontos xristi apo to synedria (px admin/parent) i kenh timi.
     public function userRole(): string
     {
         $this->start();
 
         return (string) ($_SESSION['role'] ?? '');
     }
-
-    // Epilegei pou prepei na paei o xristis analoga me ton rolo tou.
+// Xartografei ton rolo sto antistoixo proepilegmeno landing page kai dinei safe fallback sto login.
     public function redirectUrlForCurrentRole(): string
     {
         $role = $this->userRole();
@@ -41,8 +38,8 @@ class AuthSession
 
         return '/parents-council-platform-group5/public/login.php';
     }
-
-    // Prostatevei routes pou apaiteitai sygkekrimenos rolos.
+// Authorization gate: epitrepei request mono an o synedria xristis exei ton apaitoumeno rolo.
+// Se apotyxia, epistrefei JSON (401/403) i kanei redirect analoga me to mode.
     public function requireRole(string $requiredRole, array $options = []): void
     {
         $this->start();

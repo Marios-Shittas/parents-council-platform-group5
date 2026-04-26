@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
 
-// Leitourgia sendApprovalEmailMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function sendApprovalEmailMessage(string $email, string $link): void
 {
     $smtpFailureMessage = '';
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawBody = file_get_contents('php://input');
 $payload = json_decode($rawBody, true);
 
-// Windows cmd curl often wraps JSON in single quotes; try to recover that payload shape.
+// Diaxeirizetai payload apo Windows cmd curl pou merikes fores xrisimopoiei mona eisagogika.
 if (!is_array($payload) && is_string($rawBody)) {
     $trimmed = trim($rawBody);
     $len = strlen($trimmed);

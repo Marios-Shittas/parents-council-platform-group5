@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/site_context.php';
 
 class FooterViewModel
 {
-    // Ftiaxnei ta links tou footer analoga me to public/parent context.
+// Ftiaxnei lista links tou footer me context-aware entries kai prosthetei parent-only links otan xreiazetai.
     public function buildLinks(): array
     {
         $links = [

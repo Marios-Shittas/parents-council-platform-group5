@@ -4,7 +4,8 @@ require_once __DIR__ . '/../core/AppConfig.php';
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Europe/Athens');
 
 if (!function_exists('app_detect_request_value')) {
-    // Kanei delegate stin OO config klasi gia na meinoun symvata ta palia calls.
+// Backward-compatible helper pou kanei forward ta legacy procedural calls
+// sto AppConfig::detectRequestValue xwris na allaksei to palio include usage.
     function app_detect_request_value(string $primaryKey, string $fallbackKey = ''): string
     {
         return AppConfig::detectRequestValue($primaryKey, $fallbackKey);
@@ -12,7 +13,7 @@ if (!function_exists('app_detect_request_value')) {
 }
 
 if (!function_exists('app_detect_base_url')) {
-    // Kanei delegate stin OO config klasi gia ton ypologismo tou base URL.
+// Backward-compatible wrapper pou ypologizei to app base URL meso tis OO logikis AppConfig.
     function app_detect_base_url(): string
     {
         return AppConfig::detectBaseUrl();

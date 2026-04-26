@@ -1,12 +1,12 @@
 <?php
 
-// Leitourgia product_sizes_file_path: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_file_path(): string
 {
     return __DIR__ . '/../../storage/product_size_options.json';
 }
 
-// Leitourgia product_sizes_allowed_options: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_allowed_options(): array
 {
     return [
@@ -19,7 +19,7 @@ function product_sizes_allowed_options(): array
     ];
 }
 
-// Leitourgia product_sizes_get_connection: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_get_connection()
 {
     global $conn;
@@ -27,7 +27,7 @@ function product_sizes_get_connection()
     return (isset($conn) && $conn instanceof mysqli) ? $conn : null;
 }
 
-// Leitourgia product_sizes_ensure_table: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_ensure_table(): bool
 {
     static $ready = null;
@@ -70,7 +70,7 @@ function product_sizes_ensure_table(): bool
     return $ready;
 }
 
-// Leitourgia product_sizes_migrate_file_to_db: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_migrate_file_to_db(): void
 {
     static $migrated = false;
@@ -97,7 +97,7 @@ function product_sizes_migrate_file_to_db(): void
     }
 }
 
-// Leitourgia product_sizes_read_file_all: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_read_file_all(): array
 {
     $filePath = product_sizes_file_path();
@@ -129,7 +129,7 @@ function product_sizes_read_file_all(): array
     return $result;
 }
 
-// Leitourgia product_sizes_read_all: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_read_all(): array
 {
     if (!product_sizes_ensure_table()) {
@@ -173,7 +173,7 @@ function product_sizes_read_all(): array
     return $all;
 }
 
-// Leitourgia product_sizes_write_all: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_write_all(array $data): bool
 {
     $filePath = product_sizes_file_path();
@@ -191,7 +191,7 @@ function product_sizes_write_all(array $data): bool
     return @file_put_contents($filePath, $encoded . PHP_EOL, LOCK_EX) !== false;
 }
 
-// Leitourgia product_sizes_clean_text: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_clean_text($value): string
 {
     $value = trim(strip_tags((string)$value));
@@ -205,7 +205,7 @@ function product_sizes_clean_text($value): string
     return substr($value, 0, 100);
 }
 
-// Leitourgia product_sizes_split_custom_options: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_split_custom_options(string $customSizeOptions): array
 {
     $customSizeOptions = trim($customSizeOptions);
@@ -221,7 +221,7 @@ function product_sizes_split_custom_options(string $customSizeOptions): array
     return $parts;
 }
 
-// Leitourgia product_sizes_option_row_from_value: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_option_row_from_value($rawValue): array
 {
     if (is_array($rawValue)) {
@@ -261,7 +261,7 @@ function product_sizes_option_row_from_value($rawValue): array
     ];
 }
 
-// Leitourgia product_sizes_normalize_option_rows: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_normalize_option_rows($sizeOptions, string $customSizeOptions = ''): array
 {
     $normalized = [];
@@ -289,7 +289,7 @@ function product_sizes_normalize_option_rows($sizeOptions, string $customSizeOpt
     return $normalized;
 }
 
-// Leitourgia product_sizes_normalize_options: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_normalize_options($sizeOptions): array
 {
     return array_map(static function (array $row): string {
@@ -297,7 +297,7 @@ function product_sizes_normalize_options($sizeOptions): array
     }, product_sizes_normalize_option_rows($sizeOptions));
 }
 
-// Leitourgia product_sizes_build_meta: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_build_meta(array $rows): array
 {
     $normalizedRows = product_sizes_normalize_option_rows($rows);
@@ -323,7 +323,7 @@ function product_sizes_build_meta(array $rows): array
     ];
 }
 
-// Leitourgia product_sizes_get_for_product: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_get_for_product(int $productId): array
 {
     if ($productId <= 0) {
@@ -340,7 +340,7 @@ function product_sizes_get_for_product(int $productId): array
     return product_sizes_build_meta($all[$key]['size_options_with_labels'] ?? []);
 }
 
-// Leitourgia product_sizes_set_for_product: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_set_for_product(int $productId, bool $hasSizes, array $sizeOptions, string $customSizeOptions = ''): bool
 {
     if ($productId <= 0) {
@@ -366,7 +366,7 @@ function product_sizes_set_for_product(int $productId, bool $hasSizes, array $si
     return product_sizes_write_all($all);
 }
 
-// Leitourgia product_sizes_replace_db_rows: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_replace_db_rows(int $productId, array $rows): bool
 {
     $conn = product_sizes_get_connection();
@@ -432,7 +432,7 @@ function product_sizes_replace_db_rows(int $productId, array $rows): bool
     return true;
 }
 
-// Leitourgia product_sizes_remove_for_product: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_remove_for_product(int $productId): bool
 {
     if ($productId <= 0) {
@@ -449,7 +449,7 @@ function product_sizes_remove_for_product(int $productId): bool
     return product_sizes_write_all($all);
 }
 
-// Leitourgia product_sizes_label_for_value: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function product_sizes_label_for_value(string $sizeValue, ?array $meta = null): string
 {
     $sizeValue = product_sizes_clean_text($sizeValue);

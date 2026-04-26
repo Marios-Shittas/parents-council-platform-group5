@@ -5,8 +5,7 @@ require_once __DIR__ . '/../includes/db.php';
 class EshopSettingsService
 {
     private mysqli $conn;
-
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Arxikopoiei to ypiresia me provided mysqli connection i kanei fallback sto global app connection.
     public function __construct(?mysqli $conn = null)
     {
         if ($conn instanceof mysqli) {
@@ -17,8 +16,7 @@ class EshopSettingsService
         global $conn;
         $this->conn = $conn;
     }
-
-    // Leitourgia isShopVisible: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function isShopVisible(): bool
     {
         $this->ensureSettingsTable();
@@ -36,8 +34,7 @@ class EshopSettingsService
 
         return true;
     }
-
-    // Leitourgia setShopVisibility: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Apothikevei to visibility toggle tou shop kai enimerwnei timestamp gia admin auditability.
     public function setShopVisibility(bool $isVisible): bool
     {
         $this->ensureSettingsTable();
@@ -59,8 +56,7 @@ class EshopSettingsService
 
         return $updated;
     }
-
-    // Leitourgia ensureSettingsTable: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Dimiourgei ton EshopSettings pinakas an leipei kai engyatai oti yparxei singleton row (setting_id=1).
     private function ensureSettingsTable(): void
     {
         $this->conn->query("

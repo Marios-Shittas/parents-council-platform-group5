@@ -9,7 +9,7 @@ class ApplicationsService {
     private $conn;
     private $hasAdminSeenAtColumn = null;
     
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
@@ -43,7 +43,7 @@ class ApplicationsService {
     }
     
     // ============================================
-    // APPLICATION METHODS
+    // Methodoi diaxeirisis aitiseon.
     // ============================================
     
     /**
@@ -136,7 +136,7 @@ class ApplicationsService {
     }
     
     // ============================================
-    // DOCUMENT METHODS
+    // Methodoi diaxeirisis eggrafon.
     // ============================================
     
     /**
@@ -248,7 +248,7 @@ class ApplicationsService {
     }
     
     // ============================================
-    // SUBMISSION METHODS
+    // Methodoi diaxeirisis ypovolon.
     // ============================================
     
     /**
@@ -268,7 +268,7 @@ class ApplicationsService {
     }
     
     /**
-     * Create a new submission (legacy file-upload path)
+     * Dimiourgia a new submission (legacy file-upload path)
      */
     public function createSubmission($applicationId, $userId, $filePath) {
         $sql = "INSERT INTO Submissions (application_id, user_id, file_path, sub_status)
@@ -492,7 +492,7 @@ class ApplicationsService {
     }
 
     // ============================================
-    // APPLICATION FORM FIELDS METHODS
+    // Methodoi gia ta pedia tis formas aitisis.
     // ============================================
 
     /**
@@ -583,16 +583,16 @@ class ApplicationsService {
     }
 
     // ============================================================
-    // NEW: Enhanced Application Management (v2)
+    // Nea enisxymeni diaxeirisi aitiseon (v2)
     // ============================================================
     
     /**
-     * Create application from template or blank
+     * Dimiourgei aitisi apo protypo i kena
      */
     public function createApplicationFromTemplate($templateId, $title, $description, $academicYear, $openDate, $dueDate, $allowOnline = true, $allowFile = true, $requireSignature = false, $createdBy = null) {
         $formSchema = null;
         if ($templateId) {
-            // Get template schema
+            // Fortonei to schema tou protypou.
             $sql = "SELECT form_schema FROM ApplicationTemplates WHERE template_id = ?";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("i", $templateId);
@@ -626,7 +626,7 @@ class ApplicationsService {
     }
     
     /**
-     * Get application with all details (new schema)
+     * Epistrefei aitisi me ola ta stoixeia (neo schema)
      */
     public function getApplicationWithDetails($applicationId) {
         $sql = "SELECT a.*, t.name as template_name, t.template_key
@@ -640,7 +640,7 @@ class ApplicationsService {
         $result = $stmt->get_result();
         
         if ($row = $result->fetch_assoc()) {
-            // Parse JSON fields
+            // Kanei parse ta pedia JSON.
             if ($row['form_schema']) {
                 $row['form_schema'] = json_decode($row['form_schema'], true);
             }
@@ -648,7 +648,7 @@ class ApplicationsService {
                 $row['target_audience'] = json_decode($row['target_audience'], true);
             }
             
-            // Get attachments
+            // Anakta ta synimmmena arxeia.
             $row['attachments'] = $this->getApplicationAttachments($applicationId);
             
             return $row;
@@ -657,7 +657,7 @@ class ApplicationsService {
     }
     
     /**
-     * Update application with new schema
+     * Enimeronei aitisi me neo schema
      */
     public function updateApplicationDetails($applicationId, $title, $description, $academicYear, $openDate, $dueDate, $allowOnline, $allowFile, $requireSignature, $formSchema = null) {
         $formSchemaJson = $formSchema ? json_encode($formSchema, JSON_UNESCAPED_UNICODE) : null;
@@ -695,7 +695,7 @@ class ApplicationsService {
     }
     
     /**
-     * Close application (prevent new submissions)
+     * Kleisimo application (prevent new submissions)
      */
     public function closeApplication($applicationId) {
         $sql = "UPDATE Applications SET status = 'closed', updated_at = NOW() WHERE application_id = ?";
@@ -708,7 +708,7 @@ class ApplicationsService {
      * Add attachment to application
      */
     public function addApplicationAttachment($applicationId, $filePath, $originalFilename) {
-        // Get highest order
+        // Anakta tin megalyteri seira taksinomisis.
         $sql = "SELECT MAX(upload_order) as max_order FROM ApplicationAttachments WHERE application_id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $applicationId);
@@ -748,10 +748,10 @@ class ApplicationsService {
     }
     
     /**
-     * Delete attachment
+     * Diagrafi attachment
      */
     public function deleteApplicationAttachment($attachmentId) {
-        // Get file path first
+        // Anakta prwta to path tou arxeiou.
         $sql = "SELECT file_path FROM ApplicationAttachments WHERE attachment_id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $attachmentId);
@@ -763,13 +763,13 @@ class ApplicationsService {
             $filePath = $row['file_path'];
         }
         
-        // Delete from DB
+        // Diagrafei tin eggrafi apo ti vasi dedomenon.
         $sql = "DELETE FROM ApplicationAttachments WHERE attachment_id = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $attachmentId);
         $deleted = $stmt->execute();
         
-        // Delete file
+        // Diagrafei to arxeio apo to apothikeftiko meso.
         if ($deleted && $filePath) {
             $fullPath = __DIR__ . '/../../' . $filePath;
             if (file_exists($fullPath)) {
@@ -781,7 +781,7 @@ class ApplicationsService {
     }
     
     /**
-     * Create submission in new ApplicationSubmissions table
+     * Dimiourgia submission in new ApplicationSubmissions pinakas
      */
     public function createApplicationSubmission($applicationId, $userId, $submissionType, $formData = null, $uploadedFiles = null, $signatureData = null) {
         $formDataJson = $formData ? json_encode($formData, JSON_UNESCAPED_UNICODE) : null;
@@ -805,7 +805,7 @@ class ApplicationsService {
     }
     
     /**
-     * Get submissions for application (new table)
+     * Get submissions for application (new pinakas)
      */
     public function getApplicationSubmissions($applicationId) {
         $sql = "SELECT s.*, u.name, u.surname, u.email

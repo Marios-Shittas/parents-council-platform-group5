@@ -4,8 +4,7 @@ class SiteContext
 {
     private const BASE_PUBLIC_URL = '/parents-council-platform-group5/public';
     private const PROJECT_URL = '/parents-council-platform-group5';
-
-    // Vriskei an i selida trexei sto public i sto parent section.
+// Prosdiorizei to runtime context (public i parent) apo global override i apo to request path.
     public function context(): string
     {
         global $siteContext;
@@ -18,26 +17,22 @@ class SiteContext
 
         return strpos($requestPath, '/public/parent/') !== false ? 'parent' : 'public';
     }
-
-    // Elegxei an to trexon request einai sto parent portal.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function isParent(): bool
     {
         return $this->context() === 'parent';
     }
-
-    // Girnaei ti vasi gia ola ta public URLs.
+// Epistrefei to stathero public base URL prefix pou xrisimopoieitai apo ola ta builders.
     public function baseUrl(): string
     {
         return self::BASE_PUBLIC_URL;
     }
-
-    // Girnaei ti vasi tou project gia paths ektos public.
+// Epistrefei to root project URL prefix gia links ektos public (px storage/public mapping).
     public function projectUrl(): string
     {
         return self::PROJECT_URL;
     }
-
-    // Ftiaxnei URL mesa sto public i parent section.
+// Ftiaxnei URLs ana section kai vazei automatic prefix /parent otan to context einai parent.
     public function sectionUrl(string $path = ''): string
     {
         $prefix = $this->isParent() ? '/parent' : '';
@@ -49,16 +44,14 @@ class SiteContext
 
         return $this->baseUrl() . $prefix . '/' . $normalized;
     }
-
-    // Ftiaxnei URL pou deixnei panta sto public root.
+// Ftiaxnei absolute project-relative URL pou panta deixnei sto public root.
     public function publicUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
 
         return $normalized === '' ? $this->baseUrl() : $this->baseUrl() . '/' . $normalized;
     }
-
-    // Ftiaxnei URL gia assets kato apo public/assets.
+// Ftiaxnei URL gia static assets kato apo public/assets me normalized slashes.
     public function assetUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
@@ -67,14 +60,12 @@ class SiteContext
             ? $this->baseUrl() . '/assets'
             : $this->baseUrl() . '/assets/' . $normalized;
     }
-
-    // Girnaei to login URL me ena kentriko simio allagis.
+// Epistrefei kentriko login URL oste to auth entrypoint na allazei apo ena mono simeio.
     public function loginUrl(): string
     {
         return $this->publicUrl('login.php');
     }
-
-    // Ftiaxnei URL gia arxeia sto storage folder.
+// Normalopoiei kai ftiaxnei browser path gia storage resources, afairontas diplous storage prefixes.
     public function storageUrl(string $path = ''): string
     {
         $normalized = ltrim($path, '/');
@@ -90,8 +81,8 @@ class SiteContext
 
         return $root . '/' . $normalized;
     }
-
-    // Metatrepei database/file paths se browser-safe content URLs.
+// Metatrepei diafores morfes apothikevmenwn paths (absolute, relative, storage/public, external, data URI)
+// se browser-safe URLs xwris na peirazei hdh egkyra absolute links.
     public function resolveContentUrl(string $path): string
     {
         $trimmed = trim($path);

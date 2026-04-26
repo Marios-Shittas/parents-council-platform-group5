@@ -16,14 +16,14 @@ class EshopJccService
     private mysqli $conn;
     private EshopSettingsService $eshopSettingsService;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->eshopSettingsService = new EshopSettingsService($conn);
     }
 
-    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -50,7 +50,7 @@ class EshopJccService
         ]);
     }
 
-    // Leitourgia handleCheckoutRegistration: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function handleCheckoutRegistration(bool $respondWithJson): void
     {
         auth_require_role('parent', [
@@ -133,7 +133,7 @@ class EshopJccService
         }
     }
 
-    // Leitourgia handleCallback: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function handleCallback(): void
     {
         $gatewayOrderId = trim((string) ($_GET['orderId'] ?? $_GET['mdOrder'] ?? ''));
@@ -243,7 +243,7 @@ class EshopJccService
         }
     }
 
-    // Leitourgia getPendingOrderForCheckout: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPendingOrderForCheckout(int $userId): ?array
     {
         $stmt = $this->conn->prepare(
@@ -269,7 +269,7 @@ class EshopJccService
         return $row ?: null;
     }
 
-    // Leitourgia getUserEmail: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getUserEmail(int $userId): string
     {
         $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
@@ -286,7 +286,7 @@ class EshopJccService
         return trim((string) ($row['email'] ?? ''));
     }
 
-    // Leitourgia insertPayment: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertPayment(int $userId, float $amount, string $paymentType): int
     {
         $stmt = $this->conn->prepare(
@@ -306,7 +306,7 @@ class EshopJccService
         return $paymentId;
     }
 
-    // Leitourgia getPaymentContext: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPaymentContext(int $paymentId, int $orderId): ?array
     {
         $stmt = $this->conn->prepare(
@@ -330,7 +330,7 @@ class EshopJccService
         return $row ?: null;
     }
 
-    // Leitourgia insertPaymentDetailsFromOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertPaymentDetailsFromOrder(int $paymentId, int $orderId): void
     {
         $itemsStmt = $this->conn->prepare(
@@ -386,7 +386,7 @@ class EshopJccService
         }
     }
 
-    // Leitourgia updatePaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function updatePaymentStatus(int $paymentId, int $userId, string $status, string $transactionId): void
     {
         $stmt = $this->conn->prepare(
@@ -410,7 +410,7 @@ class EshopJccService
         $stmt->close();
     }
 
-    // Leitourgia paymentExistsForUser: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function paymentExistsForUser(int $paymentId, int $userId): bool
     {
         $stmt = $this->conn->prepare('SELECT 1 FROM Payments WHERE payment_id = ? AND user_id = ? LIMIT 1');
@@ -427,7 +427,7 @@ class EshopJccService
         return $exists;
     }
 
-    // Leitourgia updateOrderStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function updateOrderStatus(int $orderId, int $userId, string $status): void
     {
         $stmt = $this->conn->prepare(
@@ -451,7 +451,7 @@ class EshopJccService
         $stmt->close();
     }
 
-    // Leitourgia orderExistsForUser: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function orderExistsForUser(int $orderId, int $userId): bool
     {
         $stmt = $this->conn->prepare('SELECT 1 FROM Orders WHERE order_id = ? AND user_id = ? LIMIT 1');
@@ -468,7 +468,7 @@ class EshopJccService
         return $exists;
     }
 
-    // Leitourgia buildCallbackUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildCallbackUrl(int $paymentId, int $orderId, bool $failed): string
     {
         $base = APP_BASE_URL . '/app/services/EshopJCC.php';
@@ -484,7 +484,7 @@ class EshopJccService
         return $base . '?' . http_build_query($params);
     }
 
-    // Leitourgia storeCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function storeCheckoutContext(string $gatewayOrderId, int $userId, int $orderId, int $paymentId): void
     {
         if (!isset($_SESSION['eshop_checkout_context']) || !is_array($_SESSION['eshop_checkout_context'])) {
@@ -499,14 +499,14 @@ class EshopJccService
         ];
     }
 
-    // Leitourgia getStoredCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getStoredCheckoutContext(string $gatewayOrderId): ?array
     {
         $context = $_SESSION['eshop_checkout_context'][$gatewayOrderId] ?? null;
         return is_array($context) ? $context : null;
     }
 
-    // Leitourgia clearStoredCheckoutContext: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function clearStoredCheckoutContext(string $gatewayOrderId): void
     {
         if (isset($_SESSION['eshop_checkout_context'][$gatewayOrderId])) {
@@ -514,14 +514,14 @@ class EshopJccService
         }
     }
 
-    // Leitourgia generateOrderNumber: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function generateOrderNumber(int $userId, int $orderId, int $paymentId): string
     {
         $randomPart = bin2hex(random_bytes(5));
         return sprintf('ESHOP-%d-%d-%d-%s', $userId, $orderId, $paymentId, $randomPart);
     }
 
-    // Leitourgia registerJccOrder: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function registerJccOrder(
         string $orderNumber,
         float $amount,
@@ -603,7 +603,7 @@ class EshopJccService
         ];
     }
 
-    // Leitourgia getJccOrderStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getJccOrderStatus(string $gatewayOrderId): array
     {
         if (!function_exists('curl_init')) {
@@ -659,7 +659,7 @@ class EshopJccService
         return $response;
     }
 
-    // Leitourgia mapOrderStatusToPaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function mapOrderStatusToPaymentStatus(int $orderStatus): string
     {
         if ($orderStatus === 2) {
@@ -677,7 +677,7 @@ class EshopJccService
         return 'failed';
     }
 
-    // Leitourgia mapPaymentStatusToOrderStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function mapPaymentStatusToOrderStatus(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
@@ -691,7 +691,7 @@ class EshopJccService
         return 'pending';
     }
 
-    // Leitourgia createPendingOrderIfMissing: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function createPendingOrderIfMissing(int $userId): ?int
     {
         $existingStmt = $this->conn->prepare(
@@ -733,7 +733,7 @@ class EshopJccService
         return $newOrderId > 0 ? $newOrderId : null;
     }
 
-    // Leitourgia resolveFinalPaymentStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveFinalPaymentStatus(string $currentStatus, string $incomingStatus): string
     {
         if ($currentStatus === 'completed' && $incomingStatus !== 'refunded') {
@@ -743,7 +743,7 @@ class EshopJccService
         return $incomingStatus;
     }
 
-    // Leitourgia resolveFinalOrderStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveFinalOrderStatus(string $currentStatus, string $paymentStatus): string
     {
         if ($currentStatus === 'paid' && $paymentStatus !== 'refunded') {
@@ -753,7 +753,7 @@ class EshopJccService
         return $this->mapPaymentStatusToOrderStatus($paymentStatus);
     }
 
-    // Leitourgia resolveTransactionId: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveTransactionId(array $statusResponse, string $fallbackOrderId): string
     {
         if (isset($statusResponse['transactionAttributes']) && is_array($statusResponse['transactionAttributes'])) {
@@ -792,7 +792,7 @@ class EshopJccService
         return $fallbackOrderId;
     }
 
-    // Leitourgia insertLog: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertLog(int $userId, string $action, string $description): void
     {
         $stmt = $this->conn->prepare('INSERT INTO Logs (user_id, action, description) VALUES (?, ?, ?)');
@@ -805,7 +805,7 @@ class EshopJccService
         $stmt->close();
     }
 
-    // Leitourgia buildRedirectMessage: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildRedirectMessage(string $paymentStatus): string
     {
         if ($paymentStatus === 'completed') {
@@ -823,7 +823,7 @@ class EshopJccService
         return 'Η πληρωμή σας δεν ολοκληρώθηκε.';
     }
 
-    // Leitourgia redirectToEshop: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function redirectToEshop(string $paymentStatus, string $message): void
     {
         $url = APP_BASE_URL . '/public/parent/eshop.php?' . http_build_query([
@@ -835,14 +835,14 @@ class EshopJccService
         exit;
     }
 
-    // Leitourgia redirectToExternalUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function redirectToExternalUrl(string $url): void
     {
         header('Location: ' . $url);
         exit;
     }
 
-    // Leitourgia respondCheckoutError: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respondCheckoutError(bool $respondWithJson, string $message, int $statusCode): void
     {
         if ($respondWithJson) {
@@ -856,7 +856,7 @@ class EshopJccService
         $this->redirectToEshop('failed', $message);
     }
 
-    // Leitourgia wantsJsonResponse: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function wantsJsonResponse(): bool
     {
         $accept = (string) ($_SERVER['HTTP_ACCEPT'] ?? '');
@@ -865,7 +865,7 @@ class EshopJccService
         return str_contains($accept, 'application/json') || $requestedWith === 'xmlhttprequest';
     }
 
-    // Leitourgia respond: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $payload): void
     {
         header('Content-Type: application/json; charset=utf-8');

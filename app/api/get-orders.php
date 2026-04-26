@@ -22,12 +22,12 @@ try {
     header('Content-Type: application/json; charset=utf-8');
     $service = new OrdersService($conn);
     
-    // Ensure the column exists
+    // Elegxei an yparxei i stili prin ginei opoiadipote enimerosi.
     $testSql = "SHOW COLUMNS FROM Orders LIKE 'admin_seen_at'";
     $testResult = $conn->query($testSql);
     
     if (!$testResult || $testResult->num_rows === 0) {
-        // Column doesn't exist, try to create it
+        // An i stili den yparxei, prospathei na ti dimiourgisei asfalos.
         $alterSql = "ALTER TABLE Orders ADD COLUMN admin_seen_at datetime DEFAULT NULL";
         if (!$conn->query($alterSql)) {
             throw new RuntimeException('Failed to create admin_seen_at column: ' . $conn->error);

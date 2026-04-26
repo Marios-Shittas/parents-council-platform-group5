@@ -4,14 +4,13 @@ declare(strict_types=1);
 class TokenValidator
 {
     private mysqli $conn;
-
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei inject kai apothikevei to active mysqli connection gia ola ta token validation queries.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
-
-    // Leitourgia isTokenValid: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Boolean convenience validator pou epistrefei true otan to getUserIdByToken vrei matching xristis.
+// Ypostirizei optional role/status filters kai optional enforcement tis lixis.
     public function isTokenValid(
         string $token,
         ?string $role = null,
@@ -20,8 +19,8 @@ class TokenValidator
     ): bool {
         return $this->getUserIdByToken($token, $role, $accountStatus, $requireNotExpired) !== null;
     }
-
-    // Leitourgia getUserIdByToken: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Vasikos token resolver pou epistrefei user_id me optional role/status checks
+// kai expiry constraints. Episis kanei auto-reset expired waiting_payment parents otan xreiazetai.
     public function getUserIdByToken(
         string $token,
         ?string $role = null,
@@ -72,8 +71,8 @@ class TokenValidator
 
         return $row ? (int) $row['user_id'] : null;
     }
-
-    // Leitourgia resetAllExpiredWaitingPaymentUsersToPending: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Maintenance helper pou metatrepei parent xristes apo waiting_payment se pending
+// otan exei perasei to token_expiry kai katharizei token fields gia na min meinei stale auth.
     public function resetAllExpiredWaitingPaymentUsersToPending(): int
     {
         $stmt = $this->conn->prepare(

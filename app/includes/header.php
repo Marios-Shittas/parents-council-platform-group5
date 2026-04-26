@@ -9,7 +9,7 @@ if (!headers_sent()) {
     header("Expires: 0");
 }
 
-// Check if user is logged in (protected page)
+// Elegxei an o xristis einai sindedemenos se prostτευomeni selida.
 $isProtectedPage = isset($_SESSION['user_id']);
 
 require_once __DIR__ . '/site_context.php';

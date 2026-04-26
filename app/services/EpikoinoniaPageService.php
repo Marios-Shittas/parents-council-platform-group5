@@ -11,8 +11,7 @@ class EpikoinoniaPageService
     private $conn;
     private $defaultSections;
     private $lastError = '';
-
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Arxikopoiei DB-vasismeno page-periexomeno ypiresia, fortwnei proepilegmena kai engyatai pinakas + arxikopoisi state.
     public function __construct()
     {
         global $conn;
@@ -22,8 +21,7 @@ class EpikoinoniaPageService
         $this->ensureTable();
         $this->ensureDefaultSections();
     }
-
-    // Leitourgia getAllSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei merged sections tis selidas epikoinonias syndyazontas DB values me fallback proepilegmena.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -51,15 +49,13 @@ class EpikoinoniaPageService
 
         return $sections;
     }
-
-    // Leitourgia getSection: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei ena section tis selidas epikoinonias ana key apo ta merged dedomena.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
-
-    // Leitourgia updateSection: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei validate to section key, normalopoiei text/periexomeno encoding kai kanei upsert sto DB.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -123,14 +119,12 @@ class EpikoinoniaPageService
 
         return true;
     }
-
-    // Leitourgia getLastError: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Ekthenei to teleftaio ypiresia error gia admin UI feedback kai debugging.
     public function getLastError()
     {
         return $this->lastError;
     }
-
-    // Leitourgia ensureTable: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Dimiourgei ton EpikoinoniaPageSections pinakas me unique section_key an leipei.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS EpikoinoniaPageSections (
@@ -146,8 +140,7 @@ class EpikoinoniaPageService
 
         $this->conn->query($sql);
     }
-
-    // Leitourgia ensureDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei arxikopoisi ta proepilegmeno sections mono otan leipoun, afhnontas anepheraxto to yparxon configured periexomeno.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -167,8 +160,7 @@ class EpikoinoniaPageService
             $this->updateSection($sectionKey, $section['title'], $section['subtitle'], $section['content']);
         }
     }
-
-    // Leitourgia buildDefaultSections: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Dilwnei ti vasi domis/periexomenou gia ola ta editable sections tis selidas epikoinonias.
     private function buildDefaultSections()
     {
         return [
@@ -257,8 +249,7 @@ class EpikoinoniaPageService
             ],
         ];
     }
-
-    // Leitourgia normalizeUtf8: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Recursively normalopoiei to periexomeno payload se UTF-8-safe times prin tin apothikefsi.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

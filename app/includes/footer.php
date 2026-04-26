@@ -7,13 +7,11 @@ $footer_links = $footerViewModel->buildLinks();
 ?>
 <link rel="stylesheet" href="<?php echo site_asset_url('css/site-footer.css'); ?>">
 
-
 <!-- Κεντρικό footer του site. -->
 <footer class="site-footer">
    <div class="footer-main">
        <div class="container">
            <div class="row">
-
 
                <!-- 1η στήλη: brand + βασικά στοιχεία σχολείου. -->
                <div class="col-lg-5 col-md-12 mb-4 mb-lg-3 pr-lg-4">
@@ -25,7 +23,6 @@ $footer_links = $footerViewModel->buildLinks();
                    <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>sg.ag.athanasiou@gmail.com</span></div>
                </div>
 
-
                <!-- 2η στήλη: γρήγορα links πλοήγησης. -->
                <div class="col-lg-4 col-md-6 mb-4 mb-lg-3">
                    <h5 class="footer-title">Γρήγοροι Σύνδεσμοι</h5>
@@ -36,7 +33,6 @@ $footer_links = $footerViewModel->buildLinks();
                    </ul>
                </div>
 
-
                <!-- 3η στήλη: στοιχεία επικοινωνίας. -->
                <div class="col-lg-3 col-md-6 mb-3">
                    <h5 class="footer-title">Επικοινωνία</h5>
@@ -45,11 +41,9 @@ $footer_links = $footerViewModel->buildLinks();
                    <div class="footer-line footer-text"><i class="fas fa-clock"></i><span>Δευ - Παρ: 07:30 - 13:35</span></div>
                </div>
 
-
            </div>
        </div>
    </div>
-
 
    <!-- Κάτω γραμμή copyright / trademark. -->
    <div class="footer-bottom">
@@ -64,7 +58,6 @@ $footer_links = $footerViewModel->buildLinks();
        </div>
    </div>
 </footer>
-
 
 <!-- About Modal -->
 <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
@@ -93,13 +86,9 @@ $footer_links = $footerViewModel->buildLinks();
    </div>
 </div>
 
-
 <!-- Bootstrap JS (loaded here once for all pages) -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
-
-
 
 </body>
 </html>

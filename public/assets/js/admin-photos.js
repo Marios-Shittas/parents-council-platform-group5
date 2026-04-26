@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var dropzone = document.getElementById('parents-upload-dropzone');
 
     if (input && preview && status && dropzone) {
-        // Leitourgia renderPreview: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function renderPreview(files) {
             preview.innerHTML = '';
 

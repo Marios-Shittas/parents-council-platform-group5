@@ -9,18 +9,18 @@ class EventsService {
     private $conn;
     private $lastOperationError = '';
     
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
     }
 
-    // Leitourgia getMaxImagesPerEvent: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getMaxImagesPerEvent() {
         return 6;
     }
 
-    // Leitourgia getLastOperationError: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getLastOperationError() {
         return $this->lastOperationError;
     }
@@ -185,7 +185,7 @@ class EventsService {
      * @return bool True on success, false on failure
      */
     public function deleteEvent($id) {
-        // Images will be deleted automatically due to CASCADE
+        // Oi eikones diagrafontai aytomata logo CASCADE.
         $sql = "DELETE FROM Events WHERE event_id = ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -248,7 +248,7 @@ class EventsService {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    // Leitourgia countImages: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function countImages($eventId) {
         $sql = "SELECT COUNT(*) AS total FROM EventsImages WHERE event_id = ?";
 
@@ -301,7 +301,7 @@ class EventsService {
         return $events;
     }
 
-    // Leitourgia get5LatestEvents: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function get5LatestEvents() {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');
@@ -321,7 +321,7 @@ class EventsService {
         echo json_encode($events);
     }
 
-    // Leitourgia getAllEventsForCalendar: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getAllEventsForCalendar() {
         $eventsQuery = "SELECT event_title as title, event_description as description, event_date as date, 'event' as type FROM Events ORDER BY event_date ASC";
         $result = $this->conn->query($eventsQuery);

@@ -11,10 +11,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Initialize the service
+// Arxikopoiei to ypiresia kai fortonei tis vasikes eksartiseis.
 $applicationsService = new ApplicationsService();
 
-// Leitourgia loadApplicationUiMetaPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadApplicationUiMetaPublic(): array {
     $path = __DIR__ . '/../../../storage/application_ui_meta.json';
     if (!is_file($path)) {
@@ -30,7 +30,7 @@ function loadApplicationUiMetaPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
-// Leitourgia formatUiDatePublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function formatUiDatePublic(string $date): string {
     $date = trim($date);
     if ($date === '') {
@@ -96,7 +96,7 @@ function normalizeUploadedSubmissionFiles(array $files): array {
     return $normalized;
 }
 
-// Leitourgia getUploadedSubmissionDisplayName: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getUploadedSubmissionDisplayName(string $fileName): string {
     $fileName = trim($fileName);
     if ($fileName === '') {
@@ -106,12 +106,12 @@ function getUploadedSubmissionDisplayName(string $fileName): string {
     return basename(str_replace('\\', '/', $fileName));
 }
 
-// Leitourgia getApplicationDocumentDisplayNamesPathPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getApplicationDocumentDisplayNamesPathPublic(): string {
     return __DIR__ . '/../../../storage/application_document_display_names.json';
 }
 
-// Leitourgia loadApplicationDocumentDisplayNamesPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadApplicationDocumentDisplayNamesPublic(): array {
     $path = getApplicationDocumentDisplayNamesPathPublic();
     if (!is_file($path)) {
@@ -127,12 +127,12 @@ function loadApplicationDocumentDisplayNamesPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
-// Leitourgia getSubmissionFileDisplayNamesPathPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getSubmissionFileDisplayNamesPathPublic(): string {
     return __DIR__ . '/../../../storage/submission_file_display_names.json';
 }
 
-// Leitourgia loadSubmissionFileDisplayNamesPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadSubmissionFileDisplayNamesPublic(): array {
     $path = getSubmissionFileDisplayNamesPathPublic();
     if (!is_file($path)) {
@@ -148,7 +148,7 @@ function loadSubmissionFileDisplayNamesPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
-// Leitourgia saveSubmissionFileDisplayNamesPublic: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function saveSubmissionFileDisplayNamesPublic(array $displayNames): bool {
     $path = getSubmissionFileDisplayNamesPathPublic();
     $dir = dirname($path);
@@ -159,13 +159,13 @@ function saveSubmissionFileDisplayNamesPublic(array $displayNames): bool {
     return file_put_contents($path, json_encode($displayNames, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) !== false;
 }
 
-// Leitourgia normalizeSubmissionMode: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function normalizeSubmissionMode($mode): string {
     $mode = trim((string)$mode);
     return in_array($mode, ['manual', 'upload'], true) ? $mode : 'upload';
 }
 
-// Leitourgia normalizeManualSubmissionFieldKey: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function normalizeManualSubmissionFieldKey(string $rawName, int $index = 0): string {
     $safeName = trim($rawName);
     $safeName = preg_replace('/\s+/u', '_', $safeName) ?? '';
@@ -179,7 +179,7 @@ function normalizeManualSubmissionFieldKey(string $rawName, int $index = 0): str
     return $safeName;
 }
 
-// Leitourgia validateManualSubmissionPayload: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function validateManualSubmissionPayload(array $payload, array $applicationFields = []): string {
     if (!empty($applicationFields)) {
         foreach (array_values($applicationFields) as $index => $field) {
@@ -236,7 +236,7 @@ function validateManualSubmissionPayload(array $payload, array $applicationField
     return '';
 }
 
-// Leitourgia ensurePublicGuestSubmissionIdentity: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function ensurePublicGuestSubmissionIdentity(): array {
     global $conn;
 
@@ -718,7 +718,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
             $message = 'Μη έγκυρη αίτηση.';
             $messageType = 'warning';
         } else {
-            // Check if user already submitted this application
+            // Elegxei an o xristis exei idi ypobalei afti tin aitisi.
             if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
                 $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
                 $messageType = 'warning';

@@ -1,4 +1,4 @@
-// Leitourgia ensureDashboardNoticeElements: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function ensureDashboardNoticeElements() {
     if (document.getElementById('page-notice-overlay')) {
         return;
@@ -32,7 +32,7 @@ function ensureDashboardNoticeElements() {
     }
 }
 
-// Leitourgia showDashboardNotice: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showDashboardNotice(message, options) {
     ensureDashboardNoticeElements();
 
@@ -59,7 +59,7 @@ function showDashboardNotice(message, options) {
     overlay.classList.add('is-open');
 }
 
-// Leitourgia truncateDashboardPreviewFileName: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function truncateDashboardPreviewFileName(fileName, maxLength) {
     if (fileName.length <= maxLength) {
         return fileName;
@@ -68,12 +68,12 @@ function truncateDashboardPreviewFileName(fileName, maxLength) {
     return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
 }
 
-// Leitourgia getDashboardFileKey: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getDashboardFileKey(file) {
     return [file.name, file.size, file.lastModified, file.type].join('::');
 }
 
-// Leitourgia syncDashboardInputFiles: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function syncDashboardInputFiles(input, stagedFiles) {
     if (typeof DataTransfer === 'undefined') {
         return;
@@ -84,7 +84,7 @@ function syncDashboardInputFiles(input, stagedFiles) {
     input.files = dataTransfer.files;
 }
 
-// Leitourgia renderDashboardImagePreview: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
     if (!preview) {
         return;
@@ -125,7 +125,7 @@ function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
     });
 }
 
-// Leitourgia renderDashboardAttachmentPreview: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
     if (!preview) {
         return;
@@ -170,7 +170,7 @@ function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
     });
 }
 
-// Leitourgia setupDashboardImageInput: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
     if (!input) {
         return;
@@ -181,7 +181,7 @@ function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
     const stagedFiles = [];
     const stagedKeys = new Set();
 
-    // Leitourgia updateInputState: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateInputState() {
         if (existingCount + stagedFiles.length >= imageLimit) {
             input.disabled = true;
@@ -190,7 +190,7 @@ function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
         }
     }
 
-    // Leitourgia removeStagedFile: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function removeStagedFile(index) {
         const removedFile = stagedFiles[index];
         if (!removedFile) {
@@ -271,7 +271,7 @@ function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
     updateInputState();
 }
 
-// Leitourgia setupDashboardAttachmentInput: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
     if (!input) {
         return;
@@ -281,7 +281,7 @@ function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
     const stagedFiles = [];
     const stagedKeys = new Set();
 
-    // Leitourgia removeStagedFile: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function removeStagedFile(index) {
         const removedFile = stagedFiles[index];
         if (!removedFile) {

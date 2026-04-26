@@ -8,7 +8,7 @@ class ResetPasswordService {
     private $usersService;
     private $db;
 
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         $this->usersService = new UsersService();
         global $conn;
@@ -47,7 +47,7 @@ class ResetPasswordService {
         return $hasRow;
     }
 
-    // Leitourgia handleRequest: xeirizetai to antistoixo kommati tis selidas i tou service.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest() {
         header('Content-Type: application/json');
 

@@ -1,4 +1,4 @@
-// Leitourgia ensureNoticeElements: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function ensureNoticeElements() {
     if (document.getElementById('page-notice-overlay')) {
         return;
@@ -32,7 +32,7 @@ function ensureNoticeElements() {
     }
 }
 
-// Leitourgia showNotice: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showNotice(message, options) {
     ensureNoticeElements();
 
@@ -59,7 +59,7 @@ function showNotice(message, options) {
     overlay.classList.add('is-open');
 }
 
-// Leitourgia showConfirm: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function showConfirm(message, onConfirm, options) {
     const opts = options || {};
     const overlay = document.createElement('div');
@@ -77,7 +77,7 @@ function showConfirm(message, onConfirm, options) {
             '</div>' +
         '</div>';
 
-    // Leitourgia closeOverlay: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function closeOverlay() {
         document.body.style.overflow = previousOverflow;
         overlay.remove();
@@ -109,7 +109,7 @@ function showConfirm(message, onConfirm, options) {
     document.body.appendChild(overlay);
 }
 
-// Leitourgia deleteEventImage: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function deleteEventImage(imageId, eventId) {
     showConfirm('Διαγραφή εικόνας;', function () {
         const form = document.createElement('form');
@@ -141,17 +141,17 @@ function deleteEventImage(imageId, eventId) {
     });
 }
 
-// Leitourgia getEventImageLimit: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getEventImageLimit() {
     return Number(window.ADMIN_EVENT_IMAGE_LIMIT || 0);
 }
 
-// Leitourgia getEventImageFileKey: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getEventImageFileKey(file) {
     return [file.name, file.size, file.lastModified, file.type].join('::');
 }
 
-// Leitourgia truncatePreviewFileName: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function truncatePreviewFileName(fileName, maxLength) {
     if (fileName.length <= maxLength) {
         return fileName;
@@ -160,7 +160,7 @@ function truncatePreviewFileName(fileName, maxLength) {
     return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
 }
 
-// Leitourgia validateEventImageFile: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function validateEventImageFile(file) {
     const warnings = [];
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
@@ -182,7 +182,7 @@ function validateEventImageFile(file) {
     return warnings;
 }
 
-// Leitourgia syncEventImageInputFiles: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function syncEventImageInputFiles(input, stagedFiles) {
     if (typeof DataTransfer === 'undefined') {
         return;
@@ -193,7 +193,7 @@ function syncEventImageInputFiles(input, stagedFiles) {
     input.files = dataTransfer.files;
 }
 
-// Leitourgia renderEventImagePreview: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function renderEventImagePreview(preview, stagedFiles, onRemove) {
     if (!preview) {
         return;
@@ -234,7 +234,7 @@ function renderEventImagePreview(preview, stagedFiles, onRemove) {
     });
 }
 
-// Leitourgia setupEventImageInput: krataei tin antistoixi symperifora tou UI.
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function setupEventImageInput(input, previewId) {
     if (!input) {
         return;
@@ -246,7 +246,7 @@ function setupEventImageInput(input, previewId) {
     const stagedFiles = [];
     const stagedKeys = new Set();
 
-    // Leitourgia updateInputState: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateInputState() {
         if (existingCount + stagedFiles.length >= eventImageLimit) {
             input.disabled = true;
@@ -255,7 +255,7 @@ function setupEventImageInput(input, previewId) {
         }
     }
 
-    // Leitourgia removeStagedFile: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function removeStagedFile(index) {
         const removedFile = stagedFiles[index];
         if (!removedFile) {
@@ -328,7 +328,7 @@ setupEventImageInput(document.getElementById('images'), 'imagePreview');
 setupEventImageInput(document.getElementById('edit_images'), 'editPreview');
 
 document.querySelectorAll('[data-delete-event-image]').forEach(function (button) {
-    // Syndeei ta delete image buttons xoris inline onclick sto PHP template.
+    // Syndeei ta diagrafi image buttons xoris inline onclick sto PHP protypo.
     button.addEventListener('click', function () {
         deleteEventImage(Number(button.getAttribute('data-image-id') || 0), Number(button.getAttribute('data-event-id') || 0));
     });

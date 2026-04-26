@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-template-editor-close]').forEach(function (button) {
-        // Kleinei ton template editor xoris inline JavaScript sto PHP view.
+        // Kleinei ton protypo editor xoris inline JavaScript sto PHP provoli.
         button.addEventListener('click', function () {
             var selector = document.getElementById('template_selector');
             var editor = document.getElementById('template_editor');
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var createApplicationOpenDate = document.getElementById('create_application_open_date');
     var createApplicationCloseDate = document.getElementById('create_application_close_date');
 
-    // Leitourgia syncCreateCloseDateMin: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateCloseDateMin() {
         if (!createApplicationOpenDate || !createApplicationCloseDate) {
             return;
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
         syncCreateCloseDateMin();
     }
 
-    // Leitourgia syncCreateInstructionInputFiles: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateInstructionInputFiles(nextFiles) {
         if (!createInstructionFiles) {
             return;
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
         createInstructionFiles.files = transfer.files;
     }
 
-    // Leitourgia renderCreateInstructionFilesList: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderCreateInstructionFilesList() {
         if (!createInstructionFilesList) {
             return;
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var editApplicationOpenDateInput = document.getElementById('edit_application_open_date');
     var editApplicationCloseDateInput = document.getElementById('edit_application_close_date');
 
-    // Leitourgia syncEditCloseDateMin: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncEditCloseDateMin() {
         if (!editApplicationOpenDateInput || !editApplicationCloseDateInput) {
             return;
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function () {
         file_upload: 'Αρχείο'
     };
 
-    // Leitourgia normalizeEditApplicationFieldType: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function normalizeEditApplicationFieldType(type) {
         var normalized = String(type || 'text').toLowerCase();
         if (normalized === 'tel') {
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return Object.prototype.hasOwnProperty.call(editApplicationFieldTypes, normalized) ? normalized : 'text';
     }
 
-    // Leitourgia syncEditApplicationFormSchemaFromInputs: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncEditApplicationFormSchemaFromInputs() {
         if (!editFormFieldsContainer) {
             return;
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
         editApplicationFormSchema = nextSchema;
     }
 
-    // Leitourgia getCurrentEditTabKey: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getCurrentEditTabKey() {
         var activeTabButton = document.querySelector('#editApplicationTabs .nav-link.active');
         var activeTabId = activeTabButton ? String(activeTabButton.id || '') : '';
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'info';
     }
 
-    // Leitourgia normalizeEditTabKey: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function normalizeEditTabKey(tabKey) {
         var normalizedTabKey = String(tabKey || '').toLowerCase();
         if (normalizedTabKey === 'files' || normalizedTabKey === 'edit-files' || normalizedTabKey === 'edit-files-pane') {
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'info';
     }
 
-    // Leitourgia showEditTabByKey: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function showEditTabByKey(tabKey) {
         var normalizedTabKey = String(tabKey || '').toLowerCase();
         var targetTabId = 'edit-info-tab';
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Leitourgia renderEditApplicationFormFields: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderEditApplicationFormFields() {
         if (!editFormFieldsContainer) {
             return;
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Leitourgia escapeHtml: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/'/g, '&#039;');
     }
 
-    // Leitourgia humanizeSubmissionDetailLabel: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function humanizeSubmissionDetailLabel(key) {
         var labels = {
             parent_name: 'Ονοματεπώνυμο Γονέα',
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return labels[key] || String(key || '').replace(/_/g, ' ');
     }
 
-    // Leitourgia buildSubmissionFieldDefinitionsLookup: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function buildSubmissionFieldDefinitionsLookup(fieldDefinitions) {
         var lookup = {};
         if (!Array.isArray(fieldDefinitions)) {
@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return lookup;
     }
 
-    // Leitourgia buildUploadedFileLinksLookup: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function buildUploadedFileLinksLookup(uploadedFileLinks) {
         var lookup = {};
         if (!Array.isArray(uploadedFileLinks)) {
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return lookup;
     }
 
-    // Leitourgia formatSubmissionDetailValue: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatSubmissionDetailValue(key, value, fieldMeta, uploadedFileLinksByName) {
         if (key === '_submission_mode') {
             return value === 'manual' ? 'Online Συμπλήρωση' : 'Ανέβασμα Αρχείου';
@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return escapeHtml(raw).replace(/\r?\n/g, '<br>');
     }
 
-    // Leitourgia buildSubmissionDetailHtml: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function buildSubmissionDetailHtml(fields, fieldDefinitions, uploadedFileLinks) {
         if (!fields || typeof fields !== 'object') {
             return '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return html || '<div class="text-muted">Δεν υπάρχουν διαθέσιμα στοιχεία φόρμας.</div>';
     }
 
-    // Leitourgia renderEditApplicationFiles: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderEditApplicationFiles(documents, pendingFiles) {
         if (!editFilesList) {
             return;
@@ -670,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Leitourgia getCurrentStagedInstructionFiles: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getCurrentStagedInstructionFiles() {
         if (!editInstructionFiles) {
             return [];
@@ -1036,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Leitourgia formatApplicationNotificationCount: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatApplicationNotificationCount(count) {
         var value = Number(count) || 0;
         if (value <= 0) {
@@ -1045,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return value > 9 ? '9+' : String(value);
     }
 
-    // Leitourgia formatSidebarNotificationCount: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatSidebarNotificationCount(count) {
         var value = Number(count) || 0;
         if (value <= 0) {
@@ -1054,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return value > 10 ? '10+' : String(value);
     }
 
-    // Leitourgia removeElementSmooth: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function removeElementSmooth(element, delayMs) {
         if (!element) {
             return;
@@ -1074,7 +1074,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, delayMs || 280);
     }
 
-    // Leitourgia updateApplicationNotificationBadge: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateApplicationNotificationBadge(applicationId, waitingCount) {
         var selector = '.application-new-submission-badge[data-application-notification-badge="1"][data-application-id="' + String(applicationId) + '"]';
         var badge = document.querySelector(selector);
@@ -1105,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
     }
 
-    // Leitourgia updateSidebarApplicationsBadge: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateSidebarApplicationsBadge(waitingCount) {
         var applicationsNavLink = document.querySelector('#adminSidebar a[href="applications.php"]');
         if (!applicationsNavLink) {
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.setAttribute('aria-label', 'Νέες αιτήσεις προς έλεγχο: ' + String(waitingCount));
     }
 
-    // Leitourgia markSubmissionAsSeenOnHover: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function markSubmissionAsSeenOnHover(row) {
         if (!row || row.getAttribute('data-is-new') !== '1' || row.getAttribute('data-seen-request-running') === '1') {
             return;
@@ -1197,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }, { passive: true });
     });
 
-    // Leitourgia getSubmissionNoteKey: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getSubmissionNoteKey(applicationId, userId) {
         return 'admin_submission_note_' + String(applicationId) + '_' + String(userId);
     }
@@ -1248,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Template Editor Handler
+// Diaxeirisi leitourgion toy editor protypou.
 document.addEventListener('DOMContentLoaded', function() {
     const templateSelector = document.getElementById('template_selector');
     const templateEditor = document.getElementById('template_editor');
@@ -1287,7 +1287,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteTemplateNamePreview = document.getElementById('delete_template_name_preview');
     const deleteTemplateConfirmModal = deleteTemplateConfirmModalEl ? new bootstrap.Modal(deleteTemplateConfirmModalEl) : null;
 
-    // Ta template data erxontai apo to PHP config asset.
+    // Ta protypo data erxontai apo to PHP rythmiseis asset.
     const templatesData = Array.isArray(window.ADMIN_APPLICATIONS_TEMPLATES_DATA) ? window.ADMIN_APPLICATIONS_TEMPLATES_DATA : [];
 
     const fieldTypes = {
@@ -1307,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let editTemplateExistingInstructionFiles = [];
     let editTemplateSelectedFiles = [];
 
-    // Leitourgia syncCreateTemplateCloseDateMin: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateTemplateCloseDateMin() {
         if (!createTemplateOpenDate || !createTemplateCloseDate) {
             return;
@@ -1320,7 +1320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Leitourgia syncEditTemplateCloseDateMin: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncEditTemplateCloseDateMin() {
         if (!editTemplateOpenDate || !editTemplateCloseDate) {
             return;
@@ -1343,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', function() {
         syncEditTemplateCloseDateMin();
     }
 
-    // Leitourgia escapeHtml: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function escapeHtml(value) {
         const map = {
             '&': '&amp;',
@@ -1356,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return String(value == null ? '' : value).replace(/[&<>"']/g, (char) => map[char]);
     }
 
-    // Leitourgia syncCreateTemplateInputFiles: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateTemplateInputFiles(nextFiles) {
         if (!createTemplateInstructionFiles) {
             return;
@@ -1379,7 +1379,7 @@ document.addEventListener('DOMContentLoaded', function() {
         createTemplateInstructionFiles.files = transfer.files;
     }
 
-    // Leitourgia renderCreateTemplateInstructionFilesList: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderCreateTemplateInstructionFilesList() {
         if (!createTemplateInstructionFilesList) {
             return;
@@ -1421,7 +1421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Leitourgia syncEditTemplateInputFiles: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncEditTemplateInputFiles(nextFiles) {
         if (!editTemplateInstructionFiles) {
             return;
@@ -1444,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editTemplateInstructionFiles.files = transfer.files;
     }
 
-    // Leitourgia getEditTemplateRemovedInstructionPaths: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getEditTemplateRemovedInstructionPaths() {
         const activePaths = new Set(
             (Array.isArray(editTemplateExistingInstructionFiles) ? editTemplateExistingInstructionFiles : [])
@@ -1457,7 +1457,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .filter((path) => path !== '' && !activePaths.has(path));
     }
 
-    // Leitourgia renderEditTemplateInstructionFilesList: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderEditTemplateInstructionFilesList() {
         if (!editTemplateInstructionFilesList) {
             return;
@@ -1548,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Leitourgia syncCurrentFormSchemaFromInputs: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCurrentFormSchemaFromInputs() {
         if (!templateFieldsContainer) {
             return;
@@ -1570,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentFormSchema = nextSchema;
     }
 
-    // Leitourgia syncCreateFormSchemaFromInputs: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateFormSchemaFromInputs() {
         if (!createTemplateFieldsContainer) {
             return;
@@ -1592,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', function() {
         createFormSchema = nextSchema;
     }
 
-    // Leitourgia renderFormFields: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderFormFields() {
         templateFieldsContainer.innerHTML = '';
         currentFormSchema.forEach((field, index) => {
@@ -1659,7 +1659,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Leitourgia renderCreateTemplateFields: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderCreateTemplateFields() {
         if (!createTemplateFieldsContainer) {
             return;

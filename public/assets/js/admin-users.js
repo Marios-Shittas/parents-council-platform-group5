@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var registrationScheduleToggle = document.getElementById('registrationScheduleToggle');
     var registrationScheduleContent = document.getElementById('registrationScheduleContent');
 
-    // Leitourgia formatDateTimeLocal: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatDateTimeLocal(dateObj) {
         var year = String(dateObj.getFullYear());
         var month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
     }
 
-    // Leitourgia isSingleMomentFeature: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function isSingleMomentFeature(featureValue) {
         return featureValue === 'delete_users' || featureValue === 'cleanup_submissions';
     }
 
-    // Leitourgia setRegistrationScheduleExpanded: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function setRegistrationScheduleExpanded(shouldExpand) {
         if (!registrationScheduleCard || !registrationScheduleToggle || !registrationScheduleContent) {
             return;
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setRegistrationScheduleExpanded(false);
 
-    // Leitourgia syncScheduleRowInputs: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncScheduleRowInputs(formId) {
         if (!formId) {
             return;
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Leitourgia bindScheduleRowAutoSync: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function bindScheduleRowAutoSync() {
         var featureSelects = document.querySelectorAll('select[name="schedule_feature"][form]');
         featureSelects.forEach(function (featureSelect) {
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     bindScheduleRowAutoSync();
 
-    // Leitourgia getSeenNewUsers: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getSeenNewUsers() {
         try {
             var raw = window.localStorage.getItem(seenNewUsersStorageKey);
@@ -117,16 +117,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Leitourgia saveSeenNewUsers: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function saveSeenNewUsers(userIds) {
         try {
             window.localStorage.setItem(seenNewUsersStorageKey, JSON.stringify(userIds));
         } catch (error) {
-            // Ignore storage failures and keep the page usable.
+            // Agnoei sfalmata apothikefsis gia na paramenei xrisimi i selida.
         }
     }
 
-    // Leitourgia updateUsersSidebarNotification: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateUsersSidebarNotification() {
         var usersNavLink = document.querySelector('#adminSidebar a[href="users.php"]');
         if (!usersNavLink) {
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.textContent = badgeText;
     }
 
-    // Leitourgia dismissNewUserRow: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function dismissNewUserRow(row, persistState) {
         if (!row) {
             return;
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateUsersSidebarNotification();
 
-    // Leitourgia setPreviewState: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function setPreviewState(button, targetRow, shouldExpand) {
         if (!button || !targetRow) {
             return;
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
         button.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
     }
 
-    // Leitourgia collapseUserPreviewRows: krataei tin antistoixi symperifora tou UI.
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function collapseUserPreviewRows(userId) {
         document.querySelectorAll('.user-preview-row[data-preview-for="' + userId + '"]').forEach(function (row) {
             row.classList.add('d-none');
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var rejectionGroup = document.getElementById('rejectionMessageGroup');
         var rejectionInput = document.getElementById('edit_rejection_message');
 
-        // Leitourgia toggleRejectionMessageField: krataei tin antistoixi symperifora tou UI.
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         function toggleRejectionMessageField() {
             if (!statusSelect || !rejectionGroup || !rejectionInput) {
                 return;

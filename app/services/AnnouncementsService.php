@@ -10,19 +10,16 @@ class AnnouncementsService {
     private $lastOperationError = '';
     private $announcementAttachmentsTableChecked = false;
     private $announcementAttachmentsTableExists = false;
-    
-    // Leitourgia __construct: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Arxikopoiei to AnnouncementsService me to koinoxristo DB connection.
     public function __construct() {
         global $conn;
         $this->conn = $conn;
     }
-
-    // Leitourgia getMaxImagesPerAnnouncement: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei ton megisto arithmo eikonon pou epitrepontai ana announcement.
     public function getMaxImagesPerAnnouncement() {
         return 6;
     }
-
-    // Leitourgia getLastOperationError: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei to teleftaio operation error sxetika me attachment/image gia UI feedback.
     public function getLastOperationError() {
         return $this->lastOperationError;
     }
@@ -152,7 +149,7 @@ class AnnouncementsService {
      * @return bool True on success, false on failure
      */
     public function deleteAnnouncement($id) {
-        // Images will be deleted automatically due to CASCADE
+        // Oi eikones diagrafontai aytomata logo CASCADE.
         $sql = "DELETE FROM Announcements WHERE announcement_id = ?";
         
         $stmt = $this->conn->prepare($sql);
@@ -214,8 +211,7 @@ class AnnouncementsService {
         
         return $result->fetch_all(MYSQLI_ASSOC);
     }
-
-    // Leitourgia countImages: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Metraei tis apothikevmenes eikones ana announcement gia enforcement tou upload cap.
     public function countImages($announcementId) {
         $sql = "SELECT COUNT(*) AS total FROM AnnouncementsImages WHERE announcement_id = ?";
 
@@ -227,8 +223,7 @@ class AnnouncementsService {
 
         return (int)($row['total'] ?? 0);
     }
-
-    // Leitourgia getAttachments: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Fortonei ola ta file attachments enos announcement otan o pinaka einai diathesimos.
     public function getAttachments($announcementId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return [];
@@ -247,8 +242,7 @@ class AnnouncementsService {
             return [];
         }
     }
-
-    // Leitourgia addAttachment: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Apothikevei metadata eggrafi enos attachment kai krataei perigrafiko error se apotyxia.
     public function addAttachment($announcementId, $filePath, $originalName = null) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             $this->lastOperationError = 'Ο πίνακας συνημμένων ανακοινώσεων δεν είναι διαθέσιμος.';
@@ -267,8 +261,7 @@ class AnnouncementsService {
             return false;
         }
     }
-
-    // Leitourgia getAttachmentById: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Epistrefei ena attachment row me vasi to id tou.
     public function getAttachmentById($attachmentId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return null;
@@ -287,8 +280,7 @@ class AnnouncementsService {
             return null;
         }
     }
-
-    // Leitourgia deleteAttachment: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Diagrafei ena attachment row me id otan o attachments pinakas yparxei.
     public function deleteAttachment($attachmentId) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return false;
@@ -356,8 +348,7 @@ class AnnouncementsService {
 
         return $announcements;
     }
-
-    // Leitourgia getAttachmentsGroupedByAnnouncementIds: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei batch-load attachments kai ta omadopoiei ana announcement_id gia list pages.
     private function getAttachmentsGroupedByAnnouncementIds(array $announcementIds) {
         if (!$this->isAnnouncementAttachmentsTableAvailable()) {
             return [];
@@ -400,8 +391,7 @@ class AnnouncementsService {
 
         return $attachmentsByAnnouncement;
     }
-
-    // Leitourgia isAnnouncementAttachmentsTableAvailable: xeirizetai to antistoixo kommati tis selidas i tou service.
+// Kanei cache kai epistrefei an o AnnouncementAttachments pinakas yparxei sto schema.
     private function isAnnouncementAttachmentsTableAvailable() {
         if ($this->announcementAttachmentsTableChecked) {
             return $this->announcementAttachmentsTableExists;
@@ -418,8 +408,7 @@ class AnnouncementsService {
 
         return $this->announcementAttachmentsTableExists;
     }
-
-    // Leitourgia get5LatestAnnouncements: xeirizetai to antistoixo kommati tis selidas i tou service.
+// API-style helper pou kanei output tis teleutaies 5 announcements ws JSON response.
     public function get5LatestAnnouncements() {
         header('Content-Type: application/json');
         header('Access-Control-Allow-Origin: *');

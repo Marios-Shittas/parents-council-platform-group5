@@ -4,7 +4,8 @@ require_once __DIR__ . '/../includes/site_context.php';
 
 class HeaderViewModel
 {
-    // Ftiaxnei ola ta dedomena pou xreiazetai to public header.
+// Synthetei ola ta dedomena pou xreiazetai to header provoli: current route marker,
+// portal label, metadata tou profile link kai teliki lista navigation entries.
     public function build(): array
     {
         $currentPage = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
@@ -23,8 +24,8 @@ class HeaderViewModel
             'nav_items' => $navItems,
         ];
     }
-
-    // Ftiaxnei to menu analoga me to public/parent context.
+// Dimiourgei ti domi tou navigation menu kai prosthetei conditionally parent-only items
+// (shop/photos) analoga me to trexon site context.
     private function buildNavItems(): array
     {
         $navItems = [
