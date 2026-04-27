@@ -370,7 +370,8 @@
 
         .navbar-parent .navbar-nav {
             justify-content: center;
-            gap: clamp(.5rem, .9vw, 1.05rem);
+            gap: clamp(.9rem, 1.25vw, 1.55rem);
+            margin-left: .45rem;
             padding-right: .35rem;
         }
 
@@ -425,7 +426,8 @@
             .navbar-parent .navbar-nav {
                 flex: 1 1 auto;
                 min-width: 0;
-                gap: .08rem;
+                gap: clamp(.48rem, .75vw, .95rem);
+                margin-left: .6rem;
                 padding-right: 0;
             }
 
