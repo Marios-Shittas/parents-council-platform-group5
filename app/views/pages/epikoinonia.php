@@ -156,9 +156,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (!empty($mapSection['subtitle'])): ?>
                     <p class="section-subtitle"><?php echo htmlspecialchars($mapSection['subtitle']); ?></p>
                 <?php endif; ?>
-                <div class="map-container">
-                    <iframe src="<?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?>" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
+                <?php
+                $mapUrl = trim((string)($mapSection['content']['embed_url'] ?? ''));
+                $isEmbedMap = strpos($mapUrl, '/maps/embed') !== false || strpos($mapUrl, 'output=embed') !== false;
+                ?>
+                <?php if ($mapUrl !== '' && $isEmbedMap): ?>
+                    <div class="map-container">
+                        <iframe src="<?php echo htmlspecialchars($mapUrl); ?>" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                <?php elseif ($mapUrl !== ''): ?>
+                    <p class="text-center">
+                        <a href="<?php echo htmlspecialchars($mapUrl); ?>" class="contact-card-link" target="_blank" rel="noopener noreferrer">Άνοιγμα στο Google Maps</a>
+                    </p>
+                <?php endif; ?>
             </div>
 
             <div class="contact-section">

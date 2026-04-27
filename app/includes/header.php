@@ -210,8 +210,8 @@ $nav_items[] = [
             height: 120px;
             border-radius: 50%;
             object-fit: contain;
-            background: #ffffff;
-            border: 3px solid rgba(255, 255, 255, 0.92);
+            background: transparent;
+            border: 0;
             box-shadow: 0 10px 28px rgba(26, 58, 92, 0.16);
         }
 

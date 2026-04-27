@@ -296,7 +296,7 @@ $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_u
                        <h5 class="footer-brand-title"><?php echo htmlspecialchars($footer_site_name); ?></h5>
                    </div>
                    <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΑΡΓΟΛΙΔΟΣ 45, 4007 ΜΕΣΑ ΓΕΙΤΟΝΙΑ, Λεμεσός</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>syndesmosgonewn29odimotiko@gmail.com</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>dim-mesa-geitonia29-lem@schools.ac.cy</span></div>
                </div>
 
 
@@ -314,9 +314,9 @@ $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_u
                <!-- 3η στήλη: στοιχεία επικοινωνίας. -->
                <div class="col-lg-3 col-md-6 mb-3">
                    <h5 class="footer-title">Επικοινωνία</h5>
-                   <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>Τηλεομοιότυπο: 25694755</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-phone"></i><span>25694571</span></div>
-                   <div class="footer-line footer-text"><i class="fas fa-clock"></i><span>Δευ - Παρ: 07:30 - 13:35</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-phone"></i><span>Τηλέφωνο: 25694570</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-fax"></i><span>Τηλεομοιότυπο: 25694575</span></div>
+                   <div class="footer-line footer-text"><i class="fas fa-clock"></i><span>Δευ-Παρ: 7.30-13.05</span></div>
                </div>
 
 

@@ -179,14 +179,14 @@ class EpikoinoniaPageService
                     'cards' => [
                         [
                             'title' => 'Διεύθυνση',
-                            'text' => "Χρίστου Παπαδούρη 50\n4105 Άγιος Αθανάσιος, Λεμεσός",
+                            'text' => "ΑΡΓΟΛΙΔΟΣ 45, 4007 ΜΕΣΑ ΓΕΙΤΟΝΙΑ, Λεμεσός",
                             'icon' => 'fas fa-map-marker-alt',
                             'link_label' => '',
                             'link_url' => '',
                         ],
                         [
                             'title' => 'Τηλέφωνο',
-                            'text' => "Τηλέφωνα: 25694750, 25694752\nΤηλεομοιότυπο: 25694755",
+                            'text' => "Τηλέφωνο: 25694570\nΤηλεομοιότυπο: 25694575",
                             'icon' => 'fas fa-phone',
                             'link_label' => '',
                             'link_url' => '',
@@ -195,12 +195,12 @@ class EpikoinoniaPageService
                             'title' => 'Email',
                             'text' => '',
                             'icon' => 'fas fa-envelope',
-                            'link_label' => 'gym-ag-athanasios-lem@schools.ac.cy',
-                            'link_url' => 'mailto:gym-ag-athanasios-lem@schools.ac.cy',
+                            'link_label' => 'dim-mesa-geitonia29-lem@schools.ac.cy',
+                            'link_url' => 'mailto:dim-mesa-geitonia29-lem@schools.ac.cy',
                         ],
                         [
                             'title' => 'Ώρες Λειτουργίας',
-                            'text' => 'Δευ-Παρ - 7.30-13.35',
+                            'text' => 'Δευ-Παρ - 7.30-13.05',
                             'icon' => 'fas fa-clock',
                             'link_label' => '',
                             'link_url' => '',
@@ -212,7 +212,7 @@ class EpikoinoniaPageService
                 'title' => 'Βρείτε μας στο Χάρτη',
                 'subtitle' => 'Η τοποθεσία της σχολικής μονάδας στο Google Maps.',
                 'content' => [
-                    'embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3279.4575341666614!2d33.0611131!3d34.7188599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14e734bc13013dc9%3A0x9c01ea2ef75a5b4d!2zzpPPhc68zr3OrM-DzrnOvyDOkc6zzq_Ov8-FIM6RzrjOsc69zrHPg86vzr_PhQ!5e0!3m2!1sel!2s!4v1773496500123!5m2!1sel!2s',
+                    'embed_url' => 'https://maps.google.com/maps?q=%CE%94%CE%97%CE%9C%CE%9F%CE%A4%CE%99%CE%9A%CE%9F%20%CE%A3%CE%A7%CE%9F%CE%9B%CE%95%CE%99%CE%9F%20%CE%9C%CE%95%CE%A3%CE%91%20%CE%93%CE%95%CE%99%CE%A4%CE%9F%CE%9D%CE%99%CE%91%CE%A3%20%CE%9A%CE%98%27%20-%20%CE%93.%CE%9D.%20%CE%9A%CE%91%CE%9B%CE%9F%CE%93%CE%95%CE%A1%CE%9F%CE%A0%CE%9F%CE%A5%CE%9B%CE%9F%CE%A5%2C%20%CE%91%CF%81%CE%B3%CE%BF%CE%BB%CE%AF%CE%B4%CE%BF%CF%82%2045%2C%20%CE%9C%CE%AD%CF%83%CE%B1%20%CE%93%CE%B5%CE%B9%CF%84%CE%BF%CE%BD%CE%B9%CE%AC&z=17&output=embed',
                 ],
             ],
             'form_section' => [
@@ -231,7 +231,7 @@ class EpikoinoniaPageService
                     'items' => [
                         [
                             'title' => 'Facebook',
-                            'url' => 'https://www.facebook.com/profile.php?id=100085835704152',
+                            'url' => 'https://www.facebook.com/ypourgeiopaideias',
                             'icon' => 'fab fa-facebook-f',
                         ],
                         [
