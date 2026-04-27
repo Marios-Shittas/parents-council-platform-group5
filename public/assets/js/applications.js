@@ -679,10 +679,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var viewManualPanel = document.getElementById('application-view-manual-panel');
     var viewUploadPanel = document.getElementById('application-view-upload-panel');
     var unavailableMessageEl = document.getElementById('application-unavailable-message');
-    var applicationNoticeBox = document.getElementById('application-notice-box');
-    var applicationNoticeBackdrop = document.getElementById('application-notice-backdrop');
-    var applicationNoticeMessage = document.getElementById('application-notice-message');
-    var applicationNoticeClose = document.getElementById('application-notice-close');
+    var applicationNoticeBox = null;
+    var applicationNoticeBackdrop = null;
+    var applicationNoticeMessage = null;
+    var applicationNoticeClose = null;
 
     document.addEventListener('input', function (event) {
         var target = event.target;
@@ -696,15 +696,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
-    function hideCenterNotice() {
-        if (applicationNoticeBox) {
-            applicationNoticeBox.classList.remove('is-visible');
-        }
-        if (applicationNoticeBackdrop) {
-            applicationNoticeBackdrop.classList.remove('is-visible');
-        }
-    }
+    function hideCenterNotice() {}
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function showCenterNotice(messageText) {

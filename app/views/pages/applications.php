@@ -1237,17 +1237,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<div id="application-notice-backdrop" class="application-notice-backdrop"></div>
-<div id="application-notice-box" role="alertdialog" aria-modal="true" aria-labelledby="application-notice-title">
-    <div class="application-notice-card">
-        <div class="application-notice-header" id="application-notice-title">Ειδοποίηση</div>
-        <div class="application-notice-body" id="application-notice-message">—</div>
-        <div class="application-notice-footer">
-            <button type="button" class="btn btn-primary application-notice-btn" id="application-notice-close">OK</button>
-        </div>
-    </div>
-</div>
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?php echo site_asset_url('js/applications.js'); ?>?v=<?php echo (int)(@filemtime(__DIR__ . '/../../../public/assets/js/applications.js') ?: time()); ?>"></script>
