@@ -31,6 +31,59 @@ function Payments() {
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = eshopContext.cartUrl || "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = eshopContext.checkoutUrl || "/parents-council-platform-group5/app/services/EshopJCC.php";
+    const sizeLabels = {
+        'x-small': 'X-Small',
+        'small': 'Small',
+        'medium': 'Medium',
+        'large': 'Large',
+        'x-large': 'X-Large',
+        'one-size': 'One Size'
+    };
+
+    function getSizeLabel(sizeValue, labels = {}) {
+        if (!sizeValue) {
+            return '';
+        }
+
+        if (labels && labels[sizeValue]) {
+            return labels[sizeValue];
+        }
+
+        return sizeLabels[sizeValue] || sizeValue;
+    }
+
+    function normalizeSizeOption(sizeOption) {
+        if (sizeOption && typeof sizeOption === 'object') {
+            const value = String(sizeOption.value || '').trim();
+            const label = String(sizeOption.label || value).trim();
+
+            if (!value || !label) {
+                return null;
+            }
+
+            return { value, label };
+        }
+
+        const value = String(sizeOption || '').trim();
+        if (!value) {
+            return null;
+        }
+
+        return {
+            value,
+            label: getSizeLabel(value)
+        };
+    }
+
+    function getProductSizeOptions(product) {
+        if (!product || !Array.isArray(product.size_options)) {
+            return [];
+        }
+
+        return product.size_options
+            .map(normalizeSizeOption)
+            .filter(Boolean);
+    }
 
     function getPaymentFeedback(status, message) {
         const normalizedStatus = (status || '').toLowerCase();
@@ -236,12 +289,22 @@ function Payments() {
     }
 
     function addToCart(product) {
-        const selectedSize = selectedSizes[product.product_id];
+        const availableSizes = getProductSizeOptions(product);
+        const requiresSize = Boolean(product.has_sizes) && availableSizes.length > 0;
+        const selectedSize = selectedSizes[product.product_id] || '';
 
-        if (!selectedSize || selectedSize.trim() === '') {
+        if (requiresSize && (!selectedSize || selectedSize.trim() === '')) {
             setSizeErrors((prev) => ({
                 ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
+            }));
+            return;
+        }
+
+        if (requiresSize && !availableSizes.some((sizeOption) => sizeOption.value === selectedSize)) {
+            setSizeErrors((prev) => ({
+                ...prev,
+                [product.product_id]: 'Το μέγεθος που επιλέχθηκε δεν είναι διαθέσιμο για αυτό το προϊόν.'
             }));
             return;
         }
@@ -250,7 +313,7 @@ function Payments() {
             action: 'add',
             product_id: product.product_id,
             quantity: 1,
-            size: selectedSize
+            size: requiresSize ? selectedSize : ''
         })
         .then(() => {
             setSizeErrors((prev) => ({
@@ -559,7 +622,10 @@ function Payments() {
                     {renderCheckoutModeCard()}
 
                     <div className="row">
-                        {products.map((product) => (
+                        {products.map((product) => {
+                            const productSizeOptions = getProductSizeOptions(product);
+
+                            return (
                             <div className="col-md-4" key={product.product_id}>
                                 <div className="card m-4 mb-4">
                                     <div className="card-body">
@@ -604,24 +670,30 @@ function Payments() {
                                         </div>
 
                                         <div className="size-selector mt-3">
-                                            <label className="size-label">Επιλέξτε μέγεθος:</label>
-                                            <select
-                                                className="size-select"
-                                                value={selectedSizes[product.product_id] || ''}
-                                                onChange={(event) => updateSelectedSize(product.product_id, event.target.value)}
-                                            >
-                                                <option value="">Επιλέξτε μέγεθος</option>
-                                                <option value="x-small">X-Small</option>
-                                                <option value="small">Small</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="large">Large</option>
-                                                <option value="x-large">X-Large</option>
-                                            </select>
+                                            {Boolean(product.has_sizes) && productSizeOptions.length > 0 ? (
+                                                <>
+                                                    <label className="size-label">Επιλέξτε μέγεθος:</label>
+                                                    <select
+                                                        className="size-select"
+                                                        value={selectedSizes[product.product_id] || ''}
+                                                        onChange={(event) => updateSelectedSize(product.product_id, event.target.value)}
+                                                    >
+                                                        <option value="">Επιλέξτε μέγεθος</option>
+                                                        {productSizeOptions.map((sizeOption) => (
+                                                            <option key={sizeOption.value} value={sizeOption.value}>
+                                                                {sizeOption.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
-                                            {sizeErrors[product.product_id] && (
-                                                <div className="size-error-text">
-                                                    {sizeErrors[product.product_id]}
-                                                </div>
+                                                    {sizeErrors[product.product_id] && (
+                                                        <div className="size-error-text">
+                                                            {sizeErrors[product.product_id]}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="text-muted small">Δεν απαιτείται επιλογή μεγέθους για αυτό το προϊόν.</div>
                                             )}
                                         </div>
 
@@ -635,7 +707,8 @@ function Payments() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="wholecart m-4 mt-3">
@@ -675,7 +748,7 @@ function Payments() {
                                                 <div>{item.product_name}</div>
                                                 {item.size && (
                                                     <small className="cart-size-badge">
-                                                        {item.size.toUpperCase()}
+                                                        {item.size_label || getSizeLabel(item.size)}
                                                     </small>
                                                 )}
                                             </div>

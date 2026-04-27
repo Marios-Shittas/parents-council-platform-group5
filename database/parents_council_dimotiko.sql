@@ -276,7 +276,7 @@ CREATE TABLE `OrderItems` (
   `product_id` int(11) NOT NULL,
   `price_at_purchase` decimal(10,2) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
-  `size` varchar(20) DEFAULT NULL,
+  `size` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`order_item_id`),
   UNIQUE KEY `uq_order_item_variant` (`order_id`,`product_id`,`size`),
   KEY `idx_order_items_order_id` (`order_id`),
@@ -294,6 +294,7 @@ CREATE TABLE `Orders` (
   `total_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `order_status` enum('pending','paid','cancelled') NOT NULL DEFAULT 'pending',
+  `admin_seen_at` datetime DEFAULT NULL,
   `customer_type` enum('parent','public') NOT NULL DEFAULT 'parent',
   `customer_name` varchar(100) DEFAULT NULL,
   `customer_surname` varchar(100) DEFAULT NULL,
@@ -365,7 +366,7 @@ CREATE TABLE `PaymentsDetails` (
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL DEFAULT 1,
   `price_at_purchase` decimal(10,2) NOT NULL,
-  `size` varchar(20) DEFAULT NULL,
+  `size` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`payment_item_id`),
   KEY `fk_pd_payment` (`payment_id`),
   KEY `fk_pd_product` (`product_id`),
@@ -419,6 +420,22 @@ CREATE TABLE `Products` (
   `price` decimal(10,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `ProductSizeOptions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ProductSizeOptions` (
+  `size_option_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `size_value` varchar(100) NOT NULL,
+  `size_label` varchar(100) NOT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`size_option_id`),
+  UNIQUE KEY `uq_product_size_value` (`product_id`,`size_value`),
+  KEY `idx_product_size_product` (`product_id`),
+  CONSTRAINT `fk_product_size_product` FOREIGN KEY (`product_id`) REFERENCES `Products` (`product_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ProductsImages`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

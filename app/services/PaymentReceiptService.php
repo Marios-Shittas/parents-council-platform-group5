@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/ApprovalMailer.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 class PaymentReceiptService
 {
@@ -338,7 +339,7 @@ class PaymentReceiptService
         }
 
         $stmt = $this->conn->prepare(
-            'SELECT pd.quantity, pd.size, p.product_name ' .
+            'SELECT pd.product_id, pd.quantity, pd.size, p.product_name ' .
             'FROM PaymentsDetails pd ' .
             'INNER JOIN Products p ON p.product_id = pd.product_id ' .
             'WHERE pd.payment_id = ? ' .
@@ -356,12 +357,14 @@ class PaymentReceiptService
         $items = [];
         while ($result && ($row = $result->fetch_assoc())) {
             $productName = trim((string) ($row['product_name'] ?? 'Προϊόν'));
+            $productId = (int) ($row['product_id'] ?? 0);
             $quantity = (int) ($row['quantity'] ?? 1);
             $size = trim((string) ($row['size'] ?? ''));
 
             $label = $productName . ' x' . max($quantity, 1);
             if ($size !== '') {
-                $label .= ' (Size: ' . $size . ')';
+                $sizeMeta = product_sizes_get_for_product($productId);
+                $label .= ' (Size: ' . product_sizes_label_for_value($size, $sizeMeta) . ')';
             }
 
             $items[] = $label;

@@ -563,7 +563,7 @@ class EshopJccService
         }
 
         $stmt->bind_param(
-            'dssssss',
+            'dsssssss',
             $totalPrice,
             $customer['name'],
             $customer['surname'],
