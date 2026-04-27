@@ -4,3 +4,4 @@
 # Agnooume vendor dependencies pou dimiourgountai apo composer.
 # Ta packages ginontai install apo composer.json/composer.lock, opote den ta kanoume commit.
 /vendor/
+.DS_Store
