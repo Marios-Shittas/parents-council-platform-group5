@@ -2,6 +2,7 @@
 require_once __DIR__ . '/site_context.php';
 
 $footer_site_name = 'Σύνδεσμος Γονέων Δημοτικού Σχολείου Μέσα Γειτονιάς ΚΘ\' Γ.Ν. Καλογεροπούλου';
+$footer_site_name_formatted = str_replace('Σχολείου Μέσα', 'Σχολείου<br>Μέσα', htmlspecialchars($footer_site_name));
 
 $footer_links = [
     ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
@@ -293,7 +294,7 @@ $footer_links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_u
                <div class="col-lg-5 col-md-12 mb-4 mb-lg-3 pr-lg-4">
                    <div class="footer-badge">Parents Council</div>
                    <div class="footer-brand">
-                       <h5 class="footer-brand-title"><?php echo htmlspecialchars($footer_site_name); ?></h5>
+                       <h5 class="footer-brand-title"><?php echo $footer_site_name_formatted; ?></h5>
                    </div>
                    <div class="footer-line footer-text"><i class="fas fa-map-marker-alt"></i><span>ΑΡΓΟΛΙΔΟΣ 45, 4007 ΜΕΣΑ ΓΕΙΤΟΝΙΑ, Λεμεσός</span></div>
                    <div class="footer-line footer-text"><i class="fas fa-envelope"></i><span>dim-mesa-geitonia29-lem@schools.ac.cy</span></div>
