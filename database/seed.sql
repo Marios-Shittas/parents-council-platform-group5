@@ -10,9 +10,6 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-USE `parents_council_dimotiko`;
-SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS;
-SET FOREIGN_KEY_CHECKS = 0;
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -25,19 +22,32 @@ SET FOREIGN_KEY_CHECKS = 0;
 --
 
 
+--
+-- Dumping data for table `Users`
+--
+
+INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_number`, `number_of_children`, `role`, `account_status`, `token`, `token_expiry`, `created_at`) VALUES
+(1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '+35799123456', 0, 'admin', 'active', 'fdb9e92eb8dd2097f3b7d080f31834ff477ce5a7bf912b699730bcd93d20b09b', '2026-04-14 15:10:57', '2026-04-11 19:03:11'),
+(2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '+35799112233', 2, 'parent', 'active', NULL, NULL, '2026-04-11 19:03:11'),
+(3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '+35799445566', 1, 'parent', 'waiting_payment', NULL, NULL, '2026-04-11 19:03:11'),
+(4, 'Public', 'Guest', 'public_guest@guest.local', '$2y$10$.oiqe21yQCgVFr6YLVRwmOGiLLFLYUyq83XBLJOlSew5KueM5mEfO', '', 0, 'parent', 'approved', NULL, NULL, '2026-04-28 17:19:53');
+
+--
+-- Dumping data for table `ApplicationTemplates`
+--
+
+INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `description`, `category`, `form_schema`, `is_system_template`, `created_at`, `updated_at`) VALUES
+(1, 'subscription-insurance', 'Συνδρομή / Ασφάλιση', 'Ετήσια συνδρομή και ασφαλιστική κάλυψη μαθητή', 'standard', '{\"sections\":[{\"title\":\"Στοιχεία Μαθητή\",\"fields\":[{\"name\":\"student_name\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_birthdate\",\"label\":\"Ημερομηνία Γέννησης\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class\",\"label\":\"Τμήμα \\/ Τάξη\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Στοιχεία Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_phone\",\"label\":\"Τηλέφωνο Επικοινωνίας\",\"type\":\"tel\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_email\",\"label\":\"Email Επικοινωνίας\",\"type\":\"email\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Εγγραφές\",\"fields\":[{\"name\":\"subscription_checkbox\",\"label\":\"Συνδρομή στο Σύνδεσμο\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι τη συνδρομή\"},{\"name\":\"insurance_checkbox\",\"label\":\"Ασφαλιστική Κάλυψη\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι την ασφαλιστική κάλυψη\"}]},{\"title\":\"Συναίνεση Επικοινωνίας\",\"fields\":[{\"name\":\"consent_communication\",\"label\":\"Λήψη Ειδοποιήσεων\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι να λαμβάνω ειδοποιήσεις\"},{\"name\":\"consent_viber\",\"label\":\"Viber Community\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι συμμετοχή στην ομάδα Viber\"}]},{\"title\":\"Επιβεβαίωση\",\"fields\":[{\"name\":\"signature\",\"label\":\"Υπογραφή Κηδεμόνα\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16'),
+(2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
+
+--
+-- Dumping data for table `Announcements`
+--
+
 INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcement_date`, `publish_date`, `announcement_description`, `gdpr_notice`) VALUES
 (1, 'Πρόγραμμα Ενιαίων Τελικών Προαγωγικών & Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται το πρόγραμμα των Ενιαίων Τελικών Προαγωγικών και Απολυτήριων Γραπτών Εξετάσεων Γυμνασίων, με αναλυτική καταγραφή των ημερομηνιών και των μαθημάτων.', ''),
 (2, 'Κλήρωση Πασχαλινού Λαχείου', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζονται πληροφορίες σχετικά με την κλήρωση του Πασχαλινού Λαχείου, συμπεριλαμβανομένων των αποτελεσμάτων και των σχετικών λεπτομερειών.', ''),
 (3, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
-
---
--- Dumping data for table `AnnouncementAttachments`
---
-
-INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de2f521560b8.13949445.pdf', 'Arxeio 1.pdf', '2026-04-14 12:13:06'),
-(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de3157c4c3d0.96612284.pdf', 'Arxeio 2.pdf', '2026-04-14 12:21:43'),
-(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
 
 --
 -- Dumping data for table `AnnouncementsImages`
@@ -50,46 +60,13 @@ INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path
 (4, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639c39c_1776170851.png');
 
 --
--- Dumping data for table `Users`
+-- Dumping data for table `AnnouncementAttachments`
 --
 
-INSERT INTO `Users` (`user_id`, `name`, `surname`, `email`, `password`, `phone_number`, `number_of_children`, `role`, `account_status`, `token`, `token_expiry`, `created_at`) VALUES
-(1, 'Admin', 'User', 'admin@test.com', '$2y$10$iEzB1rYBGWURYZJnbpPg/ulK0GD/tDI/6ktzuY7hmTfQnUCOmzDxe', '+35799123456', 0, 'admin', 'active', 'fdb9e92eb8dd2097f3b7d080f31834ff477ce5a7bf912b699730bcd93d20b09b', '2026-04-14 15:10:57', '2026-04-11 19:03:11'),
-(2, 'John', 'Doe', 'parent1@test.com', '$2y$10$5MryI34DorxxyDm1IoDtiuit5ek4dsK14UR6rBWn8ce7LSzeRVHYW', '+35799112233', 2, 'parent', 'active', NULL, NULL, '2026-04-11 19:03:11'),
-(3, 'Jane', 'Smith', 'parent2@test.com', '$2y$10$dITemBxHXfD1VqAQTMCxnOZ7jU1ibL7u.GiNng2snsRgQ339MZNYi', '+35799445566', 1, 'parent', 'waiting_payment', NULL, NULL, '2026-04-11 19:03:11');
-
---
--- Dumping data for table `ApplicationTemplates`
---
-
-INSERT INTO `ApplicationTemplates` (`template_id`, `template_key`, `name`, `description`, `category`, `form_schema`, `is_system_template`, `created_at`, `updated_at`) VALUES
-(1, 'subscription-insurance', 'Συνδρομή / Ασφάλιση', 'Ετήσια συνδρομή και ασφαλιστική κάλυψη μαθητή', 'standard', '{\"sections\":[{\"title\":\"Στοιχεία Μαθητή\",\"fields\":[{\"name\":\"student_name\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_birthdate\",\"label\":\"Ημερομηνία Γέννησης\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class\",\"label\":\"Τμήμα \\/ Τάξη\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Στοιχεία Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_phone\",\"label\":\"Τηλέφωνο Επικοινωνίας\",\"type\":\"tel\",\"required\":true,\"help_text\":\"\"},{\"name\":\"guardian_email\",\"label\":\"Email Επικοινωνίας\",\"type\":\"email\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Εγγραφές\",\"fields\":[{\"name\":\"subscription_checkbox\",\"label\":\"Συνδρομή στο Σύνδεσμο\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι τη συνδρομή\"},{\"name\":\"insurance_checkbox\",\"label\":\"Ασφαλιστική Κάλυψη\",\"type\":\"checkbox\",\"required\":false,\"help_text\":\"Αποδέχομαι την ασφαλιστική κάλυψη\"}]},{\"title\":\"Συναίνεση Επικοινωνίας\",\"fields\":[{\"name\":\"consent_communication\",\"label\":\"Λήψη Ειδοποιήσεων\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι να λαμβάνω ειδοποιήσεις\"},{\"name\":\"consent_viber\",\"label\":\"Viber Community\",\"type\":\"radio\",\"required\":true,\"options\":[\"Ναι\",\"Όχι\"],\"help_text\":\"Αποδέχομαι συμμετοχή στην ομάδα Viber\"}]},{\"title\":\"Επιβεβαίωση\",\"fields\":[{\"name\":\"signature\",\"label\":\"Υπογραφή Κηδεμόνα\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16'),
-(2, 'event-consent', 'Συναίνεση Συμμετοχής σε Εκδήλωση', 'Μορφή συναίνεσης για συμμετοχή σε σχολική εκδήλωση ή δραστηριότητα', 'event', '{\"sections\":[{\"title\":\"Πληροφορίες Μαθητή\",\"fields\":[{\"name\":\"student_name_event\",\"label\":\"Ονοματεπώνυμο Μαθητή\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"},{\"name\":\"student_class_event\",\"label\":\"Τάξη\\/Τμήμα\",\"type\":\"select\",\"required\":true,\"options\":[\"A\",\"B\",\"C\",\"Γ\'\"],\"help_text\":\"\"}]},{\"title\":\"Πληροφορίες Κηδεμόνα\",\"fields\":[{\"name\":\"guardian_name_event\",\"label\":\"Ονοματεπώνυμο Κηδεμόνα\",\"type\":\"text\",\"required\":true,\"help_text\":\"\"}]},{\"title\":\"Συναίνεση\",\"fields\":[{\"name\":\"consent\",\"label\":\"Δηλώνω ότι:\",\"type\":\"radio\",\"required\":true,\"options\":[\"Συναινώ\",\"Δεν Συναινώ\"],\"help_text\":\"\"},{\"name\":\"comments\",\"label\":\"Σχόλια \\/ Παρατηρήσεις\",\"type\":\"textarea\",\"required\":false,\"help_text\":\"Προαιρετικό\"}]},{\"title\":\"Υπογραφή\",\"fields\":[{\"name\":\"signature_event\",\"label\":\"Υπογραφή\",\"type\":\"signature\",\"required\":true,\"help_text\":\"\"},{\"name\":\"signature_date_event\",\"label\":\"Ημερομηνία\",\"type\":\"date\",\"required\":true,\"help_text\":\"\"}]}]}', 1, '2026-04-11 19:10:16', '2026-04-11 19:10:16');
-
---
--- Dumping data for table `Applications`
---
-
-INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`, `title`, `application_description`, `description`, `submission_type`, `academic_year`, `open_date`, `due_date`, `status`, `allow_online_submission`, `allow_file_submission`, `require_signature`, `form_schema`, `target_audience`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, NULL, 'Field Trip Permission', 'Field Trip Permission', 'Form to allow your child to attend field trip', 'Form to allow your child to attend field trip', 'file', '2025-2026', '2026-03-01', '2026-06-15', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11'),
-(2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11');
-
---
--- Dumping data for table `ApplicationsDocuments`
---
-
-INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
-(2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
-
---
--- Dumping data for table `Children`
---
-
-INSERT INTO `Children` (`child_id`, `user_id`, `name`, `surname`, `date_of_birth`, `school_class`) VALUES
-(1, 2, 'Chris', 'Doe', '2015-05-10', '5A'),
-(2, 2, 'Anna', 'Doe', '2017-09-22', '3B'),
-(3, 3, 'Mike', 'Smith', '2016-02-11', '4A');
+INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
+(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de2f521560b8.13949445.pdf', 'Arxeio 1.pdf', '2026-04-14 12:13:06'),
+(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de3157c4c3d0.96612284.pdf', 'Arxeio 2.pdf', '2026-04-14 12:21:43'),
+(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
 
 --
 -- Dumping data for table `EpikoinoniaPageSections`
@@ -101,11 +78,18 @@ INSERT INTO `EpikoinoniaPageSections` (`section_id`, `section_key`, `section_tit
 (3, 'map_section', 'Βρείτε μας στο Χάρτη', 'Η τοποθεσία της σχολικής μονάδας στο Google Maps.', '{\"embed_url\":\"https://maps.google.com/maps?q=%CE%94%CE%97%CE%9C%CE%9F%CE%A4%CE%99%CE%9A%CE%9F%20%CE%A3%CE%A7%CE%9F%CE%9B%CE%95%CE%99%CE%9F%20%CE%9C%CE%95%CE%A3%CE%91%20%CE%93%CE%95%CE%99%CE%A4%CE%9F%CE%9D%CE%99%CE%91%CE%A3%20%CE%9A%CE%98%27%20-%20%CE%93.%CE%9D.%20%CE%9A%CE%91%CE%9B%CE%9F%CE%93%CE%95%CE%A1%CE%9F%CE%A0%CE%9F%CE%A5%CE%9B%CE%9F%CE%A5%2C%20%CE%91%CF%81%CE%B3%CE%BF%CE%BB%CE%AF%CE%B4%CE%BF%CF%82%2045%2C%20%CE%9C%CE%AD%CF%83%CE%B1%20%CE%93%CE%B5%CE%B9%CF%84%CE%BF%CE%BD%CE%B9%CE%AC&z=17&output=embed\"}', '2026-04-11 19:03:11'),
 (4, 'form_section', 'Στείλτε μας Μήνυμα', 'Συμπληρώστε τη φόρμα και θα επικοινωνήσουμε μαζί σας το συντομότερο δυνατό.', '{\"description\":\"\",\"button_text\":\"Αποστολή Μηνύματος\",\"success_message\":\"Το μήνυμά σας λήφθηκε. Θα σας απαντήσουμε το συντομότερο δυνατό.\"}', '2026-04-11 19:03:11'),
 (5, 'social_section', 'Βρείτε μας στα social networks', 'Ακολουθήστε τις επίσημες σελίδες μας για νέα και ενημερώσεις.', '{\"items\":[{\"title\":\"Facebook\",\"url\":\"https://www.facebook.com/ypourgeiopaideias\",\"icon\":\"fab fa-facebook-f\"},{\"title\":\"X\",\"url\":\"https://x.com/cymoec\",\"icon\":\"fab fa-twitter\"},{\"title\":\"YouTube\",\"url\":\"https://www.youtube.com/cymoec\",\"icon\":\"fab fa-youtube\"}]}', '2026-04-11 19:03:11');
-INSERT INTO Events (event_id, event_title, event_description, gdpr_notice, event_date, publish_date) VALUES
-(1, 'Τόμπολα & Μουσική Βραδιά', 'Παρασκευή 15 Μαΐου 2026
-Ώρα: 20:00 - 23:00', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 20:00:00', '2026-04-14');
 
-INSERT INTO EventsImages (ev_image_id, event_id, image_path) VALUES
+-- Dumping data for table `Events`
+--
+
+INSERT INTO `Events` (`event_id`, `event_title`, `event_description`, `gdpr_notice`, `event_date`, `publish_date`) VALUES
+(1, 'Τόμπολα & Μουσική Βραδιά', 'Παρασκευή 15 Μαΐου 2026\nΏρα: 20:00 - 23:00', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 20:00:00', '2026-04-14');
+
+--
+-- Dumping data for table `EventsImages`
+--
+
+INSERT INTO `EventsImages` (`ev_image_id`, `event_id`, `image_path`) VALUES
 (1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg');
 
 --
@@ -127,37 +111,6 @@ INSERT INTO `HomePageSections` (`section_id`, `section_key`, `section_title`, `s
 (3, 'announcements_section', 'Τελευταίες Ανακοινώσεις', '', '{\"button_label\":\"Όλες οι Ανακοινώσεις\"}', '2026-04-14 13:06:00'),
 (4, 'events_section', 'Τελευταίες Εκδηλώσεις', '', '{\"button_label\":\"Όλες οι Εκδηλώσεις\"}', '2026-04-14 13:06:00'),
 (5, 'banner_section', 'Banner Αρχικής', '', '{\"slides\":[{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de461935c6e8.55358859.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 1\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de49201f29e2.96931567.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 2\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de47d4c95ee6.67743613.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 3\",\"hidden\":false}]}', '2026-04-14 14:03:12');
-
---
--- Dumping data for table `Logs`
---
-
-INSERT INTO `Logs` (`log_id`, `user_id`, `action`, `description`, `created_at`) VALUES
-(1, 2, 'PAYMENT_CREATED', 'User created insurance payment (ID: 102) for 2 children; JCC orderId: 99681fbc-4657-7fae-a146-d9772eeb7620', '2026-04-13 20:27:08'),
-(2, NULL, 'user_registration', 'New parent registered with email: mariosshittas@gmail.com', '2026-04-13 20:29:10'),
-(3, 1, 'ADMIN_USER_APPROVAL_EMAIL_SENT', 'Approval email sent to user #4 (mariosshittas@gmail.com).', '2026-04-13 20:29:32'),
-(4, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=waiting_payment.', '2026-04-13 20:29:32'),
-(5, NULL, 'PAYMENT_CREATED', 'User created membership payment (ID: 103) and insurance payment (ID: 104); JCC orderId: ee49d5fb-38c8-766f-a886-a40f2eeb7620', '2026-04-13 20:29:47'),
-(6, NULL, 'PAYMENT_COMPLETED', 'JCC payment completed. Order ID: ee49d5fb-38c8-766f-a886-a40f2eeb7620, Transaction ID: 88747638109143495572', '2026-04-13 20:30:09'),
-(7, NULL, 'ACTIVATION_CREDENTIALS_SENT', 'Activation credentials email sent.', '2026-04-13 20:30:11'),
-(8, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=active.', '2026-04-13 20:39:00'),
-(9, 1, 'ADMIN_USER_REJECTION_EMAIL_SENT', 'Rejection email sent to user #4 (mariosshittas@gmail.com).', '2026-04-13 20:40:39'),
-(10, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=rejected.', '2026-04-13 20:40:39'),
-(11, 1, 'ADMIN_USER_DELETED', 'Deleted user #4 (mariosshittas@gmail.com).', '2026-04-13 20:51:12'),
-(12, NULL, 'user_registration', 'New parent registered with email: mariosshittas@gmail.com', '2026-04-13 20:54:34'),
-(13, 1, 'ADMIN_USER_APPROVAL_EMAIL_SENT', 'Approval email sent to user #5 (mariosshittas@gmail.com).', '2026-04-13 20:55:08'),
-(14, 1, 'ADMIN_USER_UPDATED', 'Updated user #5 (mariosshittas@gmail.com); role=parent, status=waiting_payment.', '2026-04-13 20:55:08'),
-(15, NULL, 'PAYMENT_CREATED', 'User created membership payment (ID: 105) and insurance payment (ID: 106); JCC orderId: f7e13147-b5ea-78d2-94aa-56fe2eeb7620', '2026-04-13 20:55:24'),
-(16, NULL, 'PAYMENT_COMPLETED', 'JCC payment completed. Order ID: f7e13147-b5ea-78d2-94aa-56fe2eeb7620, Transaction ID: 06313994115347811422', '2026-04-13 20:55:40'),
-(17, NULL, 'ACTIVATION_CREDENTIALS_SENT', 'Activation credentials email sent.', '2026-04-13 20:55:41'),
-(18, 1, 'ADMIN_USER_DELETED', 'Deleted user #5 (mariosshittas@gmail.com).', '2026-04-14 15:38:55');
-
---
--- Dumping data for table `Orders`
---
-
-INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order_status`, `customer_type`, `customer_name`, `customer_surname`, `customer_email`, `customer_phone`, `student_name`, `student_class`, `portal_context`) VALUES
-(1, 2, 0.00, '2026-04-11 22:21:41', 'pending', 'parent', NULL, NULL, NULL, NULL, NULL, NULL, 'parent');
 
 --
 -- Dumping data for table `ParentsPageGalleryImages`
@@ -187,15 +140,6 @@ INSERT INTO `ParentsPageSections` (`section_id`, `section_key`, `section_title`,
 (9, 'board_archive_section', 'Συμβούλια ανά Σχολική Χρονιά', 'Αρχείο προηγούμενων και τρεχουσών συνθέσεων του Διοικητικού Συμβουλίου.', '{\"eyebrow\":\"Αρχείο Συμβουλίων\",\"year_label\":\"Σχολική Χρονιά\",\"position_label\":\"Θέση\",\"name_label\":\"Ονοματεπώνυμο\",\"rows\":[{\"year\":\"2025-2026\",\"role\":\"ΠΡΟΕΔΡΟΣ\",\"name\":\"Μιχάλης Αριστείδου\"},{\"year\":\"2025-2026\",\"role\":\"ΑΝΤΙΠΡΟΕΔΡΟΣ\",\"name\":\"Μάριος Γαβριηλίδης\"},{\"year\":\"2025-2026\",\"role\":\"ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Βάσια Μέζου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Σπυρούλα Χαραλάμπους\"},{\"year\":\"2025-2026\",\"role\":\"ΤΑΜΙΑΣ\",\"name\":\"Γιάννα Παπαϊωάννου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΤΑΜΙΑΣ\",\"name\":\"Αρίστη Θεοδοσίου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χαρά Χριστοδούλου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χρίστος Αριστοδήμου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Πέτρος Κοντογιάννης\"}]}', '2026-04-11 19:03:11');
 
 --
--- Dumping data for table `Payments`
---
-
-INSERT INTO `Payments` (`payment_id`, `user_id`, `amount`, `payment_date`, `payment_status`, `payment_type`, `transaction_id`) VALUES
-(100, 2, 20.00, '2026-03-10 10:00:00', 'completed', 'membership', 'JCC_MEMB_001'),
-(101, 2, 15.00, '2026-03-10 10:05:00', 'completed', 'insurance', 'JCC_INS_001'),
-(102, 2, 15.00, '2026-04-13 20:27:08', 'pending', 'insurance', NULL);
-
---
 -- Dumping data for table `PricingSettings`
 --
 
@@ -221,12 +165,19 @@ INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
 (3, 3, '/parents-council-platform-group5/public/assets/Products_img/default-product.svg');
 
 --
--- Dumping data for table `Submissions`
+-- Dumping data for table `ProductSizeOptions`
 --
 
-INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `sub_status`) VALUES
-(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', 'approved'),
-(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', 'waiting');
+INSERT INTO `ProductSizeOptions` (`size_option_id`, `product_id`, `size_value`, `size_label`, `sort_order`, `created_at`) VALUES
+(1, 2, 'x-small', 'X-Small', 1, '2026-04-28 14:20:25'),
+(2, 2, 'small', 'Small', 2, '2026-04-28 14:20:25'),
+(3, 2, 'medium', 'Medium', 3, '2026-04-28 14:20:25'),
+(4, 2, 'large', 'Large', 4, '2026-04-28 14:20:25'),
+(5, 2, 'x-large', 'X-Large', 5, '2026-04-28 14:20:25'),
+(6, 1, '6', '6', 1, '2026-04-28 14:20:37'),
+(7, 1, '8', '8', 2, '2026-04-28 14:20:37'),
+(8, 1, '10', '10', 3, '2026-04-28 14:20:37'),
+(9, 1, '12', '12', 4, '2026-04-28 14:20:37');
 
 --
 -- Dumping data for table `SystemSchedule`
@@ -248,8 +199,80 @@ INSERT INTO `UsefulInformationSections` (`section_id`, `section_key`, `section_t
 (5, 'safety', 'Ασφάλεια Παιδιών & Χρήσιμα Έντυπα', 'Χρήσιμη ενημέρωση για ασφάλεια στο σχολείο και επίσημες λήψεις εντύπων.', '{\"bullets\":[\"Για θέματα πρόληψης, ασφάλειας και υγείας στο σχολείο, αρμόδιο είναι το Γραφείο Πολιτικής Άμυνας, Ασφάλειας και Υγείας του ΥΠΑΝ.\",\"Σε περίπτωση περιστατικού ή ατυχήματος, η ενημέρωση της σχολικής μονάδας πρέπει να γίνεται άμεσα, ώστε να ακολουθηθεί η προβλεπόμενη διαδικασία.\",\"Για επίσημα έντυπα καταγραφής ατυχημάτων και άλλα σχετικά έγγραφα, χρησιμοποιείτε τα έντυπα του ΥΠΑΝ.\",\"Για ετήσιες ανακοινώσεις σχετικά με πιθανή ασφαλιστική κάλυψη μαθητών, οι γονείς θα πρέπει να παρακολουθούν τις ανακοινώσεις του σχολείου και του Συνδέσμου Γονέων.\"],\"downloads\":[{\"title\":\"Έντυπα Ασφάλειας και Καταγραφής Ατυχημάτων\",\"url\":\"https://www.moec.gov.cy/politiki_amyna/ay_entypa.html\",\"icon\":\"fas fa-download\"},{\"title\":\"Επιμορφωτικό Υλικό Ασφάλειας και Υγείας\",\"url\":\"https://www.moec.gov.cy/politiki_amyna/ay_epimorfotiko_yliko.html\",\"icon\":\"fas fa-book-open\"},{\"title\":\"Έντυπα και ανακοινώσεις του σχολείου\",\"url\":\"https://gym-ag-athanasios-lem.schools.ac.cy/index.php?id=student-registrations\",\"icon\":\"fas fa-folder-open\"}]}', '2026-04-11 19:03:11'),
 (6, 'uniform', 'Μαθητική Στολή', 'Συνοπτική παρουσίαση με βάση τους εσωτερικούς κανονισμούς του σχολείου.', '{\"cards\":[{\"title\":\"Αγόρια\",\"items\":[\"Γκρίζο παντελόνι\",\"Άσπρο πουκάμισο, T-shirt ή polo\",\"Μπλε σκούρο πουλόβερ\",\"Δεν επιτρέπονται jeans ή αθλητικές φόρμες στην καθημερινή στολή\"]},{\"title\":\"Κορίτσια\",\"items\":[\"Γκρίζα φούστα ή γκρίζο παντελόνι\",\"Άσπρο πουκάμισο, T-shirt ή polo\",\"Μπλε σκούρο πουλόβερ\",\"Δεν επιτρέπονται jeans ή κολάν στην καθημερινή στολή\"]},{\"title\":\"Στολή Γυμναστικής\",\"items\":[\"Μαύρο ή μπλε παντελόνι φόρμας\",\"Άσπρη, γκρίζα ή σχολική φανέλα\",\"Αθλητικά παπούτσια\",\"Πρακτική και ασφαλής ενδυμασία για το μάθημα Φυσικής Αγωγής\"]}],\"note\":\"Για τις πλήρεις λεπτομέρειες της στολής και των κανονισμών, δείτε τους επίσημους εσωτερικούς κανονισμούς του σχολείου.\",\"button_text\":\"Προβολή Κανονισμών\",\"button_url\":\"https://gym-ag-athanasios-lem.schools.ac.cy/data/uploads/documents/2025-2026/september/esoterikoi-kanonismoi-2025-2026.pdf\"}', '2026-04-11 19:03:11');
 
+--
+-- Dumping data for table `Applications`
+--
+
+INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`, `title`, `application_description`, `description`, `submission_type`, `academic_year`, `open_date`, `due_date`, `status`, `allow_online_submission`, `allow_file_submission`, `require_signature`, `form_schema`, `target_audience`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, NULL, 'Field Trip Permission', 'Field Trip Permission', 'Form to allow your child to attend field trip', 'Form to allow your child to attend field trip', 'file', '2025-2026', '2026-03-01', '2026-06-15', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11'),
+(2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11');
+
+--
+-- Dumping data for table `ApplicationsDocuments`
+--
+
+INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
+(1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
+(2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
+
+--
+-- Dumping data for table `Children`
+--
+
+INSERT INTO `Children` (`child_id`, `user_id`, `name`, `surname`, `date_of_birth`, `school_class`) VALUES
+(1, 2, 'Chris', 'Doe', '2015-05-10', '5A'),
+(2, 2, 'Anna', 'Doe', '2017-09-22', '3B'),
+(3, 3, 'Mike', 'Smith', '2016-02-11', '4A');
+
+--
+-- Dumping data for table `Orders`
+--
+
+INSERT INTO `Orders` (`order_id`, `user_id`, `total_price`, `created_at`, `order_status`, `customer_type`, `customer_name`, `customer_surname`, `customer_email`, `customer_phone`, `student_name`, `student_class`, `portal_context`) VALUES
+(1, 2, 0.00, '2026-04-11 22:21:41', 'pending', 'parent', NULL, NULL, NULL, NULL, NULL, NULL, 'parent');
+
+--
+-- Dumping data for table `Payments`
+--
+
+INSERT INTO `Payments` (`payment_id`, `user_id`, `amount`, `payment_date`, `payment_status`, `payment_type`, `transaction_id`) VALUES
+(100, 2, 20.00, '2026-03-10 10:00:00', 'completed', 'membership', 'JCC_MEMB_001'),
+(101, 2, 15.00, '2026-03-10 10:05:00', 'completed', 'insurance', 'JCC_INS_001'),
+(102, 2, 15.00, '2026-04-13 20:27:08', 'pending', 'insurance', NULL);
+
+--
+-- Dumping data for table `Submissions`
+--
+
+INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `sub_status`) VALUES
+(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', 'approved'),
+(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', 'waiting');
+
+--
+-- Dumping data for table `Logs`
+--
+
+INSERT INTO `Logs` (`log_id`, `user_id`, `action`, `description`, `created_at`) VALUES
+(1, 2, 'PAYMENT_CREATED', 'User created insurance payment (ID: 102) for 2 children; JCC orderId: 99681fbc-4657-7fae-a146-d9772eeb7620', '2026-04-13 20:27:08'),
+(2, NULL, 'user_registration', 'New parent registered with email: mariosshittas@gmail.com', '2026-04-13 20:29:10'),
+(3, 1, 'ADMIN_USER_APPROVAL_EMAIL_SENT', 'Approval email sent to user #4 (mariosshittas@gmail.com).', '2026-04-13 20:29:32'),
+(4, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=waiting_payment.', '2026-04-13 20:29:32'),
+(5, NULL, 'PAYMENT_CREATED', 'User created membership payment (ID: 103) and insurance payment (ID: 104); JCC orderId: ee49d5fb-38c8-766f-a886-a40f2eeb7620', '2026-04-13 20:29:47'),
+(6, NULL, 'PAYMENT_COMPLETED', 'JCC payment completed. Order ID: ee49d5fb-38c8-766f-a886-a40f2eeb7620, Transaction ID: 88747638109143495572', '2026-04-13 20:30:09'),
+(7, NULL, 'ACTIVATION_CREDENTIALS_SENT', 'Activation credentials email sent.', '2026-04-13 20:30:11'),
+(8, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=active.', '2026-04-13 20:39:00'),
+(9, 1, 'ADMIN_USER_REJECTION_EMAIL_SENT', 'Rejection email sent to user #4 (mariosshittas@gmail.com).', '2026-04-13 20:40:39'),
+(10, 1, 'ADMIN_USER_UPDATED', 'Updated user #4 (mariosshittas@gmail.com); role=parent, status=rejected.', '2026-04-13 20:40:39'),
+(11, 1, 'ADMIN_USER_DELETED', 'Deleted user #4 (mariosshittas@gmail.com).', '2026-04-13 20:51:12'),
+(12, NULL, 'user_registration', 'New parent registered with email: mariosshittas@gmail.com', '2026-04-13 20:54:34'),
+(13, 1, 'ADMIN_USER_APPROVAL_EMAIL_SENT', 'Approval email sent to user #5 (mariosshittas@gmail.com).', '2026-04-13 20:55:08'),
+(14, 1, 'ADMIN_USER_UPDATED', 'Updated user #5 (mariosshittas@gmail.com); role=parent, status=waiting_payment.', '2026-04-13 20:55:08'),
+(15, NULL, 'PAYMENT_CREATED', 'User created membership payment (ID: 105) and insurance payment (ID: 106); JCC orderId: f7e13147-b5ea-78d2-94aa-56fe2eeb7620', '2026-04-13 20:55:24'),
+(16, NULL, 'PAYMENT_COMPLETED', 'JCC payment completed. Order ID: f7e13147-b5ea-78d2-94aa-56fe2eeb7620, Transaction ID: 06313994115347811422', '2026-04-13 20:55:40'),
+(17, NULL, 'ACTIVATION_CREDENTIALS_SENT', 'Activation credentials email sent.', '2026-04-13 20:55:41'),
+(18, 1, 'ADMIN_USER_DELETED', 'Deleted user #5 (mariosshittas@gmail.com).', '2026-04-14 15:38:55');
+
 COMMIT;
-SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
