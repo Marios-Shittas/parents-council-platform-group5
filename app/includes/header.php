@@ -890,42 +890,101 @@ $nav_items[] = [
 </header>
 
 <script>
-    // Fallback μόνο όταν τελειώσει το φόρτωμα και δεν υπάρχει καθόλου Bootstrap collapse.
+    // Mobile navbar controller με fallback όταν δεν υπάρχει Bootstrap collapse.
     (function () {
         function hasBootstrapCollapse() {
             return window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.collapse === 'function';
         }
 
-        function bindFallbackNavbarToggle() {
-            if (hasBootstrapCollapse()) return;
+        function isMobileViewport() {
+            return window.matchMedia('(max-width: 1199.98px)').matches;
+        }
 
-            // Βρίσκουμε τα στοιχεία που χρειάζονται για το fallback.
+        function bindNavbarToggle() {
             var toggler = document.querySelector('[data-target="#mainNavbar"]');
             var menu = document.getElementById('mainNavbar');
-            if (!toggler || !menu || toggler.dataset.fallbackBound === 'true') return;
+            if (!toggler || !menu || toggler.dataset.mobileNavBound === 'true') return;
 
-            toggler.dataset.fallbackBound = 'true';
+            var navLinks = menu.querySelectorAll('.nav-link');
+            toggler.dataset.mobileNavBound = 'true';
 
-            // Εναλλαγή open/close όταν πατάμε το hamburger.
-            toggler.addEventListener('click', function (event) {
-                // Αν φορτώθηκε στο μεταξύ Bootstrap, αφήνουμε εκείνο να χειριστεί το toggle.
-                if (hasBootstrapCollapse()) return;
+            function isOpen() {
+                return menu.classList.contains('show');
+            }
 
+            function syncExpandedState(open) {
+                toggler.classList.toggle('collapsed', !open);
+                toggler.setAttribute('aria-expanded', String(open));
+            }
+
+            function openMenu() {
+                if (hasBootstrapCollapse()) {
+                    window.jQuery(menu).collapse('show');
+                } else {
+                    menu.classList.add('show');
+                    syncExpandedState(true);
+                }
+            }
+
+            function closeMenu() {
+                if (hasBootstrapCollapse()) {
+                    window.jQuery(menu).collapse('hide');
+                } else {
+                    menu.classList.remove('show');
+                    syncExpandedState(false);
+                }
+            }
+
+            function toggleMenu(event) {
                 event.preventDefault();
+                event.stopPropagation();
+                if (isOpen()) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            }
 
-                var isOpen = menu.classList.contains('show');
-                menu.classList.toggle('show', !isOpen);
-                toggler.classList.toggle('collapsed', isOpen);
-                // Ενημέρωση του aria-expanded για accessibility.
-                toggler.setAttribute('aria-expanded', String(!isOpen));
+            if (hasBootstrapCollapse()) {
+                window.jQuery(menu).off('.mobileNavFix');
+                window.jQuery(menu).on('shown.bs.collapse.mobileNavFix', function () {
+                    syncExpandedState(true);
+                });
+                window.jQuery(menu).on('hidden.bs.collapse.mobileNavFix', function () {
+                    syncExpandedState(false);
+                });
+
+                toggler.addEventListener('click', toggleMenu);
+            } else {
+                toggler.addEventListener('click', toggleMenu);
+            }
+
+            navLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (!isMobileViewport()) return;
+                    closeMenu();
+                });
             });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Escape' || !isMobileViewport() || !isOpen()) return;
+                closeMenu();
+            });
+
+            window.addEventListener('resize', function () {
+                if (isMobileViewport()) return;
+                if (!isOpen()) return;
+                closeMenu();
+            });
+
+            syncExpandedState(isOpen());
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bindFallbackNavbarToggle);
+            document.addEventListener('DOMContentLoaded', bindNavbarToggle);
             return;
         }
 
-        bindFallbackNavbarToggle();
+        bindNavbarToggle();
     })();
 </script>
