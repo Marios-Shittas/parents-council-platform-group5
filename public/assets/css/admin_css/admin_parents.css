@@ -11,6 +11,11 @@
     box-shadow: none;
 }
 
+.parents-admin-warning-text {
+    color: #b42318;
+    font-weight: 800;
+}
+
 .parents-upload-panel {
     display: grid;
     gap: 16px;

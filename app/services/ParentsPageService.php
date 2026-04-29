@@ -446,6 +446,23 @@ class ParentsPageService
                     'rows' => $this->buildDefaultBoardArchiveRows(),
                 ],
             ],
+            'parent_documents_section' => [
+                'title' => 'Πρακτικά Συνεδριάσεων και Καταστατικό',
+                'subtitle' => 'Αρχεία διαθέσιμα μόνο για συνδεδεμένους γονείς.',
+                'content' => [
+                    'eyebrow' => 'Έγγραφα Συνδέσμου',
+                    'statute_label' => 'Καταστατικό Συνδέσμου',
+                    'minutes_label' => 'Πρακτικά Συνεδριάσεων',
+                    'open_label' => 'Άνοιγμα PDF',
+                    'empty_message' => 'Δεν έχουν προστεθεί ακόμη έγγραφα.',
+                    'statute' => [
+                        'title' => 'Καταστατικό Συνδέσμου',
+                        'file_path' => '',
+                        'original_name' => '',
+                    ],
+                    'minutes' => [],
+                ],
+            ],
             'class_responsibles_section' => [
                 'title' => 'Υπεύθυνοι Τμημάτων',
                 'subtitle' => 'ΥΠΕΥΘΥΝΟΙ ΤΜΗΜΑΤΩΝ ΚΑΙ ΥΠΕΥΘΥΝΟΙ ΒΟΗΘΟΙ ΔΙΕΥΘΥΝΤΕΣ',

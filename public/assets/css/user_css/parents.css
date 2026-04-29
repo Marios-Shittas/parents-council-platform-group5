@@ -30,15 +30,19 @@
 }
 
 .parents-card--schedule {
-    order: 3;
-}
-
-.parents-card--board {
     order: 4;
 }
 
-.parents-card--board-archive {
+.parents-card--board {
     order: 5;
+}
+
+.parents-card--board-archive {
+    order: 6;
+}
+
+.parents-card--documents {
+    order: 3;
 }
 
 .parents-card,
@@ -284,6 +288,25 @@
 
 .parents-archive-year__content {
     padding: 0 16px 16px;
+}
+
+.parents-document-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1a3a5c, #2f6ea0);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.parents-document-link:hover,
+.parents-document-link:focus {
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 12px 24px rgba(26, 58, 92, 0.18);
 }
 
 .parents-table--compact td,
