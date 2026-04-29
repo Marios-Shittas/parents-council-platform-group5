@@ -1,11 +1,14 @@
 <?php
+// Arxeio: app\services\EshopSettingsService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 
 require_once __DIR__ . '/../includes/db.php';
 
 class EshopSettingsService
 {
     private mysqli $conn;
-
+// Arxikopoiei to ypiresia me provided mysqli connection i kanei fallback sto global app connection.
     public function __construct(?mysqli $conn = null)
     {
         if ($conn instanceof mysqli) {
@@ -16,7 +19,7 @@ class EshopSettingsService
         global $conn;
         $this->conn = $conn;
     }
-
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function isShopVisible(): bool
     {
         $this->ensureSettingsTable();
@@ -34,7 +37,7 @@ class EshopSettingsService
 
         return true;
     }
-
+// Apothikevei to visibility toggle tou shop kai enimerwnei timestamp gia admin auditability.
     public function setShopVisibility(bool $isVisible): bool
     {
         $this->ensureSettingsTable();
@@ -56,7 +59,7 @@ class EshopSettingsService
 
         return $updated;
     }
-
+// Dimiourgei ton EshopSettings pinakas an leipei kai engyatai oti yparxei singleton row (setting_id=1).
     private function ensureSettingsTable(): void
     {
         $this->conn->query("

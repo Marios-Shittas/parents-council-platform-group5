@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\photos.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -15,31 +18,37 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leitourgia photosAdminTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function photosAdminTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia getPhotosGalleryUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function getPhotosGalleryUploadDir()
 {
     return dirname(__DIR__) . '/assets/Parents_img/';
 }
 
+// Leitourgia buildPhotosGalleryWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function buildPhotosGalleryWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Parents_img/' . $fileName;
 }
 
+// Leitourgia isLocalPhotosGalleryPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function isLocalPhotosGalleryPath($imagePath)
 {
     return str_starts_with((string)$imagePath, '/parents-council-platform-group5/public/assets/Parents_img/');
 }
 
+// Leitourgia resolvePhotosGalleryFilePath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function resolvePhotosGalleryFilePath($imagePath)
 {
     return getPhotosGalleryUploadDir() . basename((string)$imagePath);
 }
 
+// Leitourgia diagrafiPhotosGalleryFileIfExists: xeirizetai to antistoixo kommati tis selidas i tou service.
 function deletePhotosGalleryFileIfExists($imagePath)
 {
     if (!isLocalPhotosGalleryPath($imagePath)) {
@@ -52,6 +61,7 @@ function deletePhotosGalleryFileIfExists($imagePath)
     }
 }
 
+// Leitourgia uploadPhotosGalleryImages: xeirizetai to antistoixo kommati tis selidas i tou service.
 function uploadPhotosGalleryImages($service)
 {
     $uploadedCount = 0;
@@ -137,6 +147,7 @@ function uploadPhotosGalleryImages($service)
     return [$uploadedCount, $uploadErrors];
 }
 
+// Leitourgia addPhotosGalleryImageFromUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
 function addPhotosGalleryImageFromUrl($service)
 {
     $imageUrl = photosAdminTrim($_POST['image_url'] ?? '');
@@ -285,7 +296,7 @@ $photosCount = count($galleryImages);
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i>
-            Πίσω στο Dashboard
+            Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
@@ -304,7 +315,7 @@ $photosCount = count($galleryImages);
 
         <section class="photos-admin-overview">
             <div class="photos-admin-overview__content">
-                <p class="photos-admin-overview__kicker">Gallery Admin</p>
+                <p class="photos-admin-overview__kicker">Διαχείριση Γκαλερί</p>
                 <h2>Οργάνωσε τη σελίδα φωτογραφιών με απλό τρόπο</h2>
                 <p>Από εδώ ρυθμίζεις τα βασικά κείμενα, ανεβάζεις νέες εικόνες και διαχειρίζεσαι τη βιβλιοθήκη που εμφανίζεται στους γονείς.</p>
             </div>
@@ -594,102 +605,6 @@ $photosCount = count($galleryImages);
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('gallery-images');
-    var preview = document.getElementById('parents-upload-preview');
-    var status = document.getElementById('parents-upload-status');
-    var dropzone = document.getElementById('parents-upload-dropzone');
-
-    if (input && preview && status && dropzone) {
-        function renderPreview(files) {
-            preview.innerHTML = '';
-
-            if (!files || files.length === 0) {
-                status.textContent = 'Δεν έχουν επιλεγεί ακόμη αρχεία.';
-                dropzone.classList.remove('is-active');
-                return;
-            }
-
-            status.textContent = files.length + (files.length === 1 ? ' φωτογραφία έτοιμη για ανέβασμα.' : ' φωτογραφίες έτοιμες για ανέβασμα.');
-            dropzone.classList.add('is-active');
-
-            Array.prototype.forEach.call(files, function (file) {
-                var item = document.createElement('div');
-                item.className = 'parents-upload-preview__item';
-
-                var thumb = document.createElement('img');
-                thumb.className = 'parents-upload-preview__thumb';
-                thumb.alt = file.name;
-                thumb.src = URL.createObjectURL(file);
-                thumb.onload = function () {
-                    URL.revokeObjectURL(thumb.src);
-                };
-
-                var meta = document.createElement('div');
-                meta.className = 'parents-upload-preview__meta';
-
-                var name = document.createElement('strong');
-                name.textContent = file.name;
-
-                var size = document.createElement('span');
-                size.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
-
-                meta.appendChild(name);
-                meta.appendChild(size);
-                item.appendChild(thumb);
-                item.appendChild(meta);
-                preview.appendChild(item);
-            });
-        }
-
-        input.addEventListener('change', function () {
-            renderPreview(input.files);
-        });
-    }
-
-    var galleryDeleteForms = document.querySelectorAll('.parents-gallery-delete-form');
-    var galleryDeleteLabel = document.getElementById('deleteGalleryImageLabel');
-    var galleryDeletePath = document.getElementById('deleteGalleryImagePath');
-    var galleryDeleteThumb = document.getElementById('deleteGalleryImageThumb');
-    var galleryDeleteSource = document.getElementById('deleteGalleryImageSource');
-    var galleryDeleteConfirmButton = document.getElementById('confirmDeleteGalleryImageButton');
-    var pendingGalleryDeleteForm = null;
-
-    if (galleryDeleteForms.length > 0 && galleryDeleteLabel && galleryDeletePath && galleryDeleteThumb && galleryDeleteSource && galleryDeleteConfirmButton && window.jQuery) {
-        Array.prototype.forEach.call(galleryDeleteForms, function (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-                pendingGalleryDeleteForm = form;
-                galleryDeleteLabel.textContent = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeletePath.textContent = form.getAttribute('data-image-path') || '';
-                galleryDeleteThumb.src = form.getAttribute('data-image-thumb') || '';
-                galleryDeleteThumb.alt = form.getAttribute('data-image-label') || 'φωτογραφία';
-                galleryDeleteSource.textContent = form.getAttribute('data-image-source') || '';
-                jQuery('#deleteGalleryImageConfirmModal').modal('show');
-            });
-        });
-
-        galleryDeleteConfirmButton.addEventListener('click', function () {
-            if (!pendingGalleryDeleteForm) {
-                return;
-            }
-
-            var formToSubmit = pendingGalleryDeleteForm;
-            pendingGalleryDeleteForm = null;
-            jQuery('#deleteGalleryImageConfirmModal').modal('hide');
-            formToSubmit.submit();
-        });
-
-        jQuery('#deleteGalleryImageConfirmModal').on('hidden.bs.modal', function () {
-            pendingGalleryDeleteForm = null;
-            galleryDeletePath.textContent = '';
-            galleryDeleteThumb.src = '';
-            galleryDeleteThumb.alt = '';
-            galleryDeleteSource.textContent = '';
-        });
-    }
-});
-</script>
+<script src="../assets/js/admin-photos.js"></script>
 </body>
 </html>

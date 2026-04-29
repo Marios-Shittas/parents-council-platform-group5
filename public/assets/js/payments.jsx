@@ -1,4 +1,9 @@
+// Arxeio: public\assets\js\payments.jsx
+// Rolos: Xeirizetai frontend symperifora, validation, API calls i React rendering gia tin selida.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// React selida gia plirotes kai istoriko pliromon tou xristi.
 function Payments() {
+    // Ta states xorizoun proionta, kalathi, epilegmena megethi kai feedback gia checkout.
     const [products, setProducts] = React.useState([]);
     const [cart, setCart] = React.useState([]);
     const [selectedSizes, setSelectedSizes] = React.useState({});
@@ -13,11 +18,68 @@ function Payments() {
         variant: 'warning'
     });
 
+    // Kentrika endpoints tis selidas gia na allazoun eykola an metakinithei kapoio service.
     const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
     const cartUrl = "/parents-council-platform-group5/public/cart.php";
     const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+    const sizeLabels = {
+        'x-small': 'X-Small',
+        'small': 'Small',
+        'medium': 'Medium',
+        'large': 'Large',
+        'x-large': 'X-Large',
+        'one-size': 'One Size'
+    };
+
+    function getSizeLabel(sizeValue, labels = {}) {
+        // Prota koitame custom labels apo backend, meta peftoume sta default labels.
+        if (!sizeValue) {
+            return '';
+        }
+
+        if (labels && labels[sizeValue]) {
+            return labels[sizeValue];
+        }
+
+        return sizeLabels[sizeValue] || sizeValue;
+    }
+
+    function normalizeSizeOption(sizeOption) {
+        // Dexomaste size options eite san object eite san plain string apo palia dedomena.
+        if (sizeOption && typeof sizeOption === 'object') {
+            const value = String(sizeOption.value || '').trim();
+            const label = String(sizeOption.label || value).trim();
+
+            if (!value || !label) {
+                return null;
+            }
+
+            return { value, label };
+        }
+
+        const value = String(sizeOption || '').trim();
+        if (!value) {
+            return null;
+        }
+
+        return {
+            value,
+            label: getSizeLabel(value)
+        };
+    }
+
+    function getProductSizeOptions(product) {
+        if (!product || !Array.isArray(product.size_options)) {
+            return [];
+        }
+
+        return product.size_options
+            .map(normalizeSizeOption)
+            .filter(Boolean);
+    }
 
     function getPaymentFeedback(status, message) {
+        // Metatrepei to pliromi status se titlos/message/variant gia to notice UI.
         const normalizedStatus = (status || '').toLowerCase();
         const normalizedMessage = (message || '').trim() || 'Η πληρωμή σας ενημερώθηκε.';
 
@@ -53,6 +115,7 @@ function Payments() {
     }
 
     const clearPaymentResultParams = React.useCallback(() => {
+        // Afairoume ta pliromi params apo to URL gia na min ksanemfanistei to notice me refresh.
         const params = new URLSearchParams(window.location.search);
         params.delete("payment_status");
         params.delete("payment_message");
@@ -63,6 +126,7 @@ function Payments() {
     }, []);
 
     const consumePaymentResult = React.useCallback(() => {
+        // Diavazei to apotelesma pliromis pou gyrise apo JCC redirect.
         const params = new URLSearchParams(window.location.search);
         const paymentStatus = params.get("payment_status");
         const paymentMessage = params.get("payment_message");
@@ -86,6 +150,7 @@ function Payments() {
     }, []);
 
     React.useEffect(() => {
+        // Kleidonei to body scroll oso einai anoikto modal/notice.
         if (!notice.open) {
             return undefined;
         }
@@ -103,6 +168,7 @@ function Payments() {
     }, []);
 
     React.useEffect(() => {
+        // Arxiko load: pairnoume proionta apo to proion service.
         fetch(productsUrl)
             .then(res => res.json())
             .then(data => setProducts(data))
@@ -110,6 +176,7 @@ function Payments() {
     }, []);
 
     const loadCart = React.useCallback(() => {
+        // Fernei to kalathi apo to JSON endpoint kai kratame mono ta items pou xreiazetai to UI.
         setCartLoading(true);
 
         fetch(`${cartUrl}?action=get`)
@@ -155,6 +222,7 @@ function Payments() {
     }, [consumePaymentResult, loadCart]);
 
     function postCartAction(formData) {
+        // Koini helper gia add/upimerominia/remove/clear oste na min diplonoume fetch logic.
         return fetch(cartUrl, {
             method: "POST",
             headers: {
@@ -190,12 +258,23 @@ function Payments() {
     }
 
     function addToCart(product) {
-        const selectedSize = selectedSizes[product.product_id];
+        // Elegxei an xreiazetai megethos prin stalei add request sto kalathi API.
+        const availableSizes = getProductSizeOptions(product);
+        const requiresSize = Boolean(product.has_sizes) && availableSizes.length > 0;
+        const selectedSize = selectedSizes[product.product_id] || '';
 
-        if (!selectedSize || selectedSize.trim() === '') {
+        if (requiresSize && (!selectedSize || selectedSize.trim() === '')) {
             setSizeErrors(prev => ({
                 ...prev,
                 [product.product_id]: 'Πρέπει να επιλέξετε μέγεθος πριν προστεθεί το προϊόν στο καλάθι.'
+            }));
+            return;
+        }
+
+        if (requiresSize && !availableSizes.some(sizeOption => sizeOption.value === selectedSize)) {
+            setSizeErrors(prev => ({
+                ...prev,
+                [product.product_id]: 'Το μέγεθος που επιλέχθηκε δεν είναι διαθέσιμο για αυτό το προϊόν.'
             }));
             return;
         }
@@ -204,7 +283,7 @@ function Payments() {
             action: 'add',
             product_id: product.product_id,
             quantity: 1,
-            size: selectedSize
+            size: requiresSize ? selectedSize : ''
         })
         .then(() => {
             setSizeErrors(prev => ({
@@ -269,6 +348,7 @@ function Payments() {
     }
 
     function handleCheckout() {
+        // Ksekinaei checkout sto JCC service kai meta kanei redirect sto pliromi URL.
         if (cart.length === 0) {
             showNotice('Το καλάθι είναι κενό!', {
                 title: 'Δεν υπάρχει παραγγελία',
@@ -337,7 +417,10 @@ function Payments() {
                     )}
 
                     <div className="row">
-                        {products.map(product => (
+                        {products.map(product => {
+                            const productSizeOptions = getProductSizeOptions(product);
+
+                            return (
                             <div className="col-md-4" key={product.product_id}>
                                 <div className="card m-4 mb-4">
                                     <div className="card-body">
@@ -382,24 +465,30 @@ function Payments() {
                                         </div>
 
                                         <div className="size-selector mt-3">
-                                            <label className="size-label">Επιλέξτε μέγεθος:</label>
-                                            <select
-                                                className="size-select"
-                                                value={selectedSizes[product.product_id] || ''}
-                                                onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
-                                            >
-                                                <option value="">Επιλέξτε μέγεθος</option>
-                                                <option value="x-small">X-Small</option>
-                                                <option value="small">Small</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="large">Large</option>
-                                                <option value="x-large">X-Large</option>
-                                            </select>
+                                            {Boolean(product.has_sizes) && productSizeOptions.length > 0 ? (
+                                                <>
+                                                    <label className="size-label">Επιλέξτε μέγεθος:</label>
+                                                    <select
+                                                        className="size-select"
+                                                        value={selectedSizes[product.product_id] || ''}
+                                                        onChange={(e) => updateSelectedSize(product.product_id, e.target.value)}
+                                                    >
+                                                        <option value="">Επιλέξτε μέγεθος</option>
+                                                        {productSizeOptions.map((sizeOption) => (
+                                                            <option key={sizeOption.value} value={sizeOption.value}>
+                                                                {sizeOption.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
-                                            {sizeErrors[product.product_id] && (
-                                                <div className="size-error-text">
-                                                    {sizeErrors[product.product_id]}
-                                                </div>
+                                                    {sizeErrors[product.product_id] && (
+                                                        <div className="size-error-text">
+                                                            {sizeErrors[product.product_id]}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="text-muted small">Δεν απαιτείται επιλογή μεγέθους για αυτό το προϊόν.</div>
                                             )}
                                         </div>
 
@@ -413,7 +502,8 @@ function Payments() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="wholecart m-4 mt-3">
@@ -453,7 +543,7 @@ function Payments() {
                                                 <div>{item.product_name}</div>
                                                 {item.size && (
                                                     <small className="cart-size-badge">
-                                                        {item.size.toUpperCase()}
+                                                        {item.size_label || getSizeLabel(item.size)}
                                                     </small>
                                                 )}
                                             </div>

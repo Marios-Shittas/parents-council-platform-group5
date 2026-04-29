@@ -1,8 +1,11 @@
 <?php
+// Arxeio: app\services\ParentsPageService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * ParentsPageService
- * Αποθηκεύει και ανακτά το περιεχόμενο της σελίδας "Γονείς"
- * μαζί με το φωτογραφικό υλικό της σελίδας.
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -14,6 +17,7 @@ class ParentsPageService
     private $defaultGalleryImages;
     private $lastError = '';
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
@@ -26,6 +30,7 @@ class ParentsPageService
         $this->ensureDefaultGalleryImages();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -54,12 +59,14 @@ class ParentsPageService
         return $sections;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -124,6 +131,7 @@ class ParentsPageService
         return true;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getGalleryImages()
     {
         $images = [];
@@ -138,6 +146,7 @@ class ParentsPageService
         return $images;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getGalleryImageById($imageId)
     {
         $stmt = $this->conn->prepare('SELECT * FROM ParentsPageGalleryImages WHERE image_id = ? LIMIT 1');
@@ -156,6 +165,7 @@ class ParentsPageService
         return $result ? ($result->fetch_assoc() ?: null) : null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function addGalleryImage($fullImagePath, $thumbImagePath = '', $altText = '')
     {
         $this->lastError = '';
@@ -189,6 +199,7 @@ class ParentsPageService
         return true;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteGalleryImage($imageId)
     {
         $this->lastError = '';
@@ -208,16 +219,19 @@ class ParentsPageService
         return $stmt->affected_rows > 0;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getLastError()
     {
         return $this->lastError;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getBoardArchiveReferenceRows(): array
     {
         return $this->buildDefaultBoardArchiveRows();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function ensureTables()
     {
         $sectionsSql = "CREATE TABLE IF NOT EXISTS ParentsPageSections (
@@ -245,6 +259,7 @@ class ParentsPageService
         $this->conn->query($gallerySql);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -265,6 +280,7 @@ class ParentsPageService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function ensureDefaultGalleryImages()
     {
         $result = $this->conn->query('SELECT COUNT(*) AS total FROM ParentsPageGalleryImages');
@@ -288,6 +304,7 @@ class ParentsPageService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getNextGallerySortOrder()
     {
         $result = $this->conn->query('SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort_order FROM ParentsPageGalleryImages');
@@ -299,12 +316,13 @@ class ParentsPageService
         return 1;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildDefaultSections()
     {
         return [
             'page_header' => [
-                'title' => 'Συνδεσμος Γωνεων',
-                'subtitle' => 'Χρήσιμες πληροφορίες και στοιχεία επικοινωνίας για τον Συνδεσμο Γωνεων.',
+                'title' => 'Σύνδεσμος Γονέων',
+                'subtitle' => 'Χρήσιμες πληροφορίες και στοιχεία επικοινωνίας για τον Σύνδεσμο Γονέων.',
                 'content' => [
                     'public_eyebrow' => 'Δημόσια Πύλη',
                     'parent_eyebrow' => 'Χώρος Γονέα',
@@ -326,8 +344,8 @@ class ParentsPageService
                 ],
             ],
             'association_section' => [
-                'title' => 'Συνδεσμος Γωνεων',
-                'subtitle' => 'Η ενότητα αυτή συγκεντρώνει τον χαιρετισμό, τον σκοπό και βασικά στοιχεία για τη δράση του Συνδεσμου Γωνεων.',
+                'title' => 'Σύνδεσμος Γονέων',
+                'subtitle' => 'Η ενότητα αυτή συγκεντρώνει τον χαιρετισμό, τον σκοπό και βασικά στοιχεία για τη δράση του Συνδέσμου Γονέων.',
                 'content' => [
                     'eyebrow' => 'Συνεργασία Οικογένειας Και Σχολείου',
                     'greeting_title' => 'Χαιρετισμός',
@@ -337,7 +355,7 @@ class ParentsPageService
                     'history_title' => 'Ιστορικό του Συνδέσμου',
                     'history_body' => "Ο Σύνδεσμος Γονέων και Κηδεμόνων δρα διαχρονικά ως βασικός πυλώνας συνεργασίας ανάμεσα στην οικογένεια και το σχολείο.\nΜε την ετήσια συμμετοχή των γονέων και τη στήριξη των μελών του, ενισχύει δράσεις, εκδηλώσεις και ανάγκες της σχολικής κοινότητας, διατηρώντας ενεργό ρόλο στην καθημερινότητα του σχολείου.",
                     'contact_label' => 'Email Συνδέσμου',
-                    'contact_value' => 'sg-gym-ag-athanasios-lem@schools.ac.cy',
+                    'contact_value' => 'sg.ag.athanasiou@gmail.com',
                 ],
             ],
             'attendance_portal_section' => [
@@ -392,8 +410,8 @@ class ParentsPageService
                 ],
             ],
             'board_section' => [
-                'title' => 'Συνδεσμος Γωνεων',
-                'subtitle' => 'Στην ενότητα αυτή θα βρείτε τη σύνθεση του Διοικητικού Συμβουλίου του Συνδεσμου Γωνεων, βασικά στοιχεία επικοινωνίας και χρήσιμους συνδέσμους για άμεση ενημέρωση.',
+                'title' => 'Σύνδεσμος Γονέων',
+                'subtitle' => 'Στην ενότητα αυτή θα βρείτε τη σύνθεση του Διοικητικού Συμβουλίου του Συνδέσμου Γονέων, βασικά στοιχεία επικοινωνίας και χρήσιμους συνδέσμους για άμεση ενημέρωση.',
                 'content' => [
                     'eyebrow' => 'Σχολική Χρονιά 2025 - 2026',
                     'current_board_label' => 'Τρέχον Διοικητικό Συμβούλιο',
@@ -401,7 +419,7 @@ class ParentsPageService
                     'name_label' => 'Ονοματεπώνυμο',
                     'committee_label' => 'Μέλη',
                     'contact_email_label' => 'Email',
-                    'contact_email_value' => 'sg-gym-ag-athanasios-lem@schools.ac.cy',
+                    'contact_email_value' => 'sg.ag.athanasiou@gmail.com',
                     'board_members' => [
                         ['role' => 'ΠΡΟΕΔΡΟΣ', 'name' => 'Μιχάλης Αριστείδου'],
                         ['role' => 'ΑΝΤΙΠΡΟΕΔΡΟΣ', 'name' => 'Μάριος Γαβριηλίδης'],
@@ -426,6 +444,24 @@ class ParentsPageService
                     'position_label' => 'Θέση',
                     'name_label' => 'Ονοματεπώνυμο',
                     'rows' => $this->buildDefaultBoardArchiveRows(),
+                ],
+            ],
+            'parent_documents_section' => [
+                'title' => 'Πρακτικά Συνεδριάσεων και Καταστατικό',
+                'subtitle' => 'Αρχεία διαθέσιμα μόνο για συνδεδεμένους γονείς.',
+                'content' => [
+                    'eyebrow' => 'Έγγραφα Συνδέσμου',
+                    'statute_label' => 'Καταστατικό Συνδέσμου',
+                    'minutes_label' => 'Πρακτικά Συνεδριάσεων',
+                    'open_label' => 'Άνοιγμα PDF',
+                    'empty_message' => 'Δεν έχουν προστεθεί ακόμη έγγραφα.',
+                    'statute' => [
+                        'title' => 'Καταστατικό Συνδέσμου',
+                        'file_path' => '',
+                        'original_name' => '',
+                    ],
+                    'statutes' => [],
+                    'minutes' => [],
                 ],
             ],
             'class_responsibles_section' => [
@@ -518,6 +554,7 @@ class ParentsPageService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildDefaultGalleryImages()
     {
         return [
@@ -554,6 +591,7 @@ class ParentsPageService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildDefaultBoardArchiveRows(): array
     {
         return [
@@ -599,6 +637,7 @@ class ParentsPageService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

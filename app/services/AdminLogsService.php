@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\AdminLogsService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -9,6 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/UsersService.php';
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function adminLogsRespond(int $statusCode, array $payload): void
 {
     http_response_code($statusCode);

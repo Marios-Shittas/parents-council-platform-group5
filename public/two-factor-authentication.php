@@ -7,7 +7,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-chec
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Check if user has pending 2FA
+// Elegxei an xristis has pending 2FA
 if (!isset($_SESSION['pending_2fa']) || !isset($_SESSION['temp_email'])) {
     header('Location: login.php');
     exit;
@@ -39,9 +39,7 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     </head>
     
     <body class="body">
-    <script>
-        window.initialTwoFactorSuccess = <?php echo json_encode($successMessage, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
-    </script>
+    <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['initialTwoFactorSuccess' => $successMessage], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8'); ?>"></script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>

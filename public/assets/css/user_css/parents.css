@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\user_css\parents.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Styles gia tin public/goneas selida goneon. */
+/* Rythmizei sections, member cards kai periexomeno gia ton syndesmo goneon. */
 .parents-page {
     font-family: 'Lato', sans-serif;
     color: #334155;
@@ -25,15 +30,19 @@
 }
 
 .parents-card--schedule {
-    order: 3;
-}
-
-.parents-card--board {
     order: 4;
 }
 
-.parents-card--board-archive {
+.parents-card--board {
     order: 5;
+}
+
+.parents-card--board-archive {
+    order: 6;
+}
+
+.parents-card--documents {
+    order: 3;
 }
 
 .parents-card,
@@ -279,6 +288,89 @@
 
 .parents-archive-year__content {
     padding: 0 16px 16px;
+}
+
+.parents-document-group {
+    padding: 18px;
+    border: 1px solid #d7e4f2;
+    border-radius: 18px;
+}
+
+.parents-document-group + .parents-document-group {
+    margin-top: 18px;
+}
+
+.parents-document-group--statutes {
+    background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+    border-color: #c8d8f0;
+}
+
+.parents-document-group--minutes {
+    background: linear-gradient(180deg, #fbf9ff 0%, #f3effb 100%);
+    border-color: #d9d0eb;
+}
+
+.parents-document-group__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(43, 76, 116, 0.12);
+}
+
+.parents-document-group__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.parents-document-group--statutes .parents-document-group__icon {
+    background: linear-gradient(135deg, #255f99 0%, #173554 100%);
+}
+
+.parents-document-group--minutes .parents-document-group__icon {
+    background: linear-gradient(135deg, #6f4bb4 0%, #3f2a68 100%);
+}
+
+.parents-document-group__heading p {
+    margin: 0 0 2px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+}
+
+.parents-document-group__heading h3 {
+    margin: 0;
+    color: #173554;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem;
+}
+
+.parents-document-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #1a3a5c, #2f6ea0);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.parents-document-link:hover,
+.parents-document-link:focus {
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 12px 24px rgba(26, 58, 92, 0.18);
 }
 
 .parents-table--compact td,

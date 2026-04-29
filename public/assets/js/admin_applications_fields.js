@@ -1,11 +1,14 @@
+// Arxeio: public\assets\js\admin_applications_pedia.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Διαχείριση πεδίων φόρμας για διαδημιουργία αιτήσεων
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 (function() {
     'use strict';
 
-    // Είδη πεδίων που υποστηρίζονται
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     const FIELD_TYPES = {
         'text': 'Κείμενο',
         'email': 'Email',
@@ -16,11 +19,11 @@
         'file_upload': 'Αρχείο'
     };
 
-    // Αποθήκευση των πεδίων που δημιούργησε ο admin
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     let formFields = [];
     let fieldIdCounter = 0;
 
-    // Στοιχεία που χρειάζονται
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     const onlineFormFieldsContainer = document.getElementById('online_form_fields_container');
     const addFormFieldBtn = document.getElementById('add_form_field_btn');
     const publishApplicationBtn = document.getElementById('publish_application_btn');
@@ -30,6 +33,7 @@
     const createApplicationCloseDate = document.getElementById('create_application_close_date');
     const createInstructionFiles = document.getElementById('create_instruction_files');
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncCreateCloseDateMin() {
         if (!createApplicationOpenDate || !createApplicationCloseDate) {
             return;
@@ -47,7 +51,7 @@
         syncCreateCloseDateMin();
     }
 
-    // Λειτουργία προσθήκης νέου πεδίου
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     if (addFormFieldBtn) {
         addFormFieldBtn.addEventListener('click', function() {
             addFormField();
@@ -55,7 +59,7 @@
     }
 
     /**
-     * Προσθέτει ένα νέο πεδίο φόρμας στη διεπαφή
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function addFormField(fieldName = '', fieldType = 'text', isRequired = true) {
         const fieldId = fieldIdCounter++;
@@ -70,7 +74,7 @@
     }
 
     /**
-     * Αφαιρεί ένα πεδίο φόρμας
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function removeFormField(fieldId) {
         formFields = formFields.filter(f => f.id !== fieldId);
@@ -78,7 +82,7 @@
     }
 
     /**
-     * Ενημερώνει ένα πεδίο φόρμας
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function updateFormField(fieldId, fieldName, fieldType, isRequired) {
         const field = formFields.find(f => f.id === fieldId);
@@ -91,7 +95,7 @@
     }
 
     /**
-     * Ξαναδημιουργεί τη λίστα των πεδίων στη διεπαφή
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function renderFormFields() {
         if (!onlineFormFieldsContainer) return;
@@ -140,7 +144,7 @@
 
         onlineFormFieldsContainer.innerHTML = html;
 
-        // Προσθέτει listeners για ενημέρωση
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         document.querySelectorAll('[data-field-id]').forEach(fieldElement => {
             const fieldId = parseInt(fieldElement.dataset.fieldId);
             
@@ -167,7 +171,7 @@
         });
     }
 
-    // Δημοσίευση αίτησης
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     if (publishApplicationBtn) {
         publishApplicationBtn.addEventListener('click', function() {
             publishApplication();
@@ -175,7 +179,7 @@
     }
 
     /**
-     * Δημοσιεύει την αίτηση με όλα τα στοιχεία
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function publishApplication() {
         const title = (createApplicationTitle?.value || '').trim();
@@ -201,12 +205,12 @@
             return;
         }
 
-        // Δημιουργεί τη φόρμα POST
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         const form = document.createElement('form');
         form.method = 'POST';
         form.enctype = 'multipart/form-data';
 
-        // Προσθέτει τα βασικά στοιχεία
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         form.innerHTML = `
             <input type="hidden" name="action" value="create">
             <input type="hidden" name="application_title" value="${escapeHtml(title)}">
@@ -216,7 +220,7 @@
             <input type="hidden" name="form_fields_json" value="${escapeHtml(JSON.stringify(formFields))}">
         `;
 
-        // Προσθέτει τα αρχεία οδηγιών αν υπάρχουν
+        // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
         if (createInstructionFiles && createInstructionFiles.files.length > 0) {
             createInstructionFiles.setAttribute('name', 'instruction_file[]');
             form.appendChild(createInstructionFiles);
@@ -227,7 +231,7 @@
     }
 
     /**
-     * Απαλλαγή HTML ειδικών χαρακτήρων
+     * Sxolio: voithitiko sxolio gia ton parakato kodika.
      */
     function escapeHtml(text) {
         const map = {
@@ -240,7 +244,7 @@
         return (text || '').replace(/[&<>"']/g, m => map[m]);
     }
 
-    // Εξαγωγή API για εξωτερική χρήση
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     window.ApplicationFormFields = {
         addField: addFormField,
         removeField: removeFormField,
@@ -249,6 +253,6 @@
         clearFields: () => { formFields = []; renderFormFields(); }
     };
 
-    // Αρχικοποίηση - κενή φόρμα
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     renderFormFields();
 })();

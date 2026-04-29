@@ -1,5 +1,35 @@
 <?php
+// Arxeio: app\views\pages\parent-profile.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../includes/site_context.php';
+
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+function parentProfileFormatPhoneNumber($phone): string
+{
+    $rawPhone = trim((string)$phone);
+    if ($rawPhone === '') {
+        return '—';
+    }
+
+    $digits = preg_replace('/\D+/', '', $rawPhone);
+    if (!is_string($digits) || $digits === '') {
+        return $rawPhone;
+    }
+
+    if (strpos($digits, '357') === 0) {
+        $localNumber = substr($digits, 3);
+        if ($localNumber !== '') {
+            return '+357 ' . $localNumber;
+        }
+    }
+
+    if (strlen($digits) === 8) {
+        return '+357 ' . $digits;
+    }
+
+    return $rawPhone;
+}
 
 $profileCssPath = __DIR__ . '/../../../public/assets/css/user_css/parent-profile.css';
 $profileCssVersion = file_exists($profileCssPath) ? (string) filemtime($profileCssPath) : (string) time();
@@ -75,7 +105,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                             <?php echo htmlspecialchars(parentProfileFormatAccountStatusLabel($accountStatus)); ?>
                         </span>
                         <span><i class="fas fa-envelope mr-2"></i><?php echo htmlspecialchars((string)($parentUser['email'] ?? '—')); ?></span>
-                        <span><i class="fas fa-phone-alt mr-2"></i><?php echo htmlspecialchars((string)($parentUser['phone_number'] ?? '—')); ?></span>
+                        <span><i class="fas fa-phone-alt mr-2"></i><?php echo htmlspecialchars(parentProfileFormatPhoneNumber($parentUser['phone_number'] ?? '')); ?></span>
                     </div>
                 </div>
             </div>
@@ -90,7 +120,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
             <article class="profile-stat-card">
                 <span class="stat-label">Πληρωμένες Παραγγελίες</span>
                 <strong class="stat-value"><?php echo $paidOrdersCount; ?></strong>
-                <p class="stat-note">Ολοκληρωμένες αγορές από το e-shop</p>
+                <p class="stat-note">Ολοκληρωμένες αγορές από το κατάστημα</p>
             </article>
             <article class="profile-stat-card">
                 <span class="stat-label">Ολοκληρωμένες Πληρωμές</span>
@@ -155,7 +185,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                         </div>
                         <div class="info-tile">
                             <span class="info-label">Τηλέφωνο</span>
-                            <strong><?php echo htmlspecialchars((string)($parentUser['phone_number'] ?? '—')); ?></strong>
+                            <strong><?php echo htmlspecialchars(parentProfileFormatPhoneNumber($parentUser['phone_number'] ?? '')); ?></strong>
                         </div>
                         <div class="info-tile">
                             <span class="info-label">Τελευταία Πληρωμή</span>

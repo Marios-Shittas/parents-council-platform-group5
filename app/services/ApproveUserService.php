@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ApproveUserService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -8,6 +11,7 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function sendApprovalEmailMessage(string $email, string $link): void
 {
     $smtpFailureMessage = '';
@@ -78,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawBody = file_get_contents('php://input');
 $payload = json_decode($rawBody, true);
 
-// Windows cmd curl often wraps JSON in single quotes; try to recover that payload shape.
+// Diaxeirizetai payload apo Windows cmd curl pou merikes fores xrisimopoiei mona eisagogika.
 if (!is_array($payload) && is_string($rawBody)) {
     $trimmed = trim($rawBody);
     $len = strlen($trimmed);

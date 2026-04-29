@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\SessionCheck.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * Session validation endpoint
- * Returns JSON indicating if user is still logged in
+ * Endpoint elegxou syndedemenis synedrias
+ * Epistrefei JSON pou deixnei an o xristis paramenei syndedemenos
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -11,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 header('Content-Type: application/json');
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 
-// Check if user is logged in
+// Elegxei an o xristis einai syndedemenos
 $isLoggedIn = isset($_SESSION['user_id']);
 $userRole = $_SESSION['role'] ?? null;
 

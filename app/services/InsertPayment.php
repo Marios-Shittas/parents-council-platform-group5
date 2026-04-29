@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\InsertPayment.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -11,12 +14,14 @@ class InsertPaymentService
     private mysqli $conn;
     private TokenValidator $tokenValidator;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -108,6 +113,7 @@ class InsertPaymentService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function parseJsonBody(): array
     {
         $raw = file_get_contents('php://input');
@@ -119,11 +125,13 @@ class InsertPaymentService
         return is_array($decoded) ? $decoded : [];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getUserIdFromToken(string $token): ?int
     {
         return $this->tokenValidator->getUserIdByToken($token, 'parent', 'waiting_payment', true);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getChildrenCount(int $userId): int
     {
         $stmt = $this->conn->prepare('SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?');
@@ -140,6 +148,7 @@ class InsertPaymentService
         return (int) ($row['children_count'] ?? 0);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPricing(): ?array
     {
         $res = $this->conn->query('SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1');
@@ -151,6 +160,7 @@ class InsertPaymentService
         return $row ?: null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getUserEmail(int $userId): string
     {
         $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
@@ -167,6 +177,7 @@ class InsertPaymentService
         return (string) ($row['email'] ?? '');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertPayment(int $userId, float $amount, string $paymentType): int
     {
         $stmt = $this->conn->prepare(
@@ -186,6 +197,7 @@ class InsertPaymentService
         return $paymentId;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildJccReturnUrl(string $token, int $membershipPaymentId, ?int $insurancePaymentId, bool $failed): string
     {
         $base = $failed ? JCC_FAIL_URL : JCC_RETURN_URL;
@@ -200,12 +212,14 @@ class InsertPaymentService
         return $base . $separator . http_build_query($params);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function generateOrderNumber(int $userId): string
     {
         $randomPart = bin2hex(random_bytes(5));
         return sprintf('SUB-%d-%d-%s', $userId, time(), $randomPart);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function registerJccOrder(
         string $orderNumber,
         float $amount,
@@ -287,6 +301,7 @@ class InsertPaymentService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertLog(int $userId, string $description): void
     {
         $stmt = $this->conn->prepare(
@@ -302,6 +317,7 @@ class InsertPaymentService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $payload): void
     {
         http_response_code($statusCode);

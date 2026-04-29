@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\register.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -9,6 +12,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-chec
 header("Pragma: no-cache");
 header("Expires: 0");
 
+// Leitourgia registrationWindowState: xeirizetai to antistoixo kommati tis selidas i tou service.
 function registrationWindowState(mysqli $conn): array
 {
     $stmt = $conn->prepare(
@@ -20,8 +24,8 @@ function registrationWindowState(mysqli $conn): array
 
     if (!$stmt) {
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
@@ -33,8 +37,8 @@ function registrationWindowState(mysqli $conn): array
 
     if (empty($schedules)) {
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
@@ -65,9 +69,10 @@ function registrationWindowState(mysqli $conn): array
     }
 
     if (empty($formattedPeriods)) {
+        // No active schedule rows: registration remains open.
         return [
-            'is_open' => false,
-            'message' => 'Η περίοδος εγγραφών είναι κλειστή.',
+            'is_open' => true,
+            'message' => '',
             'periods' => [],
         ];
     }
@@ -121,7 +126,7 @@ $registerScriptVersion = is_file($registerScriptPath) ? (string) filemtime($regi
         </div>
     <?php else: ?>
         <div class="container py-5">
-            <div class="alert alert-warning border-0 shadow-sm" role="alert" style="border-radius: 14px;">
+            <div class="alert alert-warning border-0 shadow-sm alert-rounded-lg" role="alert">
                 <h4 class="alert-heading mb-2"><i class="fas fa-calendar-times me-2"></i>Εγγραφές Κλειστές</h4>
                 <p class="mb-0"><?php echo htmlspecialchars($registrationClosedMessage, ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php if (!empty($registrationPeriods)): ?>

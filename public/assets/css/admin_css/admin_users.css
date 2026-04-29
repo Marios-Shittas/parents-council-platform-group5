@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_users.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Styles gia tin admin diaxeirisi xriston kai filtraron. */
+/* Rythmizei xristis pinakas, filters, badges, export controls kai mobile anagnosimotita. */
 :root {
     --users-accent: #1f7aec;
     --users-accent-dark: #1267d1;

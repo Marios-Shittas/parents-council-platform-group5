@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\RegisteringService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 ini_set('display_errors', '1');
@@ -10,11 +13,13 @@ class RegisteringService
 {
     private mysqli $conn;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         header('Content-Type: application/json');
@@ -100,6 +105,7 @@ class RegisteringService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getRequestPayload(): ?array
     {
         $rawBody = file_get_contents('php://input');
@@ -111,6 +117,7 @@ class RegisteringService
         return is_array($decoded) ? $decoded : null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function validatePayload(array $payload): ?string
     {
         $requiredFields = ['first_name', 'last_name', 'email', 'phone', 'children'];
@@ -156,6 +163,7 @@ class RegisteringService
         return null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizePhone(string $phone): ?string
     {
         $normalizedPhone = preg_replace('/[\s\-]+/', '', trim($phone));
@@ -166,6 +174,7 @@ class RegisteringService
         return preg_match('/^\+357\d{8}$/', $normalizedPhone) === 1 ? $normalizedPhone : null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function emailExists(string $email): bool
     {
         $check = $this->conn->prepare('SELECT user_id FROM Users WHERE email = ?');
@@ -182,6 +191,7 @@ class RegisteringService
         return $exists;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function phoneExists(string $phone): bool
     {
         $check = $this->conn->prepare('SELECT user_id FROM Users WHERE phone_number = ?');
@@ -198,6 +208,7 @@ class RegisteringService
         return $exists;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertUser(string $name, string $surname, string $email, string $phone, int $childrenCount): int
     {
         $placeholderPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
@@ -219,6 +230,7 @@ class RegisteringService
         return $userId;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertChildren(int $userId, array $children): void
     {
         $stmtChild = $this->conn->prepare(
@@ -242,6 +254,7 @@ class RegisteringService
         $stmtChild->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertRegistrationLog(int $userId, string $email): void
     {
         $action = 'user_registration';
@@ -260,6 +273,7 @@ class RegisteringService
         $stmtLog->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function syncUserChildrenCount(int $userId): void
     {
         $stmt = $this->conn->prepare(
@@ -277,6 +291,7 @@ class RegisteringService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getRegistrationWindowState(): array
     {
         $stmt = $this->conn->prepare(
@@ -288,8 +303,8 @@ class RegisteringService
 
         if ($stmt === false) {
             return [
-                'is_open' => false,
-                'message' => 'Η υπηρεσία εγγραφών δεν είναι διαθέσιμη αυτή τη στιγμή.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
 
@@ -300,8 +315,8 @@ class RegisteringService
 
         if (empty($schedules)) {
             return [
-                'is_open' => false,
-                'message' => 'Δεν έχει οριστεί περίοδος εγγραφών από τον διαχειριστή.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
         $now = time();
@@ -330,9 +345,10 @@ class RegisteringService
         }
 
         if (empty($activePeriods)) {
+            // Otan den yparxoun energa grammes programmatismou, i eggrafi paramenei anoikti.
             return [
-                'is_open' => false,
-                'message' => 'Οι εγγραφές είναι κλειστές. Δεν υπάρχουν ενεργές περίοδοι εγγραφών.',
+                'is_open' => true,
+                'message' => '',
             ];
         }
 
@@ -342,6 +358,7 @@ class RegisteringService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $body): void
     {
         http_response_code($statusCode);

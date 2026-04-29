@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ProductsService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 
 require_once __DIR__ . '/../includes/db.php';
 
@@ -6,12 +9,14 @@ class ProductsService
 {
     private $conn;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getAllProducts()
     {
         $sql = "
@@ -45,6 +50,7 @@ class ProductsService
         return $products;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getProductById($id)
     {
         $id = (int)$id;
@@ -88,6 +94,7 @@ class ProductsService
         return false;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function createProduct($name, $description, $price)
     {
         $name = trim($name);
@@ -112,6 +119,7 @@ class ProductsService
         return false;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateProduct($id, $name, $description, $price)
     {
         $id = (int)$id;
@@ -134,6 +142,7 @@ class ProductsService
         return $stmt->execute();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function addProductImage($productId, $imagePath)
     {
         $productId = (int)$productId;
@@ -153,6 +162,7 @@ class ProductsService
         return $stmt->execute();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function replaceProductImage($productId, $imagePath)
     {
         $productId = (int)$productId;
@@ -212,6 +222,7 @@ class ProductsService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteProductImages($productId)
     {
         $productId = (int)$productId;
@@ -230,21 +241,35 @@ class ProductsService
         return $stmt->execute();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function productExistsInOrders($productId)
     {
         $productId = (int)$productId;
 
         $stmt = $this->conn->prepare("
-            SELECT COUNT(*) AS total
-            FROM OrderItems
-            WHERE product_id = ?
+            SELECT
+                (
+                    SELECT COUNT(*)
+                    FROM OrderItems oi
+                    INNER JOIN Orders o ON o.order_id = oi.order_id
+                    WHERE oi.product_id = ?
+                      AND o.order_status = 'paid'
+                ) +
+                (
+                    SELECT COUNT(*)
+                    FROM PaymentsDetails pd
+                    INNER JOIN Payments p ON p.payment_id = pd.payment_id
+                    WHERE pd.product_id = ?
+                      AND p.payment_type = 'product'
+                      AND p.payment_status IN ('completed', 'refunded')
+                ) AS total
         ");
 
         if (!$stmt) {
             return false;
         }
 
-        $stmt->bind_param("i", $productId);
+        $stmt->bind_param("ii", $productId, $productId);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -255,6 +280,7 @@ class ProductsService
         return false;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteProduct($productId)
     {
         $productId = (int)$productId;
@@ -266,7 +292,28 @@ class ProductsService
         mysqli_begin_transaction($this->conn);
 
         try {
+            if ($this->productExistsInOrders($productId)) {
+                throw new Exception('Product has completed order or payment history.');
+            }
+
+            $this->cleanupDraftProductReferences($productId);
+
             $imagePaths = $this->getProductImagePaths($productId);
+
+            $stmtDeleteSizes = $this->conn->prepare("
+                DELETE FROM ProductSizeOptions
+                WHERE product_id = ?
+            ");
+
+            if ($stmtDeleteSizes) {
+                $stmtDeleteSizes->bind_param("i", $productId);
+
+                if (!$stmtDeleteSizes->execute()) {
+                    throw new Exception('Delete product sizes failed: ' . $stmtDeleteSizes->error);
+                }
+
+                $stmtDeleteSizes->close();
+            }
 
             $stmtDeleteImages = $this->conn->prepare("
                 DELETE FROM ProductsImages
@@ -319,6 +366,145 @@ class ProductsService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function cleanupDraftProductReferences($productId): void
+    {
+        $productId = (int)$productId;
+
+        $paymentIds = $this->getDraftProductPaymentIds($productId);
+        if (!empty($paymentIds)) {
+            $paymentIdList = implode(',', array_map('intval', $paymentIds));
+
+            if (!$this->conn->query("DELETE FROM Payments WHERE payment_id IN ({$paymentIdList})")) {
+                throw new Exception('Delete draft product payments failed: ' . $this->conn->error);
+            }
+        }
+
+        $affectedOrderIds = $this->getDraftOrderIdsForProduct($productId);
+
+        $stmtDeleteItems = $this->conn->prepare("
+            DELETE oi
+            FROM OrderItems oi
+            INNER JOIN Orders o ON o.order_id = oi.order_id
+            WHERE oi.product_id = ?
+              AND o.order_status <> 'paid'
+        ");
+
+        if (!$stmtDeleteItems) {
+            throw new Exception('Prepare delete draft order items failed: ' . $this->conn->error);
+        }
+
+        $stmtDeleteItems->bind_param("i", $productId);
+
+        if (!$stmtDeleteItems->execute()) {
+            throw new Exception('Delete draft order items failed: ' . $stmtDeleteItems->error);
+        }
+
+        $stmtDeleteItems->close();
+
+        foreach ($affectedOrderIds as $orderId) {
+            $this->refreshOrderTotal((int)$orderId);
+        }
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function getDraftProductPaymentIds($productId): array
+    {
+        $productId = (int)$productId;
+        $paymentIds = [];
+
+        $stmt = $this->conn->prepare("
+            SELECT DISTINCT p.payment_id
+            FROM Payments p
+            INNER JOIN PaymentsDetails pd ON pd.payment_id = p.payment_id
+            WHERE pd.product_id = ?
+              AND p.payment_type = 'product'
+              AND p.payment_status IN ('pending', 'failed')
+        ");
+
+        if (!$stmt) {
+            throw new Exception('Prepare draft product payment lookup failed: ' . $this->conn->error);
+        }
+
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $paymentId = (int)($row['payment_id'] ?? 0);
+            if ($paymentId > 0) {
+                $paymentIds[] = $paymentId;
+            }
+        }
+
+        $stmt->close();
+
+        return array_values(array_unique($paymentIds));
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function getDraftOrderIdsForProduct($productId): array
+    {
+        $productId = (int)$productId;
+        $orderIds = [];
+
+        $stmt = $this->conn->prepare("
+            SELECT DISTINCT o.order_id
+            FROM Orders o
+            INNER JOIN OrderItems oi ON oi.order_id = o.order_id
+            WHERE oi.product_id = ?
+              AND o.order_status <> 'paid'
+        ");
+
+        if (!$stmt) {
+            throw new Exception('Prepare draft order lookup failed: ' . $this->conn->error);
+        }
+
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $orderId = (int)($row['order_id'] ?? 0);
+            if ($orderId > 0) {
+                $orderIds[] = $orderId;
+            }
+        }
+
+        $stmt->close();
+
+        return array_values(array_unique($orderIds));
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function refreshOrderTotal($orderId): void
+    {
+        $orderId = (int)$orderId;
+
+        $stmt = $this->conn->prepare("
+            UPDATE Orders
+            SET total_price = (
+                SELECT COALESCE(SUM(oi.price_at_purchase * oi.quantity), 0)
+                FROM OrderItems oi
+                WHERE oi.order_id = ?
+            )
+            WHERE order_id = ?
+        ");
+
+        if (!$stmt) {
+            throw new Exception('Prepare order total refresh failed: ' . $this->conn->error);
+        }
+
+        $stmt->bind_param("ii", $orderId, $orderId);
+
+        if (!$stmt->execute()) {
+            throw new Exception('Order total refresh failed: ' . $stmt->error);
+        }
+
+        $stmt->close();
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getProductImagePaths($productId)
     {
         $productId = (int)$productId;
@@ -347,6 +533,7 @@ class ProductsService
         return $imagePaths;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function deleteImageFiles(array $imagePaths)
     {
         $publicRoot = realpath(__DIR__ . '/../../public');
@@ -361,17 +548,14 @@ class ProductsService
                 continue;
             }
 
-            $cleanPath = str_replace('\\', '/', $imagePath);
-            $cleanPath = preg_replace('#^\.\./#', '', $cleanPath);
-            $cleanPath = preg_replace('#^/+#', '', $cleanPath);
-
-            $absolutePath = $publicRoot . '/' . $cleanPath;
+            $absolutePath = $this->resolveProductImageAbsolutePath($imagePath);
             if (file_exists($absolutePath)) {
                 @unlink($absolutePath);
             }
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveProductImagePath(string $imagePath): string
     {
         $imagePath = trim($imagePath);
@@ -379,22 +563,65 @@ class ProductsService
             return $this->getDefaultProductImagePath();
         }
 
-        $normalized = str_replace('\\', '/', $imagePath);
+        $absolutePath = $this->resolveProductImageAbsolutePath($imagePath);
+
+        return file_exists($absolutePath)
+            ? $this->resolveProductImagePublicUrl($imagePath)
+            : $this->getDefaultProductImagePath();
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function resolveProductImageAbsolutePath(string $imagePath): string
+    {
         $projectRoot = dirname(__DIR__, 2);
-        $absolutePath = '';
+        $publicRelativePath = $this->resolveProductImagePublicRelativePath($imagePath);
+
+        return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function resolveProductImagePublicUrl(string $imagePath): string
+    {
+        $publicRelativePath = $this->resolveProductImagePublicRelativePath($imagePath);
+
+        return $publicRelativePath === ''
+            ? $this->getDefaultProductImagePath()
+            : '/parents-council-platform-group5/public/' . $publicRelativePath;
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    private function resolveProductImagePublicRelativePath(string $imagePath): string
+    {
+        $normalized = trim(str_replace('\\', '/', $imagePath));
+        if ($normalized === '') {
+            return '';
+        }
 
         $publicPosition = strpos($normalized, '/public/');
         if ($publicPosition !== false) {
-            $absolutePath = $projectRoot . substr($normalized, $publicPosition);
-        } elseif (strpos($normalized, '/assets/') === 0) {
-            $absolutePath = $projectRoot . '/public' . $normalized;
-        } else {
-            $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+            return ltrim(substr($normalized, $publicPosition + strlen('/public/')), '/');
         }
 
-        return file_exists($absolutePath) ? $imagePath : $this->getDefaultProductImagePath();
+        if (strpos($normalized, '../assets/') === 0) {
+            return substr($normalized, 3);
+        }
+
+        if (strpos($normalized, '/assets/') === 0) {
+            return ltrim($normalized, '/');
+        }
+
+        if (strpos($normalized, 'assets/') === 0) {
+            return $normalized;
+        }
+
+        if (strpos($normalized, 'public/') === 0) {
+            return substr($normalized, strlen('public/'));
+        }
+
+        return ltrim($normalized, '/');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDefaultProductImagePath(): string
     {
         return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';

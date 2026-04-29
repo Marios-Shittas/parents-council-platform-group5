@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\UsefulInmorfiionService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
- * UsefulInformationService
- * Αποθηκεύει και ανακτά το περιεχόμενο της σελίδας "Χρήσιμες Πληροφορίες".
+ * UsefulInmorfiionService
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -11,7 +14,7 @@ class UsefulInformationService
     private $conn;
     private $defaultSections;
     private $lastError = '';
-
+// Arxikopoiei to ypiresia state, eksasfalizei DB schema/proepilegmeno records kai efarmozei legacy data fixes.
     public function __construct()
     {
         global $conn;
@@ -22,7 +25,7 @@ class UsefulInformationService
         $this->ensureDefaultSections();
         $this->applyLegacyContentAdjustments();
     }
-
+// Epistrefei merged sections Useful Information opou ta valid DB data kanoun override sta proepilegmena.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -50,13 +53,14 @@ class UsefulInformationService
 
         return $sections;
     }
-
+// Epistrefei ena section tis Useful Information ana key apo to merged section set.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
-
+// Elegxei section key kai payload, normalopoiei UTF-8, serialopoiei periexomeno JSON,
+// kai meta kanei enimerosi/eisagogi apothikevontas perigrafika errors se apotyxia.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -120,12 +124,12 @@ class UsefulInformationService
 
         return true;
     }
-
+// Epistrefei to pio prosfato validation/persistence error gia UI i logging.
     public function getLastError()
     {
         return $this->lastError;
     }
-
+// Epanaferei ola ta configurable sections stis canonical proepilegmeno times.
     public function resetAllSectionsToDefaults()
     {
         $this->lastError = '';
@@ -145,7 +149,7 @@ class UsefulInformationService
 
         return true;
     }
-
+// Dimiourgei ton UsefulInformationSections pinakas kai uniqueness constraint sto section_key otan leipei.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS UsefulInformationSections (
@@ -161,7 +165,7 @@ class UsefulInformationService
 
         $this->conn->query($sql);
     }
-
+// Kanei arxikopoisi sta missing proepilegmeno sections xwris overwrite sta yparxonta customized records.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -181,7 +185,8 @@ class UsefulInformationService
             $this->updateSection($sectionKey, $section['title'], $section['subtitle'], $section['content']);
         }
     }
-
+// Efarmozei one-time compatibility migrations gia palia subtitles/titles/link items
+// oste to legacy stored periexomeno na tairiazei me tin trexousa domi kai wording.
     private function applyLegacyContentAdjustments()
     {
         $legacyPageHeaderSubtitle = 'Συγκεντρωμένες βασικές πληροφορίες για τη σχολική χρονιά, τις αργίες, τη στολή, την ασφάλεια και τα χρήσιμα έντυπα.';
@@ -254,7 +259,7 @@ class UsefulInformationService
             $content
         );
     }
-
+// Orizei to plires proepilegmeno periexomeno schema (header, links, school year, holidays, safety, uniform).
     private function buildDefaultSections()
     {
         return [
@@ -406,7 +411,7 @@ class UsefulInformationService
             ],
         ];
     }
-
+// Recursively epidiorthwnei/normalopoiei UTF-8 gia asfales JSON encoding kai DB writes.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {
@@ -431,23 +436,23 @@ class UsefulInformationService
 
         return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
     }
-
+// Epistrefei to holiday grammes array apo to holidays section me safe fallback se keni lista.
     public function getHolidayRows()
     {
         $sections = $this->getAllSections();
         $rows = $sections['holidays']['content']['rows'] ?? [];
         return is_array($rows) ? $rows : [];
     }
-
+// Metatrepei ta holiday grammes se normalized calendar items taksinomimena me ISO date.
     public function getHolidayCalendarItems()
     {
         $items = [];
 
         foreach ($this->getHolidayRows() as $holiday) {
             $title = trim((string)($holiday['name'] ?? ''));
-            $isoDate = $this->convertHolidayDisplayDateToIso((string)($holiday['date'] ?? ''));
+            $isoDate = $this->buildHolidaySortKey((string)($holiday['date'] ?? ''));
 
-            if ($title === '' || $isoDate === null) {
+            if ($title === '' || $isoDate === '9999-99-99') {
                 continue;
             }
 
@@ -465,7 +470,56 @@ class UsefulInformationService
 
         return $items;
     }
+// Kanei map ta school-year milestones se calendar event items kai ta taksinomei chronologically.
+    public function getSchoolYearCalendarItems()
+    {
+        $section = $this->getSection('school_year');
+        if (!is_array($section)) {
+            return [];
+        }
 
+        $rawItems = $section['content']['items'] ?? [];
+        if (!is_array($rawItems)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($rawItems as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $title = trim((string)($item['label'] ?? ''));
+            $description = trim((string)($item['description'] ?? ''));
+            $isoDate = $this->convertSchoolYearDisplayDateToIso((string)($item['date'] ?? ''));
+
+            if ($title === '' || $isoDate === null) {
+                continue;
+            }
+
+            $items[] = [
+                'title' => $title,
+                'description' => $description,
+                'date' => $isoDate,
+                'type' => 'event',
+            ];
+        }
+
+        usort($items, static function ($left, $right) {
+            $leftDate = (string)($left['date'] ?? '');
+            $rightDate = (string)($right['date'] ?? '');
+
+            if ($leftDate !== $rightDate) {
+                return strcmp($leftDate, $rightDate);
+            }
+
+            return strcmp((string)($left['title'] ?? ''), (string)($right['title'] ?? ''));
+        });
+
+        return $items;
+    }
+// Prosthetei nea argia apo ISO date + title meta apo validation, duplicate detection,
+// display-date formatting, sorting kai persisted enimerosi tou section.
     public function addHolidayFromIsoDate($isoDate, $name)
     {
         $this->lastError = '';
@@ -523,7 +577,7 @@ class UsefulInformationService
             ['rows' => $rows]
         );
     }
-
+// Taksinomei ta holiday grammes me vasi computed date key kai deuteron me lowercase onoma argias.
     private function sortHolidayRows(array $rows)
     {
         usort($rows, function ($left, $right) {
@@ -542,7 +596,7 @@ class UsefulInformationService
 
         return $rows;
     }
-
+// Ftiaxnei sortable ISO-like key apo single-date i date-range display text.
     private function buildHolidaySortKey($dateText)
     {
         $dateText = trim((string)$dateText);
@@ -562,48 +616,58 @@ class UsefulInformationService
         $singleIso = $this->convertHolidayDisplayDateToIso($dateText);
         return $singleIso ?? '9999-99-99';
     }
-
+// Kanei parse to Greek holiday display date text kai to metatrepei se ISO yyyy-mm-dd otan einai valid.
     private function convertHolidayDisplayDateToIso($dateText)
     {
         $dateText = trim((string)$dateText);
-        if ($dateText === '' || strpos($dateText, ' - ') !== false) {
+        if ($dateText === '') {
             return null;
         }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateText) === 1) {
+            return $dateText;
+        }
+
+        if (strpos($dateText, '-') !== false) {
+            return null;
+        }
+
+        $dateText = preg_replace('/\s+/u', ' ', $dateText);
 
         $greekMonths = [
-            'Ιανουαρίου' => '01',
-            'Φεβρουαρίου' => '02',
-            'Μαρτίου' => '03',
-            'Απριλίου' => '04',
-            'Μαΐου' => '05',
-            'Ιουνίου' => '06',
-            'Ιουλίου' => '07',
-            'Αυγούστου' => '08',
-            'Σεπτεμβρίου' => '09',
-            'Οκτωβρίου' => '10',
-            'Νοεμβρίου' => '11',
-            'Δεκεμβρίου' => '12',
+            'ιανουαρίου' => '01',
+            'φεβρουαρίου' => '02',
+            'μαρτίου' => '03',
+            'απριλίου' => '04',
+            'μαΐου' => '05',
+            'ιουνίου' => '06',
+            'ιουλίου' => '07',
+            'αυγούστου' => '08',
+            'σεπτεμβρίου' => '09',
+            'οκτωβρίου' => '10',
+            'νοεμβρίου' => '11',
+            'δεκεμβρίου' => '12',
         ];
 
-        foreach ($greekMonths as $greek => $numeric) {
-            $dateText = str_replace($greek, $numeric, $dateText);
-        }
-
-        $parts = preg_split('/\s+/', $dateText);
-        if (count($parts) !== 3) {
+        if (preg_match('/^(\d{1,2})\s*([^\d\s]+)\s*(\d{4})$/u', $dateText, $matches) !== 1) {
             return null;
         }
 
-        [$day, $month, $year] = $parts;
-        $day = str_pad((string)(int)$day, 2, '0', STR_PAD_LEFT);
+        $day = str_pad((string)(int)$matches[1], 2, '0', STR_PAD_LEFT);
+        $monthText = mb_strtolower(trim((string)$matches[2]), 'UTF-8');
+        $year = trim((string)$matches[3]);
 
-        if (!preg_match('/^\d{2}$/', (string)$month) || !preg_match('/^\d{4}$/', (string)$year)) {
+        if (!isset($greekMonths[$monthText])) {
             return null;
         }
 
-        return $year . '-' . $month . '-' . $day;
+        if (!preg_match('/^\d{4}$/', $year)) {
+            return null;
+        }
+
+        return $year . '-' . $greekMonths[$monthText] . '-' . $day;
     }
-
+// Kanei parse to start date enos range danizomeno to year apo to end date otan leipei.
     private function convertHolidayDisplayDateToIsoWithFallbackYear($startText, $endText)
     {
         $directIso = $this->convertHolidayDisplayDateToIso((string)$startText);
@@ -618,7 +682,7 @@ class UsefulInformationService
             return null;
         }
 
-        if (preg_match('/^\d{1,2}\s+\S+$/u', $startText) !== 1) {
+        if (preg_match('/^\d{1,2}\s*\S+$/u', $startText) !== 1) {
             return null;
         }
 
@@ -628,7 +692,21 @@ class UsefulInformationService
 
         return $this->convertHolidayDisplayDateToIso($startText . ' ' . $matches[1]);
     }
+// Metatrepei school-year display date se ISO; dexetai direct ISO i kanei delegate se Greek parser.
+    private function convertSchoolYearDisplayDateToIso($dateText)
+    {
+        $dateText = trim((string)$dateText);
+        if ($dateText === '') {
+            return null;
+        }
 
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateText) === 1) {
+            return $dateText;
+        }
+
+        return $this->convertHolidayDisplayDateToIso($dateText);
+    }
+// Morfopoiei ISO yyyy-mm-dd se Greek human-readable imerominia pou xrisimopoieitai sta holiday grammes.
     private function convertIsoDateToHolidayDisplayDate($isoDate)
     {
         $parts = explode('-', (string)$isoDate);

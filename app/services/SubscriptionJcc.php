@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\SubscriptionJcc.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora payment flow, opote kratame ta redirects/responses synexi me ton provider.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -13,12 +16,14 @@ class SubscriptionJccService
     private mysqli $conn;
     private TokenValidator $tokenValidator;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         $token = trim((string) ($_GET['token'] ?? ''));
@@ -162,6 +167,7 @@ class SubscriptionJccService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getJccOrderStatus(string $orderId): array
     {
         if (!function_exists('curl_init')) {
@@ -217,6 +223,7 @@ class SubscriptionJccService
         return $response;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function mapOrderStatusToPaymentStatus(int $orderStatus): string
     {
         if ($orderStatus === 2) {
@@ -234,6 +241,7 @@ class SubscriptionJccService
         return 'failed';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveTransactionId(array $statusResponse, string $fallbackOrderId): string
     {
         if (isset($statusResponse['transactionAttributes']) && is_array($statusResponse['transactionAttributes'])) {
@@ -272,6 +280,7 @@ class SubscriptionJccService
         return $fallbackOrderId;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function updatePaymentStatus(
         int $paymentId,
         int $userId,
@@ -318,6 +327,7 @@ class SubscriptionJccService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function paymentExistsForUser(int $paymentId, int $userId): bool
     {
         $stmt = $this->conn->prepare('SELECT 1 FROM Payments WHERE payment_id = ? AND user_id = ? LIMIT 1');
@@ -334,6 +344,7 @@ class SubscriptionJccService
         return $exists;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertInsuranceChildrenPayments(int $userId, int $insurancePaymentId): void
     {
         $childrenStmt = $this->conn->prepare('SELECT child_id FROM Children WHERE user_id = ?');
@@ -373,6 +384,7 @@ class SubscriptionJccService
         $childrenStmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function activateUserWithTemporaryPassword(int $userId): ?array
     {
         $temporaryPassword = $this->generateTemporaryPassword();
@@ -410,6 +422,7 @@ class SubscriptionJccService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getUserEmail(int $userId): string
     {
         $stmt = $this->conn->prepare('SELECT email FROM Users WHERE user_id = ? LIMIT 1');
@@ -426,6 +439,7 @@ class SubscriptionJccService
         return trim((string) ($row['email'] ?? ''));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function generateTemporaryPassword(int $length = 12): string
     {
         $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
@@ -439,6 +453,7 @@ class SubscriptionJccService
         return $password;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendActivationCredentialsEmail(string $toEmail, string $temporaryPassword): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -473,6 +488,7 @@ class SubscriptionJccService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertLog(int $userId, string $action, string $description): void
     {
         $stmt = $this->conn->prepare(
@@ -488,6 +504,7 @@ class SubscriptionJccService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $payload): void
     {
         http_response_code($statusCode);

@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\user_css\photos.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Styles gia tin photo gallery pou vlepoun oi xristes. */
+/* Edo allazei to gallery grid, eikona cards, hover states kai mobile provoli. */
 .photos-page {
     background:
         radial-gradient(circle at top right, rgba(54, 105, 166, 0.09), transparent 28%),

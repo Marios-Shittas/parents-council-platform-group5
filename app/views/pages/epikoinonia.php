@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\epikoinonia.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../services/EpikoinoniaService.php';
 require_once __DIR__ . '/../../services/EpikoinoniaPageService.php';
 require_once __DIR__ . '/../../includes/site_context.php';
@@ -113,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if (!empty($contactInfo['subtitle'])): ?>
                     <p class="section-subtitle"><?php echo htmlspecialchars($contactInfo['subtitle']); ?></p>
                 <?php endif; ?>
-                <div class="row">
+                <div class="row contact-cards-grid">
                     <?php foreach (($contactInfo['content']['cards'] ?? []) as $card): ?>
                         <?php
                         $iconClass = trim((string)($card['icon'] ?? '')) ?: 'fas fa-info-circle';
@@ -157,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="section-subtitle"><?php echo htmlspecialchars($mapSection['subtitle']); ?></p>
                 <?php endif; ?>
                 <div class="map-container">
-                    <iframe src="<?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?>" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe src="<?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?>" width="600" height="450" class="map-frame-borderless" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
 

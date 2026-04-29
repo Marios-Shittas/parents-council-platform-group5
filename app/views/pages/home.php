@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\home.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../includes/site_context.php';
 require_once __DIR__ . '/../../services/HomePageService.php';
 
@@ -27,6 +30,7 @@ $eventsBlockTitle = (string)($eventsSection['title'] ?? 'Τελευταίες Ε
 $eventsBlockButton = (string)($eventsSection['content']['button_label'] ?? 'Όλες οι Εκδηλώσεις');
 
 if (!function_exists('home_public_content_url_exists')) {
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function home_public_content_url_exists(string $url): bool
     {
         $path = (string)parse_url($url, PHP_URL_PATH);
@@ -80,6 +84,30 @@ if (!function_exists('home_public_content_url_exists')) {
         ];
         $storedHomeBannerSlides = is_array($bannerSection['content']['slides'] ?? null) ? $bannerSection['content']['slides'] : [];
         $homeBannerSlides = [];
+        $isRenderableBannerAsset = static function (string $url): bool {
+            $trimmedUrl = trim($url);
+            if ($trimmedUrl === '') {
+                return false;
+            }
+
+            if (strpos($trimmedUrl, 'data:') === 0 || preg_match('#^https?://#i', $trimmedUrl)) {
+                return true;
+            }
+
+            if ($trimmedUrl[0] !== '/') {
+                return true;
+            }
+
+            $documentRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/\\');
+            if ($documentRoot === '') {
+                return true;
+            }
+
+            $relativePath = str_replace('/', DIRECTORY_SEPARATOR, ltrim($trimmedUrl, '/'));
+            $absolutePath = $documentRoot . DIRECTORY_SEPARATOR . $relativePath;
+
+            return is_file($absolutePath);
+        };
 
         foreach ($defaultHomeBannerSlides as $index => $defaultSlide) {
             $storedSlide = is_array($storedHomeBannerSlides[$index] ?? null) ? $storedHomeBannerSlides[$index] : [];
@@ -87,16 +115,19 @@ if (!function_exists('home_public_content_url_exists')) {
                 continue;
             }
 
-            $resolvedSrc = site_resolve_content_url((string)($storedSlide['src'] ?? $defaultSlide['src']));
+            $storedSrc = trim((string)($storedSlide['src'] ?? ''));
+            $defaultSrc = (string)$defaultSlide['src'];
+            $resolvedSrc = site_resolve_content_url($storedSrc !== '' ? $storedSrc : $defaultSrc);
+
+            if (!$isRenderableBannerAsset($resolvedSrc)) {
+                $resolvedSrc = site_resolve_content_url($defaultSrc);
+            }
+
             if (trim($resolvedSrc) === '') {
                 continue;
             }
 
-            if (!home_public_content_url_exists($resolvedSrc)) {
-                $resolvedSrc = site_resolve_content_url((string)$defaultSlide['src']);
-            }
-
-            if (!home_public_content_url_exists($resolvedSrc)) {
+            if (!$isRenderableBannerAsset($resolvedSrc)) {
                 continue;
             }
 
@@ -180,26 +211,7 @@ if (!function_exists('home_public_content_url_exists')) {
 
     <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.home-school-banner__carousel').forEach(function (carousel) {
-                var slides = carousel.querySelectorAll('.home-school-banner__image');
-
-                if (slides.length <= 1) {
-                    return;
-                }
-
-                var currentIndex = 0;
-                var intervalMs = parseInt(carousel.getAttribute('data-interval'), 10) || 15000;
-
-                window.setInterval(function () {
-                    slides[currentIndex].classList.remove('is-active');
-                    currentIndex = (currentIndex + 1) % slides.length;
-                    slides[currentIndex].classList.add('is-active');
-                }, intervalMs);
-            });
-        });
-    </script>
+    <script src="<?php echo site_asset_url('js/home-banner-carousel.js'); ?>" defer></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>

@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\home.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/EventsService.php';
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
 require_once __DIR__ . '/../../app/services/HomePageService.php';
@@ -18,38 +21,45 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
+// Leitourgia adminCalendarIsValidIsoImerominia: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarIsValidIsoDate($value)
 {
     return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1;
 }
 
+// Leitourgia adminCalendarNormalizeTime: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarNormalizeTime($value)
 {
     $value = trim((string)$value);
     return preg_match('/^\d{2}:\d{2}$/', $value) ? $value : '09:00';
 }
 
+// Leitourgia adminHomeTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia adminHomeTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
+// Leitourgia adminHomeGetBannerUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeGetBannerUploadDir()
 {
     return dirname(__DIR__) . '/assets/Home_img/';
 }
 
+// Leitourgia adminHomeBuildBannerWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeBuildBannerWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Home_img/' . $fileName;
 }
 
+// Leitourgia adminHomeDeleteManagedBannerImage: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeDeleteManagedBannerImage($path)
 {
     $trimmed = trim((string)$path);
@@ -65,6 +75,7 @@ function adminHomeDeleteManagedBannerImage($path)
     }
 }
 
+// Leitourgia adminHomePublicContentUrlExists: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomePublicContentUrlExists($url)
 {
     $path = (string)parse_url((string)$url, PHP_URL_PATH);
@@ -86,6 +97,7 @@ function adminHomePublicContentUrlExists($url)
     return is_file($filePath);
 }
 
+// Leitourgia adminHomeUploadBannerImage: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminHomeUploadBannerImage($fileField, $existingPath)
 {
     $upload = $_FILES[$fileField] ?? null;
@@ -150,46 +162,55 @@ function adminHomeUploadBannerImage($fileField, $existingPath)
     return [adminHomeBuildBannerWebPath($newFileName), ''];
 }
 
+// Leitourgia adminCalendarGetEventImageUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetEventImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Events_img/';
 }
 
+// Leitourgia adminCalendarBuildEventImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildEventImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Events_img/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetAnnouncementImageUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetAnnouncementImageUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_img/';
 }
 
+// Leitourgia adminCalendarBuildAnnouncementImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildAnnouncementImageWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetAnnouncementAttachmentUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetAnnouncementAttachmentUploadDir()
 {
     return dirname(__DIR__) . '/assets/Announcements_docs/';
 }
 
+// Leitourgia adminCalendarBuildAnnouncementAttachmentWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
 {
     return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
 }
 
+// Leitourgia adminCalendarGetDefaultAnnouncementGdprNotice: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetDefaultAnnouncementGdprNotice()
 {
     return 'Το φωτογραφικό υλικό και τα συνημμένα έγγραφα των ανακοινώσεων δημοσιεύονται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με την πολιτική προστασίας δεδομένων του σχολείου και τις σχετικές εγκρίσεις που ισχύουν.';
 }
 
+// Leitourgia adminCalendarGetDefaultEventGdprNotice: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarGetDefaultEventGdprNotice()
 {
     return 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.';
 }
 
+// Leitourgia adminCalendarUploadImages: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persistImageCallback, $maxFiles = null, $persistErrorCallback = null)
 {
     $uploadedCount = 0;
@@ -292,6 +313,7 @@ function adminCalendarUploadImages($fileField, $uploadDir, $pathBuilder, $persis
     return [$uploadedCount, $uploadErrors];
 }
 
+// Leitourgia adminCalendarUploadAnnouncementAttachments: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarUploadAnnouncementAttachments($announcementsService, $announcementId)
 {
     $uploadedCount = 0;
@@ -378,6 +400,7 @@ function adminCalendarUploadAnnouncementAttachments($announcementsService, $anno
     return [$uploadedCount, $uploadErrors];
 }
 
+// Leitourgia adminCalendarBuildItems: xeirizetai to antistoixo kommati tis selidas i tou service.
 function adminCalendarBuildItems($eventsService, $announcementsService, $usefulInformationService)
 {
     $items = [];
@@ -435,6 +458,20 @@ function adminCalendarBuildItems($eventsService, $announcementsService, $usefulI
             'time' => null,
             'sort_key' => (string)($holiday['date'] ?? '') . ' 00:00:00',
             'source_url' => 'useful-information.php',
+            'source_label' => 'Χρήσιμες Πληροφορίες',
+        ];
+    }
+
+    foreach ($usefulInformationService->getSchoolYearCalendarItems() as $schoolYearItem) {
+        $items[] = [
+            'id' => null,
+            'type' => 'event',
+            'title' => (string)($schoolYearItem['title'] ?? ''),
+            'description' => (string)($schoolYearItem['description'] ?? ''),
+            'date' => (string)($schoolYearItem['date'] ?? ''),
+            'time' => null,
+            'sort_key' => (string)($schoolYearItem['date'] ?? '') . ' 00:00:00',
+            'source_url' => 'useful-information.php?active_tab=school_year',
             'source_label' => 'Χρήσιμες Πληροφορίες',
         ];
     }
@@ -565,7 +602,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'src' => '',
                             'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
                                 ? (string)$existingSlide['alt']
-                                : 'Banner αρχικής σελίδας ' . $i,
+                                : 'Εικόνα αρχικής σελίδας ' . $i,
                             'hidden' => false,
                         ];
                         continue;
@@ -575,7 +612,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'src' => $uploadedPath,
                         'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
                             ? (string)$existingSlide['alt']
-                            : 'Banner αρχικής σελίδας ' . $i,
+                            : 'Εικόνα αρχικής σελίδας ' . $i,
                         'hidden' => $hideSlide,
                     ];
                 }
@@ -759,7 +796,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $homeContentTabs = [
-    'banner_section' => ['label' => 'Banner', 'icon' => 'fas fa-images'],
+    'banner_section' => ['label' => 'Κεντρικές Εικόνες', 'icon' => 'fas fa-images'],
     'hero_section' => ['label' => 'Κεντρικό Μήνυμα', 'icon' => 'fas fa-home'],
     'calendar_section' => ['label' => 'Ημερολόγιο', 'icon' => 'fas fa-calendar-alt'],
     'announcements_section' => ['label' => 'Ανακοινώσεις', 'icon' => 'fas fa-bullhorn'],
@@ -778,9 +815,9 @@ $announcementsContentSection = $homeSections['announcements_section'] ?? ['title
 $eventsContentSection = $homeSections['events_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
 $defaultBannerSlides = [
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2'],
+    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3'],
 ];
 $bannerSlidesForEditor = [];
 for ($i = 0; $i < 3; $i++) {
@@ -827,7 +864,7 @@ $calendarPayload = [
     <link rel="stylesheet" href="../assets/css/admin_css/admin_useful_information.css">
     <link rel="stylesheet" href="../assets/css/admin_css/admin_home.css">
 
-    <title>Dashboard Ημερολογίου - Admin</title>
+    <title>Πίνακας Ημερολογίου - Διαχείριση</title>
 </head>
 <body>
 
@@ -837,11 +874,11 @@ $calendarPayload = [
     <main class="admin-content">
         <section class="dashboard-hero card-custom">
             <div>
-                <p class="dashboard-kicker">Admin Dashboard</p>
+                <p class="dashboard-kicker">Πίνακας Διαχείρισης</p>
                 <h1><i class="fas fa-calendar-check mr-2"></i>Κεντρικό Ημερολόγιο Διαχείρισης</h1>
                 <p class="dashboard-subtitle">
-                    Εδώ ο admin βλέπει συγκεντρωμένα τι υπάρχει σε κάθε ημερομηνία και μπορεί να καταχωρεί
-                    νέα εκδήλωση, ανακοίνωση ή αργία χωρίς να φεύγει από το dashboard.
+                    Εδώ ο διαχειριστής βλέπει συγκεντρωμένα τι υπάρχει σε κάθε ημερομηνία και μπορεί να καταχωρεί
+                    νέα εκδήλωση, ανακοίνωση ή αργία χωρίς να φεύγει από τον πίνακα διαχείρισης.
                 </p>
             </div>
             <div class="dashboard-hero-actions">
@@ -886,7 +923,7 @@ $calendarPayload = [
         <section class="home-content-management" id="home-content-management">
             <div class="card card-custom page-intro">
                 <p class="mb-2"><strong>Διαχείριση δημόσιου περιεχομένου αρχικής σελίδας</strong></p>
-                <p>Από εδώ ενημερώνεις τα βασικά κείμενα και τους τίτλους που προβάλλονται στην αρχική σελίδα, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να επεξεργάζεσαι με έλεγχο το Hero, το block του ημερολογίου και τις ενότητες ανακοινώσεων και εκδηλώσεων.</p>
+                <p>Από εδώ ενημερώνεις τα βασικά κείμενα και τους τίτλους που προβάλλονται στην αρχική σελίδα, τόσο για τους επισκέπτες όσο και για τους συνδεδεμένους γονείς. Κάθε ενότητα αποθηκεύεται ξεχωριστά, ώστε να επεξεργάζεσαι με έλεγχο το κεντρικό μήνυμα, την ενότητα του ημερολογίου και τις ενότητες ανακοινώσεων και εκδηλώσεων.</p>
             </div>
 
             <ul class="nav nav-tabs admin-section-tabs mb-4" role="tablist">
@@ -910,8 +947,8 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'banner_section' ? 'show active' : ''; ?>" id="tab-banner_section" role="tabpanel" aria-labelledby="tab-banner_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Banner Αρχικής Σελίδας</h2>
-                            <p>Από εδώ μπορείς να αλλάζεις τις 3 εικόνες που εμφανίζονται στο επάνω slider της αρχικής σελίδας.</p>
+                            <h2>Κεντρικές Εικόνες Αρχικής Σελίδας</h2>
+                            <p>Από εδώ μπορείς να αλλάζεις τις 3 εικόνες που εμφανίζονται στο επάνω καρουζέλ της αρχικής σελίδας.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-images"></i></span>
                     </div>
@@ -921,12 +958,12 @@ $calendarPayload = [
                         <input type="hidden" name="section_key" value="banner_section">
                         <input type="hidden" name="home_tab" value="banner_section">
                         <input type="hidden" name="redirect_date" value="<?php echo htmlspecialchars($selectedDate); ?>">
-                        <input type="hidden" name="title" value="<?php echo htmlspecialchars($bannerContentSection['title'] ?? 'Banner Αρχικής'); ?>">
+                        <input type="hidden" name="title" value="<?php echo htmlspecialchars($bannerContentSection['title'] ?? 'Κεντρικές Εικόνες Αρχικής'); ?>">
 
                         <div class="section-form-grid">
                             <?php foreach ($bannerSlidesForEditor as $index => $slide): ?>
                                 <div class="editor-subcard">
-                                    <h3>Slide <?php echo $index + 1; ?></h3>
+                                    <h3>Διαφάνεια <?php echo $index + 1; ?></h3>
                                     <input type="hidden" name="current_banner_<?php echo $index + 1; ?>_src" value="<?php echo htmlspecialchars($slide['src']); ?>">
 
                                     <div class="home-banner-admin-preview">
@@ -936,7 +973,7 @@ $calendarPayload = [
                                     <div class="form-group mb-3">
                                         <div class="form-check home-banner-remove-check">
                                             <label class="form-check-label" for="banner_<?php echo $index + 1; ?>_hide">
-                                                Απόκρυψη από την αρχική σελίδα (Hide)
+                                                Απόκρυψη από την αρχική σελίδα
                                             </label>
                                             <input class="form-check-input" type="checkbox" name="banner_<?php echo $index + 1; ?>_hide" value="1" id="banner_<?php echo $index + 1; ?>_hide" <?php echo !empty($slide['hidden']) ? 'checked' : ''; ?>>
                                         </div>
@@ -961,7 +998,7 @@ $calendarPayload = [
                         </div>
 
                         <div class="section-actions">
-                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Banner</button>
+                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Εικόνων</button>
                         </div>
                     </form>
                 </section>
@@ -969,7 +1006,7 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'hero_section' ? 'show active' : ''; ?>" id="tab-hero_section" role="tabpanel" aria-labelledby="tab-hero_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Hero Ενότητα</h2>
+                            <h2>Ενότητα Κεντρικού Μηνύματος</h2>
                             <p>Το βασικό μήνυμα καλωσορίσματος, ο μεγάλος τίτλος και τα δύο κουμπιά πλοήγησης.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-home"></i></span>
@@ -1005,7 +1042,7 @@ $calendarPayload = [
                         </div>
 
                         <div class="section-actions">
-                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Hero</button>
+                            <button type="submit" class="btn btn-primary-custom"><i class="fas fa-save mr-1"></i>Αποθήκευση Κεντρικού Μηνύματος</button>
                         </div>
                     </form>
                 </section>
@@ -1013,7 +1050,7 @@ $calendarPayload = [
                 <section class="card card-custom section-editor tab-pane fade <?php echo $activeHomeTab === 'calendar_section' ? 'show active' : ''; ?>" id="tab-calendar_section" role="tabpanel" aria-labelledby="tab-calendar_section-link">
                     <div class="section-editor__header">
                         <div>
-                            <h2>Block Ημερολογίου</h2>
+                            <h2>Ενότητα Ημερολογίου</h2>
                             <p>Ο τίτλος που εμφανίζεται στο πλαίσιο του ημερολογίου στην αρχική σελίδα.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-calendar-alt"></i></span>
@@ -1027,7 +1064,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div class="full-width">
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($calendarContentSection['title'] ?? ''); ?>">
                             </div>
                         </div>
@@ -1042,7 +1079,7 @@ $calendarPayload = [
                     <div class="section-editor__header">
                         <div>
                             <h2>Ενότητα Ανακοινώσεων</h2>
-                            <p>Ο τίτλος του block και το κείμενο του κουμπιού που οδηγεί σε όλες τις ανακοινώσεις.</p>
+                            <p>Ο τίτλος της ενότητας και το κείμενο του κουμπιού που οδηγεί σε όλες τις ανακοινώσεις.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-bullhorn"></i></span>
                     </div>
@@ -1055,7 +1092,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div>
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($announcementsContentSection['title'] ?? ''); ?>">
                             </div>
                             <div>
@@ -1074,7 +1111,7 @@ $calendarPayload = [
                     <div class="section-editor__header">
                         <div>
                             <h2>Ενότητα Εκδηλώσεων</h2>
-                            <p>Ο τίτλος του block και το κείμενο του κουμπιού που οδηγεί σε όλες τις εκδηλώσεις.</p>
+                            <p>Ο τίτλος της ενότητας και το κείμενο του κουμπιού που οδηγεί σε όλες τις εκδηλώσεις.</p>
                         </div>
                         <span class="section-editor__icon"><i class="fas fa-star"></i></span>
                     </div>
@@ -1087,7 +1124,7 @@ $calendarPayload = [
 
                         <div class="section-form-grid">
                             <div>
-                                <label><strong>Τίτλος Block</strong></label>
+                                <label><strong>Τίτλος Ενότητας</strong></label>
                                 <input type="text" name="title" class="form-control form-control-custom" value="<?php echo htmlspecialchars($eventsContentSection['title'] ?? ''); ?>">
                             </div>
                             <div>
@@ -1276,355 +1313,11 @@ $calendarPayload = [
     </div>
 </div>
 
-<script>
-window.adminCalendarData = <?php echo json_encode(
-    $calendarPayload,
-    JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-); ?>;
-</script>
+<script src="../assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['adminCalendarData' => $calendarPayload], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/admin-home-calendar.js"></script>
-<script>
-function ensureDashboardNoticeElements() {
-    if (document.getElementById('page-notice-overlay')) {
-        return;
-    }
-
-    const overlay = document.createElement('div');
-    overlay.id = 'page-notice-overlay';
-    overlay.className = 'page-notice-overlay';
-    overlay.innerHTML = '' +
-        '<div class="page-notice-card" id="page-notice-card" role="dialog" aria-modal="true" aria-labelledby="page-notice-title">' +
-            '<h3 class="page-notice-title" id="page-notice-title">Ειδοποίηση</h3>' +
-            '<div class="page-notice-message" id="page-notice-message">—</div>' +
-            '<div class="page-notice-actions"><button type="button" class="page-notice-btn" id="page-notice-close">Εντάξει</button></div>' +
-        '</div>';
-
-    overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        }
-    });
-
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('page-notice-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            overlay.classList.remove('is-open');
-            document.body.style.overflow = overlay.getAttribute('data-prev-overflow') || '';
-        });
-    }
-}
-
-function showDashboardNotice(message, options) {
-    ensureDashboardNoticeElements();
-
-    const overlay = document.getElementById('page-notice-overlay');
-    const card = document.getElementById('page-notice-card');
-    const title = document.getElementById('page-notice-title');
-    const body = document.getElementById('page-notice-message');
-    const opts = options || {};
-
-    if (!overlay || !card || !title || !body) {
-        console.error(message);
-        return;
-    }
-
-    card.classList.remove('is-error', 'is-warning');
-    if (opts.variant === 'error') card.classList.add('is-error');
-    if (opts.variant === 'warning') card.classList.add('is-warning');
-
-    title.textContent = opts.title || 'Ειδοποίηση';
-    body.textContent = message || 'Συνέβη ένα απρόσμενο σφάλμα.';
-
-    overlay.setAttribute('data-prev-overflow', document.body.style.overflow || '');
-    document.body.style.overflow = 'hidden';
-    overlay.classList.add('is-open');
-}
-
-function truncateDashboardPreviewFileName(fileName, maxLength) {
-    if (fileName.length <= maxLength) {
-        return fileName;
-    }
-
-    return fileName.slice(0, Math.max(0, maxLength - 3)) + '...';
-}
-
-function getDashboardFileKey(file) {
-    return [file.name, file.size, file.lastModified, file.type].join('::');
-}
-
-function syncDashboardInputFiles(input, stagedFiles) {
-    if (typeof DataTransfer === 'undefined') {
-        return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    stagedFiles.forEach((file) => dataTransfer.items.add(file));
-    input.files = dataTransfer.files;
-}
-
-function renderDashboardImagePreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const item = document.createElement('div');
-        item.className = 'image-preview-item';
-
-        const image = document.createElement('img');
-        image.alt = file.name;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        const caption = document.createElement('div');
-        caption.className = 'preview-file-caption';
-        caption.textContent = truncateDashboardPreviewFileName(file.name, 18);
-
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            image.src = String(event.target && event.target.result ? event.target.result : '');
-        };
-        reader.readAsDataURL(file);
-
-        item.appendChild(image);
-        item.appendChild(deleteBtn);
-        item.appendChild(caption);
-        preview.appendChild(item);
-    });
-}
-
-function renderDashboardAttachmentPreview(preview, stagedFiles, onRemove) {
-    if (!preview) {
-        return;
-    }
-
-    preview.innerHTML = '';
-
-    stagedFiles.forEach((file, index) => {
-        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-        const item = document.createElement('div');
-        item.className = 'attachment-preview-item';
-
-        const info = document.createElement('div');
-        info.className = 'attachment-preview-info';
-
-        const icon = document.createElement('i');
-        icon.className = fileExt === 'pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
-
-        const text = document.createElement('span');
-        text.className = 'attachment-preview-name';
-        text.textContent = truncateDashboardPreviewFileName(file.name, 40);
-
-        const size = document.createElement('span');
-        size.className = 'attachment-preview-size';
-        size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.type = 'button';
-        deleteBtn.className = 'attachment-remove-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-        deleteBtn.setAttribute('aria-label', `Αφαίρεση ${file.name}`);
-        deleteBtn.addEventListener('click', function () {
-            onRemove(index);
-        });
-
-        info.appendChild(icon);
-        info.appendChild(text);
-        info.appendChild(size);
-        item.appendChild(info);
-        item.appendChild(deleteBtn);
-        preview.appendChild(item);
-    });
-}
-
-function setupDashboardImageInput(input, previewId, imageLimit, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const existingCount = Number.parseInt(input.dataset.existingCount || '0', 10) || 0;
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function updateInputState() {
-        if (existingCount + stagedFiles.length >= imageLimit) {
-            input.disabled = true;
-        } else if (existingCount < imageLimit) {
-            input.disabled = false;
-        }
-    }
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
-        const maxFileSize = 5 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-        let reachedLimit = false;
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        if (existingCount >= imageLimit) {
-            warnings.push(`Έχει ήδη συμπληρωθεί το όριο των ${imageLimit} εικόνων.`);
-        } else {
-            incomingFiles.forEach((file) => {
-                const fileKey = getDashboardFileKey(file);
-                const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-
-                if (!allowedExtensions.includes(fileExt)) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο JPG, JPEG, PNG, GIF.`);
-                    return;
-                }
-
-                if (file.size > maxFileSize) {
-                    warnings.push(`Το αρχείο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 5MB.`);
-                    return;
-                }
-
-                if (!String(file.type || '').startsWith('image/')) {
-                    warnings.push(`Το αρχείο "${file.name}" δεν φαίνεται να είναι εικόνα.`);
-                    return;
-                }
-
-                if (stagedKeys.has(fileKey)) {
-                    warnings.push(`Το αρχείο "${file.name}" έχει ήδη επιλεγεί.`);
-                    return;
-                }
-
-                if (existingCount + stagedFiles.length >= imageLimit) {
-                    if (!reachedLimit) {
-                        const remainingSlots = Math.max(0, imageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες.`);
-                        reachedLimit = true;
-                    }
-                    return;
-                }
-
-                stagedFiles.push(file);
-                stagedKeys.add(fileKey);
-            });
-        }
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardImagePreview(preview, stagedFiles, removeStagedFile);
-        updateInputState();
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-
-    updateInputState();
-}
-
-function setupDashboardAttachmentInput(input, previewId, noticeTitle) {
-    if (!input) {
-        return;
-    }
-
-    const preview = document.getElementById(previewId);
-    const stagedFiles = [];
-    const stagedKeys = new Set();
-
-    function removeStagedFile(index) {
-        const removedFile = stagedFiles[index];
-        if (!removedFile) {
-            return;
-        }
-
-        stagedFiles.splice(index, 1);
-        stagedKeys.delete(getDashboardFileKey(removedFile));
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-    }
-
-    input.addEventListener('change', function () {
-        const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
-        const maxFileSize = 8 * 1024 * 1024;
-        const incomingFiles = Array.from(input.files || []);
-        const warnings = [];
-
-        if (incomingFiles.length === 0) {
-            return;
-        }
-
-        incomingFiles.forEach((file) => {
-            const fileKey = getDashboardFileKey(file);
-            const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-            const fileType = String(file.type || '');
-
-            if (!allowedExtensions.includes(fileExt)) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρη επέκταση. Επιτρέπονται μόνο PDF, JPG, JPEG, PNG.`);
-                return;
-            }
-
-            if (file.size > maxFileSize) {
-                warnings.push(`Το συνημμένο "${file.name}" είναι πολύ μεγάλο (${(file.size / 1024 / 1024).toFixed(2)}MB). Μέγιστο μέγεθος: 8MB.`);
-                return;
-            }
-
-            if (fileType !== '' && fileType !== 'application/pdf' && !fileType.startsWith('image/')) {
-                warnings.push(`Το συνημμένο "${file.name}" δεν έχει έγκυρο τύπο αρχείου.`);
-                return;
-            }
-
-            if (stagedKeys.has(fileKey)) {
-                warnings.push(`Το συνημμένο "${file.name}" έχει ήδη επιλεγεί.`);
-                return;
-            }
-
-            stagedFiles.push(file);
-            stagedKeys.add(fileKey);
-        });
-
-        syncDashboardInputFiles(input, stagedFiles);
-        renderDashboardAttachmentPreview(preview, stagedFiles, removeStagedFile);
-
-        if (warnings.length > 0) {
-            showDashboardNotice('Προειδοποιήσεις:\n\n' + warnings.join('\n\n'), {
-                title: noticeTitle,
-                variant: 'warning'
-            });
-        }
-    });
-}
-
-setupDashboardImageInput(document.getElementById('calendar_event_images'), 'calendarEventImagePreview', 6, 'Έλεγχος εικόνων εκδήλωσης');
-setupDashboardImageInput(document.getElementById('calendar_announcement_images'), 'calendarAnnouncementImagePreview', 6, 'Έλεγχος εικόνων ανακοίνωσης');
-setupDashboardAttachmentInput(document.getElementById('calendar_announcement_attachments'), 'calendarAnnouncementAttachmentPreview', 'Έλεγχος συνημμένων ανακοίνωσης');
-</script>
+<script src="../assets/js/admin-home-dashboard.js"></script>
 </body>
 </html>

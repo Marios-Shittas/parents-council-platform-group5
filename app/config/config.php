@@ -1,54 +1,25 @@
 <?php
+// Arxeio: app\config\config.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
+require_once __DIR__ . '/../core/AppConfig.php';
+
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Europe/Athens');
 
 if (!function_exists('app_detect_request_value')) {
+// Backward-compatible helper pou kanei forward ta legacy procedural calls
+// sto AppConfig::detectRequestValue xwris na allaksei to palio include usage.
     function app_detect_request_value(string $primaryKey, string $fallbackKey = ''): string
     {
-        $value = trim((string) ($_SERVER[$primaryKey] ?? ''));
-        if ($value !== '') {
-            return explode(',', $value)[0];
-        }
-
-        if ($fallbackKey !== '') {
-            $fallbackValue = trim((string) ($_SERVER[$fallbackKey] ?? ''));
-            if ($fallbackValue !== '') {
-                return explode(',', $fallbackValue)[0];
-            }
-        }
-
-        return '';
+        return AppConfig::detectRequestValue($primaryKey, $fallbackKey);
     }
 }
 
 if (!function_exists('app_detect_base_url')) {
+// Backward-compatible wrapper pou ypologizei to app base URL meso tis OO logikis AppConfig.
     function app_detect_base_url(): string
     {
-        $configuredBaseUrl = trim((string) getenv('APP_BASE_URL'));
-        if ($configuredBaseUrl !== '') {
-            return rtrim($configuredBaseUrl, '/');
-        }
-
-        $scheme = app_detect_request_value('HTTP_X_FORWARDED_PROTO');
-        if ($scheme === '') {
-            $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
-            $scheme = ($https !== '' && $https !== 'off') ? 'https' : 'http';
-        }
-
-        $host = app_detect_request_value('HTTP_X_FORWARDED_HOST', 'HTTP_HOST');
-        if ($host === '') {
-            $host = trim((string) ($_SERVER['SERVER_NAME'] ?? 'localhost'));
-        }
-
-        $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
-        $basePath = '/parents-council-platform-group5';
-
-        if (preg_match('#^(.*?)/public(?:/|$)#', $scriptName, $matches)) {
-            $basePath = $matches[1] !== '' ? $matches[1] : '';
-        } elseif (preg_match('#^(.*?)/app(?:/|$)#', $scriptName, $matches)) {
-            $basePath = $matches[1] !== '' ? $matches[1] : '';
-        }
-
-        return rtrim($scheme . '://' . $host . $basePath, '/');
+        return AppConfig::detectBaseUrl();
     }
 }
 
@@ -62,8 +33,8 @@ define('APP_BASE_URL', app_detect_base_url());
 define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
 define('SMTP_PORT', (int) (getenv('SMTP_PORT') ?: 587));
 define('SMTP_ENCRYPTION', getenv('SMTP_ENCRYPTION') ?: 'tls');
-define('SMTP_USER', getenv('SMTP_USER') ?: 'nigkaleta@gmail.com');
-define('SMTP_PASS', getenv('SMTP_PASS') ?: 'dyjs vehc oyiy dvmv');
+define('SMTP_USER', getenv('SMTP_USER') ?: 'sg.ag.athanasiou@gmail.com');
+define('SMTP_PASS', getenv('SMTP_PASS') ?: 'hxkh dayj kdvi myvn');
 define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: SMTP_USER);
 define('APPROVAL_LINK_EXPIRY_HOURS', (int) (getenv('APPROVAL_LINK_EXPIRY_HOURS') ?: 168));
 define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Parents Council');

@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\ApplicationTemplateService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
  * ApplicationTemplateService
- * Manages reusable application templates for standard/recurring applications
+ * Diaxeirizetai reusable aitisi templates gia standard/epanalamvanomenes aitiseis
  */
 class ApplicationTemplateService {
     private $conn;
@@ -9,14 +12,15 @@ class ApplicationTemplateService {
     private $templatesTableChecked = false;
     private $templatesTableReady = false;
     
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct($conn) {
         $this->conn = $conn;
         $this->ensureTemplatesTableReady();
     }
 
     /**
-     * Ensure the templates table exists for older installs that have not run the
-     * applications v2 migration yet.
+     * Eksasfalizei to templates pinakas yparxei gia palaioteres egkatastaseis that have not run to
+     * aitiseis v2 migration yet.
      */
     private function ensureTemplatesTableReady() {
         if ($this->templatesTableChecked) {
@@ -39,12 +43,14 @@ class ApplicationTemplateService {
         return $this->templatesTableReady;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function templatesTableExists() {
         $tableName = $this->conn->real_escape_string($this->templatesTable);
         $result = $this->conn->query("SHOW TABLES LIKE '{$tableName}'");
         return $result instanceof mysqli_result && $result->num_rows > 0;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function createTemplatesTable() {
         $sql = "CREATE TABLE IF NOT EXISTS `ApplicationTemplates` (
                     `template_id` INT NOT NULL AUTO_INCREMENT,
@@ -64,6 +70,7 @@ class ApplicationTemplateService {
         $this->conn->query($sql);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function seedDefaultTemplatesIfNeeded() {
         if (!$this->templatesTableReady) {
             return;
@@ -90,11 +97,11 @@ class ApplicationTemplateService {
     }
     
     // ============================================================
-    // RETRIEVAL
+    // Anaktisi dedomenon.
     // ============================================================
     
     /**
-     * Get all templates
+     * Get all protypa
      */
     public function getAllTemplates($isSystemOnly = false) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -121,7 +128,7 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Get template by ID
+     * Get protypo by ID
      */
     public function getTemplateById($templateId) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -144,7 +151,7 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Get template by key
+     * Get protypo by key
      */
     public function getTemplateByKey($templateKey) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -167,7 +174,7 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Get templates by category
+     * Get protypa by category
      */
     public function getTemplatesByCategory($category) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -191,11 +198,11 @@ class ApplicationTemplateService {
     }
     
     // ============================================================
-    // CRUD (mainly for custom templates)
+    // Leitourgies CRUD (kyrios gia custom protypa)
     // ============================================================
     
     /**
-     * Create a new template
+     * Dimiourgia a new protypo
      */
     public function createTemplate($templateKey, $name, $description, $category, $formSchema, $isSystemTemplate = false) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -231,7 +238,7 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Update a custom template
+     * Enimerosi a custom protypo
      */
     public function updateTemplate($templateId, $name, $description, $category, $formSchema) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -243,7 +250,7 @@ class ApplicationTemplateService {
             return false;
         }
         
-        // If formSchema is already JSON string, keep it; otherwise encode it
+        // An to formSchema einai idi JSON string, to krata. allios kane encode.
         if (is_array($formSchema)) {
             $formSchemaJson = json_encode($formSchema, JSON_UNESCAPED_UNICODE);
         } else {
@@ -261,7 +268,7 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Delete a custom template (not system templates)
+     * Diagrafi a custom protypo (not system protypa)
      */
     public function deleteTemplate($templateId) {
         if (!$this->ensureTemplatesTableReady()) {
@@ -281,18 +288,18 @@ class ApplicationTemplateService {
     }
     
     // ============================================================
-    // SEED / DEFAULT TEMPLATES
+    // Arxikopoisi me proepilegmena protypa.
     // ============================================================
     
     /**
-     * Seed system templates into database
-     * Call this once during installation
+     * Vazei arxika system templates mesa se vasi
+     * Kaleitai mia fora kata tin egkatastasi
      */
     public function seedDefaultTemplates() {
         $templates = $this->getDefaultTemplates();
         
         foreach ($templates as $template) {
-            // Check if already exists
+            // Elegxei an yparxei idi i eggrafi.
             $existing = $this->getTemplateByKey($template['key']);
             if ($existing) {
                 continue;
@@ -310,11 +317,11 @@ class ApplicationTemplateService {
     }
     
     /**
-     * Get the default template definitions
+     * Get the proepilegmeno protypo definitions
      */
     private function getDefaultTemplates() {
         return [
-            // Template 1: Subscription / Insurance
+            // Protypo 1: Syndromi / Asfalisi
             [
                 'key' => 'subscription-insurance',
                 'name' => 'Συνδρομή / Ασφάλιση',
@@ -438,7 +445,7 @@ class ApplicationTemplateService {
                 ]
             ],
             
-            // Template 2: Event Consent
+            // Protypo 2: Synainesi ekdilosis
             [
                 'key' => 'event-consent',
                 'name' => 'Συναίνεση Συμμετοχής σε Εκδήλωση',

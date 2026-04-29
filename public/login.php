@@ -30,22 +30,11 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
         <!-- Costom CSS -->
         <link rel="stylesheet" href="assets/css/main.css">
         <link rel="stylesheet" href="assets/css/login.css">
+        <script src="assets/js/site-favicon.js" data-favicon-href="assets/img/logo-icon.png" data-favicon-shape="circle" defer></script>
     </head>
     
     <body class="body">
-    <script>
-        (function() {
-            window.addEventListener('popstate', function(event) {
-            });
-            
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    if (window.location.pathname.includes('login.php')) {
-                    }
-                }
-            });
-        })();
-    </script>
+    <script src="assets/js/login-page.js" defer></script>
         <div class="page-content">
             <a href="index.php">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>

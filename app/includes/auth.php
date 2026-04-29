@@ -1,74 +1,46 @@
 <?php
+// Arxeio: app\includes\auth.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora authentication/security flow, ara den allazoume validation i redirects xoris elegxo.
+
+require_once __DIR__ . '/../core/AuthSession.php';
 
 if (!function_exists('auth_start_session')) {
+// Thin compatibility wrapper pou ksekina to synedria meso tou AuthSession OO layer.
     function auth_start_session(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        (new AuthSession())->start();
     }
 }
 
 if (!function_exists('auth_user_id')) {
+// Epistrefei to authenticated xristis id apo to synedria meso tou kentrikou AuthSession API.
     function auth_user_id(): int
     {
-        auth_start_session();
-        return (int) ($_SESSION['user_id'] ?? 0);
+        return (new AuthSession())->userId();
     }
 }
 
 if (!function_exists('auth_user_role')) {
+// Epistrefei to role string tou synedria oste ta role reads na einai consistency se legacy code.
     function auth_user_role(): string
     {
-        auth_start_session();
-        return (string) ($_SESSION['role'] ?? '');
+        return (new AuthSession())->userRole();
     }
 }
 
 if (!function_exists('auth_redirect_url_for_current_role')) {
+// Kanei delegate ton ypologismo role-based redirect stin kentriki logiki tou AuthSession.
     function auth_redirect_url_for_current_role(): string
     {
-        $role = auth_user_role();
-
-        if ($role === 'admin') {
-            return '/parents-council-platform-group5/public/admin/home.php';
-        }
-
-        if ($role === 'parent') {
-            return '/parents-council-platform-group5/public/parent/home.php';
-        }
-
-        return '/parents-council-platform-group5/public/login.php';
+        return (new AuthSession())->redirectUrlForCurrentRole();
     }
 }
 
 if (!function_exists('auth_require_role')) {
+// Legacy-friendly authorization guard pou epivalei required role me redirect i JSON behavior.
     function auth_require_role(string $requiredRole, array $options = []): void
     {
-        auth_start_session();
-
-        $userId = auth_user_id();
-        $userRole = auth_user_role();
-
-        if ($userId > 0 && $userRole === $requiredRole) {
-            return;
-        }
-
-        $mode = (string) ($options['mode'] ?? 'redirect');
-        $message = (string) ($options['message'] ?? 'Unauthorized access.');
-        $statusCode = $userId > 0 ? 403 : 401;
-
-        if ($mode === 'json') {
-            http_response_code($statusCode);
-            echo json_encode([
-                'success' => false,
-                'message' => $message,
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        $redirectTo = (string) ($options['redirect_to'] ?? auth_redirect_url_for_current_role());
-        header('Location: ' . $redirectTo);
-        exit;
+        (new AuthSession())->requireRole($requiredRole, $options);
     }
 }

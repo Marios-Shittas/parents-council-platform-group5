@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ProductFetch.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -6,6 +9,7 @@ header("Access-Control-Allow-Origin: *");
 
 include "../config/db.php";
 require_once __DIR__ . '/EshopSettingsService.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 $eshopSettingsService = new EshopSettingsService($conn);
 
@@ -15,11 +19,13 @@ if (!$eshopSettingsService->isShopVisible()) {
     exit;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getDefaultProductImagePath(): string
 {
     return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function resolveProductImagePath(string $imagePath): string
 {
     $imagePath = trim($imagePath);
@@ -27,20 +33,60 @@ function resolveProductImagePath(string $imagePath): string
         return getDefaultProductImagePath();
     }
 
-    $normalized = str_replace('\\', '/', $imagePath);
+    $absolutePath = resolveProductImageAbsolutePath($imagePath);
+
+    return file_exists($absolutePath) ? resolveProductImagePublicUrl($imagePath) : getDefaultProductImagePath();
+}
+
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+function resolveProductImageAbsolutePath(string $imagePath): string
+{
     $projectRoot = dirname(__DIR__, 2);
-    $absolutePath = '';
+    $publicRelativePath = resolveProductImagePublicRelativePath($imagePath);
+
+    return $publicRelativePath === '' ? '' : $projectRoot . '/public/' . $publicRelativePath;
+}
+
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+function resolveProductImagePublicUrl(string $imagePath): string
+{
+    $publicRelativePath = resolveProductImagePublicRelativePath($imagePath);
+
+    return $publicRelativePath === ''
+        ? getDefaultProductImagePath()
+        : '/parents-council-platform-group5/public/' . $publicRelativePath;
+}
+
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+function resolveProductImagePublicRelativePath(string $imagePath): string
+{
+    $normalized = trim(str_replace('\\', '/', $imagePath));
+    if ($normalized === '') {
+        return '';
+    }
 
     $publicPosition = strpos($normalized, '/public/');
     if ($publicPosition !== false) {
-        $absolutePath = $projectRoot . substr($normalized, $publicPosition);
-    } elseif (strpos($normalized, '/assets/') === 0) {
-        $absolutePath = $projectRoot . '/public' . $normalized;
-    } else {
-        $absolutePath = $projectRoot . '/public/' . ltrim($normalized, '/');
+        return ltrim(substr($normalized, $publicPosition + strlen('/public/')), '/');
     }
 
-    return file_exists($absolutePath) ? $imagePath : getDefaultProductImagePath();
+    if (strpos($normalized, '../assets/') === 0) {
+        return substr($normalized, 3);
+    }
+
+    if (strpos($normalized, '/assets/') === 0) {
+        return ltrim($normalized, '/');
+    }
+
+    if (strpos($normalized, 'assets/') === 0) {
+        return $normalized;
+    }
+
+    if (strpos($normalized, 'public/') === 0) {
+        return substr($normalized, strlen('public/'));
+    }
+
+    return ltrim($normalized, '/');
 }
 
 $sql = "SELECT product_id, product_name, product_description, price FROM Products";
@@ -66,12 +112,16 @@ if ($result->num_rows > 0) {
             $images[] = getDefaultProductImagePath();
         }
 
+        $sizeMeta = product_sizes_get_for_product((int)$product_id);
+        $row['has_sizes'] = $sizeMeta['has_sizes'];
+        $row['size_options'] = $sizeMeta['size_options_with_labels'];
+        $row['size_labels'] = $sizeMeta['size_labels'];
         $row['images'] = $images;
         $products[] = $row;      
     }
 }
 
-echo json_encode($products);
+echo json_encode($products, JSON_UNESCAPED_UNICODE);
 
 $conn->close();
 ?>

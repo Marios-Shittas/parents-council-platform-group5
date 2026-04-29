@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\home.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Styles gia tin public arxiki selida, banner kai sections. */
+/* Edo allazoun hero/banner, cards anakoinoseon, ekdiloseis feed kai responsive arxiki. */
 :root {
     --home-blue-900: #1a3a5c;
     --home-blue-800: #003d7a;
@@ -268,16 +273,16 @@
     color: var(--home-text-900);
 }
 
-#announcements-block,
+#anakoinoseis-block,
 #calendar-block,
-#upcoming-events-block {
+#upcoming-ekdiloseis-block {
     position: relative;
     overflow: hidden;
 }
 
-#announcements-block::after,
+#anakoinoseis-block::after,
 #calendar-block::after,
-#upcoming-events-block::after {
+#upcoming-ekdiloseis-block::after {
     content: "";
     position: absolute;
     top: 0;
@@ -286,7 +291,7 @@
     height: 4px;
 }
 
-#announcements-block::after {
+#anakoinoseis-block::after {
     background: linear-gradient(90deg, #0057a8, #4a8ecb);
 }
 
@@ -294,12 +299,12 @@
     background: linear-gradient(90deg, #1a3a5c, #2f6ea0);
 }
 
-#upcoming-events-block::after {
+#upcoming-ekdiloseis-block::after {
     background: linear-gradient(90deg, #003d7a, #1b4f8f);
 }
 
-#announcements-root,
-#upcoming-events-root {
+#anakoinoseis-root,
+#upcoming-ekdiloseis-root {
     flex: 1;
 }
 

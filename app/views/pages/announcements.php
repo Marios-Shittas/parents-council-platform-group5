@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\announcements.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../services/AnnouncementsService.php';
 require_once __DIR__ . '/../../includes/site_context.php';
 
@@ -63,22 +66,6 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var params = new URLSearchParams(window.location.search);
-        var openId = params.get('open');
-
-        if (!openId) {
-            return;
-        }
-
-        var modalElement = document.getElementById('announcementModal' + openId);
-        if (!modalElement || typeof window.jQuery === 'undefined') {
-            return;
-        }
-
-        window.jQuery(modalElement).modal('show');
-    });
-</script>
+<script src="<?php echo site_asset_url('js/announcement-open-modal.js'); ?>" defer></script>
 </body>
 </html>

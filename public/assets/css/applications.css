@@ -1,7 +1,10 @@
-/* Applications Page Styles */
+/* Arxeio: public\assets\css\applications.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika. */
+/* Aitiseis Page Styles */
 
 /* ===== PAGE HEADER BANNER ===== */
-/* .applications-hero = the blue banner at the top of the applications page */
+/* .aitiseis-hero = to blue banner at to top apo to aitiseis page */
 .applications-hero {
     background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
     color: white;
@@ -9,26 +12,26 @@
     margin-bottom: 3rem;
 }
 
-/* .applications-hero .lead = the subtitle text under the title in the hero banner */
+/* .aitiseis-hero .lead = to subtitlos text under to titlos in to hero banner */
 .applications-hero .lead {
     color: white;
 }
 
 /* ===== APPLICATION CARD STYLES ===== */
-/* .applications-card = the white card containers for main sections */
+/* .aitiseis-card = to white card containers gia main sections */
 .applications-card {
     border: none;
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* .section-title = the heading text for each main section ("Available Applications", "My Submissions") */
+/* .section-titlos = to heading text gia each main section ("Available Aitiseis", "My Ypovoles") */
 .section-title {
     font-weight: 700;
     margin-bottom: 20px;
 }
 
-/* .application-item = individual application boxes within the grid */
+/* .aitisi-item = individual aitisi boxes within to grid */
 .application-item {
     background: #fff;
     border: 1px solid #eef1f5;
@@ -39,19 +42,19 @@
     flex-direction: column;
 }
 
-/* .application-title = the title of each application */
+/* .aitisi-titlos = to titlos apo each aitisi */
 .application-title {
     font-weight: 700;
     margin-bottom: 8px;
 }
 
-/* .application-description = the description text of each application */
+/* .aitisi-perigrafi = to perigrafi text apo each aitisi */
 .application-description {
     color: #6c757d;
     min-height: 90px;
 }
 
-/* .doc-badge = the small blue badge showing document count */
+/* .doc-badge = to small blue badge showing document count */
 .doc-badge {
     background: #e7f1ff;
     color: #0d6efd;
@@ -61,19 +64,19 @@
     font-weight: 700;
 }
 
-/* .submit-btn = the "Submit Application" button */
+/* .submit-btn = to "Submit Aitisi" button */
 .submit-btn {
     margin-top: auto;
 }
 
 /* ===== INSTRUCTIONS SIDEBAR ===== */
-/* .instructions-list = the bullet list in the instructions sidebar */
+/* .instructions-list = to bullet list in to instructions sidebar */
 .instructions-list li {
     margin-bottom: 10px;
 }
 
 /* ===== UPLOAD STYLES ===== */
-/* .upload-box = the file upload area in the modal */
+/* .upload-box = to arxeio upload area in to modal */
 .upload-box {
     border: 2px dashed #ced4da;
     border-radius: 14px;
@@ -82,7 +85,7 @@
 }
 
 /* ===== STATUS BADGES ===== */
-/* .status-badge = the status indicators for submitted applications */
+/* .status-badge = to status indicators gia submitted aitiseis */
 .status-badge {
     display: inline-block;
     padding: 6px 12px;
@@ -92,19 +95,19 @@
     text-transform: capitalize;
 }
 
-/* .status-waiting = yellow badge for applications waiting for review */
+/* .status-anamoni = yellow badge gia aitiseis anamoni gia elegxo */
 .status-waiting {
     background: #fff3cd;
     color: #856404;
 }
 
-/* .status-approved = green badge for approved applications */
+/* .status-approved = green badge gia approved aitiseis */
 .status-approved {
     background: #d4edda;
     color: #155724;
 }
 
-/* .status-rejected = red badge for rejected applications */
+/* .status-rejected = red badge gia rejected aitiseis */
 .status-rejected {
     background: #f8d7da;
     color: #721c24;

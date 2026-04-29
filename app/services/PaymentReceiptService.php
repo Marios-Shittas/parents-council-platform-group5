@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\PaymentReceiptService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 require_once __DIR__ . '/ApprovalMailer.php';
@@ -7,11 +10,13 @@ class PaymentReceiptService
 {
     private mysqli $conn;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendReceiptForPayments(int $userId, array $paymentIds, string $sourceLabel = 'JCC'): array
     {
         $normalizedPaymentIds = array_values(array_unique(array_filter(array_map('intval', $paymentIds), static function (int $id): bool {
@@ -63,6 +68,7 @@ class PaymentReceiptService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getReceiptRecipient(int $userId): array
     {
         $stmt = $this->conn->prepare('SELECT name, surname, email FROM Users WHERE user_id = ? LIMIT 1');
@@ -92,6 +98,7 @@ class PaymentReceiptService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPayments(int $userId, array $paymentIds): array
     {
         $placeholders = implode(',', array_fill(0, count($paymentIds), '?'));
@@ -128,6 +135,7 @@ class PaymentReceiptService
         return $payments;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildReceiptTextBody(array $recipient, array $payments, string $sourceLabel, float $totalAmount): string
     {
         $fullName = trim(($recipient['name'] ?? '') . ' ' . ($recipient['surname'] ?? ''));
@@ -161,6 +169,7 @@ class PaymentReceiptService
             'Αυτό είναι αυτοματοποιημένο μήνυμα. Για απορίες, απαντήστε σε αυτό το email.';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildPaymentDescription(array $payment): string
     {
         $paymentType = (string) ($payment['payment_type'] ?? '');
@@ -191,6 +200,7 @@ class PaymentReceiptService
         return 'Πληρωμή';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function countCoveredChildren(int $paymentId): int
     {
         if ($paymentId <= 0) {
@@ -211,6 +221,7 @@ class PaymentReceiptService
         return (int) ($row['children_count'] ?? 0);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function loadProductItems(int $paymentId): array
     {
         if ($paymentId <= 0) {
@@ -252,6 +263,7 @@ class PaymentReceiptService
         return $items;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function formatDate(string $dateTime): string
     {
         if ($dateTime === '') {

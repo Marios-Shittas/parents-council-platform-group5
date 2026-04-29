@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Arxeio: public\assets\img\logo-icon-favicon.svg | Rolos: Periexei vector asset pou xrisimopoieitai apo to UI. | Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include. -->
+  <!-- Favicon icon gia to site, se mikri tetragoni ekdosi. -->
+  <!-- To viewBox 100x100 krataei to icon katharo se browser tabs kai syntomeusis. -->
+  <defs>
+    <clipPath id="faviconCircle">
+      <circle cx="50" cy="50" r="50" />
+    </clipPath>
+  </defs>
+  <image
+    href="/parents-council-platform-group5/public/assets/img/logo-icon.png"
+    x="0"
+    y="0"
+    width="100"
+    height="100"
+    preserveAspectRatio="xMidYMid slice"
+    clip-path="url(#faviconCircle)"
+  />
+</svg>

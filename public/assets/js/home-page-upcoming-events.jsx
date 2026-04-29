@@ -1,8 +1,14 @@
+// Arxeio: public\assets\js\home-page-upcoming-events.jsx
+// Rolos: Xeirizetai dynamic kommatia tis arxikis selidas kai fernei dedomena apo backend services.
+// Simeiosi: Allages edo epireazoun ti symperifora sto browser kai ta API requests pou stelnei to UI.
+// React component pou deixnei tis epomenes ekdiloseis stin arxiki selida.
 function UpcomingEvents() {
+    // Ekdiloseis/loading/error kratane to feed responsive oso perimenoume to backend.
     const [events, setEvents] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(false);
 
+    // Metatrepei tin imerominia tis ekdilosis se anagnosimo keimeno gia tin karta.
     const formatDate = (value) => {
         if (!value) return "Εκδήλωση";
         const date = new Date(String(value).replace(" ", "T"));
@@ -15,6 +21,7 @@ function UpcomingEvents() {
     };
 
     React.useEffect(() => {
+        // Pairnoume ta ekdiloseis apo to service kai krataoume mono osa xreiazontai gia tin arxiki.
         fetch('/parents-council-platform-group5/app/services/EventsService.php')
         .then(result => result.json())
         .then(data => {

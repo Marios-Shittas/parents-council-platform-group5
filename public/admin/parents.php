@@ -1,38 +1,56 @@
 <?php
+// Arxeio: public\admin\parents.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
+// Admin selida gia epexergasia tou periexomenou "Syndesmos Goneon".
+// Apo edo o admin allazei text, lista, board archive kai stoixeia pou fainontai sto public/goneas view.
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// No-cache gia na min meinei admin content ston browser meta apo logout.
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
 header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    // An den einai admin, gyrnaei sto login kai stamataei i selida.
     header('Location: /parents-council-platform-group5/public/login.php');
     exit;
 }
 
+// Leitourgia parentsAdminTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia parentsAdminTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
 }
 
+// Leitourgia parentsAdminUrl: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminUrl($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia parentsAdminFixedPageHeaderIcon: xeirizetai to antistoixo kommati tis selidas i tou service.
+function parentsAdminFixedPageHeaderIcon()
+{
+    return 'fas fa-users';
+}
+
+// Leitourgia parentsAdminTextareaToList: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToList($value)
 {
+    // Kathe grammi tou textarea ginetai ena item sti lista, ta kena agnoountai.
     $lines = explode("\n", parentsAdminTextarea($value));
     $items = [];
 
@@ -46,8 +64,10 @@ function parentsAdminTextareaToList($value)
     return $items;
 }
 
+// Leitourgia parentsAdminTextareaToRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminTextareaToRows($value, array $keys)
 {
+    // Xrisimopoieitai gia pinakes pou grafontai sto textarea me separator "|".
     $lines = explode("\n", parentsAdminTextarea($value));
     $rows = [];
 
@@ -76,13 +96,16 @@ function parentsAdminTextareaToRows($value, array $keys)
     return $rows;
 }
 
+// Leitourgia parentsAdminListToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminListToTextarea($items)
 {
     return implode("\n", is_array($items) ? $items : []);
 }
 
+// Leitourgia parentsAdminRowsToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminRowsToTextarea($rows, array $keys)
 {
+    // Kanei ta apothikevmena rows pali text gia na ta dei/epexergastei o admin sto textarea.
     if (!is_array($rows)) {
         return '';
     }
@@ -111,8 +134,10 @@ function parentsAdminRowsToTextarea($rows, array $keys)
     return implode("\n", $lines);
 }
 
+// Leitourgia parentsAdminMergeBoardArchiveReferenceRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
+    // Krataei osa exei idi o admin kai prosthetei missing reference years apo ta apothikevmena dedomena.
     $mergedRows = is_array($rows) ? $rows : [];
     $existingYears = [];
 
@@ -150,8 +175,10 @@ function parentsAdminMergeBoardArchiveReferenceRows(array $rows, array $referenc
     return $mergedRows;
 }
 
+// Leitourgia parentsAdminGroupBoardArchiveRowsByYear: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
 {
+    // Omadopoiei to archive ana xronia gia na fanei kathara sto pelegxo/UI.
     $groupedRows = [];
 
     foreach ($rows as $row) {
@@ -177,11 +204,13 @@ function parentsAdminGroupBoardArchiveRowsByYear(array $rows)
     return $groupedRows;
 }
 
+// Leitourgia parentsAdminBoardArchiveGroupToTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminBoardArchiveGroupToTextarea(array $rows)
 {
     return parentsAdminRowsToTextarea($rows, ['role', 'name']);
 }
 
+// Leitourgia parentsAdminBoardArchiveBlocksToRows: xeirizetai to antistoixo kommati tis selidas i tou service.
 function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
 {
     $archiveRows = [];
@@ -213,6 +242,208 @@ function parentsAdminBoardArchiveBlocksToRows($years, $rowsPerYear)
     return $archiveRows;
 }
 
+function parentsAdminDocumentsUploadDir()
+{
+    return dirname(__DIR__) . '/assets/Parents_docs/';
+}
+
+function parentsAdminDocumentsWebPath($fileName)
+{
+    return '/parents-council-platform-group5/public/assets/Parents_docs/' . $fileName;
+}
+
+function parentsAdminDeleteUploadedDocument($webPath)
+{
+    $webPath = parentsAdminTrim($webPath);
+    $webPrefix = '/parents-council-platform-group5/public/assets/Parents_docs/';
+
+    if ($webPath === '' || strpos($webPath, $webPrefix) !== 0) {
+        return;
+    }
+
+    $fileName = basename($webPath);
+    $localPath = parentsAdminDocumentsUploadDir() . $fileName;
+
+    if (is_file($localPath)) {
+        @unlink($localPath);
+    }
+}
+
+function parentsAdminEnsureDocumentsUploadDir()
+{
+    $uploadDir = parentsAdminDocumentsUploadDir();
+
+    if (!is_dir($uploadDir)) {
+        @mkdir($uploadDir, 0777, true);
+    }
+
+    clearstatcache(true, $uploadDir);
+    if (is_dir($uploadDir) && !is_writable($uploadDir)) {
+        @chmod($uploadDir, 0777);
+        clearstatcache(true, $uploadDir);
+    }
+
+    return is_dir($uploadDir) && is_writable($uploadDir);
+}
+
+function parentsAdminUploadedPdf($fieldName, $index = null)
+{
+    $file = $_FILES[$fieldName] ?? null;
+    if (!$file) {
+        return [null, []];
+    }
+
+    $errorCode = $index === null
+        ? ($file['error'] ?? UPLOAD_ERR_NO_FILE)
+        : ($file['error'][$index] ?? UPLOAD_ERR_NO_FILE);
+
+    if ($errorCode === UPLOAD_ERR_NO_FILE) {
+        return [null, []];
+    }
+
+    $originalName = $index === null
+        ? basename((string)($file['name'] ?? ''))
+        : basename((string)($file['name'][$index] ?? ''));
+    $safeOriginalName = htmlspecialchars($originalName, ENT_QUOTES, 'UTF-8');
+
+    if ($errorCode !== UPLOAD_ERR_OK) {
+        return [null, ["Το PDF '{$safeOriginalName}' απέτυχε να ανέβει (Error: {$errorCode})."]];
+    }
+
+    $tmpName = $index === null
+        ? (string)($file['tmp_name'] ?? '')
+        : (string)($file['tmp_name'][$index] ?? '');
+    $fileSize = $index === null
+        ? (int)($file['size'] ?? 0)
+        : (int)($file['size'][$index] ?? 0);
+    $fileExt = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    $maxFileSize = 12 * 1024 * 1024;
+
+    if ($fileExt !== 'pdf') {
+        return [null, ["Το αρχείο '{$safeOriginalName}' πρέπει να είναι PDF."]];
+    }
+
+    if ($fileSize > $maxFileSize) {
+        return [null, ["Το PDF '{$safeOriginalName}' είναι πολύ μεγάλο. Μέγιστο μέγεθος: 12MB."]];
+    }
+
+    if (!is_uploaded_file($tmpName)) {
+        return [null, ["Το προσωρινό αρχείο για '{$safeOriginalName}' δεν βρέθηκε."]];
+    }
+
+    $mimeType = @mime_content_type($tmpName);
+    if ($mimeType && !in_array($mimeType, ['application/pdf', 'application/x-pdf', 'application/octet-stream'], true)) {
+        return [null, ["Το αρχείο '{$safeOriginalName}' δεν αναγνωρίστηκε ως PDF."]];
+    }
+
+    if (!parentsAdminEnsureDocumentsUploadDir()) {
+        return [null, ['Ο φάκελος αποθήκευσης PDF δεν είναι διαθέσιμος ή εγγράψιμος.']];
+    }
+
+    $newFileName = uniqid('parents_doc_', true) . '_' . time() . '.pdf';
+    $targetPath = parentsAdminDocumentsUploadDir() . $newFileName;
+
+    if (!move_uploaded_file($tmpName, $targetPath)) {
+        return [null, ["Αποτυχία μεταφόρτωσης του PDF '{$safeOriginalName}'."]];
+    }
+
+    return [[
+        'file_path' => parentsAdminDocumentsWebPath($newFileName),
+        'original_name' => $originalName,
+    ], []];
+}
+
+function parentsAdminBuildParentDocumentsContent(array $existingContent)
+{
+    $uploadErrors = [];
+    $statuteTitles = is_array($_POST['statute_titles'] ?? null) ? $_POST['statute_titles'] : [];
+    $statuteExistingPaths = is_array($_POST['statute_existing_paths'] ?? null) ? $_POST['statute_existing_paths'] : [];
+    $statuteExistingNames = is_array($_POST['statute_existing_names'] ?? null) ? $_POST['statute_existing_names'] : [];
+    $statuteDeleteIndexes = is_array($_POST['statute_delete_indexes'] ?? null) ? $_POST['statute_delete_indexes'] : [];
+    $statuteDeleteMap = array_flip(array_map('strval', $statuteDeleteIndexes));
+    $statutes = [];
+
+    foreach ($statuteTitles as $index => $statuteTitleValue) {
+        $statuteTitle = parentsAdminTrim($statuteTitleValue);
+        $statuteExistingPath = parentsAdminTrim($statuteExistingPaths[$index] ?? '');
+        $statuteExistingName = parentsAdminTrim($statuteExistingNames[$index] ?? '');
+
+        if (isset($statuteDeleteMap[(string)$index])) {
+            parentsAdminDeleteUploadedDocument($statuteExistingPath);
+            continue;
+        }
+
+        [$uploadedStatute, $statuteErrors] = parentsAdminUploadedPdf('statute_files', $index);
+        $uploadErrors = array_merge($uploadErrors, $statuteErrors);
+
+        $statutePath = $uploadedStatute['file_path'] ?? $statuteExistingPath;
+        $statuteOriginalName = $uploadedStatute['original_name'] ?? $statuteExistingName;
+
+        if ($statuteTitle === '' && $statutePath === '') {
+            continue;
+        }
+
+        if ($statuteTitle === '') {
+            $statuteTitle = 'Καταστατικό Συνδέσμου';
+        }
+
+        $statutes[] = [
+            'title' => $statuteTitle,
+            'file_path' => $statutePath,
+            'original_name' => $statuteOriginalName,
+        ];
+    }
+
+    $minuteTitles = is_array($_POST['minute_titles'] ?? null) ? $_POST['minute_titles'] : [];
+    $minuteExistingPaths = is_array($_POST['minute_existing_paths'] ?? null) ? $_POST['minute_existing_paths'] : [];
+    $minuteExistingNames = is_array($_POST['minute_existing_names'] ?? null) ? $_POST['minute_existing_names'] : [];
+    $minuteDeleteIndexes = is_array($_POST['minute_delete_indexes'] ?? null) ? $_POST['minute_delete_indexes'] : [];
+    $minuteDeleteMap = array_flip(array_map('strval', $minuteDeleteIndexes));
+    $minutes = [];
+
+    foreach ($minuteTitles as $index => $minuteTitleValue) {
+        $minuteTitle = parentsAdminTrim($minuteTitleValue);
+        $minuteExistingPath = parentsAdminTrim($minuteExistingPaths[$index] ?? '');
+        $minuteExistingName = parentsAdminTrim($minuteExistingNames[$index] ?? '');
+
+        if (isset($minuteDeleteMap[(string)$index])) {
+            parentsAdminDeleteUploadedDocument($minuteExistingPath);
+            continue;
+        }
+
+        [$uploadedMinute, $minuteErrors] = parentsAdminUploadedPdf('minute_files', $index);
+        $uploadErrors = array_merge($uploadErrors, $minuteErrors);
+
+        $minutePath = $uploadedMinute['file_path'] ?? $minuteExistingPath;
+        $minuteOriginalName = $uploadedMinute['original_name'] ?? $minuteExistingName;
+
+        if ($minuteTitle === '' && $minutePath === '') {
+            continue;
+        }
+
+        if ($minuteTitle === '') {
+            $minuteTitle = 'Πρακτικά Συνεδρίασης';
+        }
+
+        $minutes[] = [
+            'title' => $minuteTitle,
+            'file_path' => $minutePath,
+            'original_name' => $minuteOriginalName,
+        ];
+    }
+
+    return [[
+        'eyebrow' => parentsAdminTrim($_POST['eyebrow'] ?? ($existingContent['eyebrow'] ?? '')),
+        'statute_label' => parentsAdminTrim($_POST['statute_label'] ?? ($existingContent['statute_label'] ?? '')),
+        'minutes_label' => parentsAdminTrim($_POST['minutes_label'] ?? ($existingContent['minutes_label'] ?? '')),
+        'open_label' => parentsAdminTrim($_POST['open_label'] ?? ($existingContent['open_label'] ?? '')),
+        'empty_message' => parentsAdminTrim($_POST['empty_message'] ?? ($existingContent['empty_message'] ?? '')),
+        'statutes' => $statutes,
+        'statute' => $statutes[0] ?? ['title' => 'Καταστατικό Συνδέσμου', 'file_path' => '', 'original_name' => ''],
+        'minutes' => $minutes,
+    ], $uploadErrors];
+}
+
 $parentsPageService = new ParentsPageService();
 $flashMessage = $_SESSION['flash_message'] ?? '';
 $flashType = $_SESSION['flash_type'] ?? 'success';
@@ -225,6 +456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'update_content_section') {
         $sectionKey = $_POST['section_key'] ?? '';
         $saved = false;
+        $parentsPageServiceError = '';
 
         switch ($sectionKey) {
             case 'page_header':
@@ -235,7 +467,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     [
                         'public_eyebrow' => parentsAdminTrim($_POST['public_eyebrow'] ?? ''),
                         'parent_eyebrow' => parentsAdminTrim($_POST['parent_eyebrow'] ?? ''),
-                        'icon' => parentsAdminTrim($_POST['icon'] ?? ''),
+                        'icon' => parentsAdminFixedPageHeaderIcon(),
                     ]
                 );
                 break;
@@ -340,11 +572,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 break;
 
+            case 'parent_documents_section':
+                $currentDocumentsSection = $parentsPageService->getSection('parent_documents_section') ?? ['content' => []];
+                [$documentsContent, $documentUploadErrors] = parentsAdminBuildParentDocumentsContent($currentDocumentsSection['content'] ?? []);
+                $saved = empty($documentUploadErrors) && $parentsPageService->updateSection(
+                    'parent_documents_section',
+                    parentsAdminTrim($_POST['title'] ?? ''),
+                    parentsAdminTextarea($_POST['subtitle'] ?? ''),
+                    $documentsContent
+                );
+                if (!empty($documentUploadErrors)) {
+                    $parentsPageServiceError = implode(' ', $documentUploadErrors);
+                }
+                break;
+
         }
 
         $_SESSION['flash_message'] = $saved
-            ? 'Το περιεχόμενο της σελίδας Συνδεσμος Γωνεων ενημερώθηκε επιτυχώς.'
-            : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . $parentsPageService->getLastError();
+            ? 'Το περιεχόμενο της σελίδας Σύνδεσμος Γονέων ενημερώθηκε επιτυχώς.'
+            : 'Παρουσιάστηκε σφάλμα κατά την αποθήκευση. ' . (($parentsPageServiceError ?? '') ?: $parentsPageService->getLastError());
         $_SESSION['flash_type'] = $saved ? 'success' : 'danger';
         $redirectTab = preg_replace('/[^a-z0-9_-]/i', '', (string)$sectionKey);
         $redirectUrl .= '?active_tab=' . urlencode($redirectTab) . '#content-management';
@@ -362,19 +608,33 @@ $attendancePortalSection = $sections['attendance_portal_section'];
 $scheduleSection = $sections['schedule_section'];
 $boardSection = $sections['board_section'];
 $boardArchiveSection = $sections['board_archive_section'];
+$parentDocumentsSection = $sections['parent_documents_section'];
 $boardArchiveRowsForEditor = parentsAdminMergeBoardArchiveReferenceRows(
     $boardArchiveSection['content']['rows'] ?? [],
     $parentsPageService->getBoardArchiveReferenceRows()
 );
 $boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArchiveRowsForEditor);
+$parentDocumentsStatuteForEditor = is_array($parentDocumentsSection['content']['statute'] ?? null)
+    ? $parentDocumentsSection['content']['statute']
+    : ['title' => 'Καταστατικό Συνδέσμου', 'file_path' => '', 'original_name' => ''];
+$parentDocumentsStatutesForEditor = is_array($parentDocumentsSection['content']['statutes'] ?? null)
+    ? $parentDocumentsSection['content']['statutes']
+    : [];
+if (empty($parentDocumentsStatutesForEditor) && trim((string)($parentDocumentsStatuteForEditor['file_path'] ?? '')) !== '') {
+    $parentDocumentsStatutesForEditor = [$parentDocumentsStatuteForEditor];
+}
+$parentDocumentsMinutesForEditor = is_array($parentDocumentsSection['content']['minutes'] ?? null)
+    ? $parentDocumentsSection['content']['minutes']
+    : [];
 $parentsContentTabs = [
-    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'history_section' => ['label' => 'Ιστορικό', 'icon' => 'fas fa-landmark'],
     'association_section' => ['label' => 'Σύνδεσμος', 'icon' => 'fas fa-handshake'],
     'attendance_portal_section' => ['label' => 'Επιπρόσθετα Στοιχεία', 'icon' => 'fas fa-folder-open'],
     'schedule_section' => ['label' => 'Ωράριο', 'icon' => 'fas fa-clock'],
     'board_section' => ['label' => 'Δ.Σ.', 'icon' => 'fas fa-user-friends'],
     'board_archive_section' => ['label' => 'Αρχείο Δ.Σ.', 'icon' => 'fas fa-archive'],
+    'parent_documents_section' => ['label' => 'Πρακτικά και Καταστατικό', 'icon' => 'fas fa-file-pdf'],
 ];
 $activeParentsTab = (string)($_GET['active_tab'] ?? 'page_header');
 if (!isset($parentsContentTabs[$activeParentsTab])) {
@@ -386,7 +646,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Διαχείριση Σελίδας Συνδεσμος Γωνεων - Admin</title>
+    <title>Διαχείριση Σελίδας Σύνδεσμος Γονέων - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -402,13 +662,13 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
     <main class="admin-content">
         <a href="home.php" class="back-link">
             <i class="fas fa-arrow-left"></i>
-            Πίσω στο Dashboard
+            Πίσω στην Αρχική
         </a>
 
         <div class="admin-header">
             <h1>
                 <i class="fas fa-users"></i>
-                Διαχείριση Σελίδας Συνδεσμος Γωνεων
+                Διαχείριση Σελίδας Σύνδεσμος Γονέων
             </h1>
         </div>
 
@@ -448,7 +708,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Page Header</h3>
+                            <h3>Κεφαλίδα Σελίδας</h3>
                             <p>Τίτλος, υπότιτλος και διαφορετικός μικρός τίτλος για δημόσια και γονική προβολή.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
@@ -462,11 +722,6 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                             <div class="form-group">
                                 <label for="page-header-title">Τίτλος</label>
                                 <input type="text" class="form-control" id="page-header-title" name="title" value="<?php echo htmlspecialchars($pageHeaderSection['title']); ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="page-header-icon">Icon class</label>
-                                <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-users'); ?>">
                             </div>
 
                             <div class="form-group">
@@ -487,7 +742,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Header
+                                <i class="fas fa-save"></i> Αποθήκευση Κεφαλίδας
                             </button>
                         </div>
                     </form>
@@ -534,8 +789,8 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'association_section' ? 'show active' : ''; ?>" id="tab-association_section" role="tabpanel" aria-labelledby="tab-association_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
-                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδεσμου Γωνεων.</p>
+                            <h3>Σύνδεσμος Γονέων</h3>
+                            <p>Ξεχωριστά πεδία για χαιρετισμό, σκοπό, ιστορικό και στοιχεία επικοινωνίας του Συνδέσμου Γονέων.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-handshake"></i></span>
                     </div>
@@ -609,7 +864,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
 
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
-                                <i class="fas fa-save"></i> Αποθήκευση Συνδεσμου Γωνεων
+                                <i class="fas fa-save"></i> Αποθήκευση Συνδέσμου Γονέων
                             </button>
                         </div>
                     </form>
@@ -729,7 +984,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                 <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'board_section' ? 'show active' : ''; ?>" id="tab-board_section" role="tabpanel" aria-labelledby="tab-board_section-link">
                     <div class="content-editor-card__header">
                         <div>
-                            <h3>Συνδεσμος Γωνεων</h3>
+                            <h3>Σύνδεσμος Γονέων</h3>
                             <p>Lead paragraph, labels πίνακα και μέλη Δ.Σ. Μορφή γραμμής: <code>Θέση | Ονοματεπώνυμο</code>.</p>
                         </div>
                         <span class="content-editor-card__icon"><i class="fas fa-user-friends"></i></span>
@@ -881,6 +1136,170 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                         <div class="content-editor-card__actions">
                             <button type="submit" class="btn-save-section">
                                 <i class="fas fa-save"></i> Αποθήκευση Αρχείου Συμβουλίων
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="content-editor-card tab-pane fade <?php echo $activeParentsTab === 'parent_documents_section' ? 'show active' : ''; ?>" id="tab-parent_documents_section" role="tabpanel" aria-labelledby="tab-parent_documents_section-link">
+                    <div class="content-editor-card__header">
+                        <div>
+                            <h3>Πρακτικά και Καταστατικό</h3>
+                            <p class="parents-admin-warning-text">PDF έγγραφα που εμφανίζονται μόνο στη σελίδα γονέα, όχι στη δημόσια προβολή.</p>
+                        </div>
+                        <span class="content-editor-card__icon"><i class="fas fa-file-pdf"></i></span>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_content_section">
+                        <input type="hidden" name="section_key" value="parent_documents_section">
+
+                        <div class="content-form-grid">
+                            <div class="form-group">
+                                <label for="parent-documents-title">Τίτλος</label>
+                                <input type="text" class="form-control" id="parent-documents-title" name="title" value="<?php echo htmlspecialchars($parentDocumentsSection['title']); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parent-documents-eyebrow">Μικρός τίτλος ενότητας</label>
+                                <input type="text" class="form-control" id="parent-documents-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['eyebrow'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="parent-documents-subtitle">Εισαγωγικό κείμενο</label>
+                                <textarea class="form-control content-textarea" id="parent-documents-subtitle" name="subtitle"><?php echo htmlspecialchars($parentDocumentsSection['subtitle']); ?></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parent-documents-statute-label">Label καταστατικού</label>
+                                <input type="text" class="form-control" id="parent-documents-statute-label" name="statute_label" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['statute_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parent-documents-minutes-label">Label πρακτικών</label>
+                                <input type="text" class="form-control" id="parent-documents-minutes-label" name="minutes_label" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['minutes_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parent-documents-open-label">Κείμενο κουμπιού PDF</label>
+                                <input type="text" class="form-control" id="parent-documents-open-label" name="open_label" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="parent-documents-empty-message">Μήνυμα όταν δεν υπάρχουν έγγραφα</label>
+                                <input type="text" class="form-control" id="parent-documents-empty-message" name="empty_message" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['empty_message'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group full-width parent-documents-editor parent-documents-editor--statutes">
+                                <div class="parent-documents-editor__heading">
+                                    <span class="parent-documents-editor__icon"><i class="fas fa-file-contract"></i></span>
+                                    <div>
+                                        <span class="parent-documents-editor__eyebrow">Καταστατικό</span>
+                                        <label>Καταστατικό Συνδέσμου</label>
+                                    </div>
+                                </div>
+                                <div class="board-archive-editor">
+                                    <?php foreach ($parentDocumentsStatutesForEditor as $statuteIndex => $statuteDocument): ?>
+                                        <?php if (!is_array($statuteDocument)) { continue; } ?>
+                                        <div class="board-archive-editor__block">
+                                            <div class="form-group">
+                                                <label>Τίτλος expandable</label>
+                                                <input type="text" class="form-control" name="statute_titles[]" value="<?php echo htmlspecialchars($statuteDocument['title'] ?? ''); ?>" placeholder="π.χ. Καταστατικό Συνδέσμου">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label>PDF καταστατικού</label>
+                                                <?php if (trim((string)($statuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <p class="mb-2">
+                                                        <a href="<?php echo htmlspecialchars($statuteDocument['file_path']); ?>" target="_blank" rel="noopener noreferrer">
+                                                            <i class="fas fa-file-pdf mr-1"></i><?php echo htmlspecialchars($statuteDocument['original_name'] ?? 'Τρέχον PDF'); ?>
+                                                        </a>
+                                                    </p>
+                                                <?php endif; ?>
+                                                <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
+                                                <input type="hidden" name="statute_existing_paths[]" value="<?php echo htmlspecialchars($statuteDocument['file_path'] ?? ''); ?>">
+                                                <input type="hidden" name="statute_existing_names[]" value="<?php echo htmlspecialchars($statuteDocument['original_name'] ?? ''); ?>">
+                                                <?php if (trim((string)($statuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <label class="parent-document-delete-option">
+                                                        <input type="checkbox" name="statute_delete_indexes[]" value="<?php echo (int)$statuteIndex; ?>">
+                                                        <span><i class="fas fa-trash-alt"></i> Διαγραφή αυτού του PDF</span>
+                                                    </label>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="board-archive-editor__block board-archive-editor__block--new">
+                                        <div class="form-group">
+                                            <label>Νέο Καταστατικό</label>
+                                            <input type="text" class="form-control" name="statute_titles[]" value="" placeholder="π.χ. Καταστατικό Συνδέσμου">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label>PDF νέου καταστατικού</label>
+                                            <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
+                                            <input type="hidden" name="statute_existing_paths[]" value="">
+                                            <input type="hidden" name="statute_existing_names[]" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width parent-documents-editor parent-documents-editor--minutes">
+                                <div class="parent-documents-editor__heading">
+                                    <span class="parent-documents-editor__icon"><i class="fas fa-clipboard-list"></i></span>
+                                    <div>
+                                        <span class="parent-documents-editor__eyebrow">Συνεδριάσεις</span>
+                                        <label>Πρακτικά συνεδριάσεων</label>
+                                    </div>
+                                </div>
+                                <div class="board-archive-editor">
+                                    <?php foreach ($parentDocumentsMinutesForEditor as $minuteIndex => $minuteDocument): ?>
+                                        <?php if (!is_array($minuteDocument)) { continue; } ?>
+                                        <div class="board-archive-editor__block">
+                                            <div class="form-group">
+                                                <label>Τίτλος expandable</label>
+                                                <input type="text" class="form-control" name="minute_titles[]" value="<?php echo htmlspecialchars($minuteDocument['title'] ?? ''); ?>" placeholder="π.χ. 1η Συνεδρίαση 2025-2026">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label>PDF πρακτικών</label>
+                                                <?php if (trim((string)($minuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <p class="mb-2">
+                                                        <a href="<?php echo htmlspecialchars($minuteDocument['file_path']); ?>" target="_blank" rel="noopener noreferrer">
+                                                            <i class="fas fa-file-pdf mr-1"></i><?php echo htmlspecialchars($minuteDocument['original_name'] ?? 'Τρέχον PDF'); ?>
+                                                        </a>
+                                                    </p>
+                                                <?php endif; ?>
+                                                <input type="file" class="form-control-file" name="minute_files[]" accept="application/pdf,.pdf">
+                                                <input type="hidden" name="minute_existing_paths[]" value="<?php echo htmlspecialchars($minuteDocument['file_path'] ?? ''); ?>">
+                                                <input type="hidden" name="minute_existing_names[]" value="<?php echo htmlspecialchars($minuteDocument['original_name'] ?? ''); ?>">
+                                                <?php if (trim((string)($minuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <label class="parent-document-delete-option">
+                                                        <input type="checkbox" name="minute_delete_indexes[]" value="<?php echo (int)$minuteIndex; ?>">
+                                                        <span><i class="fas fa-trash-alt"></i> Διαγραφή αυτού του PDF</span>
+                                                    </label>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="board-archive-editor__block board-archive-editor__block--new">
+                                        <div class="form-group">
+                                            <label>Νέα Συνεδρίαση</label>
+                                            <input type="text" class="form-control" name="minute_titles[]" value="" placeholder="π.χ. 1η Συνεδρίαση 2025-2026">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label>PDF νέας συνεδρίασης</label>
+                                            <input type="file" class="form-control-file" name="minute_files[]" accept="application/pdf,.pdf">
+                                            <input type="hidden" name="minute_existing_paths[]" value="">
+                                            <input type="hidden" name="minute_existing_names[]" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-editor-card__actions">
+                            <button type="submit" class="btn-save-section">
+                                <i class="fas fa-save"></i> Αποθήκευση Εγγράφων Γονέων
                             </button>
                         </div>
                     </form>

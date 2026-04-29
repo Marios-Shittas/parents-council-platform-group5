@@ -1,0 +1,311 @@
+/* Arxeio: public\assets\css\site-footer.css
+   Rolos: Orizei koino i page-specific styling gia tin antistoixi selida.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
+/* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .site-footer,
+   .site-footer * {
+       box-sizing: border-box;
+   }
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .site-footer {
+       margin-top: 56px;
+       background: #f7f9fc;
+       border-top: 1px solid #dde5ef;
+       position: relative;
+       font-family: 'Lato', sans-serif;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .site-footer::before {
+       content: "";
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 2px;
+       background: linear-gradient(90deg, #1a3a5c 0%, #2f6ea0 50%, #1a3a5c 100%);
+       opacity: 0.55;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .site-footer .container {
+       max-width: 1320px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-main {
+       padding: 38px 0 22px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-title {
+       font-family: 'Montserrat', sans-serif;
+       font-weight: 700;
+       font-size: 1.04rem;
+       margin-bottom: 14px;
+       color: #1a3a5c;
+       letter-spacing: .2px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-text {
+       font-size: 0.93rem;
+       color: #475569;
+       margin-bottom: 10px;
+       line-height: 1.45;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-brand {
+       margin-bottom: 20px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-brand-title {
+       font-family: 'Montserrat', sans-serif;
+       font-size: 1.35rem;
+       font-weight: 800;
+       color: #183555;
+       margin-bottom: 6px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-badge {
+       display: none;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-line {
+       display: flex;
+       align-items: flex-start;
+       margin-bottom: 8px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-line i {
+       width: 18px;
+       margin-right: 8px;
+       margin-top: 3px;
+       color: #1f4a74;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-links {
+       list-style: none;
+       padding: 0;
+       margin: 0;
+       display: grid;
+       grid-template-columns: repeat(2, minmax(140px, 1fr));
+       gap: 8px 12px;
+       max-width: 320px;
+   }
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-links a {
+       font-family: 'Lato', sans-serif;
+       color: #475569;
+       text-decoration: none;
+       font-size: 0.93rem;
+       transition: color .2s ease, transform .2s ease;
+       display: inline-flex;
+       align-items: center;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-links a:hover {
+       color: #1a3a5c;
+       transform: translateX(2px);
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-bottom {
+       font-family: 'Lato', sans-serif;
+       border-top: 1px solid #dbe3ec;
+       padding: 8px 0 9px;
+       color: #5f6f82;
+       font-size: 0.84rem;
+       background: #fdfefe;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-bottom-wrap {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       gap: 12px;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-about-btn {
+       font-family: 'Lato', sans-serif;
+       background: none;
+       border: 1px solid #b0bec5;
+       border-radius: 4px;
+       color: #5f6f82;
+       font-size: 0.84rem;
+       padding: 2px 10px;
+       cursor: pointer;
+       transition: color .2s, border-color .2s;
+   }
+   .footer-about-btn:hover {
+       color: #1a3a5c;
+       border-color: #1a3a5c;
+   }
+
+
+   /* Link "Ola rights reserved.". */
+   .footer-policy {
+       color: #5f6f82;
+       text-decoration: none;
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   .footer-policy:hover {
+       color: #1a3a5c;
+       text-decoration: none;
+   }
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   #aboutModal parathyro .modal-titlos {
+       font-family: 'Montserrat', sans-serif;
+       color: #ffffff !important;
+   }
+
+   #aboutModal parathyro .modal-body,
+   #aboutModal parathyro .modal-footer,
+   #aboutModal parathyro .btn {
+       font-family: 'Lato', sans-serif;
+   }
+
+   #aboutModal parathyro .about-people {
+       padding-left: 1.1rem;
+       margin-bottom: 1rem;
+   }
+
+   #aboutModal parathyro .about-people li {
+       margin-bottom: .45rem;
+   }
+
+   #aboutModal parathyro .about-people a {
+       color: #1a3a5c;
+       font-weight: 700;
+       text-decoration: none;
+   }
+
+   #aboutModal parathyro .about-people a:hover {
+       color: #0f5ea8;
+       text-decoration: underline;
+   }
+
+   #aboutModal parathyro .modal-header .close {
+       color: #ffffff;
+       opacity: 1;
+       transition: color .2s ease, transform .2s ease;
+   }
+
+   #aboutModal parathyro .modal-header .close:hover {
+       color: #dc3545;
+       transform: scale(1.05);
+   }
+
+   #aboutModal parathyro .modal-footer .btn-secondary {
+       border-color: #c7d1db;
+       background: #eef2f6;
+       color: #344055;
+       transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+   }
+
+   #aboutModal parathyro .modal-footer .btn-secondary:hover,
+   #aboutModal parathyro .modal-footer .btn-secondary:focus {
+       background: #dc3545;
+       border-color: #dc3545;
+       color: #ffffff;
+       transform: translateY(-1px);
+   }
+
+
+   /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+   @media (max-width: 991.98px) {
+       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       .footer-main {
+           padding: 32px 0 16px;
+       }
+
+
+       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       .footer-links {
+           grid-template-columns: 1fr;
+           gap: 7px;
+           max-width: 100%;
+       }
+
+
+       /* Sxolio: voithitiko sxolio gia ton parakato kodika. */
+       .footer-bottom-wrap {
+           flex-direction: column;
+           text-align: center;
+       }
+   }
+
+
+.footer-about-actions {
+    gap: 12px;
+}
+
+.about-modal-header {
+    background: #1a3a5c;
+    color: #fff;
+}
+
+.about-modal-header .modal-title {
+    color: #ffffff;
+}
+
+.about-modal-close {
+    color: #fff;
+    opacity: 1;
+    transition: color .2s ease, transform .2s ease;
+}
+
+.about-modal-close:hover,
+.about-modal-close:focus {
+    color: #dc3545;
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.about-modal-body {
+    font-size: .95rem;
+    line-height: 1.7;
+    color: #344055;
+}
+
+#aboutModal .about-people {
+    padding-left: 1.75rem;
+    margin-left: 0;
+    margin-bottom: 1rem;
+}
+
+#aboutModal .modal-footer .btn-secondary:hover,
+#aboutModal .modal-footer .btn-secondary:focus {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #ffffff;
+}

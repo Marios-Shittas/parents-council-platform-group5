@@ -1,17 +1,23 @@
 <?php
+// Arxeio: app\services\CartService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/product_sizes.php';
 
 class CartService
 {
     private $conn;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getOrCreateCart($userId)
     {
         $userId = (int)$userId;
@@ -54,6 +60,7 @@ class CartService
         return false;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getCart($userId)
     {
         $orderId = $this->getOrCreateCart($userId);
@@ -100,6 +107,9 @@ class CartService
                 $row['price'] = (float)$row['price'];
                 $row['price_at_purchase'] = (float)$row['price_at_purchase'];
                 $row['line_total'] = $row['quantity'] * $row['price_at_purchase'];
+                $sizeValue = trim((string)($row['size'] ?? ''));
+                $sizeMeta = product_sizes_get_for_product((int)$row['product_id']);
+                $row['size_label'] = product_sizes_label_for_value($sizeValue, $sizeMeta);
                 $total += $row['line_total'];
                 $items[] = $row;
             }
@@ -114,6 +124,7 @@ class CartService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function addToCart($userId, $productId, $quantity = 1, $size = '')
     {
         $userId = (int)$userId;
@@ -129,6 +140,18 @@ class CartService
 
         if (!$orderId) {
             return false;
+        }
+
+        $sizeMeta = product_sizes_get_for_product($productId);
+        $availableSizes = $sizeMeta['size_options'] ?? [];
+        $requiresSize = !empty($sizeMeta['has_sizes']) && !empty($availableSizes);
+
+        if ($requiresSize) {
+            if ($size === '' || !in_array($size, $availableSizes, true)) {
+                return false;
+            }
+        } else {
+            $size = '';
         }
 
         $stmtPrice = $this->conn->prepare("
@@ -213,6 +236,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateCartItem($userId, $productId, $size, $quantity)
     {
         $userId = (int)$userId;
@@ -258,6 +282,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function removeFromCart($userId, $productId, $size)
     {
         $userId = (int)$userId;
@@ -297,6 +322,7 @@ class CartService
         return $this->refreshOrderTotal($orderId);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function clearCart($userId)
     {
         $userId = (int)$userId;
@@ -325,6 +351,7 @@ class CartService
         return $this->updateOrderTotal($orderId, 0);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function refreshOrderTotal($orderId)
     {
         $orderId = (int)$orderId;
@@ -351,6 +378,7 @@ class CartService
         return $this->updateOrderTotal($orderId, $total);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function updateOrderTotal($orderId, $total)
     {
         $orderId = (int)$orderId;

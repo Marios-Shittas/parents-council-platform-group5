@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\epikoinonia.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/EpikoinoniaService.php';
 require_once __DIR__ . '/../../app/services/EpikoinoniaPageService.php';
 
@@ -16,15 +19,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
+// Leitourgia epikoinoniaAdminTrim: xeirizetai to antistoixo kommati tis selidas i tou service.
 function epikoinoniaAdminTrim($value)
 {
     return trim((string)$value);
 }
 
+// Leitourgia epikoinoniaAdminTextarea: xeirizetai to antistoixo kommati tis selidas i tou service.
 function epikoinoniaAdminTextarea($value)
 {
     $value = str_replace(["\r\n", "\r"], "\n", (string)$value);
     return trim($value);
+}
+
+// Leitourgia epikoinoniaAdminFixedPageHeaderIcon: xeirizetai to antistoixo kommati tis selidas i tou service.
+function epikoinoniaAdminFixedPageHeaderIcon()
+{
+    return 'fas fa-envelope';
 }
 
 $service = new EpikoinoniaService();
@@ -46,18 +57,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     epikoinoniaAdminTrim($_POST['subtitle'] ?? ''),
                     [
                         'eyebrow' => epikoinoniaAdminTrim($_POST['eyebrow'] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST['icon'] ?? ''),
+                        'icon' => epikoinoniaAdminFixedPageHeaderIcon(),
                     ]
                 );
                 break;
 
             case 'contact_info':
+                $existingContactInfoSection = $pageService->getSection('contact_info');
+                $existingCards = is_array($existingContactInfoSection['content']['cards'] ?? null)
+                    ? $existingContactInfoSection['content']['cards']
+                    : [];
                 $cards = [];
                 for ($i = 1; $i <= 4; $i++) {
+                    $existingCard = is_array($existingCards[$i - 1] ?? null) ? $existingCards[$i - 1] : [];
                     $cards[] = [
                         'title' => epikoinoniaAdminTrim($_POST["card_{$i}_title"] ?? ''),
                         'text' => epikoinoniaAdminTextarea($_POST["card_{$i}_text"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST["card_{$i}_icon"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($existingCard['icon'] ?? ''),
                         'link_label' => epikoinoniaAdminTrim($_POST["card_{$i}_link_label"] ?? ''),
                         'link_url' => epikoinoniaAdminTrim($_POST["card_{$i}_link_url"] ?? ''),
                     ];
@@ -96,12 +112,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'social_section':
+                $existingSocialSection = $pageService->getSection('social_section');
+                $existingSocialItems = is_array($existingSocialSection['content']['items'] ?? null)
+                    ? $existingSocialSection['content']['items']
+                    : [];
                 $items = [];
                 for ($i = 1; $i <= 3; $i++) {
+                    $existingSocialItem = is_array($existingSocialItems[$i - 1] ?? null) ? $existingSocialItems[$i - 1] : [];
                     $items[] = [
                         'title' => epikoinoniaAdminTrim($_POST["social_{$i}_title"] ?? ''),
                         'url' => epikoinoniaAdminTrim($_POST["social_{$i}_url"] ?? ''),
-                        'icon' => epikoinoniaAdminTrim($_POST["social_{$i}_icon"] ?? ''),
+                        'icon' => epikoinoniaAdminTrim($existingSocialItem['icon'] ?? ''),
                     ];
                 }
 
@@ -161,12 +182,15 @@ $contactInfoSection = $contentSections['contact_info'];
 $mapSection = $contentSections['map_section'];
 $formSection = $contentSections['form_section'];
 $socialSection = $contentSections['social_section'];
+if (($socialSection['title'] ?? '') === 'Βρείτε μας στα social networks') {
+    $socialSection['title'] = 'Βρείτε μας στα κοινωνικά δίκτυα';
+}
 $epikoinoniaContentTabs = [
-    'page_header' => ['label' => 'Header', 'icon' => 'fas fa-heading'],
+    'page_header' => ['label' => 'Κεφαλίδα', 'icon' => 'fas fa-heading'],
     'contact_info' => ['label' => 'Επικοινωνία', 'icon' => 'fas fa-address-card'],
     'map_section' => ['label' => 'Χάρτης', 'icon' => 'fas fa-map-marked-alt'],
     'form_section' => ['label' => 'Φόρμα', 'icon' => 'fas fa-paper-plane'],
-    'social_section' => ['label' => 'Social', 'icon' => 'fas fa-share-alt'],
+    'social_section' => ['label' => 'Κοινωνικά', 'icon' => 'fas fa-share-alt'],
 ];
 $activeEpikoinoniaTab = (string)($_GET['active_tab'] ?? 'page_header');
 if (!isset($epikoinoniaContentTabs[$activeEpikoinoniaTab])) {
@@ -264,7 +288,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
             <?php if (!$viewDetail): ?>
                 <a href="home.php" class="back-link">
                     <i class="fas fa-arrow-left"></i>
-                    Πίσω στο Dashboard
+                    Πίσω στην Αρχική
                 </a>
             <?php endif; ?>
 
@@ -378,7 +402,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                     </div>
 
                     <div class="message-actions">
-                        <form method="POST" style="display: inline;" class="delete-form" data-message-id="<?php echo $detailMessage['message_id']; ?>">
+                        <form method="POST" class="admin-inline-form delete-form" data-message-id="<?php echo $detailMessage['message_id']; ?>">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="message_id" value="<?php echo $detailMessage['message_id']; ?>">
                             <button type="button" class="btn btn-danger delete-btn">
@@ -429,7 +453,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                         <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'page_header' ? 'show active' : ''; ?>" id="tab-page_header" role="tabpanel" aria-labelledby="tab-page_header-link">
                             <div class="content-editor-card__header">
                                 <div>
-                                    <h3>Page Header</h3>
+                                    <h3>Κεφαλίδα Σελίδας</h3>
                                     <p>Τίτλος, υπότιτλος και μικρός τίτλος που εμφανίζεται πάνω από την κορυφή της σελίδας.</p>
                                 </div>
                                 <span class="content-editor-card__icon"><i class="fas fa-heading"></i></span>
@@ -446,7 +470,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="page-header-eyebrow">Μικρός τίτλος πάνω από το header</label>
+                                        <label for="page-header-eyebrow">Μικρός τίτλος πάνω από την κεφαλίδα</label>
                                         <input type="text" class="form-control" id="page-header-eyebrow" name="eyebrow" value="<?php echo htmlspecialchars($pageHeaderSection['content']['eyebrow'] ?? ''); ?>">
                                     </div>
 
@@ -454,16 +478,11 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                         <label for="page-header-subtitle">Υπότιτλος</label>
                                         <textarea class="form-control content-textarea" id="page-header-subtitle" name="subtitle"><?php echo htmlspecialchars($pageHeaderSection['subtitle']); ?></textarea>
                                     </div>
-
-                                    <div class="form-group">
-                                        <label for="page-header-icon">Icon class</label>
-                                        <input type="text" class="form-control" id="page-header-icon" name="icon" value="<?php echo htmlspecialchars($pageHeaderSection['content']['icon'] ?? 'fas fa-envelope'); ?>">
-                                    </div>
                                 </div>
 
                                 <div class="content-editor-card__actions">
                                     <button type="submit" class="btn-save-section">
-                                        <i class="fas fa-save"></i> Αποθήκευση Header
+                                        <i class="fas fa-save"></i> Αποθήκευση Κεφαλίδας
                                     </button>
                                 </div>
                             </form>
@@ -473,7 +492,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             <div class="content-editor-card__header">
                                 <div>
                                     <h3>Πληροφορίες Επικοινωνίας</h3>
-                                    <p>Οι 4 κάρτες που εμφανίζονται στο πρώτο section της front-end σελίδας.</p>
+                                    <p>Οι 4 κάρτες που εμφανίζονται στην πρώτη ενότητα της δημόσιας σελίδας.</p>
                                 </div>
                                 <span class="content-editor-card__icon"><i class="fas fa-address-card"></i></span>
                             </div>
@@ -484,12 +503,12 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
                                 <div class="content-form-grid">
                                     <div class="form-group">
-                                        <label for="contact-info-title">Τίτλος section</label>
+                                        <label for="contact-info-title">Τίτλος ενότητας</label>
                                         <input type="text" class="form-control" id="contact-info-title" name="title" value="<?php echo htmlspecialchars($contactInfoSection['title']); ?>">
                                     </div>
 
                                     <div class="form-group full-width">
-                                        <label for="contact-info-subtitle">Υπότιτλος section</label>
+                                        <label for="contact-info-subtitle">Υπότιτλος ενότητας</label>
                                         <textarea class="form-control content-textarea" id="contact-info-subtitle" name="subtitle"><?php echo htmlspecialchars($contactInfoSection['subtitle']); ?></textarea>
                                     </div>
 
@@ -507,23 +526,18 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="card-<?php echo $cardNumber; ?>-icon">Icon class</label>
-                                                <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-icon" name="card_<?php echo $cardNumber; ?>_icon" value="<?php echo htmlspecialchars($card['icon'] ?? ''); ?>">
-                                            </div>
-
-                                            <div class="form-group">
                                                 <label for="card-<?php echo $cardNumber; ?>-text">Κείμενο</label>
                                                 <textarea class="form-control content-textarea" id="card-<?php echo $cardNumber; ?>-text" name="card_<?php echo $cardNumber; ?>_text"><?php echo htmlspecialchars($card['text'] ?? ''); ?></textarea>
                                                 <small class="content-help">Χρησιμοποίησε νέα γραμμή όπου θέλεις αλλαγή σειράς.</small>
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="card-<?php echo $cardNumber; ?>-link-label">Link label</label>
+                                                <label for="card-<?php echo $cardNumber; ?>-link-label">Κείμενο συνδέσμου</label>
                                                 <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-link-label" name="card_<?php echo $cardNumber; ?>_link_label" value="<?php echo htmlspecialchars($card['link_label'] ?? ''); ?>">
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="card-<?php echo $cardNumber; ?>-link-url">Link URL</label>
+                                                <label for="card-<?php echo $cardNumber; ?>-link-url">Σύνδεσμος URL</label>
                                                 <input type="text" class="form-control" id="card-<?php echo $cardNumber; ?>-link-url" name="card_<?php echo $cardNumber; ?>_link_url" value="<?php echo htmlspecialchars($card['link_url'] ?? ''); ?>">
                                             </div>
                                         </div>
@@ -563,7 +577,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                     </div>
 
                                     <div class="form-group full-width">
-                                        <label for="map-embed-url">Iframe URL</label>
+                                        <label for="map-embed-url">URL ενσωμάτωσης iframe</label>
                                         <textarea class="form-control content-textarea content-textarea--large" id="map-embed-url" name="embed_url"><?php echo htmlspecialchars($mapSection['content']['embed_url'] ?? ''); ?></textarea>
                                     </div>
                                 </div>
@@ -627,8 +641,8 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                         <section class="content-editor-card tab-pane fade <?php echo $activeEpikoinoniaTab === 'social_section' ? 'show active' : ''; ?>" id="tab-social_section" role="tabpanel" aria-labelledby="tab-social_section-link">
                             <div class="content-editor-card__header">
                                 <div>
-                                    <h3>Social Links</h3>
-                                    <p>Τίτλος section, περιγραφή και οι σύνδεσμοι των social buttons.</p>
+                                    <h3>Σύνδεσμοι Κοινωνικών Δικτύων</h3>
+                                    <p>Τίτλος ενότητας, περιγραφή και οι σύνδεσμοι των κουμπιών κοινωνικών δικτύων.</p>
                                 </div>
                                 <span class="content-editor-card__icon"><i class="fas fa-share-alt"></i></span>
                             </div>
@@ -654,16 +668,11 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                         $socialNumber = $index + 1;
                                         ?>
                                         <div class="content-subcard">
-                                            <h4>Social <?php echo $socialNumber; ?></h4>
+                                            <h4>Κοινωνικό Δίκτυο <?php echo $socialNumber; ?></h4>
 
                                             <div class="form-group">
                                                 <label for="social-<?php echo $socialNumber; ?>-title">Τίτλος</label>
                                                 <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-title" name="social_<?php echo $socialNumber; ?>_title" value="<?php echo htmlspecialchars($item['title'] ?? ''); ?>">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="social-<?php echo $socialNumber; ?>-icon">Icon class</label>
-                                                <input type="text" class="form-control" id="social-<?php echo $socialNumber; ?>-icon" name="social_<?php echo $socialNumber; ?>_icon" value="<?php echo htmlspecialchars($item['icon'] ?? ''); ?>">
                                             </div>
 
                                             <div class="form-group">
@@ -676,7 +685,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
                                 <div class="content-editor-card__actions">
                                     <button type="submit" class="btn-save-section">
-                                        <i class="fas fa-save"></i> Αποθήκευση Social Links
+                                        <i class="fas fa-save"></i> Αποθήκευση Συνδέσμων Κοινωνικών Δικτύων
                                     </button>
                                 </div>
                             </form>
@@ -724,7 +733,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 
                 </div>
 
-                <!-- Search & Filters Section -->
+                <!-- Psaxnei & Filters Section -->
                 <div class="search-filters-section">
                     <div class="search-filters-header">
                         <i class="fas fa-filter"></i>
@@ -766,7 +775,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                     </form>
 
                     <?php if (!empty($search) || !empty($status) || !empty($dateFrom) || !empty($dateTo)): ?>
-                        <div style="margin-top: 1rem;">
+                        <div class="admin-mt-1rem">
                             <a href="epikoinonia.php" class="btn-reset">
                                 <i class="fas fa-times"></i>
                                 Εκκαθάριση Φίλτρων
@@ -806,11 +815,11 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                             <table class="table table-custom">
                                 <thead>
                                     <tr>
-                                        <th style="width: 25%;">ΑΠΟΣΤΟΛΕΑΣ</th>
-                                        <th style="width: 25%;">ΘΕΜΑ</th>
-                                        <th style="width: 20%;">ΗΜΕΡΟΜΗΝΙΑ</th>
-                                        <th style="width: 15%;">ΚΑΤΑΣΤΑΣΗ</th>
-                                        <th style="width: 15%; text-align: center;">ΕΝΕΡΓΕΙΕΣ</th>
+                                        <th class="admin-col-25">ΑΠΟΣΤΟΛΕΑΣ</th>
+                                        <th class="admin-col-25">ΘΕΜΑ</th>
+                                        <th class="admin-col-20">ΗΜΕΡΟΜΗΝΙΑ</th>
+                                        <th class="admin-col-15">ΚΑΤΑΣΤΑΣΗ</th>
+                                        <th class="admin-col-15 admin-text-center">ΕΝΕΡΓΕΙΕΣ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -857,8 +866,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
                                                         <i class="fas fa-eye"></i>
                                                         Προβολή
                                                     </a>
-                                                    <form method="POST" style="display: inline;" 
-                                                          class="delete-form" data-message-id="<?php echo $message['message_id']; ?>">
+                                                    <form method="POST" class="admin-inline-form delete-form" data-message-id="<?php echo $message['message_id']; ?>">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="message_id" value="<?php echo $message['message_id']; ?>">
                                                         <button type="button" class="btn btn-sm btn-danger delete-btn">
@@ -929,7 +937,7 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Diagrafei Confirmation Modal parathyro -->
     <div id="deleteModal" class="delete-modal">
         <div class="delete-modal-content">
             <div class="delete-modal-header">
@@ -953,39 +961,6 @@ unset($_SESSION['flash_message'], $_SESSION['flash_type']);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     
-    <script>
-        let pendingDeleteForm = null;
-        
-        // Show delete confirmation modal
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const form = this.closest('.delete-form');
-                pendingDeleteForm = form;
-                document.getElementById('deleteModal').classList.add('active');
-            });
-        });
-        
-        // Cancel deletion
-        document.getElementById('cancelBtn').addEventListener('click', function() {
-            document.getElementById('deleteModal').classList.remove('active');
-            pendingDeleteForm = null;
-        });
-        
-        // Confirm deletion
-        document.getElementById('confirmBtn').addEventListener('click', function() {
-            if (pendingDeleteForm) {
-                pendingDeleteForm.submit();
-            }
-        });
-        
-        // Close modal when clicking outside
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-                pendingDeleteForm = null;
-            }
-        });
-    </script>
+    <script src="../assets/js/admin-epikoinonia.js"></script>
 </body>
 </html>

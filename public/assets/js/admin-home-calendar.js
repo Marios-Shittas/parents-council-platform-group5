@@ -1,3 +1,6 @@
+// Arxeio: public\assets\js\admin-home-calendar.js
+// Rolos: Xeirizetai frontend symperifora sto admin panel, opos formaes, modals, filters i React components.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 (function () {
     const root = document.getElementById('admin-calendar-app');
     if (!root) {
@@ -48,15 +51,18 @@
         'December',
     ];
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function isIsoDate(value) {
         return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function parseIsoDate(isoDate) {
         const parts = String(isoDate).split('-').map(Number);
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function toIsoDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -64,6 +70,7 @@
         return `${year}-${month}-${day}`;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function escapeHtml(value) {
         return String(value ?? '')
             .replace(/&/g, '&amp;')
@@ -73,6 +80,7 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatLongDate(isoDate) {
         return new Intl.DateTimeFormat('el-GR', {
             weekday: 'long',
@@ -82,6 +90,7 @@
         }).format(parseIsoDate(isoDate));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatShortDate(isoDate) {
         return new Intl.DateTimeFormat('el-GR', {
             day: '2-digit',
@@ -90,6 +99,7 @@
         }).format(parseIsoDate(isoDate));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function formatTime(value) {
         if (!value) {
             return 'Χωρίς συγκεκριμένη ώρα';
@@ -98,6 +108,7 @@
         return value;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getItemsForDate(isoDate) {
         return (Array.isArray(data.items) ? data.items : [])
             .filter((item) => item && item.date === isoDate)
@@ -120,6 +131,7 @@
             });
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function getCounts(items) {
         return items.reduce((accumulator, item) => {
             if (accumulator[item.type] !== undefined) {
@@ -129,6 +141,7 @@
         }, { holiday: 0, event: 0, announcement: 0 });
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function syncFormFields() {
         document.querySelectorAll('[data-calendar-date-field]').forEach((field) => {
             field.value = state.selectedDate;
@@ -143,6 +156,7 @@
         });
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function openModal(modalSelector) {
         syncFormFields();
 
@@ -151,6 +165,7 @@
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderCalendarCells() {
         const firstDay = new Date(state.year, state.month, 1).getDay();
         const daysInMonth = new Date(state.year, state.month + 1, 0).getDate();
@@ -199,6 +214,7 @@
         return cells.join('');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function renderSelectedDayPanel() {
         const items = getItemsForDate(state.selectedDate);
         const counts = getCounts(items);
@@ -264,6 +280,7 @@
         `;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function render() {
         root.innerHTML = `
             <div class="calendar-dashboard-grid">

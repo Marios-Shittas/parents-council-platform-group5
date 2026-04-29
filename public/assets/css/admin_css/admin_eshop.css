@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_eshop.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services. */
+/* Styles gia tin admin diaxeirisi tou eshop kai ton proionton. */
+/* Edo allazoun kartes proionton, formaes, tables kai actions pou vlepoun mono oi admins. */
 :root{
   --color-navy: #1A374D;
   --color-teal: #3A7CA5;
@@ -80,50 +85,122 @@
     padding: 12px 20px;
 }
 
-#createProductModal .modal-header {
+#createProductModal parathyro .modal-header {
     background: #2f6fb3 !important;
 }
 
-#createProductModal .modal-header,
-#createProductModal .modal-header * {
+#createProductModal parathyro .modal-header,
+#createProductModal parathyro .modal-header * {
     color: #ffffff !important;
     fill: #ffffff !important;
 }
 
-#createProductModal .modal-header .close,
-#createProductModal .modal-header .close span {
+#createProductModal parathyro .modal-header .close,
+#createProductModal parathyro .modal-header .close span {
     color: #ffffff !important;
     opacity: 1 !important;
     text-shadow: none !important;
 }
 
-#editProductModal .modal-header {
+#editProductModal parathyro .modal-header {
     background: #2f6fb3 !important;
 }
 
-#editProductModal .modal-header,
-#editProductModal .modal-header * {
+#editProductModal parathyro .modal-header,
+#editProductModal parathyro .modal-header * {
     color: #ffffff !important;
     fill: #ffffff !important;
 }
 
-#editProductModal .modal-header .close,
-#editProductModal .modal-header .close span {
+#editProductModal parathyro .modal-header .close,
+#editProductModal parathyro .modal-header .close span {
     color: #ffffff !important;
     opacity: 1 !important;
     text-shadow: none !important;
 }
 
-#createProductModal .modal-footer .btn-secondary:hover,
-#createProductModal .modal-footer .btn-secondary:focus,
-#editProductModal .modal-footer .btn-secondary:hover,
-#editProductModal .modal-footer .btn-secondary:focus,
-#deleteConfirmModal .modal-footer .btn-secondary:hover,
-#deleteConfirmModal .modal-footer .btn-secondary:focus {
+#createProductModal parathyro .modal-footer .btn-secondary:hover,
+#createProductModal parathyro .modal-footer .btn-secondary:focus,
+#editProductModal parathyro .modal-footer .btn-secondary:hover,
+#editProductModal parathyro .modal-footer .btn-secondary:focus,
+#diagrafiConfirmModal parathyro .modal-footer .btn-secondary:hover,
+#diagrafiConfirmModal parathyro .modal-footer .btn-secondary:focus {
     background: #dc3545 !important;
     border-color: #dc3545 !important;
     color: #ffffff !important;
     box-shadow: none !important;
+}
+
+.custom-size-builder {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid #dfe5ee;
+    border-radius: 10px;
+    background: #f8fbfd;
+}
+
+.custom-size-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.custom-size-input-row .form-control {
+    min-height: 42px;
+}
+
+.custom-size-input-row .btn {
+    flex-shrink: 0;
+    font-weight: 700;
+    border-radius: 8px;
+}
+
+.custom-size-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 34px;
+    margin-top: 12px;
+}
+
+.custom-size-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 8px 6px 12px;
+    border: 1px solid rgba(47, 111, 179, 0.22);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--color-navy);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.custom-size-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.1);
+    color: #b42335;
+    cursor: pointer;
+}
+
+.custom-size-chip-remove:hover,
+.custom-size-chip-remove:focus {
+    background: #dc3545;
+    color: #ffffff;
+    outline: none;
+}
+
+.custom-size-empty {
+    align-self: center;
+    color: #6c757d;
+    font-size: 0.9rem;
 }
 
 @media (max-width: 767.98px) {
@@ -151,9 +228,13 @@
         height: 56px;
     }
 
-    #createProductModal .modal-dialog,
-    #editProductModal .modal-dialog,
-    #deleteConfirmModal .modal-dialog {
+    .custom-size-input-row {
+        flex-direction: column;
+    }
+
+    #createProductModal parathyro .modal-dialog,
+    #editProductModal parathyro .modal-dialog,
+    #diagrafiConfirmModal parathyro .modal-dialog {
         margin: 0.5rem;
     }
 }

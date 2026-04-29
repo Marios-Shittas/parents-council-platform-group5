@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\parents.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../../includes/site_context.php';
 require_once __DIR__ . '/../../services/ParentsPageService.php';
 
@@ -6,16 +9,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageRenderMultiline($value)
 {
     return nl2br(htmlspecialchars(parentsPageNormalizeText($value), ENT_QUOTES, 'UTF-8'));
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageNormalizeText($value)
 {
     return is_array($value) ? '' : trim((string)$value);
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeList($items)
 {
     if (!is_array($items)) {
@@ -32,6 +38,7 @@ function parentsPageSanitizeList($items)
     return $sanitizedItems;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeRows($rows)
 {
     if (!is_array($rows)) {
@@ -44,7 +51,7 @@ function parentsPageSanitizeRows($rows)
             foreach ($row as $key => $cell) {
                 $sanitizedRow[$key] = parentsPageNormalizeText($cell);
             }
-            // Only add non-empty rows
+            // Only add non-empty grammes
             if (count(array_filter($sanitizedRow, function ($cell) { return $cell !== ''; })) > 0) {
                 $sanitizedRows[] = $sanitizedRow;
             }
@@ -53,6 +60,7 @@ function parentsPageSanitizeRows($rows)
     return $sanitizedRows;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageSanitizeScheduleBlocks($blocks)
 {
     if (!is_array($blocks)) {
@@ -80,6 +88,7 @@ function parentsPageSanitizeScheduleBlocks($blocks)
     return $sanitizedBlocks;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageGroupArchiveRowsByYear($rows)
 {
     $grouped = [];
@@ -100,6 +109,37 @@ function parentsPageGroupArchiveRowsByYear($rows)
     return $grouped;
 }
 
+function parentsPageSanitizeDocument($document)
+{
+    if (!is_array($document)) {
+        return ['title' => '', 'file_path' => '', 'original_name' => ''];
+    }
+
+    return [
+        'title' => parentsPageNormalizeText($document['title'] ?? ''),
+        'file_path' => parentsPageNormalizeText($document['file_path'] ?? ''),
+        'original_name' => parentsPageNormalizeText($document['original_name'] ?? ''),
+    ];
+}
+
+function parentsPageSanitizeDocuments($documents)
+{
+    if (!is_array($documents)) {
+        return [];
+    }
+
+    $sanitizedDocuments = [];
+    foreach ($documents as $document) {
+        $sanitizedDocument = parentsPageSanitizeDocument($document);
+        if ($sanitizedDocument['title'] !== '' || $sanitizedDocument['file_path'] !== '') {
+            $sanitizedDocuments[] = $sanitizedDocument;
+        }
+    }
+
+    return $sanitizedDocuments;
+}
+
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function parentsPageMergeBoardArchiveReferenceRows(array $rows, array $referenceRows)
 {
     $mergedRows = parentsPageSanitizeRows($rows);
@@ -140,6 +180,7 @@ $attendancePortalSection = $sections['attendance_portal_section'] ?? ['title' =>
 $scheduleSection = $sections['schedule_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $boardSection = $sections['board_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $boardArchiveSection = $sections['board_archive_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
+$parentDocumentsSection = $sections['parent_documents_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $classResponsiblesSection = $sections['class_responsibles_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 $electronicAdminSection = $sections['electronic_admin_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
@@ -153,6 +194,12 @@ $boardArchiveRows = parentsPageGroupArchiveRowsByYear(
         $parentsPageService->getBoardArchiveReferenceRows()
     )
 );
+$parentStatuteDocuments = parentsPageSanitizeDocuments($parentDocumentsSection['content']['statutes'] ?? []);
+$legacyParentStatuteDocument = parentsPageSanitizeDocument($parentDocumentsSection['content']['statute'] ?? []);
+if (empty($parentStatuteDocuments) && $legacyParentStatuteDocument['file_path'] !== '') {
+    $parentStatuteDocuments[] = $legacyParentStatuteDocument;
+}
+$parentMinutesDocuments = parentsPageSanitizeDocuments($parentDocumentsSection['content']['minutes'] ?? []);
 $classResponsibles = parentsPageSanitizeRows($classResponsiblesSection['content']['rows'] ?? []);
 $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content']['registration_steps'] ?? []);
 $loginSteps = parentsPageSanitizeList($electronicAdminSection['content']['login_steps'] ?? []);
@@ -162,6 +209,7 @@ $chromeSteps = parentsPageSanitizeList($electronicAdminSection['content']['chrom
 $pageHeaderTitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['title'] ?? ''));
 $pageHeaderSubtitle = str_replace('Συνδεσμος Γωνεων', 'Σύνδεσμος Γονέων', (string)($pageHeaderSection['subtitle'] ?? ''));
 $pageHeaderIcon = $pageHeaderSection['content']['icon'] ?? 'fas fa-users';
+$isParentRoleView = site_is_parent() && (($_SESSION['role'] ?? '') === 'parent');
 $pageHeaderEyebrow = site_is_parent()
     ? ($pageHeaderSection['content']['parent_eyebrow'] ?? 'Χώρος Γονέα')
     : ($pageHeaderSection['content']['public_eyebrow'] ?? 'Δημόσια Πύλη');
@@ -263,6 +311,92 @@ $pageHeaderEyebrow = site_is_parent()
                         </div>
                     </div>
                 </div>
+
+                <?php if ($isParentRoleView): ?>
+                    <div class="parents-card parents-card--documents">
+                        <div class="parents-section-heading">
+                            <span class="parents-section-heading__icon"><i class="fas fa-file-pdf"></i></span>
+                            <div>
+                                <p class="parents-section-heading__eyebrow"><?php echo htmlspecialchars($parentDocumentsSection['content']['eyebrow'] ?? ''); ?></p>
+                                <h2><?php echo htmlspecialchars($parentDocumentsSection['title'] ?? ''); ?></h2>
+                            </div>
+                        </div>
+
+                        <?php if (trim((string)($parentDocumentsSection['subtitle'] ?? '')) !== ''): ?>
+                            <p class="parents-lead"><?php echo parentsPageRenderMultiline($parentDocumentsSection['subtitle']); ?></p>
+                        <?php endif; ?>
+
+                        <?php if (empty($parentStatuteDocuments) && empty($parentMinutesDocuments)): ?>
+                            <p class="mb-0"><?php echo htmlspecialchars($parentDocumentsSection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη έγγραφα.'); ?></p>
+                        <?php else: ?>
+                            <?php if (!empty($parentStatuteDocuments)): ?>
+                                <section class="parents-document-group parents-document-group--statutes">
+                                    <div class="parents-document-group__heading">
+                                        <span class="parents-document-group__icon"><i class="fas fa-file-contract"></i></span>
+                                        <div>
+                                            <p>Καταστατικό</p>
+                                            <h3><?php echo htmlspecialchars($parentDocumentsSection['content']['statute_label'] ?? 'Καταστατικό Συνδέσμου'); ?></h3>
+                                        </div>
+                                    </div>
+                                    <?php foreach ($parentStatuteDocuments as $index => $document): ?>
+                                        <?php if ($document['file_path'] === '') { continue; } ?>
+                                        <details class="parents-archive-year parents-document-panel mb-3" <?php echo $index === 0 ? 'open' : ''; ?>>
+                                            <summary class="parents-archive-year__summary">
+                                                <span class="parents-archive-year__title"><?php echo htmlspecialchars($document['title'] ?: ($parentDocumentsSection['content']['statute_label'] ?? 'Καταστατικό Συνδέσμου')); ?></span>
+                                                <span class="parents-archive-year__icon" aria-hidden="true">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </span>
+                                            </summary>
+
+                                            <div class="parents-archive-year__content">
+                                                <a class="parents-document-link"
+                                                   href="<?php echo htmlspecialchars($document['file_path']); ?>"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
+                                                </a>
+                                            </div>
+                                        </details>
+                                    <?php endforeach; ?>
+                                </section>
+                            <?php endif; ?>
+
+                            <?php if (!empty($parentMinutesDocuments)): ?>
+                                <section class="parents-document-group parents-document-group--minutes">
+                                    <div class="parents-document-group__heading">
+                                        <span class="parents-document-group__icon"><i class="fas fa-clipboard-list"></i></span>
+                                        <div>
+                                            <p>Συνεδριάσεις</p>
+                                            <h3><?php echo htmlspecialchars($parentDocumentsSection['content']['minutes_label'] ?? 'Πρακτικά Συνεδριάσεων'); ?></h3>
+                                        </div>
+                                    </div>
+                                    <?php foreach ($parentMinutesDocuments as $document): ?>
+                                        <?php if ($document['file_path'] === '') { continue; } ?>
+                                        <details class="parents-archive-year parents-document-panel mb-3">
+                                            <summary class="parents-archive-year__summary">
+                                                <span class="parents-archive-year__title"><?php echo htmlspecialchars($document['title'] ?: ($parentDocumentsSection['content']['minutes_label'] ?? 'Πρακτικά Συνεδρίασης')); ?></span>
+                                                <span class="parents-archive-year__icon" aria-hidden="true">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </span>
+                                            </summary>
+
+                                            <div class="parents-archive-year__content">
+                                                <a class="parents-document-link"
+                                                   href="<?php echo htmlspecialchars($document['file_path']); ?>"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
+                                                </a>
+                                            </div>
+                                        </details>
+                                    <?php endforeach; ?>
+                                </section>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="parents-card parents-card--schedule">
                     <div class="parents-section-heading">

@@ -1,9 +1,12 @@
+/* Arxeio: public\assets\css\admin_css\admin_events.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
 /**
- * Admin Events - Events specific styles only
- * Page-only CSS related to events functionality
+ * Admin Ekdiloseis - Ekdiloseis sigkekrimeno styles only
+ * Page-only CSS related to ekdiloseis functionality
  */
 
-/* Image preview container for event images */
+/* Eikona pelegxo container gia ekdilosi eikones */
 .image-preview {
     display: flex;
     flex-wrap: wrap;
@@ -11,14 +14,14 @@
     margin-top: 10px;
 }
 
-/* Individual image item in preview */
+/* Individual eikona item in pelegxo */
 .image-preview-item {
     position: relative;
     width: 100px;
     height: 100px;
 }
 
-/* Image display in preview */
+/* Eikona display in pelegxo */
 .image-preview-item img {
     width: 100%;
     height: 100%;
@@ -26,7 +29,7 @@
     border-radius: 8px;
 }
 
-/* Delete button for each image */
+/* Diagrafei button gia each eikona */
 .image-preview-item .delete-btn {
     position: absolute;
     top: -8px;
@@ -41,7 +44,7 @@
     cursor: pointer;
 }
 
-/* Thumbnail in events table */
+/* Thumbnail in ekdiloseis pinakas */
 .thumbnail {
     width: 72px;
     height: 72px;
@@ -50,7 +53,7 @@
     border: 1px solid #dfe5ee;
 }
 
-/* Event card in admin panel */
+/* Ekdilosi card in admin panel */
 .card.event-card {
     border: 1px solid #e3e8ef;
     transition: box-shadow 0.3s ease;
@@ -60,7 +63,7 @@
     box-shadow: 0 4px 12px rgba(0, 87, 168, 0.1);
 }
 
-/* Event date badge in card */
+/* Ekdilosi imerominia badge in card */
 .event-date-badge {
     background: #0057a8;
     color: white;
@@ -70,13 +73,13 @@
     font-weight: 600;
 }
 
-/* Event time display */
+/* Ekdilosi time display */
 .event-time {
     color: #666;
     font-size: 0.9rem;
 }
 
-/* Event status indicator */
+/* Ekdilosi status indicator */
 .event-status {
     display: inline-block;
     padding: 4px 12px;
@@ -95,45 +98,45 @@
     color: #721c24;
 }
 
-/* Modal styles for event management */
-#createModal .modal-header,
-#editModal .modal-header {
+/* Modal parathyro styles gia ekdilosi management */
+#createModal parathyro .modal-header,
+#editModal parathyro .modal-header {
     background: #0057a8;
     color: white;
 }
 
-#createModal .modal-header .close,
-#editModal .modal-header .close {
+#createModal parathyro .modal-header .close,
+#editModal parathyro .modal-header .close {
     color: white;
     opacity: 0.8;
 }
 
-#createModal .modal-header .close:hover,
-#editModal .modal-header .close:hover {
+#createModal parathyro .modal-header .close:hover,
+#editModal parathyro .modal-header .close:hover {
     opacity: 1;
 }
 
-#createModal .modal-footer .btn-secondary-custom,
-#editModal .modal-footer .btn-secondary-custom {
+#createModal parathyro .modal-footer .btn-secondary-custom,
+#editModal parathyro .modal-footer .btn-secondary-custom {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-#createModal .modal-footer .btn-secondary-custom:hover,
-#createModal .modal-footer .btn-secondary-custom:focus,
-#editModal .modal-footer .btn-secondary-custom:hover,
-#editModal .modal-footer .btn-secondary-custom:focus {
+#createModal parathyro .modal-footer .btn-secondary-custom:hover,
+#createModal parathyro .modal-footer .btn-secondary-custom:focus,
+#editModal parathyro .modal-footer .btn-secondary-custom:hover,
+#editModal parathyro .modal-footer .btn-secondary-custom:focus {
     background: #c62828;
     border-color: #c62828;
     color: #ffffff;
 }
 
-/* Form styling for event forms */
+/* Form styling gia ekdilosi formaes */
 .event-form-group label {
     font-weight: 600;
     color: #333;
 }
 
-/* Action buttons in event cards */
+/* Action buttons in ekdilosi cards */
 .card-footer .btn-warning {
     background: #ffc107;
     border-color: #ffc107;
@@ -245,9 +248,9 @@
     margin-top: 2px;
 }
 
-/* Admin events table tuning, aligned with announcements */
+/* Admin ekdiloseis pinakas tuning, aligned me anakoinoseis */
 .admin-table {
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .admin-table th {
@@ -265,28 +268,30 @@
 
 .admin-table th:nth-child(1),
 .admin-table td:nth-child(1) {
-    width: 120px;
+    width: 110px;
     text-align: center;
 }
 
 .admin-table th:nth-child(2),
 .admin-table td:nth-child(2) {
-    width: 180px;
+    width: 280px;
 }
 
 .admin-table th:nth-child(3),
 .admin-table td:nth-child(3) {
-    width: 175px;
+    width: 160px;
     text-align: center;
 }
 
 .admin-table th:nth-child(4),
 .admin-table td:nth-child(4) {
-    width: 170px;
+    width: 140px;
     text-align: center;
 }
 
-.admin-table th:nth-child(5) {
+.admin-table th:nth-child(5),
+.admin-table td:nth-child(5) {
+    width: 280px;
     text-align: left;
 }
 
@@ -297,13 +302,20 @@
 
 .admin-table th:nth-child(6),
 .admin-table td:nth-child(6) {
-    width: 150px;
+    width: 120px;
     text-align: center;
+}
+
+.admin-table td:nth-child(2),
+.admin-table td:nth-child(5) {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 767.98px) {
     .admin-table {
-        min-width: 900px;
+        min-width: 1100px;
     }
 
     .admin-table th:nth-child(5),
@@ -322,15 +334,15 @@
         height: 84px;
     }
 
-    #createModal .modal-dialog,
-    #editModal .modal-dialog {
+    #createModal parathyro .modal-dialog,
+    #editModal parathyro .modal-dialog {
         margin: 0.5rem;
     }
 
-    #createModal textarea,
+    #createModal parathyro textarea,
     #editEventForm textarea,
-    #edit_description,
-    #description,
+    #edit_perigrafi,
+    #perigrafi,
     #gdpr_notice,
     #edit_gdpr_notice {
         min-height: 120px;
@@ -338,8 +350,8 @@
         line-height: 1.5;
     }
 
-    #createModal .form-group,
-    #editEventForm .form-group {
+    #createModal parathyro .forma-group,
+    #editEventForm .forma-group {
         min-width: 0;
     }
 

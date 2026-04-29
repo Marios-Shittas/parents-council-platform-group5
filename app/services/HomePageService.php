@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\services\HomePageService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 /**
  * HomePageService
- * Αποθηκεύει και ανακτά το editable περιεχόμενο της αρχικής σελίδας.
+ * Sxolio: voithitiko sxolio gia ton parakato kodika.
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -11,7 +14,8 @@ class HomePageService
     private $conn;
     private $defaultSections;
     private $lastError = '';
-
+// Kanei bootstrap tou ypiresia: fortwnei DB handle, etoimazei proepilegmeno section schema,
+// eksasfalizei oti yparxei pinakas kai kanei arxikopoisi sta missing proepilegmena.
     public function __construct()
     {
         global $conn;
@@ -21,7 +25,7 @@ class HomePageService
         $this->ensureTable();
         $this->ensureDefaultSections();
     }
-
+// Epistrefei merged homepage sections opou to DB periexomeno kanei override sta proepilegmena ana section key.
     public function getAllSections()
     {
         $sections = $this->defaultSections;
@@ -49,13 +53,14 @@ class HomePageService
 
         return $sections;
     }
-
+// Epistrefei ena section ana key apo to merged section map.
     public function getSection($sectionKey)
     {
         $sections = $this->getAllSections();
         return $sections[$sectionKey] ?? null;
     }
-
+// Kanei validate to section key, normalopoiei UTF-8 payload, serialopoiei JSON periexomeno,
+// kai ekteli upsert (enimerosi i eisagogi) gia to target homepage section.
     public function updateSection($sectionKey, $title, $subtitle, array $content)
     {
         $this->lastError = '';
@@ -119,12 +124,12 @@ class HomePageService
 
         return true;
     }
-
+// Epistrefei to teleftaio human-readable validation i persistence error tou ypiresia.
     public function getLastError()
     {
         return $this->lastError;
     }
-
+// Dimiourgei ton HomePageSections pinakas kai uniqueness constraint sto section_key.
     private function ensureTable()
     {
         $sql = "CREATE TABLE IF NOT EXISTS HomePageSections (
@@ -140,7 +145,7 @@ class HomePageService
 
         $this->conn->query($sql);
     }
-
+// Kanei eisagogi ta proepilegmeno sections mono otan leipoun, xwris na peirazei hdh customized periexomeno.
     private function ensureDefaultSections()
     {
         foreach ($this->defaultSections as $sectionKey => $section) {
@@ -160,26 +165,26 @@ class HomePageService
             $this->updateSection($sectionKey, $section['title'], $section['subtitle'], $section['content']);
         }
     }
-
+// Orizei to canonical homepage periexomeno blueprint gia first-time setup kai fallback reads.
     private function buildDefaultSections()
     {
         return [
             'banner_section' => [
-                'title' => 'Banner Αρχικής',
+                'title' => 'Κεντρικές Εικόνες Αρχικής',
                 'subtitle' => '',
                 'content' => [
                     'slides' => [
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 1',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 2',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2',
                         ],
                         [
                             'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png',
-                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Banner 3',
+                            'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3',
                         ],
                     ],
                 ],
@@ -214,7 +219,7 @@ class HomePageService
             ],
         ];
     }
-
+// Recursively katharizei arrays/strings se valid UTF-8 gia na apofeygontai DB/JSON encoding failures.
     private function normalizeUtf8($value)
     {
         if (is_array($value)) {

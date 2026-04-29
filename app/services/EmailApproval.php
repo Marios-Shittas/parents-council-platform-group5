@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\EmailApproval.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 
 namespace Kozzy\ParentsCouncilPlatformGroup5\services;
 
@@ -10,6 +13,7 @@ class EmailApproval
     private PHPMailer $mailer;
     private array $transportModes = [];
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(array $smtpConfig)
     {
         $host = trim((string) ($smtpConfig['host'] ?? ''));
@@ -64,6 +68,7 @@ class EmailApproval
         $this->transportModes = $this->resolveTransportModes($encryption, $port);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendApprovalEmail(string $toEmail, string $link): void
     {
         $lastError = null;
@@ -92,6 +97,7 @@ class EmailApproval
         throw new \RuntimeException('Failed to send approval email.');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveTransportModes(string $encryption, int $port): array
     {
         $normalized = strtolower(trim($encryption));
@@ -115,6 +121,7 @@ class EmailApproval
         return ['starttls', 'smtps', 'none'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function applyTransportMode(string $mode): void
     {
         if ($mode === 'smtps') {

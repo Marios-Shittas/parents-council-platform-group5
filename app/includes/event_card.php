@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\includes\event_card.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 $images     = !empty($event['images']) ? $event['images'] : [$defaultImage];
 $imageCount = count($event['images'] ?? []);
 $eventDateTime = new DateTime($event['event_date']);
@@ -10,11 +13,11 @@ $isPast        = $eventDateTime < new DateTime();
 <div class="col-xl-4 col-md-6 mb-4">
     <div class="event-card">
 
-        <!-- Image area -->
+        <!-- Perioxi eikonas -->
         <div class="event-card-img-wrap">
 
             <?php if ($imageCount > 1): ?>
-                <!-- Mini carousel για πολλές φωτογραφίες -->
+                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                 <div id="cardCarousel<?php echo $event['event_id']; ?>" class="carousel slide" data-ride="carousel" data-interval="3500">
                     <div class="carousel-inner">
                         <?php foreach ($images as $i => $img): ?>
@@ -38,12 +41,12 @@ $isPast        = $eventDateTime < new DateTime();
                      onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
             <?php endif; ?>
 
-            <!-- Ημερομηνία badge -->
+            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
             <div class="event-date-badge">
                 <i class="far fa-calendar-alt mr-1"></i><?php echo $dayMonth; ?>
             </div>
 
-            <!-- Photo count badge (μόνο αν >1 φωτογραφία) -->
+            <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
             <?php if ($imageCount > 1): ?>
                 <div class="event-photo-count">
                     <i class="fas fa-images mr-1"></i><?php echo $imageCount; ?>
@@ -88,21 +91,21 @@ $isPast        = $eventDateTime < new DateTime();
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal parathyro -->
 <div class="modal fade event-modal" id="eventModal<?php echo $event['event_id']; ?>" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
 
-            <div class="modal-header" style="background: linear-gradient(135deg, #0057a8, #003d7a); border: none;">
-                <h5 class="modal-title" style="color:#ffffff !important; font-weight:700;">
-                    <i class="fas fa-calendar-alt mr-2" style="color:#ffffff !important;"></i><?php echo htmlspecialchars($event['event_title']); ?>
+            <div class="modal-header modal-brand-header">
+                <h5 class="modal-title modal-brand-title">
+                    <i class="fas fa-calendar-alt mr-2"></i><?php echo htmlspecialchars($event['event_title']); ?>
                 </h5>
                 <button type="button"
                         class="close"
                         data-dismiss="modal"
                         aria-label="Close"
-                        style="color:#ffffff !important; opacity:1; text-shadow:none; border:none; background:transparent;">
-                    <span aria-hidden="true" style="color:#ffffff !important;">&times;</span>
+                        class="modal-brand-close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
@@ -110,7 +113,7 @@ $isPast        = $eventDateTime < new DateTime();
 
                 <?php if (!empty($event['images'])): ?>
                     <?php if (count($event['images']) > 1): ?>
-                        <!-- Full carousel με indicators -->
+                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                         <div id="modalCarousel<?php echo $event['event_id']; ?>" class="carousel slide mb-4" data-ride="carousel">
                             <ol class="carousel-indicators">
                                 <?php foreach ($event['images'] as $i => $img): ?>
@@ -136,13 +139,12 @@ $isPast        = $eventDateTime < new DateTime();
                         </div>
                     <?php else: ?>
                         <img src="<?php echo htmlspecialchars($event['images'][0]); ?>"
-                             class="img-fluid mb-4 w-100"
-                             style="border-radius:12px; max-height:380px; object-fit:cover;"
+                             class="img-fluid mb-4 w-100 modal-preview-image"
                              alt="<?php echo htmlspecialchars($event['event_title']); ?>">
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <!-- Ημερομηνία / Ώρα -->
+                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                 <div class="modal-event-meta">
                     <div class="event-info">
                         <i class="far fa-calendar"></i>
@@ -154,7 +156,7 @@ $isPast        = $eventDateTime < new DateTime();
                     </div>
                 </div>
 
-                <!-- Περιγραφή -->
+                <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                 <div class="event-content">
                     <h6>Περιγραφή</h6>
                     <p class="text-muted"><?php echo nl2br(htmlspecialchars($event['event_description'] ?? '')); ?></p>

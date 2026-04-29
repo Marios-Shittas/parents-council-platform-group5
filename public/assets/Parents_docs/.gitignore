@@ -1,0 +1,4 @@
+# Arxeio: public\assets\Parents_docs\.gitignore
+# Rolos: Krataei ton fakelo sto git gia uploads praktikon/katastatikou.
+# Den agnooume ta PDF, oste na mporoun na ginoun push otan xreiazontai sto seed/demo content.
+.DS_Store

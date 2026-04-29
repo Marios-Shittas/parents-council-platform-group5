@@ -1,28 +1,18 @@
 <?php
+// Arxeio: public\subscription.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 require_once __DIR__ . '/../app/config/db.php';
-require_once __DIR__ . '/../app/includes/TokenValidator.php';
+require_once __DIR__ . '/../app/controllers/SubscriptionPageController.php';
 
-class SubscriptionPage
-{
-    private mysqli $conn;
-    private TokenValidator $tokenValidator;
-    private string $tokenMessage = 'Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει.';
-
-    public function __construct(mysqli $conn)
-    {
-        $this->conn = $conn;
-        $this->tokenValidator = new TokenValidator($conn);
-    }
-
-    public function render(): void
-    {
-        $token = trim((string) ($_GET['token'] ?? ''));
-        $isValidToken = $this->isTokenValid($token);
-        $tokenJson = json_encode($token, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-        ?>
+$subscriptionController = new SubscriptionPageController($conn);
+$subscriptionData = $subscriptionController->viewData();
+$isValidToken = $subscriptionData['is_valid_token'];
+$tokenMessage = $subscriptionData['token_message'];
+$subscriptionConfig = ['APPROVAL_TOKEN' => $subscriptionData['token']];
+?>
 <!DOCTYPE html>
 <html lang="el">
 <head>
@@ -47,7 +37,7 @@ class SubscriptionPage
     <?php if (!$isValidToken): ?>
         <div class="container mt-5">
             <div class="alert alert-danger text-center" role="alert">
-                <?php echo htmlspecialchars($this->tokenMessage, ENT_QUOTES, 'UTF-8'); ?>
+                <?php echo htmlspecialchars($tokenMessage, ENT_QUOTES, 'UTF-8'); ?>
             </div>
         </div>
     <?php else: ?>
@@ -64,23 +54,11 @@ class SubscriptionPage
         <!-- Babel -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-        <script>
-            window.APPROVAL_TOKEN = <?php echo $tokenJson ?: '""'; ?>;
-        </script>
+        <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode($subscriptionConfig, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
         <script type="text/babel" src="assets/js/subscription.jsx"></script>
     <?php endif; ?>
 </body>
 </html>
-        <?php
-    }
-
-    private function isTokenValid(string $token): bool
-    {
-        return $this->tokenValidator->isTokenValid($token, 'parent', 'waiting_payment', true);
-    }
-}
-
-$page = new SubscriptionPage($conn);
-$page->render();
+<?php
 $conn->close();

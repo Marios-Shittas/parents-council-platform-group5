@@ -1,3 +1,8 @@
+/* Arxeio: public\assets\css\admin_css\admin_photos.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Styles gia tin admin diaxeirisi tis photo gallery. */
+/* Xrisimopoieitai gia upload controls, gallery grid kai koumpia diagrafis/epexergasias. */
 body {
     background:
         radial-gradient(circle at top right, rgba(47, 110, 160, 0.06), transparent 28%),

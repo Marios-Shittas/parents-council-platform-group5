@@ -1,3 +1,21 @@
+/* Arxeio: public\assets\css\admin_css\admin_parents.css
+   Rolos: Orizei styles gia admin selida/panel kai allazei tin optiki empeiria tou diaxeiristi.
+   Simeiosi: Prosoxi: einai admin-facing, opote kratame role checks kai feedback kathara gia ton diaxeiristi. */
+/* Styles gia tin admin diaxeirisi tis selidas goneon. */
+/* Edo einai ta tabs, formaes kai pelegxo blocks gia periexomeno pou allazei o admin. */
+.admin-section-tabs .nav-link:focus,
+.admin-section-tabs .nav-link:focus-visible,
+.admin-section-tabs .nav-link.active:focus,
+.admin-section-tabs .nav-link.active:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.content-editor-card__header .parents-admin-warning-text {
+    color: #b42318 !important;
+    font-weight: 800;
+}
+
 .parents-upload-panel {
     display: grid;
     gap: 16px;
@@ -267,6 +285,91 @@
 .board-archive-editor__block--new {
     border-style: dashed;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.parent-documents-editor {
+    padding: 18px;
+    border: 1px solid #d9e4f0;
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.parent-documents-editor--statutes {
+    border-color: #c8d8f0;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+.parent-documents-editor--minutes {
+    border-color: #d9d0eb;
+    background: linear-gradient(180deg, #fbf9ff 0%, #f3effb 100%);
+}
+
+.parent-documents-editor__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(43, 76, 116, 0.12);
+}
+
+.parent-documents-editor__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #ffffff;
+}
+
+.parent-documents-editor--statutes .parent-documents-editor__icon {
+    background: linear-gradient(135deg, #255f99 0%, #173554 100%);
+}
+
+.parent-documents-editor--minutes .parent-documents-editor__icon {
+    background: linear-gradient(135deg, #6f4bb4 0%, #3f2a68 100%);
+}
+
+.parent-documents-editor__eyebrow {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+}
+
+.parent-documents-editor__heading label {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #173554;
+}
+
+.parent-document-delete-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid #f2b8b8;
+    background: #fff5f5;
+    color: #b42318;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.parent-document-delete-option input {
+    accent-color: #b42318;
+}
+
+.parent-document-delete-option span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
 }
 
 .parents-confirm-modal .modal-content {

@@ -1,7 +1,10 @@
 <?php
+// Arxeio: app\views\pages\applications.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika.
 /**
- * Parent Applications Page
- * Displays all applications and allows parent users to submit them.
+ * Goneas Aitiseis Page
+ * Displays ola aitiseis kai allows goneas xristes to submit them.
  */
 
 require_once __DIR__ . '/../../services/ApplicationsService.php';
@@ -11,9 +14,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Initialize the service
+// Arxikopoiei to ypiresia kai fortonei tis vasikes eksartiseis.
 $applicationsService = new ApplicationsService();
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadApplicationUiMetaPublic(): array {
     $path = __DIR__ . '/../../../storage/application_ui_meta.json';
     if (!is_file($path)) {
@@ -29,6 +33,7 @@ function loadApplicationUiMetaPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function formatUiDatePublic(string $date): string {
     $date = trim($date);
     if ($date === '') {
@@ -44,10 +49,10 @@ function formatUiDatePublic(string $date): string {
 }
 
 /**
- * Normalize $_FILES input (single or multiple) into a flat files array.
+ * Normalize $_FILES input (ena i multiple) mesa se a flat arxeia pinakas.
  *
- * @param array<string, mixed> $files
- * @return array<int, array<string, mixed>>
+ * @param array<string, mixed - > $arxeia
+ * @return array<int, - pinakas<string, mixed>>
  */
 function normalizeUploadedSubmissionFiles(array $files): array {
     $normalized = [];
@@ -94,6 +99,7 @@ function normalizeUploadedSubmissionFiles(array $files): array {
     return $normalized;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getUploadedSubmissionDisplayName(string $fileName): string {
     $fileName = trim($fileName);
     if ($fileName === '') {
@@ -103,10 +109,12 @@ function getUploadedSubmissionDisplayName(string $fileName): string {
     return basename(str_replace('\\', '/', $fileName));
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getApplicationDocumentDisplayNamesPathPublic(): string {
     return __DIR__ . '/../../../storage/application_document_display_names.json';
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadApplicationDocumentDisplayNamesPublic(): array {
     $path = getApplicationDocumentDisplayNamesPathPublic();
     if (!is_file($path)) {
@@ -122,10 +130,12 @@ function loadApplicationDocumentDisplayNamesPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getSubmissionFileDisplayNamesPathPublic(): string {
     return __DIR__ . '/../../../storage/submission_file_display_names.json';
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function loadSubmissionFileDisplayNamesPublic(): array {
     $path = getSubmissionFileDisplayNamesPathPublic();
     if (!is_file($path)) {
@@ -141,6 +151,7 @@ function loadSubmissionFileDisplayNamesPublic(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function saveSubmissionFileDisplayNamesPublic(array $displayNames): bool {
     $path = getSubmissionFileDisplayNamesPathPublic();
     $dir = dirname($path);
@@ -151,11 +162,13 @@ function saveSubmissionFileDisplayNamesPublic(array $displayNames): bool {
     return file_put_contents($path, json_encode($displayNames, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) !== false;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function normalizeSubmissionMode($mode): string {
     $mode = trim((string)$mode);
     return in_array($mode, ['manual', 'upload'], true) ? $mode : 'upload';
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function normalizeManualSubmissionFieldKey(string $rawName, int $index = 0): string {
     $safeName = trim($rawName);
     $safeName = preg_replace('/\s+/u', '_', $safeName) ?? '';
@@ -169,6 +182,7 @@ function normalizeManualSubmissionFieldKey(string $rawName, int $index = 0): str
     return $safeName;
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function validateManualSubmissionPayload(array $payload, array $applicationFields = []): string {
     if (!empty($applicationFields)) {
         foreach (array_values($applicationFields) as $index => $field) {
@@ -225,6 +239,7 @@ function validateManualSubmissionPayload(array $payload, array $applicationField
     return '';
 }
 
+// Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function ensurePublicGuestSubmissionIdentity(): array {
     global $conn;
 
@@ -706,7 +721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
             $message = 'Μη έγκυρη αίτηση.';
             $messageType = 'warning';
         } else {
-            // Check if user already submitted this application
+            // Elegxei an o xristis exei idi ypobalei afti tin aitisi.
             if ($isAuthenticatedParent && $applicationsService->hasUserSubmitted($application_id, $user_id)) {
                 $message = 'Έχετε ήδη υποβάλει αυτή την αίτηση.';
                 $messageType = 'warning';
@@ -799,532 +814,7 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/applications.css'); ?>?v=<?php echo (int)(@filemtime(__DIR__ . '/../../../public/assets/css/user_css/applications.css') ?: time()); ?>">
 
-    <style>
-        .post-card {
-            cursor: pointer;
-            overflow: hidden;
-            padding: 0;
-            background: #f8f9fb;
-            border: 1px solid #dbe4f3;
-            border-radius: 0;
-            box-shadow: none;
-            border-bottom: 4px solid #2f6fb3;
-        }
-
-        .post-image-wrap {
-            display: none !important;
-        }
-
-        .post-content {
-            padding: 22px 26px 16px;
-        }
-
-        .application-item.post-card:hover {
-            box-shadow: none;
-            transform: none;
-        }
-
-        .application-title {
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.25px;
-        }
-
-        .application-instruction-links {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 0;
-        }
-
-        .application-instruction-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: #6b7280;
-            font-weight: 700;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.45px;
-            width: fit-content;
-        }
-
-        .application-instruction-link:hover {
-            text-decoration: underline;
-        }
-
-        .application-instruction-empty {
-            color: #6c757d;
-            font-size: 0.95rem;
-        }
-
-        .application-date-bottom {
-            margin-top: 10px;
-            width: 100%;
-            text-align: right;
-        }
-
-        .application-date-bottom span {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 999px;
-            background: transparent;
-            color: #355b85;
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .app-meta-top,
-        .js-dates-placeholder,
-        .submit-btn {
-            display: none !important;
-        }
-
-        .application-view-attachments a {
-            text-decoration: none;
-        }
-
-        #applicationViewModal .modal-content {
-            border: 0;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 18px 44px rgba(18, 41, 70, 0.18);
-        }
-
-        #applicationViewModal .modal-header {
-            background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
-            border-bottom: 0;
-        }
-
-        #applicationViewModal .modal-title,
-        #applicationViewModal .modal-header .close {
-            color: #ffffff;
-            text-shadow: none;
-            opacity: 1;
-        }
-
-        #applicationViewModal .modal-body {
-            background: #f8fbff;
-        }
-
-        .application-view-files-panel {
-            background: #ffffff;
-            border: 1px solid #dce9f8;
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
-        }
-
-        .application-view-files-panel h6 {
-            color: #1f4f8f;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        #application-view-attachments-list {
-            list-style: none;
-            margin-bottom: 0;
-            padding-left: 0;
-        }
-
-        #application-view-attachments-list li {
-            margin-bottom: 10px;
-            line-height: 1.35;
-            background: #f7fbff;
-            border: 1px solid #d8e7f8;
-            border-radius: 10px;
-            padding: 10px 12px;
-        }
-
-        #application-view-attachments-list li:last-child {
-            margin-bottom: 0;
-        }
-
-        #application-view-attachments-list a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #18395f;
-            font-weight: 600;
-        }
-
-        .application-submit-methods {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 16px;
-        }
-
-        .application-submit-option {
-            position: relative;
-            width: 100%;
-            border: 1px solid #d7e6f7;
-            border-radius: 14px;
-            background: linear-gradient(180deg, #fbfdff 0%, #f2f8ff 100%);
-            padding: 18px 18px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            text-align: left;
-            color: #1f456d;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .application-submit-option:hover {
-            border-color: #a8c7ec;
-            box-shadow: 0 10px 24px rgba(31, 79, 143, 0.08);
-            transform: translateY(-1px);
-        }
-
-        .application-submit-option.is-active {
-            border-color: #1f6fc4;
-            box-shadow: 0 14px 28px rgba(31, 111, 196, 0.16);
-            background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
-        }
-
-        .application-submit-option__icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #eaf3ff;
-            color: #2368b9;
-            font-size: 1.05rem;
-            flex-shrink: 0;
-        }
-
-        .application-submit-option__title {
-            display: block;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #173a63;
-        }
-
-        .application-submit-option__text {
-            display: block;
-            margin-top: 5px;
-            color: #60758e;
-            font-size: 0.92rem;
-            line-height: 1.45;
-        }
-
-        .application-submit-option__check {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 28px;
-            height: 28px;
-            border-radius: 9px;
-            border: 1px solid #bdd3ef;
-            background: #ffffff;
-            color: transparent;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-        }
-
-        .application-submit-option.is-active .application-submit-option__check {
-            background: #1f6fc4;
-            border-color: #1f6fc4;
-            color: #ffffff;
-        }
-
-        .application-submit-panel {
-            display: none;
-        }
-
-        .application-submit-panel.is-active {
-            display: block;
-        }
-
-        .application-submit-helper {
-            margin-bottom: 14px;
-            color: #60758e;
-            font-size: 0.93rem;
-            line-height: 1.5;
-        }
-
-        .application-view-manual-fields .form-group:last-child {
-            margin-bottom: 0 !important;
-        }
-
-        .application-view-manual-fields .form-control {
-            border: 1px solid #b9d1ef;
-            border-radius: 10px;
-            color: #223d60;
-            background: #fbfdff;
-        }
-
-        .application-view-manual-fields .form-control:focus {
-            border-color: #2b76cc;
-            box-shadow: 0 0 0 0.2rem rgba(43, 118, 204, 0.12);
-        }
-
-        .application-view-manual-fields textarea.form-control {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        #application-view-upload {
-            background: #ffffff;
-            border: 1px solid #dce9f8;
-            border-radius: 12px;
-            padding: 16px 18px;
-            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
-        }
-
-        #application-view-upload .upload-title {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            font-weight: 700;
-            color: #1f4f8f;
-            margin-bottom: 12px;
-            font-size: 1.05rem;
-        }
-
-        #application-view-upload .upload-title i {
-            width: 18px;
-            text-align: center;
-        }
-
-        .application-view-upload-note {
-            display: block;
-            margin-top: 10px;
-            color: #60758e !important;
-            font-size: 0.92rem;
-        }
-
-        .application-view-upload-note strong {
-            color: #304c6f;
-        }
-
-        #application-view-file-input {
-            border: 1px solid #b9d1ef;
-            background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
-            border-radius: 10px;
-            min-height: 46px;
-            padding: 6px 8px;
-            color: #223d60;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-        }
-
-        #application-view-file-input::file-selector-button,
-        #application-view-file-input::-webkit-file-upload-button {
-            border: 0;
-            background: linear-gradient(135deg, #2c73c8 0%, #1d5faa 100%);
-            color: #ffffff;
-            padding: 0.42rem 0.75rem;
-            margin-right: 0.65rem;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 0.92rem;
-            line-height: 1.1;
-            font-weight: 700;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        #application-view-selected-files {
-            list-style: none;
-            margin-top: 14px;
-            margin-bottom: 0;
-            padding-left: 0;
-            color: #2b4462;
-            font-size: 0.9rem;
-        }
-
-        #application-view-selected-files:empty {
-            display: none;
-        }
-
-        #application-view-selected-files li {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            padding: 9px 12px;
-            background: #f7fbff;
-            border: 1px solid #d8e7f8;
-            border-radius: 10px;
-            color: #24476d;
-            font-weight: 600;
-        }
-
-        #application-view-selected-files li:last-child {
-            margin-bottom: 0;
-        }
-
-        #application-view-selected-files li i {
-            color: #2b76cc;
-        }
-
-        .application-registration-reminder {
-            margin-top: 14px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid #f2d7a1;
-            background: #fff7e6;
-            color: #7a4f00;
-            font-size: 0.9rem;
-            line-height: 1.45;
-        }
-
-        .application-registration-reminder i {
-            color: #c47b00;
-            margin-right: 6px;
-        }
-
-        #submitModal .modal-dialog {
-            margin: 0.75rem auto;
-        }
-
-        #submitModal .modal-content {
-            max-height: calc(100vh - 1.5rem);
-        }
-
-        #submitModal .modal-header {
-            background: #1f7aec;
-            border-bottom: 0;
-        }
-
-        #submitModal .modal-title {
-            color: #ffffff;
-        }
-
-        #application-notice-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1085;
-            width: min(360px, calc(100vw - 32px));
-            display: none;
-            padding: 0;
-            background: transparent !important;
-            border: 0;
-            box-shadow: none !important;
-            outline: none;
-        }
-
-        #application-notice-box.is-visible {
-            display: block;
-        }
-
-        .application-notice-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 31, 52, 0.28);
-            z-index: 1084;
-            display: none;
-        }
-
-        .application-notice-backdrop.is-visible {
-            display: block;
-        }
-
-        .application-notice-card {
-            background: linear-gradient(180deg, #f7fbff 0%, #e6f1ff 100%);
-            border: none;
-            border-radius: 14px;
-            box-shadow: 0 18px 44px rgba(18, 41, 70, 0.22);
-            overflow: hidden;
-            background-clip: padding-box;
-        }
-
-        .application-notice-header {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 0.98rem;
-        }
-
-        .application-notice-body {
-            padding: 16px;
-            color: #284566;
-            font-size: 0.95rem;
-            line-height: 1.45;
-            background: transparent;
-        }
-
-        .application-notice-footer {
-            padding: 0 16px 16px;
-            display: flex;
-            justify-content: center;
-            background: transparent;
-        }
-
-        .application-notice-btn {
-            min-width: 96px;
-            border-radius: 9px;
-            font-weight: 700;
-        }
-
-        #submitModal .modal-header .close {
-            color: #ffffff;
-            opacity: 1;
-            text-shadow: none;
-        }
-
-        #submitModal .modal-header .close:hover {
-            color: #ffffff;
-            opacity: 0.85;
-        }
-
-        #submitModal .modal-body {
-            overflow-y: auto;
-        }
-
-        #application-unavailable-modal .modal-content {
-            border: 0;
-            border-radius: 14px;
-            box-shadow: 0 14px 40px rgba(15, 31, 50, 0.2);
-        }
-
-        #application-unavailable-modal .modal-body {
-            padding: 1.4rem 1.2rem 1rem;
-            text-align: center;
-            color: #1f3550;
-            font-weight: 700;
-        }
-
-        #application-unavailable-modal .modal-footer {
-            border-top: 0;
-            justify-content: center;
-            padding-top: 0;
-            padding-bottom: 1rem;
-        }
-
-        #modal-submission-file {
-            font-size: 0.9rem;
-            line-height: 1.2;
-            padding: 0.28rem 0.5rem;
-        }
-
-        #modal-submission-file::file-selector-button,
-        #modal-submission-file::-webkit-file-upload-button {
-            font-size: 0.82rem;
-            line-height: 1.2;
-            padding: 0.28rem 0.62rem;
-            margin-right: 0.5rem;
-        }
-
-        @media (max-width: 767.98px) {
-            .application-submit-methods {
-                grid-template-columns: 1fr;
-            }
-
-            .application-submit-option {
-                padding: 16px 16px 14px;
-            }
-        }
-    </style>
+    
 
     <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
@@ -1445,7 +935,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
 
                                         <div class="post-content d-flex flex-column h-100">
 
-                                        <!-- Status badge & category tag – filled by JS -->
+                                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                                         <div class="app-meta-top d-flex justify-content-between align-items-center mb-2">
                                             <span class="js-status-placeholder"></span>
                                             <span class="js-category-placeholder"></span>
@@ -1467,7 +957,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                                             <span><?php echo htmlspecialchars($applicationDateDisplay); ?></span>
                                         </div>
 
-                                        <!-- Open / close date row – filled by JS -->
+                                        <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
                                         <div class="js-dates-placeholder mb-3"></div>
 
                                         <button
@@ -1507,12 +997,12 @@ include __DIR__ . '/../../includes/public_page_header.php';
                             <?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' style="display:none"' : ''; ?>>
+                        <div class="alert alert-secondary mb-3" id="no-submissions-msg"<?php echo (!empty($mySubmissions)) ? ' hidden' : ''; ?>>
                             <i class="fas fa-inbox mr-2"></i>Δεν έχετε υποβάλει ακόμη καμία αίτηση.
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table submissions-table" id="submissions-table"<?php echo empty($mySubmissions) ? ' style="display:none"' : ''; ?>>
+                            <table class="table submissions-table" id="submissions-table"<?php echo empty($mySubmissions) ? ' hidden' : ''; ?>>
                                 <thead>
                                     <tr>
                                         <th>Αίτηση</th>
@@ -1673,7 +1163,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── Submit Application Modal ────────────────────────────────────── -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <div class="modal fade" id="submitModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -1689,7 +1179,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                 <p id="modal-description" class="text-muted small mb-3"></p>
                 <hr class="my-2">
                 <div id="modal-dynamic-fields">
-                    <!-- Rendered by JavaScript -->
+                    <!-- Rendered apo JavaScript -->
                 </div>
                 <div class="form-group mt-3 mb-0">
                     <label class="form-label-custom mb-2">
@@ -1711,7 +1201,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── View Submission Details Modal ─────────────────────────────────── -->
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
 <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
@@ -1740,21 +1230,10 @@ include __DIR__ . '/../../includes/public_page_header.php';
     </div>
 </div>
 
-<!-- ── Success Toast ──────────────────────────────────────────────────── -->
-<div id="submission-toast" class="position-fixed" style="bottom:1.5rem;right:1.5rem;z-index:9999;display:none;">
+<!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
+<div id="submission-toast" class="position-fixed submission-toast" hidden>
     <div class="alert alert-success shadow py-3 px-4 mb-0">
         <i class="fas fa-check-circle mr-2"></i> Η αίτησή σας υποβλήθηκε επιτυχώς!
-    </div>
-</div>
-
-<div id="application-notice-backdrop" class="application-notice-backdrop"></div>
-<div id="application-notice-box" role="alertdialog" aria-modal="true" aria-labelledby="application-notice-title">
-    <div class="application-notice-card">
-        <div class="application-notice-header" id="application-notice-title">Ειδοποίηση</div>
-        <div class="application-notice-body" id="application-notice-message">—</div>
-        <div class="application-notice-footer">
-            <button type="button" class="btn btn-primary application-notice-btn" id="application-notice-close">OK</button>
-        </div>
     </div>
 </div>
 

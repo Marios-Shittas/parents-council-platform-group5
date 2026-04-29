@@ -1,16 +1,10 @@
 <?php
-require_once __DIR__ . '/config.php';
+// Arxeio: app\config\db.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
+// Sindesi me tin vasi dedomenon gia ola ta app services.
+// Kratame ena kentriko include oste ola ta services na pairnoun tin idia mysqli sindesi.
+require_once __DIR__ . '/../core/Database.php';
 
-$host = DB_HOST;
-$user = DB_USER;
-$password = DB_PASS;
-$database = DB_NAME;
-
-$conn = new mysqli($host, $user, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$conn->set_charset(DB_CHARSET);
-?>
+// To Vasi::connect() diavazei ta credentials apo to core config kai epistrefei diavasmay connection.
+$conn = Database::connect();

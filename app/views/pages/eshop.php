@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\views\pages\eshop.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 require_once __DIR__ . '/../../includes/site_context.php';
 require_once __DIR__ . '/../../services/EshopSettingsService.php';
 
@@ -40,8 +43,8 @@ $isShopVisible = $eshopSettingsService->isShopVisible();
     <?php else: ?>
         <section class="eshop-coming-soon">
             <div class="eshop-coming-soon__card">
-                <span class="eshop-coming-soon__eyebrow">E-shop</span>
-                <h2>Coming soon</h2>
+                <span class="eshop-coming-soon__eyebrow">Κατάστημα</span>
+                <h2>Έρχεται Σύντομα</h2>
                 <p>Το κατάστημα δεν είναι διαθέσιμο αυτή τη στιγμή. Δοκιμάστε ξανά σύντομα.</p>
             </div>
         </section>

@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\Subscription.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
@@ -10,12 +13,14 @@ class SubscriptionService
     private mysqli $conn;
     private TokenValidator $tokenValidator;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
         $this->tokenValidator = new TokenValidator($conn);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest(): void
     {
         $token = trim((string) ($_GET['token'] ?? ''));
@@ -65,11 +70,13 @@ class SubscriptionService
         ]);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getUserIdFromToken(string $token): ?int
     {
         return $this->tokenValidator->getUserIdByToken($token, 'parent', 'waiting_payment', true);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getChildrenCount(int $userId): int
     {
         $stmt = $this->conn->prepare('SELECT COUNT(*) AS children_count FROM Children WHERE user_id = ?');
@@ -86,6 +93,7 @@ class SubscriptionService
         return (int) ($row['children_count'] ?? 0);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getPricing(): ?array
     {
         $sql = 'SELECT subscription_price, insurance_price FROM PricingSettings LIMIT 1';
@@ -98,6 +106,7 @@ class SubscriptionService
         return $row ?: null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function respond(int $statusCode, array $payload): void
     {
         http_response_code($statusCode);

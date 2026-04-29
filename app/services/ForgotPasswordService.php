@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\ForgotPasswordService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 use PHPMailer\PHPMailer\PHPMailer;
 
 require_once __DIR__ . '/../config/config.php';
@@ -16,12 +19,14 @@ class ForgotPasswordService {
     private $db;
     private $tokenExpirationMinutes = 600;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct() {
         $this->usersService = new UsersService();
         global $conn;
         $this->db = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function handleRequest() {
         header('Content-Type: application/json');
 
@@ -52,6 +57,7 @@ class ForgotPasswordService {
         return $result;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function generateAndStoreToken($email) {
         try {
             $token = bin2hex(random_bytes(32));
@@ -74,6 +80,7 @@ class ForgotPasswordService {
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function clearResetToken($email): void
     {
         $stmt = $this->db->prepare("UPDATE Users SET token = NULL, token_expiry = NULL WHERE email = ?");
@@ -86,6 +93,7 @@ class ForgotPasswordService {
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendResetEmail($name, $email, $token) {
         try {
             $subject = $this->resetEmailSubject();
@@ -149,16 +157,19 @@ class ForgotPasswordService {
         return false;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildResetLink(string $email, string $token): string
     {
         return rtrim(APP_BASE_URL, '/') . '/public/reset-password.php?email=' . urlencode($email) . '&token=' . urlencode($token);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resetEmailSubject(): string
     {
         return 'Ξεχασα τον κωδικο';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildResetEmailBody(string $name, string $resetLink): string
     {
         $safeName = htmlspecialchars(trim($name) !== '' ? trim($name) : 'there', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');

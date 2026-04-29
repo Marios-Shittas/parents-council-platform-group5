@@ -1,20 +1,23 @@
-/* Applications Page Styles */
+/* Arxeio: public\assets\css\user_css\applications.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Prosoxi: afora aitiseis/templates kai uploads, ara ta paths kai ta validation einai simantika. */
+/* Aitiseis Page Styles */
 
 /* ===== APPLICATION CARD STYLES ===== */
-/* .applications-card = the white card containers for main sections */
+/* .aitiseis-card = to white card containers gia main sections */
 .applications-card {
     border: none;
     border-radius: 18px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* .section-title = the heading text for each main section ("Available Applications", "My Submissions") */
+/* .section-titlos = to heading text gia each main section ("Available Aitiseis", "My Ypovoles") */
 .section-title {
     font-weight: 700;
     margin-bottom: 20px;
 }
 
-/* .application-item = individual application boxes within the grid */
+/* .aitisi-item = individual aitisi boxes within to grid */
 .application-item {
     background: #fff;
     border: 1px solid #eef1f5;
@@ -25,19 +28,19 @@
     flex-direction: column;
 }
 
-/* .application-title = the title of each application */
+/* .aitisi-titlos = to titlos apo each aitisi */
 .application-title {
     font-weight: 700;
     margin-bottom: 8px;
 }
 
-/* .application-description = the description text of each application */
+/* .aitisi-perigrafi = to perigrafi text apo each aitisi */
 .application-description {
     color: #6c757d;
     min-height: 90px;
 }
 
-/* .doc-badge = the small blue badge showing document count */
+/* .doc-badge = to small blue badge showing document count */
 .doc-badge {
     background: #e7f1ff;
     color: #0d6efd;
@@ -47,19 +50,19 @@
     font-weight: 700;
 }
 
-/* .submit-btn = the "Submit Application" button */
+/* .submit-btn = to "Submit Aitisi" button */
 .submit-btn {
     margin-top: auto;
 }
 
 /* ===== INSTRUCTIONS SIDEBAR ===== */
-/* .instructions-list = the bullet list in the instructions sidebar */
+/* .instructions-list = to bullet list in to instructions sidebar */
 .instructions-list li {
     margin-bottom: 10px;
 }
 
 /* ===== UPLOAD STYLES ===== */
-/* .upload-box = the file upload area in the modal */
+/* .upload-box = to arxeio upload area in to modal */
 .upload-box {
     border: 2px dashed #ced4da;
     border-radius: 14px;
@@ -68,7 +71,7 @@
 }
 
 /* ===== STATUS BADGES ===== */
-/* .status-badge = the status indicators for submitted applications */
+/* .status-badge = to status indicators gia submitted aitiseis */
 .status-badge {
     display: inline-block;
     padding: 6px 12px;
@@ -78,19 +81,19 @@
     text-transform: capitalize;
 }
 
-/* .status-waiting = yellow badge for applications waiting for review */
+/* .status-anamoni = yellow badge gia aitiseis anamoni gia elegxo */
 .status-waiting {
     background: #fff3cd;
     color: #856404;
 }
 
-/* .status-approved = green badge for approved applications */
+/* .status-approved = green badge gia approved aitiseis */
 .status-approved {
     background: #d4edda;
     color: #155724;
 }
 
-/* .status-rejected = red badge for rejected applications */
+/* .status-rejected = red badge gia rejected aitiseis */
 .status-rejected {
     background: #f8d7da;
     color: #721c24;
@@ -228,7 +231,7 @@
     display: block;
 }
 
-/* ===== SUBMISSION STATUS BADGES (table level) ===== */
+/* ===== SUBMISSION STATUS BADGES (pinakas level) ===== */
 .sub-status-badge {
     display: inline-block;
     padding: 4px 11px;
@@ -262,7 +265,7 @@
     color: #721c24;
 }
 
-/* Keep the page header card aligned with the main applications cards on desktop. */
+/* Keep to page header card aligned me to main aitiseis cards on desktop. */
 @media (min-width: 1200px) {
     body[data-applications-can-submit] .public-page-header__card {
         width: 91.666667%;
@@ -272,7 +275,7 @@
 }
 
 /* ===== ENHANCED SUBMISSIONS TABLE ===== */
-#submissions-table {
+#ypovoles-pinakas {
     margin-bottom: 0;
 }
 
@@ -318,10 +321,16 @@
 }
 
 /* ===== SUCCESS TOAST ===== */
-#submission-toast .alert {
+#ypovoli-toast .alert {
     border-radius: 12px;
     min-width: 280px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.submission-toast {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
 }
 
 /* ===== BUTTON DISABLED STATE ===== */
@@ -431,3 +440,470 @@
         font-size: 1.05rem;
     }
 }
+
+/* Extracted apo app/views/pages/aitiseis.php */
+.post-card {
+            cursor: pointer;
+            overflow: hidden;
+            padding: 0;
+            background: #f8f9fb;
+            border: 1px solid #dbe4f3;
+            border-radius: 0;
+            box-shadow: none;
+            border-bottom: 4px solid #2f6fb3;
+        }
+
+        .post-image-wrap {
+            display: none !important;
+        }
+
+        .post-content {
+            padding: 22px 26px 16px;
+        }
+
+        .application-item.post-card:hover {
+            box-shadow: none;
+            transform: none;
+        }
+
+        .application-title {
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.25px;
+        }
+
+        .application-instruction-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 0;
+        }
+
+        .application-instruction-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #6b7280;
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.45px;
+            width: fit-content;
+        }
+
+        .application-instruction-link:hover {
+            text-decoration: underline;
+        }
+
+        .application-instruction-empty {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        .application-date-bottom {
+            margin-top: 10px;
+            width: 100%;
+            text-align: right;
+        }
+
+        .application-date-bottom span {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: transparent;
+            color: #355b85;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .app-meta-top,
+        .js-dates-placeholder,
+        .submit-btn {
+            display: none !important;
+        }
+
+        .application-view-attachments a {
+            text-decoration: none;
+        }
+
+        #applicationViewModal .modal-content {
+            border: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 18px 44px rgba(18, 41, 70, 0.18);
+        }
+
+        #applicationViewModal .modal-header {
+            background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
+            border-bottom: 0;
+        }
+
+        #applicationViewModal .modal-title,
+        #applicationViewModal .modal-header .close {
+            color: #ffffff;
+            text-shadow: none;
+            opacity: 1;
+        }
+
+        #applicationViewModal .modal-body {
+            background: #f8fbff;
+        }
+
+        .application-view-files-panel {
+            background: #ffffff;
+            border: 1px solid #dce9f8;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
+        }
+
+        .application-view-files-panel h6 {
+            color: #1f4f8f;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        #application-view-attachments-list {
+            list-style: none;
+            margin-bottom: 0;
+            padding-left: 0;
+        }
+
+        #application-view-attachments-list li {
+            margin-bottom: 10px;
+            line-height: 1.35;
+            background: #f7fbff;
+            border: 1px solid #d8e7f8;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        #application-view-attachments-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        #application-view-attachments-list a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #18395f;
+            font-weight: 600;
+        }
+
+        .application-submit-methods {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .application-submit-option {
+            position: relative;
+            width: 100%;
+            border: 1px solid #d7e6f7;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fbfdff 0%, #f2f8ff 100%);
+            padding: 18px 18px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+            color: #1f456d;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .application-submit-option:hover {
+            border-color: #a8c7ec;
+            box-shadow: 0 10px 24px rgba(31, 79, 143, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .application-submit-option.is-active {
+            border-color: #1f6fc4;
+            box-shadow: 0 14px 28px rgba(31, 111, 196, 0.16);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
+        }
+
+        .application-submit-option__icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eaf3ff;
+            color: #2368b9;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .application-submit-option__title {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #173a63;
+        }
+
+        .application-submit-option__text {
+            display: block;
+            margin-top: 5px;
+            color: #60758e;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+
+        .application-submit-option__check {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            border: 1px solid #bdd3ef;
+            background: #ffffff;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .application-submit-option.is-active .application-submit-option__check {
+            background: #1f6fc4;
+            border-color: #1f6fc4;
+            color: #ffffff;
+        }
+
+        .application-submit-panel {
+            display: none;
+        }
+
+        .application-submit-panel.is-active {
+            display: block;
+        }
+
+        .application-submit-helper {
+            margin-bottom: 14px;
+            color: #60758e;
+            font-size: 0.93rem;
+            line-height: 1.5;
+        }
+
+        .application-view-manual-fields .form-group:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .application-view-manual-fields .form-control {
+            border: 1px solid #b9d1ef;
+            border-radius: 10px;
+            color: #223d60;
+            background: #fbfdff;
+        }
+
+        .application-view-manual-fields .form-control:focus {
+            border-color: #2b76cc;
+            box-shadow: 0 0 0 0.2rem rgba(43, 118, 204, 0.12);
+        }
+
+        .application-view-manual-fields textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        #application-view-upload {
+            background: #ffffff;
+            border: 1px solid #dce9f8;
+            border-radius: 12px;
+            padding: 16px 18px;
+            box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
+        }
+
+        #application-view-upload .upload-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 700;
+            color: #1f4f8f;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        #application-view-upload .upload-title i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .application-view-upload-note {
+            display: block;
+            margin-top: 10px;
+            color: #60758e !important;
+            font-size: 0.92rem;
+        }
+
+        .application-view-upload-note strong {
+            color: #304c6f;
+        }
+
+        #application-view-file-input {
+            border: 1px solid #b9d1ef;
+            background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
+            border-radius: 10px;
+            min-height: 46px;
+            padding: 6px 8px;
+            color: #223d60;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        #application-view-file-input::file-selector-button,
+        #application-view-file-input::-webkit-file-upload-button {
+            border: 0;
+            background: linear-gradient(135deg, #2c73c8 0%, #1d5faa 100%);
+            color: #ffffff;
+            padding: 0.42rem 0.75rem;
+            margin-right: 0.65rem;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 0.92rem;
+            line-height: 1.1;
+            font-weight: 700;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        #application-view-selected-files {
+            list-style: none;
+            margin-top: 14px;
+            margin-bottom: 0;
+            padding-left: 0;
+            color: #2b4462;
+            font-size: 0.9rem;
+        }
+
+        #application-view-selected-files:empty {
+            display: none;
+        }
+
+        #application-view-selected-files li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 9px 12px;
+            background: #f7fbff;
+            border: 1px solid #d8e7f8;
+            border-radius: 10px;
+            color: #24476d;
+            font-weight: 600;
+        }
+
+        #application-view-selected-files li:last-child {
+            margin-bottom: 0;
+        }
+
+        #application-view-selected-files li i {
+            color: #2b76cc;
+        }
+
+        .application-registration-reminder {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #f2d7a1;
+            background: #fff7e6;
+            color: #7a4f00;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .application-registration-reminder i {
+            color: #c47b00;
+            margin-right: 6px;
+        }
+
+        #submitModal .modal-dialog {
+            margin: 0.75rem auto;
+        }
+
+        #submitModal .modal-content {
+            max-height: calc(100vh - 1.5rem);
+        }
+
+        #submitModal .modal-header {
+            background: #1f7aec;
+            border-bottom: 0;
+        }
+
+        #submitModal .modal-title {
+            color: #ffffff;
+        }
+
+        #submitModal .modal-header .close {
+            color: #ffffff;
+            opacity: 1;
+            text-shadow: none;
+        }
+
+        #submitModal .modal-header .close:hover {
+            color: #ffffff;
+            opacity: 0.85;
+        }
+
+        #submitModal .modal-body {
+            overflow-y: auto;
+        }
+
+        #aitisi-unavailable-modal .modal-content {
+            border: 0;
+            border-radius: 14px;
+            box-shadow: 0 14px 40px rgba(15, 31, 50, 0.2);
+        }
+
+        #aitisi-unavailable-modal .modal-body {
+            padding: 1.4rem 1.2rem 1rem;
+            text-align: center;
+            color: #1f3550;
+            font-weight: 700;
+        }
+
+        #aitisi-unavailable-modal .modal-footer {
+            border-top: 0;
+            justify-content: center;
+            padding-top: 0;
+            padding-bottom: 1rem;
+        }
+
+        #modal-submission-file {
+            font-size: 0.9rem;
+            line-height: 1.2;
+            padding: 0.28rem 0.5rem;
+        }
+
+        #modal-submission-file::file-selector-button,
+        #modal-submission-file::-webkit-file-upload-button {
+            font-size: 0.82rem;
+            line-height: 1.2;
+            padding: 0.28rem 0.62rem;
+            margin-right: 0.5rem;
+        }
+
+        #applicationViewModal .modal-footer .btn-secondary:hover,
+        #applicationViewModal .modal-footer .btn-secondary:focus,
+        #submitModal .modal-footer .btn-secondary:hover,
+        #submitModal .modal-footer .btn-secondary:focus {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+            box-shadow: 0 8px 18px rgba(220, 53, 69, 0.22);
+        }
+
+        @media (max-width: 767.98px) {
+            .application-submit-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .application-submit-option {
+                padding: 16px 16px 14px;
+            }
+        }

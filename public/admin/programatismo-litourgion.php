@@ -1,4 +1,7 @@
 <?php
+// Arxeio: public\admin\programatismo-litourgion.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/UsersService.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -15,11 +18,13 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
+// Leitourgia normalizeScheduleStatus: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeScheduleStatus(string $status): string
 {
     return in_array($status, ['active', 'inactive'], true) ? $status : 'inactive';
 }
 
+// Leitourgia normalizeScheduleFeature: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeScheduleFeature(string $feature): string
 {
     $normalized = trim((string)$feature);
@@ -31,6 +36,7 @@ function normalizeScheduleFeature(string $feature): string
     return in_array($normalized, $allowed, true) ? $normalized : 'registration';
 }
 
+// Leitourgia scheduleFeatureLabel: xeirizetai to antistoixo kommati tis selidas i tou service.
 function scheduleFeatureLabel(string $feature): string
 {
     $map = [
@@ -42,6 +48,7 @@ function scheduleFeatureLabel(string $feature): string
     return $map[$feature] ?? $feature;
 }
 
+// Leitourgia normalizeImerominiaTimeLocalInput: xeirizetai to antistoixo kommati tis selidas i tou service.
 function normalizeDateTimeLocalInput(string $value): ?string
 {
     $trimmed = trim($value);
@@ -61,6 +68,7 @@ function normalizeDateTimeLocalInput(string $value): ?string
     return $dateTime->format('Y-m-d H:i:s');
 }
 
+// Leitourgia toImerominiaTimeLocalValue: xeirizetai to antistoixo kommati tis selidas i tou service.
 function toDateTimeLocalValue(?string $value): string
 {
     if (!is_string($value) || trim($value) === '') {
@@ -71,6 +79,7 @@ function toDateTimeLocalValue(?string $value): string
     return $timestamp ? date('Y-m-d\\TH:i', $timestamp) : '';
 }
 
+// Leitourgia redirectWithFlash: xeirizetai to antistoixo kommati tis selidas i tou service.
 function redirectWithFlash(string $message, string $type = 'info', string $email = ''): void
 {
     $_SESSION['flash_message'] = $message;
@@ -159,7 +168,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ενέργειες Συστήματος - Admin</title>
+    <title>Ενέργειες Συστήματος - Διαχείριση</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -175,7 +184,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
 
     <main class="admin-content">
         <a href="home.php" class="back-link">
-            <i class="fas fa-arrow-left"></i> Πίσω στο Dashboard
+            <i class="fas fa-arrow-left"></i> Πίσω στην Αρχική
         </a>
 
         <div class="admin-header admin-page-header">
@@ -199,6 +208,30 @@ $registrationSchedules = $usersService->getSystemSchedules();
                 </div>
             </div>
 
+            <div class="alert alert-info mb-4" role="alert">
+                <h5 class="alert-heading mb-3"><i class="fas fa-info-circle me-2"></i>Διαθέσιμες Λειτουργίες Προγραμματισμού</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="mb-2">
+                            <strong>📝 Εγγραφές:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικά παράθυρα κατά τα οποία οι γονείς μπορούν να εγγραφούν ή να ενημερώσουν τα στοιχεία τους στο σύστημα.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="mb-2">
+                            <strong>🗑️ Διαγραφή Χρηστών:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών για καθαρισμό του συστήματος.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <strong>🧹 Καθαρισμός Υποβολών:</strong>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματο καθαρισμό παλαιών υποβολών.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table align-middle admin-dashboard-table program-feature-table mb-0">
                     <thead>
@@ -207,7 +240,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                         <th>Έναρξη</th>
                         <th>Λήξη</th>
                         <th>Κατάσταση</th>
-                        <th class="text-end">Ενέργεια</th>
+                        <th>Ενέργεια</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -244,7 +277,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                         <option value="inactive" <?php echo $rowStatus === 'inactive' ? 'selected' : ''; ?>>Ανενεργό</option>
                                     </select>
                                 </td>
-                                <td class="text-end">
+                                <td class="program-feature-actions-cell">
                                     <button type="submit" class="btn btn-primary-custom" form="<?php echo htmlspecialchars($scheduleFormId); ?>">
                                         <i class="fas fa-save me-1"></i>Αποθήκευση
                                     </button>
@@ -277,7 +310,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                                 <option value="inactive">Ανενεργό</option>
                             </select>
                         </td>
-                        <td class="text-end">
+                        <td class="program-feature-actions-cell">
                             <button type="submit" class="btn btn-success" form="<?php echo $newScheduleFormId; ?>">
                                 <i class="fas fa-plus me-1"></i>Προσθήκη
                             </button>
@@ -310,7 +343,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
         <section class="program-log-card card-custom">
             <div class="program-log-head">
                 <div>
-                    <span class="program-feature-kicker">Log Search</span>
+                    <span class="program-feature-kicker">Αναζήτηση Καταγραφών</span>
                     <h2>Ενέργειες γονέα με βάση το email</h2>
                     <p>Εισήγαγε το email του γονέα για να δεις τα στοιχεία του και τις καταγεγραμμένες ενέργειές του από τον πίνακα Logs.</p>
                 </div>
@@ -343,61 +376,9 @@ $registrationSchedules = $usersService->getSystemSchedules();
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel" src="../assets/js/admin-programatismo-litourgion.jsx"></script>
-<script>
-    (function () {
-        var deleteScheduleModal = document.getElementById('deleteScheduleModal');
-        if (!deleteScheduleModal) {
-            return;
-        }
-
-        deleteScheduleModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            if (!button) {
-                return;
-            }
-
-            var featureLabel = button.getAttribute('data-schedule-feature') || '—';
-            var startDate = button.getAttribute('data-schedule-start') || '';
-            var endDate = button.getAttribute('data-schedule-end') || '';
-            var formId = button.getAttribute('data-schedule-delete-form-id') || '';
-
-            var featureEl = document.getElementById('delete_schedule_feature');
-            var datesEl = document.getElementById('delete_schedule_dates');
-            var formIdEl = document.getElementById('delete_schedule_form_id');
-
-            if (featureEl) {
-                featureEl.textContent = 'Λειτουργία: ' + featureLabel;
-            }
-
-            if (datesEl) {
-                datesEl.textContent = 'Διάστημα: ' + (startDate || '—') + ' έως ' + (endDate || '—');
-            }
-
-            if (formIdEl) {
-                formIdEl.value = formId;
-            }
-        });
-
-        var confirmDeleteScheduleButton = document.getElementById('confirmDeleteScheduleButton');
-        if (confirmDeleteScheduleButton) {
-            confirmDeleteScheduleButton.addEventListener('click', function () {
-                var formIdEl = document.getElementById('delete_schedule_form_id');
-                var formId = formIdEl ? formIdEl.value : '';
-                if (!formId) {
-                    return;
-                }
-
-                var form = document.getElementById(formId);
-                if (!form) {
-                    return;
-                }
-
-                form.submit();
-            });
-        }
-    })();
-</script>
+<script src="../assets/js/admin-programatismo-litourgion-page.js"></script>
 </body>
 </html>

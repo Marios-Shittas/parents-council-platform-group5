@@ -1,0 +1,31 @@
+<?php
+// Arxeio: app\viewmodels\FooterViewModel.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
+
+require_once __DIR__ . '/../includes/site_context.php';
+
+class FooterViewModel
+{
+// Ftiaxnei lista links tou footer me context-aware entries kai prosthetei parent-only links otan xreiazetai.
+    public function buildLinks(): array
+    {
+        $links = [
+            ['label' => 'Αρχική', 'href' => site_section_url('home.php')],
+            ['label' => 'Σύνδεσμος Γονέων', 'href' => site_section_url('parents.php')],
+            ['label' => 'Ανακοινώσεις', 'href' => site_section_url('announcements.php')],
+            ['label' => 'Εκδηλώσεις', 'href' => site_section_url('events.php')],
+            ['label' => 'Χρήσιμες Πληροφορίες', 'href' => site_section_url('useful-information.php')],
+            ['label' => 'Αιτήσεις', 'href' => site_section_url('applications.php')],
+        ];
+
+        if (site_is_parent()) {
+            $links[] = ['label' => 'Κατάστημα', 'href' => site_section_url('eshop.php')];
+            $links[] = ['label' => 'Φωτογραφίες', 'href' => site_section_url('photos.php')];
+        }
+
+        $links[] = ['label' => 'Επικοινωνία', 'href' => site_section_url('epikoinonia.php')];
+
+        return $links;
+    }
+}

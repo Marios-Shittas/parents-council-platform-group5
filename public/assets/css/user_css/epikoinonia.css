@@ -1,3 +1,6 @@
+/* Arxeio: public\assets\css\user_css\epikoinonia.css
+   Rolos: Orizei styles gia public/parent selida pou vlepoun oi xristes.
+   Simeiosi: Allages edo mporoun na epireasoun desktop kai mobile layout, opote thelei elegxo se responsive. */
 .epikoinonia-page,
 .epikoinonia-page h1,
 .epikoinonia-page h2,
@@ -75,11 +78,22 @@ body {
     border: none;
     border-radius: 10px;
     padding: 25px;
-    margin: 15px;
-    margin-bottom: 15px;
+    margin: 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
+}
+
+.contact-cards-grid {
+    row-gap: 18px;
+}
+
+.contact-cards-grid > [class*='col-'] {
+    display: flex;
+}
+
+.contact-cards-grid .contact-card {
+    width: 100%;
 }
 
 .contact-card:hover {
@@ -106,7 +120,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Compact text for phone and email cards */
+/* Compact text gia phone kai email cards */
 .contact-card-phone,
 .contact-card-email {
     padding: 20px !important;

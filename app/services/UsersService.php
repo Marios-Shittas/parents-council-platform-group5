@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\UsersService.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/ApprovalMailer.php';
@@ -8,12 +11,14 @@ class UsersService
 {
     private mysqli $conn;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct()
     {
         global $conn;
         $this->conn = $conn;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getUserByEmail($email)
     {
         $sql = "SELECT * FROM Users WHERE email = ? LIMIT 1";
@@ -31,6 +36,7 @@ class UsersService
         return $user ?: null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getUserById(int $userId)
     {
         $sql = "SELECT * FROM Users WHERE user_id = ? LIMIT 1";
@@ -49,6 +55,7 @@ class UsersService
         return $user ?: null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function login($inputEmail, $inputPassword)
     {
         $email = trim((string)$inputEmail);
@@ -83,6 +90,16 @@ class UsersService
         $stmt->execute();
         $stmt->close();
 
+        $role = strtolower((string)($user['role'] ?? ''));
+        if ($role === 'parent') {
+            $loginDescription = sprintf(
+                'Successful login for parent user #%d (%s).',
+                (int)$user['user_id'],
+                (string)($user['email'] ?? '')
+            );
+            $this->insertAdminLog((int)$user['user_id'], 'PARENT_LOGIN', $loginDescription);
+        }
+
         return [
             'success' => true,
             'user' => $user,
@@ -92,6 +109,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resetAllExpiredWaitingPaymentUsersToPending(): int
     {
         $stmt = $this->conn->prepare(
@@ -114,11 +132,13 @@ class UsersService
         return max(0, $affectedRows);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function runScheduledMaintenance(): void
     {
         $this->runScheduledMaintenanceWithReport();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function runScheduledMaintenanceWithReport(): array
     {
         $deletedUsers = $this->runScheduledUsersCleanup();
@@ -130,61 +150,21 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function runScheduledUsersCleanup(): int
     {
-        $gate = $this->isSystemFeatureOpen('delete_users');
-        if (empty($gate['is_open'])) {
-            return 0;
-        }
-
-        $result = $this->conn->query(
-            "SELECT user_id
-             FROM Users
-             WHERE role <> 'admin'"
-        );
-
-        if (!$result) {
-            return 0;
-        }
-
-        $deletedCount = 0;
-        while ($row = $result->fetch_assoc()) {
-            $userId = (int)($row['user_id'] ?? 0);
-            if ($userId <= 0) {
-                continue;
-            }
-
-            $deleteResult = $this->deleteUserByAdmin($userId, null);
-            if (!empty($deleteResult['success'])) {
-                $deletedCount++;
-            }
-        }
-
-        return $deletedCount;
+        // System actions were intentionally disabled.
+        return 0;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function runScheduledSubmissionsCleanup(): int
     {
-        $gate = $this->isSystemFeatureOpen('cleanup_submissions');
-        if (empty($gate['is_open'])) {
-            return 0;
-        }
-
-        $deletedCount = 0;
-
-        $submissionsResult = $this->conn->query('DELETE FROM Submissions');
-        if ($submissionsResult) {
-            $deletedCount += max(0, (int)$this->conn->affected_rows);
-        }
-
-        $applicationSubmissionsResult = $this->conn->query('DELETE FROM ApplicationSubmissions');
-        if ($applicationSubmissionsResult) {
-            $deletedCount += max(0, (int)$this->conn->affected_rows);
-        }
-
-        return $deletedCount;
+        // System actions were intentionally disabled.
+        return 0;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function forgot($email)
     {
         $email = trim((string)$email);
@@ -200,6 +180,7 @@ class UsersService
         return ['success' => true, 'message' => 'Ο σύνδεσμος στάλθηκε.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function resetPassword($email, $newPassword) 
     {
         if ($newPassword === '') {
@@ -210,7 +191,7 @@ class UsersService
             return ['success' => false, 'message' => 'Ο κωδικός δεν μπορεί να περιέχει κενά.'];
         }
 
-        // At least 8 chars, with letters, numbers, and a special character.
+        // At least 8 chars, me letters, numbers, kai a special character.
         if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/', $newPassword)) {
             return [
                 'success' => false,
@@ -244,6 +225,7 @@ class UsersService
 
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getAllUsersForAdmin(string $sort = 'pending_first'): array
     {
         switch ($sort) {
@@ -342,6 +324,7 @@ class UsersService
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getPendingRegistrationCount(): int
     {
         $sql = "
@@ -360,6 +343,7 @@ class UsersService
         return max(0, (int)($row['count'] ?? 0));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getSystemSchedules(): array
     {
         $sql = "
@@ -376,6 +360,7 @@ class UsersService
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getParentLogsByEmail(string $email): array
     {
         $normalizedEmail = trim($email);
@@ -447,6 +432,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function isSystemFeatureOpen(string $feature): array
     {
         $normalizedFeature = $this->normalizeScheduleFeature($feature);
@@ -499,7 +485,7 @@ class UsersService
             }
 
             if ($this->isSingleMomentScheduleFeature($normalizedFeature) && $endTs <= $startTs) {
-                // Keep single-moment tasks open for a short window so cron/page timing does not miss them.
+                // Krataei anoiktes tis monostigmes ergasies gia ligo, oste na min xathoun apo xronismo cron/selidas.
                 $endTs = $startTs + 600;
             }
 
@@ -526,6 +512,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateSystemSchedule(int $ssId, string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
@@ -575,6 +562,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το πρόγραμμα ενημερώθηκε επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function createSystemSchedule(string $feature, string $startDate, string $endDate, string $status = 'active', ?int $actorUserId = null): array
     {
         $normalized = $this->normalizeScheduleInput($feature, $startDate, $endDate, $status);
@@ -615,6 +603,7 @@ class UsersService
         return ['success' => true, 'message' => 'Προστέθηκε νέο πρόγραμμα επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteSystemSchedule(int $ssId, ?int $actorUserId = null): array
     {
         if ($ssId <= 0) {
@@ -649,6 +638,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το πρόγραμμα διαγράφηκε επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function createUserByAdmin(array $data, ?int $actorUserId = null): array
     {
         $name = trim((string)($data['name'] ?? ''));
@@ -717,6 +707,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateUserByAdmin(int $userId, array $data, ?int $actorUserId = null): array
     {
         $existingUser = $this->getUserById($userId);
@@ -885,6 +876,7 @@ class UsersService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteUserByAdmin(int $userId, ?int $actorUserId = null): array
     {
         $existingUser = $this->getUserById($userId);
@@ -935,6 +927,7 @@ class UsersService
         return ['success' => true, 'message' => 'Ο χρήστης διαγράφηκε επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function collectUserSubmissionFilePaths(int $userId): array
     {
         $paths = [];
@@ -983,6 +976,7 @@ class UsersService
         return array_values(array_unique($paths));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function deleteUserCommerceHistory(int $userId): void
     {
         $paymentIds = [];
@@ -1078,6 +1072,7 @@ class UsersService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function unlinkProjectRelativeFile(string $path): void
     {
         $path = trim($path);
@@ -1093,6 +1088,7 @@ class UsersService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getChildrenByUserId(int $userId): array
     {
         $stmt = $this->conn->prepare(
@@ -1115,6 +1111,7 @@ class UsersService
         return $children;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getChildrenGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1166,6 +1163,7 @@ class UsersService
         return $groupedChildren;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getOrdersGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1217,12 +1215,14 @@ class UsersService
         return $groupedOrders;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getOrdersByUserId(int $userId): array
     {
         $groupedOrders = $this->getOrdersGroupedByUserIds([$userId]);
         return $groupedOrders[$userId] ?? [];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getPaymentsGroupedByUserIds(array $userIds): array
     {
         $userIds = array_values(array_filter(array_map('intval', $userIds), static function ($id) {
@@ -1274,12 +1274,14 @@ class UsersService
         return $groupedPayments;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getPaymentsByUserId(int $userId): array
     {
         $groupedPayments = $this->getPaymentsGroupedByUserIds([$userId]);
         return $groupedPayments[$userId] ?? [];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getCompletedInsuredChildIdsByUserId(int $userId): array
     {
         $stmt = $this->conn->prepare(
@@ -1314,6 +1316,7 @@ class UsersService
         return array_values(array_unique($childIds));
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getInsurancePriceSetting(): float
     {
         $result = $this->conn->query('SELECT insurance_price FROM PricingSettings LIMIT 1');
@@ -1325,6 +1328,7 @@ class UsersService
         return (float)($row['insurance_price'] ?? 0.0);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function getOrderItemsGroupedByOrderIds(array $orderIds): array
     {
         $orderIds = array_values(array_filter(array_map('intval', $orderIds), static function ($id) {
@@ -1391,6 +1395,7 @@ class UsersService
         return $itemsByOrderId;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function createChildForParent(int $parentUserId, array $data, ?int $actorUserId = null): array
     {
         $parent = $this->getUserById($parentUserId);
@@ -1440,6 +1445,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το παιδί προστέθηκε επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function updateChildForParent(int $childId, int $parentUserId, array $data, ?int $actorUserId = null): array
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
@@ -1489,6 +1495,7 @@ class UsersService
         return ['success' => true, 'message' => 'Τα στοιχεία του παιδιού ενημερώθηκαν επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function deleteChildForParent(int $childId, int $parentUserId, ?int $actorUserId = null): array
     {
         $child = $this->getChildByIdForParent($childId, $parentUserId);
@@ -1529,6 +1536,7 @@ class UsersService
         return ['success' => true, 'message' => 'Το παιδί διαγράφηκε επιτυχώς.'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function emailExists(string $email, int $excludeUserId = 0): bool
     {
         if ($excludeUserId > 0) {
@@ -1557,6 +1565,7 @@ class UsersService
         return $exists;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDeletionBlockingData(int $userId): array
     {
         $stmtOrders = $this->conn->prepare("SELECT COUNT(*) AS total FROM Orders WHERE user_id = ?");
@@ -1590,6 +1599,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function insertAdminLog(?int $actorUserId, string $action, string $description): void
     {
         if ($actorUserId === null || $actorUserId <= 0) {
@@ -1609,6 +1619,7 @@ class UsersService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getChildByIdForParent(int $childId, int $parentUserId)
     {
         $stmt = $this->conn->prepare(
@@ -1631,6 +1642,7 @@ class UsersService
         return $child ?: null;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function syncUserChildrenCount(int $userId): void
     {
         $stmt = $this->conn->prepare(
@@ -1650,18 +1662,21 @@ class UsersService
         $stmt->close();
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function isValidDate(string $date): bool
     {
         $dt = DateTime::createFromFormat('Y-m-d', $date);
         return $dt instanceof DateTime && $dt->format('Y-m-d') === $date;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function isValidDateTime(string $dateTime): bool
     {
         $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTime);
         return $dt instanceof DateTime && $dt->format('Y-m-d H:i:s') === $dateTime;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizeScheduleInput(string $feature, string $startDate, string $endDate, string $status): array
     {
         $normalizedFeature = $this->normalizeScheduleFeature($feature);
@@ -1702,6 +1717,7 @@ class UsersService
         ];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizeScheduleFeature(string $feature): string
     {
         $normalized = trim((string)$feature);
@@ -1713,22 +1729,26 @@ class UsersService
         return in_array($normalized, $allowed, true) ? $normalized : '';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function isSingleMomentScheduleFeature(string $feature): bool
     {
         return in_array($feature, ['delete_users', 'cleanup_submissions'], true);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizeRole(string $role): string
     {
         return in_array($role, ['admin', 'parent'], true) ? $role : 'parent';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function normalizeStatus(string $status): string
     {
         $allowedStatuses = ['pending', 'approved', 'rejected', 'waiting_payment', 'active'];
         return in_array($status, $allowedStatuses, true) ? $status : 'pending';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function shouldTriggerApprovalFlow(array $existingUser, string $role, string $status): bool
     {
         if ($role !== 'parent' || $status !== 'approved') {
@@ -1736,11 +1756,12 @@ class UsersService
         }
 
         $currentStatus = (string)($existingUser['account_status'] ?? 'pending');
-        // Allow re-running the approval email/token flow for parent accounts
-        // unless they are already fully active.
+        // Allow re-running to approval email/token flow gia goneas accounts
+        // unless they are aldiavasmay fully active.
         return in_array($currentStatus, ['pending', 'rejected', 'approved', 'waiting_payment'], true);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendApprovalEmail(string $email, string $link): void
     {
         $smtpFailureMessage = '';
@@ -1802,6 +1823,7 @@ class UsersService
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendRejectionEmail(string $email, string $rejectionMessage): void
     {
         $smtpFailureMessage = '';

@@ -1,4 +1,7 @@
 <?php
+// Arxeio: app\services\EmailRejection.php
+// Rolos: PHP arxeio tou project pou syndeei backend logiki me tin efarmogi.
+// Simeiosi: Allages edo mporoun na epireasoun tin antistoixi selida i service pou to kanei include.
 
 declare(strict_types=1);
 
@@ -13,6 +16,7 @@ class EmailRejection
     private string $fromName;
     private int $timeout;
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function __construct(array $config)
     {
         $this->host = trim((string)($config['host'] ?? ''));
@@ -37,6 +41,7 @@ class EmailRejection
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     public function sendRejectionEmail(string $toEmail, string $adminMessage): void
     {
         if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
@@ -72,6 +77,7 @@ class EmailRejection
         throw new RuntimeException('Failed to send rejection email.');
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function sendViaSmtpMode(string $mode, string $toEmail, string $subject, string $body): void
     {
         $socket = $this->openConnection($mode);
@@ -110,6 +116,7 @@ class EmailRejection
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function resolveTransportModes(): array
     {
         if ($this->encryption === 'ssl' || $this->encryption === 'smtps') {
@@ -131,11 +138,13 @@ class EmailRejection
         return ['starttls', 'smtps', 'none'];
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function shouldUseStartTls(string $mode): bool
     {
         return $mode === 'starttls';
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function openConnection(string $mode)
     {
         $transport = $mode === 'smtps' ? 'ssl://' : 'tcp://';
@@ -166,6 +175,7 @@ class EmailRejection
         return $socket;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function buildMessage(string $toEmail, string $subject, string $body): string
     {
         $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
@@ -184,12 +194,14 @@ class EmailRejection
         return implode("\r\n", $headers) . "\r\n\r\n" . $body;
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function command($socket, string $command, array $expectedCodes): string
     {
         $this->write($socket, $command . "\r\n");
         return $this->expect($socket, $expectedCodes);
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function write($socket, string $payload): void
     {
         $written = fwrite($socket, $payload);
@@ -198,6 +210,7 @@ class EmailRejection
         }
     }
 
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function expect($socket, array $expectedCodes): string
     {
         $response = '';
