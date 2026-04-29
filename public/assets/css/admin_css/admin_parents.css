@@ -348,6 +348,30 @@
     color: #173554;
 }
 
+.parent-document-delete-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid #f2b8b8;
+    background: #fff5f5;
+    color: #b42318;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.parent-document-delete-option input {
+    accent-color: #b42318;
+}
+
+.parent-document-delete-option span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
 .parents-confirm-modal .modal-content {
     border: none;
     border-radius: 24px;

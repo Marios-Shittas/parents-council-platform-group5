@@ -252,6 +252,23 @@ function parentsAdminDocumentsWebPath($fileName)
     return '/parents-council-platform-group5/public/assets/Parents_docs/' . $fileName;
 }
 
+function parentsAdminDeleteUploadedDocument($webPath)
+{
+    $webPath = parentsAdminTrim($webPath);
+    $webPrefix = '/parents-council-platform-group5/public/assets/Parents_docs/';
+
+    if ($webPath === '' || strpos($webPath, $webPrefix) !== 0) {
+        return;
+    }
+
+    $fileName = basename($webPath);
+    $localPath = parentsAdminDocumentsUploadDir() . $fileName;
+
+    if (is_file($localPath)) {
+        @unlink($localPath);
+    }
+}
+
 function parentsAdminEnsureDocumentsUploadDir()
 {
     $uploadDir = parentsAdminDocumentsUploadDir();
@@ -342,12 +359,20 @@ function parentsAdminBuildParentDocumentsContent(array $existingContent)
     $statuteTitles = is_array($_POST['statute_titles'] ?? null) ? $_POST['statute_titles'] : [];
     $statuteExistingPaths = is_array($_POST['statute_existing_paths'] ?? null) ? $_POST['statute_existing_paths'] : [];
     $statuteExistingNames = is_array($_POST['statute_existing_names'] ?? null) ? $_POST['statute_existing_names'] : [];
+    $statuteDeleteIndexes = is_array($_POST['statute_delete_indexes'] ?? null) ? $_POST['statute_delete_indexes'] : [];
+    $statuteDeleteMap = array_flip(array_map('strval', $statuteDeleteIndexes));
     $statutes = [];
 
     foreach ($statuteTitles as $index => $statuteTitleValue) {
         $statuteTitle = parentsAdminTrim($statuteTitleValue);
         $statuteExistingPath = parentsAdminTrim($statuteExistingPaths[$index] ?? '');
         $statuteExistingName = parentsAdminTrim($statuteExistingNames[$index] ?? '');
+
+        if (isset($statuteDeleteMap[(string)$index])) {
+            parentsAdminDeleteUploadedDocument($statuteExistingPath);
+            continue;
+        }
+
         [$uploadedStatute, $statuteErrors] = parentsAdminUploadedPdf('statute_files', $index);
         $uploadErrors = array_merge($uploadErrors, $statuteErrors);
 
@@ -372,12 +397,20 @@ function parentsAdminBuildParentDocumentsContent(array $existingContent)
     $minuteTitles = is_array($_POST['minute_titles'] ?? null) ? $_POST['minute_titles'] : [];
     $minuteExistingPaths = is_array($_POST['minute_existing_paths'] ?? null) ? $_POST['minute_existing_paths'] : [];
     $minuteExistingNames = is_array($_POST['minute_existing_names'] ?? null) ? $_POST['minute_existing_names'] : [];
+    $minuteDeleteIndexes = is_array($_POST['minute_delete_indexes'] ?? null) ? $_POST['minute_delete_indexes'] : [];
+    $minuteDeleteMap = array_flip(array_map('strval', $minuteDeleteIndexes));
     $minutes = [];
 
     foreach ($minuteTitles as $index => $minuteTitleValue) {
         $minuteTitle = parentsAdminTrim($minuteTitleValue);
         $minuteExistingPath = parentsAdminTrim($minuteExistingPaths[$index] ?? '');
         $minuteExistingName = parentsAdminTrim($minuteExistingNames[$index] ?? '');
+
+        if (isset($minuteDeleteMap[(string)$index])) {
+            parentsAdminDeleteUploadedDocument($minuteExistingPath);
+            continue;
+        }
+
         [$uploadedMinute, $minuteErrors] = parentsAdminUploadedPdf('minute_files', $index);
         $uploadErrors = array_merge($uploadErrors, $minuteErrors);
 
@@ -1166,7 +1199,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                     </div>
                                 </div>
                                 <div class="board-archive-editor">
-                                    <?php foreach ($parentDocumentsStatutesForEditor as $statuteDocument): ?>
+                                    <?php foreach ($parentDocumentsStatutesForEditor as $statuteIndex => $statuteDocument): ?>
                                         <?php if (!is_array($statuteDocument)) { continue; } ?>
                                         <div class="board-archive-editor__block">
                                             <div class="form-group">
@@ -1185,6 +1218,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                                 <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
                                                 <input type="hidden" name="statute_existing_paths[]" value="<?php echo htmlspecialchars($statuteDocument['file_path'] ?? ''); ?>">
                                                 <input type="hidden" name="statute_existing_names[]" value="<?php echo htmlspecialchars($statuteDocument['original_name'] ?? ''); ?>">
+                                                <?php if (trim((string)($statuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <label class="parent-document-delete-option">
+                                                        <input type="checkbox" name="statute_delete_indexes[]" value="<?php echo (int)$statuteIndex; ?>">
+                                                        <span><i class="fas fa-trash-alt"></i> Διαγραφή αυτού του PDF</span>
+                                                    </label>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -1213,7 +1252,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                     </div>
                                 </div>
                                 <div class="board-archive-editor">
-                                    <?php foreach ($parentDocumentsMinutesForEditor as $minuteDocument): ?>
+                                    <?php foreach ($parentDocumentsMinutesForEditor as $minuteIndex => $minuteDocument): ?>
                                         <?php if (!is_array($minuteDocument)) { continue; } ?>
                                         <div class="board-archive-editor__block">
                                             <div class="form-group">
@@ -1232,6 +1271,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                                 <input type="file" class="form-control-file" name="minute_files[]" accept="application/pdf,.pdf">
                                                 <input type="hidden" name="minute_existing_paths[]" value="<?php echo htmlspecialchars($minuteDocument['file_path'] ?? ''); ?>">
                                                 <input type="hidden" name="minute_existing_names[]" value="<?php echo htmlspecialchars($minuteDocument['original_name'] ?? ''); ?>">
+                                                <?php if (trim((string)($minuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <label class="parent-document-delete-option">
+                                                        <input type="checkbox" name="minute_delete_indexes[]" value="<?php echo (int)$minuteIndex; ?>">
+                                                        <span><i class="fas fa-trash-alt"></i> Διαγραφή αυτού του PDF</span>
+                                                    </label>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
