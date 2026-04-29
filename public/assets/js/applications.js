@@ -8,14 +8,14 @@ const FORM_FIELDS = {
 };
 
 const SUBMISSION_FIELD_LABELS = {
-    parent_name: '???�atep???�? G???a',
-    parent_email: 'Email ?p????????a?',
-    parent_phone: '????f??? ?p????????a?',
-    student_name: '???�atep???�? ?a??t?/?a??t??a?',
-    student_class: '?�?�a / ????',
-    manual_application_text: '?e?�e?? ??t?s??',
-    applied_at: '?�e??�???a ?p?�????',
-    _submission_mode: '???p?? ?p?�????'
+    parent_name: 'Ονοματεπώνυμο Γονέα',
+    parent_email: 'Email Επικοινωνίας',
+    parent_phone: 'Τηλέφωνο Επικοινωνίας',
+    student_name: 'Ονοματεπώνυμο Μαθητή/Μαθήτριας',
+    student_class: 'Τμήμα / Τάξη',
+    manual_application_text: 'Κείμενο Αίτησης',
+    applied_at: 'Ημερομηνία Υποβολής',
+    _submission_mode: 'Τρόπος Υποβολής'
 };
 
 const APP_META = [
@@ -30,8 +30,8 @@ const APP_META = [
 var MAX_SUBMISSION_FILES = 4;
 var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
 var SUBMISSION_MODE_LABELS = {
-    manual: 'Online S?�p????s?',
-    upload: '???�as�a ???e???'
+    manual: 'Online Συμπλήρωση',
+    upload: 'Ανέβασμα Αρχείου'
 };
 
 /* IN-PAGE APPLIED TRACKING (resets on page reload DB is the source of truth) */
@@ -475,7 +475,7 @@ function addSubmissionRow(sub) {
         : '';
     var filesHtml = uploadedFiles.map(function (fileItem) {
         if (fileItem && typeof fileItem === 'object' && fileItem.url) {
-            var itemName = fileItem.name ? String(fileItem.name) : '???e??';
+            var itemName = fileItem.name ? String(fileItem.name) : 'Αρχείο';
             return '<a href="' + escHtml(String(fileItem.url)) + '" target="_blank" rel="noopener noreferrer" class="submission-file-link d-block small mt-1"><i class="fas fa-paperclip mr-1"></i>' + escHtml(itemName) + '</a>';
         }
 
@@ -507,7 +507,7 @@ function buildField(field) {
     if (field.type === 'checkbox') {
         showTopLabel = false;
         control = '<label class="application-checkbox-row" for="field_' + escHtml(field.name) + '">' +
-                  '<span class="application-checkbox-text">� ' + escHtml(field.label) + req + '</span>' +
+                  '<span class="application-checkbox-text">' + escHtml(field.label) + req + '</span>' +
                   '<input type="checkbox" id="field_' + escHtml(field.name) + '" class="application-checkbox-input" name="' + field.name + '" value="1"' +
                   (field.required ? ' required' : '') + ' aria-label="' + escHtml(field.label) + '">' +
                   '</label>';
@@ -515,7 +515,7 @@ function buildField(field) {
         control = '<input type="file" class="form-control" name="' + field.name + '" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"' +
                   (field.required ? ' required' : '') + '>';
     } else if (field.type === 'tel') {
-        control = '<input type="tel" class="form-control js-phone-only" name="' + field.name + '" inputmode="numeric" pattern="[0-9]{6,15}" minlength="6" maxlength="15" autocomplete="tel" title="???? a???�?? (6-15 ??f?a)"' +
+        control = '<input type="tel" class="form-control js-phone-only" name="' + field.name + '" inputmode="numeric" pattern="[0-9]{6,15}" minlength="6" maxlength="15" autocomplete="tel" title="Μόνο αριθμοί (6-15 ψηφία)"' +
                   (field.required ? ' required' : '') + '>';
     } else if (field.type === 'select') {
         var opts = (field.options && Array.isArray(field.options)) 
@@ -701,11 +701,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function showCenterNotice(messageText) {
         if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
-            window.alert(messageText || 'Sf??�a.');
+            window.alert(messageText || 'Σφάλμα.');
             return;
         }
 
-        applicationNoticeMessage.textContent = messageText || 'Sf??�a.';
+        applicationNoticeMessage.textContent = messageText || 'Σφάλμα.';
         applicationNoticeBackdrop.classList.add('is-visible');
         applicationNoticeBox.classList.add('is-visible');
 
@@ -829,18 +829,18 @@ document.addEventListener('DOMContentLoaded', function () {
     function getSubmissionFilesValidationMessage(files, requireAtLeastOne) {
         var selectedFiles = Array.isArray(files) ? files : [];
         if (requireAtLeastOne && selectedFiles.length === 0) {
-            return '?a?a?a?? ep????te t??????st?? ??a a??e?? p??? t?? ?p?�???.';
+            return 'Παρακαλώ επιλέξτε τουλάχιστον ένα αρχείο πριν την υποβολή.';
         }
 
         if (selectedFiles.length > MAX_SUBMISSION_FILES) {
-            return '?p??e?te ?a ep????ete ??? ' + String(MAX_SUBMISSION_FILES) + ' a??e?a.';
+            return 'Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.';
         }
 
         for (var i = 0; i < selectedFiles.length; i++) {
             var fileName = String(selectedFiles[i].name || '');
             var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
             if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
-                return '?p?t?ep?�e??? t?p?? a??e???: pdf, doc, docx, jpg, jpeg, png.';
+                return 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
             }
         }
 
@@ -863,12 +863,12 @@ document.addEventListener('DOMContentLoaded', function () {
             safeName = 'field_' + String((index || 0) + 1);
         }
 
-        var rawLabel = String(field.label || rawName || ('?ed?? ' + String((index || 0) + 1))).trim();
+        var rawLabel = String(field.label || rawName || ('Πεδίο ' + String((index || 0) + 1))).trim();
         var rawIcon = String(field.icon || '').trim();
 
         return {
             name: safeName,
-            label: rawLabel || ('?ed?? ' + String((index || 0) + 1)),
+            label: rawLabel || ('Πεδίο ' + String((index || 0) + 1)),
             type: normalizeManualFieldType(field.type),
             required: Boolean(field.required),
             icon: rawIcon || 'fa-keyboard',
@@ -959,14 +959,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (!canSubmitApplications) {
-            viewModalSubmitBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>???s????? �? d?a??s?�?';
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Μη διαθέσιμη υποβολή';
             return;
         }
 
         var normalizedMode = normalizeSubmissionMode(mode);
         viewModalSubmitBtn.innerHTML = normalizedMode === 'manual'
-            ? '<i class="fas fa-keyboard mr-1"></i>?p?�??? Online ??t?s??'
-            : '<i class="fas fa-paper-plane mr-1"></i>?p?�??? ??t?s??';
+            ? '<i class="fas fa-keyboard mr-1"></i>Υποβολή Online Αίτησης'
+            : '<i class="fas fa-paper-plane mr-1"></i>Υποβολή Αίτησης';
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -1002,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var submitBtn = card.querySelector('.submit-btn');
         if (!submitBtn || submitBtn.disabled) {
             var reason = submitBtn ? (submitBtn.dataset.unavailableReason || '') : '';
-            showUnavailableBox(reason || '? a?t?s? de? ??e? a????e? a??�a.');
+            showUnavailableBox(reason || 'Η αίτηση δεν έχει ανοίξει ακόμα.');
             return;
         }
 
@@ -1068,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (viewManualFields) {
-            viewManualFields.innerHTML = '<div class="text-muted small py-2">F??t?s? ped??? f??�a?...</div>';
+            viewManualFields.innerHTML = '<div class="text-muted small py-2">Φόρτωση πεδίων φόρμας...</div>';
         }
 
         _modal.manualFieldsLoading = true;
@@ -1087,12 +1087,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var uploadTitleEl = document.querySelector('#application-view-upload .upload-title span');
         if (uploadTitleEl) {
-            uploadTitleEl.textContent = 'Upload ??t?s?? (??? 4 a??e?a)';
+            uploadTitleEl.textContent = 'Upload Αίτησης (έως 4 αρχεία)';
         }
 
         var uploadNoteEl = document.querySelector('#application-view-upload .application-view-upload-note');
         if (uploadNoteEl) {
-            uploadNoteEl.innerHTML = '?pa?te?ta? t??????st?? 1 a??e??. ?p?t?ep?�e??? t?p??: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.';
+            uploadNoteEl.innerHTML = 'Απαιτείται τουλάχιστον 1 αρχείο. Επιτρεπόμενοι τύποι: <strong>pdf, doc, docx, jpg, jpeg, png</strong>.';
         }
 
         if (viewModalSubmitBtn) {
@@ -1110,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (submitButton.disabled || submitButton.dataset.unavailableReason) {
                     e.preventDefault();
                     e.stopPropagation();
-                    showUnavailableBox(submitButton.dataset.unavailableReason || '? a?t?s? de? e??a? d?a??s?�?.');
+                    showUnavailableBox(submitButton.dataset.unavailableReason || 'Η αίτηση δεν είναι διαθέσιμη.');
                 }
                 return;
             }
@@ -1141,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function () {
         viewModalFileInput.addEventListener('change', function () {
             var selectedFiles = Array.from(viewModalFileInput.files || []);
             if (selectedFiles.length > MAX_SUBMISSION_FILES) {
-                showCenterNotice('?p??e?te ?a ep????ete ??? ' + String(MAX_SUBMISSION_FILES) + ' a??e?a.');
+                showCenterNotice('Μπορείτε να επιλέξετε έως ' + String(MAX_SUBMISSION_FILES) + ' αρχεία.');
                 viewModalFileInput.value = '';
             }
 
@@ -1179,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!_modal.appId) return;
 
             if (!canSubmitApplications) {
-                showCenterNotice('? ?p?�??? de? e??a? d?a??s?�? a?t? t? st??�?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???�?ste ?a??.');
+                showCenterNotice('Η υποβολή δεν είναι διαθέσιμη αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.');
                 return;
             }
 
@@ -1194,12 +1194,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (selectedMode === 'manual') {
                 if (_modal.manualFieldsLoading) {
-                    showCenterNotice('G??eta? f??t?s? t?? ped???. ?e??�??ete ???a de?te???epta ?a? d???�?ste ?a??.');
+                    showCenterNotice('Γίνεται φόρτωση των πεδίων. Περιμένετε λίγα δευτερόλεπτα και δοκιμάστε ξανά.');
                     return;
                 }
 
                 if (!viewManualForm) {
-                    showCenterNotice('?e? e??a? d?a??s?�? ? online f??�a a?t? t? st??�?.');
+                    showCenterNotice('Δεν είναι διαθέσιμη η online φόρμα αυτή τη στιγμή.');
                     return;
                 }
 
@@ -1225,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             viewModalSubmitBtn.disabled = true;
-            viewModalSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>?p?st???...';
+            viewModalSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Υποβολή...';
 
             var body = new FormData();
             body.append('ajax_submit_v2', '1');
@@ -1256,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 setApplicationSubmitButtonText(selectedMode);
 
                 if (!json.success) {
-                    showCenterNotice(json.message || 'Sf??�a.');
+                    showCenterNotice(json.message || 'Σφάλμα.');
                     return;
                 }
 
@@ -1284,7 +1284,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(function () {
                 viewModalSubmitBtn.disabled = false;
                 setApplicationSubmitButtonText(selectedMode);
-                showCenterNotice('Sf??�a d??t???. ?e�a???e?te ?t? ? d?a??�?st?? t???e? ?a? d???�?ste ?a??.');
+                showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
             });
         });
     }
@@ -1406,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /* Submit button: POST to PHP via anaktisi(). */
     document.getElementById('modal-submit-btn').addEventListener('click', function () {
         if (!canSubmitApplications) {
-            showCenterNotice('? ?p?�??? de? e??a? d?a??s?�? a?t? t? st??�?. ?a?a?a?? a?a?e?ste t? se??da ?a? d???�?ste ?a??.');
+            showCenterNotice('Η υποβολή δεν είναι διαθέσιμη αυτή τη στιγμή. Παρακαλώ ανανεώστε τη σελίδα και δοκιμάστε ξανά.');
             return;
         }
 
@@ -1434,7 +1434,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var btn = document.getElementById('modal-submit-btn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> ?p?st???...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Υποβολή...';
 
         var body = new FormData();
         body.append('ajax_submit_v2', '1');
@@ -1460,10 +1460,10 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(function (json) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?�???';
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';
 
             if (!json.success) {
-                showCenterNotice(json.message || 'Sf??�a.');
+                showCenterNotice(json.message || 'Σφάλμα.');
                 return;
             }
 
@@ -1489,8 +1489,8 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(function (err) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> ?p?�???';
-            showCenterNotice('Sf??�a d??t???. ?e�a???e?te ?t? ? d?a??�?st?? t???e? ?a? d???�?ste ?a??.');
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';
+            showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
         });
     });
 
@@ -1499,7 +1499,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveDraftBtn.addEventListener('click', function () {
             var form = document.getElementById('application-form');
             if (!form || !_modal.appId) {
-                showCenterNotice('?e? ?p???e? e?e??? a?t?s? ??a ap????e?s? p???e????.');
+                showCenterNotice('Δεν υπάρχει ενεργή αίτηση για αποθήκευση προχείρου.');
                 return;
             }
 
@@ -1516,9 +1516,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (saveDraft(_modal.appId, data)) {
                 upsertDraftSubmissionRow(_modal.appId, data);
-                showCenterNotice('?? p???e??? ap????e?t??e. ?p??e?te ?a s??e??sete a???te?a.');
+                showCenterNotice('Το πρόχειρο αποθηκεύτηκε. Μπορείτε να συνεχίσετε αργότερα.');
             } else {
-                showCenterNotice('?e? ?ta? d??at? ? ap????e?s? p???e???? se a?t? t? s?s?e??.');
+                showCenterNotice('Δεν ήταν δυνατή η αποθήκευση προχείρου σε αυτή τη συσκευή.');
             }
         });
     }
@@ -1546,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     var parsed = JSON.parse(raw);
                     showViewModalFromData(title, parsed, status, submittedAt);
                 } catch (err) {
-                    showCenterNotice('?e? e??a? d??at? ? e�f???s? ?ept?�e?e???.');
+                    showCenterNotice('Δεν είναι δυνατή η εμφάνιση λεπτομερειών.');
                 }
             }
 
@@ -1557,7 +1557,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 var submitBtn = document.querySelector('#app-card-' + appId + ' .submit-btn');
                 if (!submitBtn || submitBtn.disabled) {
-                    showCenterNotice('?e? e??a? d??at? ? s????e?a a?t?? t?? a?t?s??.');
+                    showCenterNotice('Δεν είναι δυνατή η συνέχεια αυτής της αίτησης.');
                     return;
                 }
 

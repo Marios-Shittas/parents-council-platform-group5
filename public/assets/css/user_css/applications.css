@@ -391,16 +391,16 @@
     outline-offset: 2px;
 }
 
-/* Keep native arxeio selector button visually inside to input frame. */
-#applicationViewModal parathyro input[type="arxeio"].forma-control,
-#submitModal parathyro input[type="arxeio"].forma-control {
+/* Keep native file selector button visually inside the input frame. */
+#applicationViewModal input[type="file"].form-control,
+#submitModal input[type="file"].form-control {
     padding: 0.375rem 0.75rem;
     line-height: 1.5;
     overflow: hidden;
 }
 
-#applicationViewModal parathyro input[type="arxeio"].forma-control::arxeio-selector-button,
-#submitModal parathyro input[type="arxeio"].forma-control::arxeio-selector-button {
+#applicationViewModal input[type="file"].form-control::file-selector-button,
+#submitModal input[type="file"].form-control::file-selector-button {
     margin: -0.375rem 0.75rem -0.375rem -0.75rem;
     padding: 0.375rem 0.85rem;
     border: 0;
@@ -411,8 +411,8 @@
     font-weight: 600;
 }
 
-#applicationViewModal parathyro input[type="arxeio"].forma-control::-webkit-arxeio-upload-button,
-#submitModal parathyro input[type="arxeio"].forma-control::-webkit-arxeio-upload-button {
+#applicationViewModal input[type="file"].form-control::-webkit-file-upload-button,
+#submitModal input[type="file"].form-control::-webkit-file-upload-button {
     margin: -0.375rem 0.75rem -0.375rem -0.75rem;
     padding: 0.375rem 0.85rem;
     border: 0;
@@ -527,26 +527,26 @@
             text-decoration: none;
         }
 
-        #applicationViewModal parathyro .modal-content {
+        #applicationViewModal .modal-content {
             border: 0;
             border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 18px 44px rgba(18, 41, 70, 0.18);
         }
 
-        #applicationViewModal parathyro .modal-header {
+        #applicationViewModal .modal-header {
             background: linear-gradient(135deg, #1f63b6 0%, #2f7fd8 100%);
             border-bottom: 0;
         }
 
-        #applicationViewModal parathyro .modal-titlos,
-        #applicationViewModal parathyro .modal-header .close {
+        #applicationViewModal .modal-title,
+        #applicationViewModal .modal-header .close {
             color: #ffffff;
             text-shadow: none;
             opacity: 1;
         }
 
-        #applicationViewModal parathyro .modal-body {
+        #applicationViewModal .modal-body {
             background: #f8fbff;
         }
 
@@ -565,13 +565,13 @@
             margin-bottom: 12px;
         }
 
-        #aitisi-view-attachments-list {
+        #application-view-attachments-list {
             list-style: none;
             margin-bottom: 0;
             padding-left: 0;
         }
 
-        #aitisi-view-attachments-list li {
+        #application-view-attachments-list li {
             margin-bottom: 10px;
             line-height: 1.35;
             background: #f7fbff;
@@ -580,11 +580,11 @@
             padding: 10px 12px;
         }
 
-        #aitisi-view-attachments-list li:last-child {
+        #application-view-attachments-list li:last-child {
             margin-bottom: 0;
         }
 
-        #aitisi-view-attachments-list a {
+        #application-view-attachments-list a {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -713,7 +713,7 @@
             resize: vertical;
         }
 
-        #aitisi-view-upload {
+        #application-view-upload {
             background: #ffffff;
             border: 1px solid #dce9f8;
             border-radius: 12px;
@@ -721,7 +721,7 @@
             box-shadow: 0 8px 24px rgba(31, 79, 143, 0.06);
         }
 
-        #aitisi-view-upload .upload-titlos {
+        #application-view-upload .upload-title {
             display: flex;
             align-items: center;
             gap: 9px;
@@ -731,7 +731,7 @@
             font-size: 1.05rem;
         }
 
-        #aitisi-view-upload .upload-titlos i {
+        #application-view-upload .upload-title i {
             width: 18px;
             text-align: center;
         }
@@ -747,7 +747,7 @@
             color: #304c6f;
         }
 
-        #aitisi-view-arxeio-input {
+        #application-view-file-input {
             border: 1px solid #b9d1ef;
             background: linear-gradient(180deg, #fafdff 0%, #f3f8ff 100%);
             border-radius: 10px;
@@ -757,8 +757,8 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
         }
 
-        #aitisi-view-arxeio-input::arxeio-selector-button,
-        #aitisi-view-arxeio-input::-webkit-arxeio-upload-button {
+        #application-view-file-input::file-selector-button,
+        #application-view-file-input::-webkit-file-upload-button {
             border: 0;
             background: linear-gradient(135deg, #2c73c8 0%, #1d5faa 100%);
             color: #ffffff;
@@ -772,7 +772,7 @@
             transition: background 0.2s ease, transform 0.2s ease;
         }
 
-        #aitisi-view-selected-arxeia {
+        #application-view-selected-files {
             list-style: none;
             margin-top: 14px;
             margin-bottom: 0;
@@ -781,11 +781,11 @@
             font-size: 0.9rem;
         }
 
-        #aitisi-view-selected-arxeia:empty {
+        #application-view-selected-files:empty {
             display: none;
         }
 
-        #aitisi-view-selected-arxeia li {
+        #application-view-selected-files li {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -798,11 +798,11 @@
             font-weight: 600;
         }
 
-        #aitisi-view-selected-arxeia li:last-child {
+        #application-view-selected-files li:last-child {
             margin-bottom: 0;
         }
 
-        #aitisi-view-selected-arxeia li i {
+        #application-view-selected-files li i {
             color: #2b76cc;
         }
 
@@ -822,35 +822,35 @@
             margin-right: 6px;
         }
 
-        #submitModal parathyro .modal-dialog {
+        #submitModal .modal-dialog {
             margin: 0.75rem auto;
         }
 
-        #submitModal parathyro .modal-content {
+        #submitModal .modal-content {
             max-height: calc(100vh - 1.5rem);
         }
 
-        #submitModal parathyro .modal-header {
+        #submitModal .modal-header {
             background: #1f7aec;
             border-bottom: 0;
         }
 
-        #submitModal parathyro .modal-titlos {
+        #submitModal .modal-title {
             color: #ffffff;
         }
 
-        #submitModal parathyro .modal-header .close {
+        #submitModal .modal-header .close {
             color: #ffffff;
             opacity: 1;
             text-shadow: none;
         }
 
-        #submitModal parathyro .modal-header .close:hover {
+        #submitModal .modal-header .close:hover {
             color: #ffffff;
             opacity: 0.85;
         }
 
-        #submitModal parathyro .modal-body {
+        #submitModal .modal-body {
             overflow-y: auto;
         }
 
@@ -874,18 +874,28 @@
             padding-bottom: 1rem;
         }
 
-        #modal-ypovoli-arxeio {
+        #modal-submission-file {
             font-size: 0.9rem;
             line-height: 1.2;
             padding: 0.28rem 0.5rem;
         }
 
-        #modal-ypovoli-arxeio::arxeio-selector-button,
-        #modal-ypovoli-arxeio::-webkit-arxeio-upload-button {
+        #modal-submission-file::file-selector-button,
+        #modal-submission-file::-webkit-file-upload-button {
             font-size: 0.82rem;
             line-height: 1.2;
             padding: 0.28rem 0.62rem;
             margin-right: 0.5rem;
+        }
+
+        #applicationViewModal .modal-footer .btn-secondary:hover,
+        #applicationViewModal .modal-footer .btn-secondary:focus,
+        #submitModal .modal-footer .btn-secondary:hover,
+        #submitModal .modal-footer .btn-secondary:focus {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+            box-shadow: 0 8px 18px rgba(220, 53, 69, 0.22);
         }
 
         @media (max-width: 767.98px) {

@@ -45,6 +45,22 @@ function resolveEventImageFilePath($imagePath) {
     return getEventImageUploadDir() . basename((string)$imagePath);
 }
 
+function ensureEventImageUploadDir() {
+    $uploadDir = getEventImageUploadDir();
+
+    if (!is_dir($uploadDir)) {
+        @mkdir($uploadDir, 0777, true);
+    }
+
+    clearstatcache(true, $uploadDir);
+    if (is_dir($uploadDir) && !is_writable($uploadDir)) {
+        @chmod($uploadDir, 0777);
+        clearstatcache(true, $uploadDir);
+    }
+
+    return is_dir($uploadDir) && is_writable($uploadDir);
+}
+
 // Leitourgia uploadEventImages: xeirizetai to antistoixo kommati tis selidas i tou service.
 function uploadEventImages($eventsService, $eventId) {
     $uploadedCount = 0;
@@ -55,8 +71,9 @@ function uploadEventImages($eventsService, $eventId) {
     }
 
     $uploadDir = getEventImageUploadDir();
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    if (!ensureEventImageUploadDir()) {
+        $uploadErrors[] = "Ο φάκελος Events_img δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα του {$uploadDir}";
+        return [$uploadedCount, $uploadErrors];
     }
 
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -118,6 +135,11 @@ function uploadEventImages($eventsService, $eventId) {
         if (!file_exists($tmpName)) {
             $uploadErrors[] = "Το προσωρινό αρχείο για '{$safeFileName}' δεν βρέθηκε";
             continue;
+        }
+
+        if (!is_writable($uploadDir)) {
+            @chmod($uploadDir, 0777);
+            clearstatcache(true, $uploadDir);
         }
 
         if (!is_writable($uploadDir)) {
