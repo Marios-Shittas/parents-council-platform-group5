@@ -11,8 +11,8 @@
     box-shadow: none;
 }
 
-.parents-admin-warning-text {
-    color: #b42318;
+.content-editor-card__header .parents-admin-warning-text {
+    color: #b42318 !important;
     font-weight: 800;
 }
 

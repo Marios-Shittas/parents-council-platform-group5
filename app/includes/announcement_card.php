@@ -6,6 +6,42 @@ require_once __DIR__ . '/site_context.php';
 $annImages     = !empty($announcement['images']) ? $announcement['images'] : [$defaultImage];
 $annImageCount = count($announcement['images'] ?? []);
 $annAttachments = is_array($announcement['attachments'] ?? null) ? $announcement['attachments'] : [];
+
+if (!function_exists('announcementCardLocalAttachmentExists')) {
+    function announcementCardLocalAttachmentExists(string $filePath): bool
+    {
+        $filePath = trim($filePath);
+        if ($filePath === '') {
+            return false;
+        }
+
+        if (preg_match('#^https?://#i', $filePath)) {
+            return true;
+        }
+
+        $projectRoot = dirname(__DIR__, 2);
+        $projectPrefix = '/parents-council-platform-group5';
+        $localPath = $filePath;
+
+        if (strpos($localPath, $projectPrefix) === 0) {
+            $localPath = substr($localPath, strlen($projectPrefix));
+        }
+
+        if (strpos($localPath, '/public/') === 0) {
+            return is_file($projectRoot . $localPath);
+        }
+
+        if (strpos($localPath, 'assets/') === 0) {
+            return is_file($projectRoot . '/public/' . $localPath);
+        }
+
+        return true;
+    }
+}
+
+$annAttachments = array_values(array_filter($annAttachments, function ($attachment) {
+    return announcementCardLocalAttachmentExists((string)($attachment['file_path'] ?? ''));
+}));
 $attachmentCount = count($annAttachments);
 $annDateSource = $announcement['announcement_date'] ?? $announcement['publish_date'];
 $annDate       = new DateTime($annDateSource);

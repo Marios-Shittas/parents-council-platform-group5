@@ -55,18 +55,6 @@ INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcem
 (2, 'Κλήρωση Πασχαλινού Λαχείου', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζονται πληροφορίες σχετικά με την κλήρωση του Πασχαλινού Λαχείου, συμπεριλαμβανομένων των αποτελεσμάτων και των σχετικών λεπτομερειών.', ''),
 (3, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
 
---
--- ========================================================
--- Dedomena gia ton pinaka: `AnnouncementAttachments`
--- Edw mpainei to arxiko periexomeno tou pinaka
--- ========================================================
-
-INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de2f521560b8.13949445.pdf', 'Arxeio 1.pdf', '2026-04-14 12:13:06'),
-(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de3157c4c3d0.96612284.pdf', 'Arxeio 2.pdf', '2026-04-14 12:21:43'),
-(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69de32711daff6.13168279.pdf', 'Arxeio3.pdf', '2026-04-14 12:26:25');
-
---
 -- ========================================================
 -- Dedomena gia ton pinaka: `AnnouncementsImages`
 -- Edw mpainei to arxiko periexomeno tou pinaka
