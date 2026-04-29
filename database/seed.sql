@@ -55,6 +55,18 @@ INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcem
 (2, 'Κλήρωση Πασχαλινού Λαχείου', '2026-04-03', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζονται πληροφορίες σχετικά με την κλήρωση του Πασχαλινού Λαχείου, συμπεριλαμβανομένων των αποτελεσμάτων και των σχετικών λεπτομερειών.', ''),
 (3, 'Προγραμματισμός Απριλίου – Γυμνάσιο Αγίου Αθανασίου', '2026-03-30', '2026-04-14', 'Στο πιο κάτω αρχείο παρουσιάζεται ο προγραμματισμός του Απριλίου για το Γυμνάσιο Αγίου Αθανασίου, με αναλυτική καταγραφή των δραστηριοτήτων και των προγραμματισμένων εκδηλώσεων.', '');
 
+--
+-- ========================================================
+-- Dedomena gia ton pinaka: `AnnouncementAttachments`
+-- Edw mpainei to arxiko periexomeno tou pinaka
+-- ========================================================
+
+INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
+(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c55ce801f9.73448830.pdf', 'Arxeio 1.pdf', '2026-04-29 11:46:20'),
+(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c580c2a946.91698533.pdf', 'Arxeio 2.pdf', '2026-04-29 11:46:56'),
+(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c5a47c9422.26992142.pdf', 'Arxeio 3.pdf', '2026-04-29 11:47:32');
+
+--
 -- ========================================================
 -- Dedomena gia ton pinaka: `AnnouncementsImages`
 -- Edw mpainei to arxiko periexomeno tou pinaka
@@ -136,7 +148,9 @@ INSERT INTO `EshopSettings` (`setting_id`, `is_visible`, `updated_at`) VALUES
 -- ========================================================
 
 INSERT INTO `Events` (`event_id`, `event_title`, `event_description`, `gdpr_notice`, `event_date`, `publish_date`) VALUES
-(1, 'Τόμπολα & Μουσική Βραδιά', 'Παρασκευή 15 Μαΐου 2026\nΏρα: 20:00 - 23:00', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 20:00:00', '2026-04-14');
+(1, 'Τόμπολα & Μουσική Βραδιά', 'Παρασκευή 15 Μαΐου 2026\nΏρα: 20:00 - 23:00', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-05-15 20:00:00', '2026-04-14'),
+(2, 'Test', 'This is a test', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-08-20 10:00:00', '2026-04-29'),
+(3, 'Another Test expired event', 'Expired event', 'Το φωτογραφικό υλικό της εκδήλωσης δημοσιεύεται με σεβασμό στα προσωπικά δεδομένα και σύμφωνα με τις ισχύουσες εγκρίσεις/πολιτικές του σχολείου.', '2026-04-28 11:00:00', '2026-04-29');
 
 --
 -- ========================================================
@@ -145,7 +159,11 @@ INSERT INTO `Events` (`event_id`, `event_title`, `event_description`, `gdpr_noti
 -- ========================================================
 
 INSERT INTO `EventsImages` (`ev_image_id`, `event_id`, `image_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg');
+(1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg'),
+(2, 2, '/parents-council-platform-group5/public/assets/Events_img/69f1c777b1888_1777452919.jpg'),
+(3, 2, '/parents-council-platform-group5/public/assets/Events_img/69f1c777b1be3_1777452919.jpeg'),
+(4, 3, '/parents-council-platform-group5/public/assets/Events_img/69f1c7c1a30cd_1777452993.jpg'),
+(5, 3, '/parents-council-platform-group5/public/assets/Events_img/69f1c7c1a37cc_1777452993.jpg');
 
 --
 -- ========================================================
