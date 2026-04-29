@@ -1,3 +1,2 @@
-*
+# Keep uploaded parent documents trackable.
 !.gitignore
-!*.pdf

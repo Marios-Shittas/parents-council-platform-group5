@@ -1,12 +1,2 @@
-*
-*
+# Keep uploaded announcement documents trackable.
 !.gitignore
-!*.pdf
-*** Add File: /Applications/XAMPP/xamppfiles/htdocs/parents-council-platform-group5/public/assets/Applications_docs/.gitignore
-*
-!.gitignore
-!*.pdf
-*** Add File: /Applications/XAMPP/xamppfiles/htdocs/parents-council-platform-group5/public/assets/Submissions_docs/.gitignore
-*
-!.gitignore
-!*.pdf

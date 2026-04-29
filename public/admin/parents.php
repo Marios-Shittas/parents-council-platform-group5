@@ -228,6 +228,23 @@ function parentsAdminDocumentsWebPath($fileName)
     return '/parents-council-platform-group5/public/assets/Parents_docs/' . $fileName;
 }
 
+function parentsAdminDeleteUploadedDocument($webPath)
+{
+    $webPath = parentsAdminTrim($webPath);
+    $webPrefix = '/parents-council-platform-group5/public/assets/Parents_docs/';
+
+    if ($webPath === '' || strpos($webPath, $webPrefix) !== 0) {
+        return;
+    }
+
+    $fileName = basename($webPath);
+    $localPath = parentsAdminDocumentsUploadDir() . $fileName;
+
+    if (is_file($localPath)) {
+        @unlink($localPath);
+    }
+}
+
 function parentsAdminEnsureDocumentsUploadDir()
 {
     $uploadDir = parentsAdminDocumentsUploadDir();
@@ -318,12 +335,20 @@ function parentsAdminBuildStatuteContent(array $existingContent)
     $statuteTitles = is_array($_POST['statute_titles'] ?? null) ? $_POST['statute_titles'] : [];
     $statuteExistingPaths = is_array($_POST['statute_existing_paths'] ?? null) ? $_POST['statute_existing_paths'] : [];
     $statuteExistingNames = is_array($_POST['statute_existing_names'] ?? null) ? $_POST['statute_existing_names'] : [];
+    $statuteDeleteIndexes = is_array($_POST['statute_delete_indexes'] ?? null) ? $_POST['statute_delete_indexes'] : [];
+    $statuteDeleteMap = array_flip(array_map('strval', $statuteDeleteIndexes));
     $statutes = [];
 
     foreach ($statuteTitles as $index => $statuteTitleValue) {
         $statuteTitle = parentsAdminTrim($statuteTitleValue);
         $statuteExistingPath = parentsAdminTrim($statuteExistingPaths[$index] ?? '');
         $statuteExistingName = parentsAdminTrim($statuteExistingNames[$index] ?? '');
+
+        if (isset($statuteDeleteMap[(string)$index])) {
+            parentsAdminDeleteUploadedDocument($statuteExistingPath);
+            continue;
+        }
+
         [$uploadedStatute, $statuteErrors] = parentsAdminUploadedPdf('statute_files', $index);
         $uploadErrors = array_merge($uploadErrors, $statuteErrors);
 
@@ -1092,7 +1117,7 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                 </div>
 
                                 <div class="board-archive-editor">
-                                    <?php foreach ($statuteDocumentsForEditor as $statuteDocument): ?>
+                                    <?php foreach ($statuteDocumentsForEditor as $statuteIndex => $statuteDocument): ?>
                                         <div class="board-archive-editor__block">
                                             <div class="form-group">
                                                 <label>Τίτλος expandable</label>
@@ -1110,6 +1135,12 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                                 <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
                                                 <input type="hidden" name="statute_existing_paths[]" value="<?php echo htmlspecialchars($statuteDocument['file_path'] ?? ''); ?>">
                                                 <input type="hidden" name="statute_existing_names[]" value="<?php echo htmlspecialchars($statuteDocument['original_name'] ?? ''); ?>">
+                                                <?php if (trim((string)($statuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <label class="parent-document-delete-option">
+                                                        <input type="checkbox" name="statute_delete_indexes[]" value="<?php echo (int)$statuteIndex; ?>">
+                                                        <span><i class="fas fa-trash-alt"></i> Διαγραφή αυτού του PDF</span>
+                                                    </label>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>

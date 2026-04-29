@@ -221,6 +221,18 @@ CREATE TABLE `EpikoinoniaPageSections` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `EshopSettings`
+--
+
+CREATE TABLE `EshopSettings` (
+  `setting_id` tinyint(3) UNSIGNED NOT NULL,
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `Events`
 --
 
@@ -639,6 +651,12 @@ ALTER TABLE `contact_messages`
 ALTER TABLE `EpikoinoniaPageSections`
   ADD PRIMARY KEY (`section_id`),
   ADD UNIQUE KEY `uq_epikoinonia_page_section_key` (`section_key`);
+
+--
+-- Indexes for table `EshopSettings`
+--
+ALTER TABLE `EshopSettings`
+  ADD PRIMARY KEY (`setting_id`);
 
 --
 -- Indexes for table `Events`
