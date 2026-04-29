@@ -131,6 +131,13 @@ $ordersBadgeText = $adminSidebarData['orders_badge_text'];
             </a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link <?php echo $currentPage === 'programatismo-litourgion.php' ? 'active' : ''; ?>" href="programatismo-litourgion.php">
+                <i class="fas fa-cogs"></i>
+                <span class="admin-nav-label">&#917;&#957;&#941;&#961;&#947;&#949;&#953;&#949;&#962; &#931;&#965;&#963;&#964;&#942;&#956;&#945;&#964;&#959;&#962;</span>
+            </a>
+        </li>
+
     </ul>
 
     <div class="admin-sidebar-footer">
