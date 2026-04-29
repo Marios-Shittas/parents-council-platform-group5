@@ -428,6 +428,16 @@ class ParentsPageService
                     'rows' => $this->buildDefaultBoardArchiveRows(),
                 ],
             ],
+            'statute_section' => [
+                'title' => 'Καταστατικό Συνδέσμου',
+                'subtitle' => 'Αρχεία διαθέσιμα μόνο για συνδεδεμένους γονείς.',
+                'content' => [
+                    'eyebrow' => 'Έγγραφα Συνδέσμου',
+                    'open_label' => 'Άνοιγμα PDF',
+                    'empty_message' => 'Δεν έχει προστεθεί ακόμη καταστατικό.',
+                    'statutes' => [],
+                ],
+            ],
             'class_responsibles_section' => [
                 'title' => 'Υπεύθυνοι Τμημάτων',
                 'subtitle' => 'ΥΠΕΥΘΥΝΟΙ ΤΜΗΜΑΤΩΝ ΚΑΙ ΥΠΕΥΘΥΝΟΙ ΒΟΗΘΟΙ ΔΙΕΥΘΥΝΤΕΣ',

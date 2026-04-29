@@ -277,6 +277,57 @@
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
+.parents-admin-warning-text {
+    color: #c62828 !important;
+    font-weight: 800;
+}
+
+.parent-documents-editor {
+    padding: 18px;
+    border: 1px solid #d9e4f0;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+}
+
+.parent-documents-editor--statutes {
+    border-left: 5px solid #c62828;
+}
+
+.parent-documents-editor__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e1e9f2;
+}
+
+.parent-documents-editor__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff0f0;
+    color: #c62828;
+}
+
+.parent-documents-editor__eyebrow {
+    margin: 0 0 4px;
+    color: #c62828;
+    font-size: .76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.parent-documents-editor__heading h4 {
+    margin: 0;
+    color: #173554;
+    font-weight: 800;
+}
+
 .parents-confirm-modal .modal-content {
     border: none;
     border-radius: 24px;

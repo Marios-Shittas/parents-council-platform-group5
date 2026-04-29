@@ -24,16 +24,20 @@
     order: 2;
 }
 
-.parents-card--schedule {
+.parents-card--statute {
     order: 3;
 }
 
-.parents-card--board {
+.parents-card--schedule {
     order: 4;
 }
 
-.parents-card--board-archive {
+.parents-card--board {
     order: 5;
+}
+
+.parents-card--board-archive {
+    order: 6;
 }
 
 .parents-card,
@@ -279,6 +283,74 @@
 
 .parents-archive-year__content {
     padding: 0 16px 16px;
+}
+
+.parents-document-group {
+    border: 1px solid #d6e4f2;
+    border-radius: 20px;
+    padding: 18px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f1f6fb 100%);
+}
+
+.parents-document-group__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #dbe7f3;
+}
+
+.parents-document-group__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff0f0;
+    color: #c62828;
+    font-size: 1.05rem;
+}
+
+.parents-document-group__heading p {
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #c62828;
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.parents-document-group__heading h3 {
+    margin: 0;
+    color: #173957;
+    font-size: 1.05rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.parents-document-panel {
+    background: #ffffff;
+}
+
+.parents-document-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    border-radius: 999px;
+    border: 1px solid #ffd1d1;
+    background: #fff6f6;
+    color: #b71c1c;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.parents-document-link:hover,
+.parents-document-link:focus {
+    color: #8f1010;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(183, 28, 28, 0.14);
 }
 
 .parents-table--compact td,
