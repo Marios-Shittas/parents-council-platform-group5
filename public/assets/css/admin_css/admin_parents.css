@@ -287,6 +287,67 @@
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
+.parent-documents-editor {
+    padding: 18px;
+    border: 1px solid #d9e4f0;
+    border-radius: 18px;
+    background: #ffffff;
+}
+
+.parent-documents-editor--statutes {
+    border-color: #c8d8f0;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+.parent-documents-editor--minutes {
+    border-color: #d9d0eb;
+    background: linear-gradient(180deg, #fbf9ff 0%, #f3effb 100%);
+}
+
+.parent-documents-editor__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(43, 76, 116, 0.12);
+}
+
+.parent-documents-editor__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #ffffff;
+}
+
+.parent-documents-editor--statutes .parent-documents-editor__icon {
+    background: linear-gradient(135deg, #255f99 0%, #173554 100%);
+}
+
+.parent-documents-editor--minutes .parent-documents-editor__icon {
+    background: linear-gradient(135deg, #6f4bb4 0%, #3f2a68 100%);
+}
+
+.parent-documents-editor__eyebrow {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+}
+
+.parent-documents-editor__heading label {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #173554;
+}
+
 .parents-confirm-modal .modal-content {
     border: none;
     border-radius: 24px;

@@ -460,6 +460,7 @@ class ParentsPageService
                         'file_path' => '',
                         'original_name' => '',
                     ],
+                    'statutes' => [],
                     'minutes' => [],
                 ],
             ],

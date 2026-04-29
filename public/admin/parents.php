@@ -339,13 +339,35 @@ function parentsAdminUploadedPdf($fieldName, $index = null)
 function parentsAdminBuildParentDocumentsContent(array $existingContent)
 {
     $uploadErrors = [];
-    $existingStatute = is_array($existingContent['statute'] ?? null) ? $existingContent['statute'] : [];
-    [$uploadedStatute, $statuteErrors] = parentsAdminUploadedPdf('statute_file');
-    $uploadErrors = array_merge($uploadErrors, $statuteErrors);
+    $statuteTitles = is_array($_POST['statute_titles'] ?? null) ? $_POST['statute_titles'] : [];
+    $statuteExistingPaths = is_array($_POST['statute_existing_paths'] ?? null) ? $_POST['statute_existing_paths'] : [];
+    $statuteExistingNames = is_array($_POST['statute_existing_names'] ?? null) ? $_POST['statute_existing_names'] : [];
+    $statutes = [];
 
-    $statutePath = $uploadedStatute['file_path'] ?? parentsAdminTrim($_POST['statute_existing_path'] ?? ($existingStatute['file_path'] ?? ''));
-    $statuteOriginalName = $uploadedStatute['original_name'] ?? parentsAdminTrim($_POST['statute_existing_name'] ?? ($existingStatute['original_name'] ?? ''));
-    $statuteTitle = parentsAdminTrim($_POST['statute_title'] ?? ($existingStatute['title'] ?? 'Καταστατικό Συνδέσμου'));
+    foreach ($statuteTitles as $index => $statuteTitleValue) {
+        $statuteTitle = parentsAdminTrim($statuteTitleValue);
+        $statuteExistingPath = parentsAdminTrim($statuteExistingPaths[$index] ?? '');
+        $statuteExistingName = parentsAdminTrim($statuteExistingNames[$index] ?? '');
+        [$uploadedStatute, $statuteErrors] = parentsAdminUploadedPdf('statute_files', $index);
+        $uploadErrors = array_merge($uploadErrors, $statuteErrors);
+
+        $statutePath = $uploadedStatute['file_path'] ?? $statuteExistingPath;
+        $statuteOriginalName = $uploadedStatute['original_name'] ?? $statuteExistingName;
+
+        if ($statuteTitle === '' && $statutePath === '') {
+            continue;
+        }
+
+        if ($statuteTitle === '') {
+            $statuteTitle = 'Καταστατικό Συνδέσμου';
+        }
+
+        $statutes[] = [
+            'title' => $statuteTitle,
+            'file_path' => $statutePath,
+            'original_name' => $statuteOriginalName,
+        ];
+    }
 
     $minuteTitles = is_array($_POST['minute_titles'] ?? null) ? $_POST['minute_titles'] : [];
     $minuteExistingPaths = is_array($_POST['minute_existing_paths'] ?? null) ? $_POST['minute_existing_paths'] : [];
@@ -383,11 +405,8 @@ function parentsAdminBuildParentDocumentsContent(array $existingContent)
         'minutes_label' => parentsAdminTrim($_POST['minutes_label'] ?? ($existingContent['minutes_label'] ?? '')),
         'open_label' => parentsAdminTrim($_POST['open_label'] ?? ($existingContent['open_label'] ?? '')),
         'empty_message' => parentsAdminTrim($_POST['empty_message'] ?? ($existingContent['empty_message'] ?? '')),
-        'statute' => [
-            'title' => $statuteTitle,
-            'file_path' => $statutePath,
-            'original_name' => $statuteOriginalName,
-        ],
+        'statutes' => $statutes,
+        'statute' => $statutes[0] ?? ['title' => 'Καταστατικό Συνδέσμου', 'file_path' => '', 'original_name' => ''],
         'minutes' => $minutes,
     ], $uploadErrors];
 }
@@ -565,6 +584,12 @@ $boardArchiveGroupsForEditor = parentsAdminGroupBoardArchiveRowsByYear($boardArc
 $parentDocumentsStatuteForEditor = is_array($parentDocumentsSection['content']['statute'] ?? null)
     ? $parentDocumentsSection['content']['statute']
     : ['title' => 'Καταστατικό Συνδέσμου', 'file_path' => '', 'original_name' => ''];
+$parentDocumentsStatutesForEditor = is_array($parentDocumentsSection['content']['statutes'] ?? null)
+    ? $parentDocumentsSection['content']['statutes']
+    : [];
+if (empty($parentDocumentsStatutesForEditor) && trim((string)($parentDocumentsStatuteForEditor['file_path'] ?? '')) !== '') {
+    $parentDocumentsStatutesForEditor = [$parentDocumentsStatuteForEditor];
+}
 $parentDocumentsMinutesForEditor = is_array($parentDocumentsSection['content']['minutes'] ?? null)
     ? $parentDocumentsSection['content']['minutes']
     : [];
@@ -1132,33 +1157,61 @@ if (!isset($parentsContentTabs[$activeParentsTab])) {
                                 <input type="text" class="form-control" id="parent-documents-empty-message" name="empty_message" value="<?php echo htmlspecialchars($parentDocumentsSection['content']['empty_message'] ?? ''); ?>">
                             </div>
 
-                            <div class="form-group full-width">
-                                <label>Καταστατικό Συνδέσμου</label>
+                            <div class="form-group full-width parent-documents-editor parent-documents-editor--statutes">
+                                <div class="parent-documents-editor__heading">
+                                    <span class="parent-documents-editor__icon"><i class="fas fa-file-contract"></i></span>
+                                    <div>
+                                        <span class="parent-documents-editor__eyebrow">Καταστατικό</span>
+                                        <label>Καταστατικό Συνδέσμου</label>
+                                    </div>
+                                </div>
                                 <div class="board-archive-editor">
-                                    <div class="board-archive-editor__block">
+                                    <?php foreach ($parentDocumentsStatutesForEditor as $statuteDocument): ?>
+                                        <?php if (!is_array($statuteDocument)) { continue; } ?>
+                                        <div class="board-archive-editor__block">
+                                            <div class="form-group">
+                                                <label>Τίτλος expandable</label>
+                                                <input type="text" class="form-control" name="statute_titles[]" value="<?php echo htmlspecialchars($statuteDocument['title'] ?? ''); ?>" placeholder="π.χ. Καταστατικό Συνδέσμου">
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label>PDF καταστατικού</label>
+                                                <?php if (trim((string)($statuteDocument['file_path'] ?? '')) !== ''): ?>
+                                                    <p class="mb-2">
+                                                        <a href="<?php echo htmlspecialchars($statuteDocument['file_path']); ?>" target="_blank" rel="noopener noreferrer">
+                                                            <i class="fas fa-file-pdf mr-1"></i><?php echo htmlspecialchars($statuteDocument['original_name'] ?? 'Τρέχον PDF'); ?>
+                                                        </a>
+                                                    </p>
+                                                <?php endif; ?>
+                                                <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
+                                                <input type="hidden" name="statute_existing_paths[]" value="<?php echo htmlspecialchars($statuteDocument['file_path'] ?? ''); ?>">
+                                                <input type="hidden" name="statute_existing_names[]" value="<?php echo htmlspecialchars($statuteDocument['original_name'] ?? ''); ?>">
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="board-archive-editor__block board-archive-editor__block--new">
                                         <div class="form-group">
-                                            <label for="statute-title">Τίτλος expandable</label>
-                                            <input type="text" class="form-control" id="statute-title" name="statute_title" value="<?php echo htmlspecialchars($parentDocumentsStatuteForEditor['title'] ?? 'Καταστατικό Συνδέσμου'); ?>">
+                                            <label>Νέο Καταστατικό</label>
+                                            <input type="text" class="form-control" name="statute_titles[]" value="" placeholder="π.χ. Καταστατικό Συνδέσμου">
                                         </div>
                                         <div class="form-group mb-0">
-                                            <label for="statute-file">PDF καταστατικού</label>
-                                            <?php if (trim((string)($parentDocumentsStatuteForEditor['file_path'] ?? '')) !== ''): ?>
-                                                <p class="mb-2">
-                                                    <a href="<?php echo htmlspecialchars($parentDocumentsStatuteForEditor['file_path']); ?>" target="_blank" rel="noopener noreferrer">
-                                                        <i class="fas fa-file-pdf mr-1"></i><?php echo htmlspecialchars($parentDocumentsStatuteForEditor['original_name'] ?? 'Τρέχον PDF'); ?>
-                                                    </a>
-                                                </p>
-                                            <?php endif; ?>
-                                            <input type="file" class="form-control-file" id="statute-file" name="statute_file" accept="application/pdf,.pdf">
-                                            <input type="hidden" name="statute_existing_path" value="<?php echo htmlspecialchars($parentDocumentsStatuteForEditor['file_path'] ?? ''); ?>">
-                                            <input type="hidden" name="statute_existing_name" value="<?php echo htmlspecialchars($parentDocumentsStatuteForEditor['original_name'] ?? ''); ?>">
+                                            <label>PDF νέου καταστατικού</label>
+                                            <input type="file" class="form-control-file" name="statute_files[]" accept="application/pdf,.pdf">
+                                            <input type="hidden" name="statute_existing_paths[]" value="">
+                                            <input type="hidden" name="statute_existing_names[]" value="">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="form-group full-width">
-                                <label>Πρακτικά συνεδριάσεων</label>
+                            <div class="form-group full-width parent-documents-editor parent-documents-editor--minutes">
+                                <div class="parent-documents-editor__heading">
+                                    <span class="parent-documents-editor__icon"><i class="fas fa-clipboard-list"></i></span>
+                                    <div>
+                                        <span class="parent-documents-editor__eyebrow">Συνεδριάσεις</span>
+                                        <label>Πρακτικά συνεδριάσεων</label>
+                                    </div>
+                                </div>
                                 <div class="board-archive-editor">
                                     <?php foreach ($parentDocumentsMinutesForEditor as $minuteDocument): ?>
                                         <?php if (!is_array($minuteDocument)) { continue; } ?>

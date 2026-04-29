@@ -194,7 +194,11 @@ $boardArchiveRows = parentsPageGroupArchiveRowsByYear(
         $parentsPageService->getBoardArchiveReferenceRows()
     )
 );
-$parentStatuteDocument = parentsPageSanitizeDocument($parentDocumentsSection['content']['statute'] ?? []);
+$parentStatuteDocuments = parentsPageSanitizeDocuments($parentDocumentsSection['content']['statutes'] ?? []);
+$legacyParentStatuteDocument = parentsPageSanitizeDocument($parentDocumentsSection['content']['statute'] ?? []);
+if (empty($parentStatuteDocuments) && $legacyParentStatuteDocument['file_path'] !== '') {
+    $parentStatuteDocuments[] = $legacyParentStatuteDocument;
+}
 $parentMinutesDocuments = parentsPageSanitizeDocuments($parentDocumentsSection['content']['minutes'] ?? []);
 $classResponsibles = parentsPageSanitizeRows($classResponsiblesSection['content']['rows'] ?? []);
 $registrationSteps = parentsPageSanitizeList($electronicAdminSection['content']['registration_steps'] ?? []);
@@ -322,51 +326,74 @@ $pageHeaderEyebrow = site_is_parent()
                             <p class="parents-lead"><?php echo parentsPageRenderMultiline($parentDocumentsSection['subtitle']); ?></p>
                         <?php endif; ?>
 
-                        <?php if ($parentStatuteDocument['file_path'] === '' && empty($parentMinutesDocuments)): ?>
+                        <?php if (empty($parentStatuteDocuments) && empty($parentMinutesDocuments)): ?>
                             <p class="mb-0"><?php echo htmlspecialchars($parentDocumentsSection['content']['empty_message'] ?? 'Δεν έχουν προστεθεί ακόμη έγγραφα.'); ?></p>
                         <?php else: ?>
-                            <?php if ($parentStatuteDocument['file_path'] !== ''): ?>
-                                <details class="parents-archive-year parents-document-panel mb-3" open>
-                                    <summary class="parents-archive-year__summary">
-                                        <span class="parents-archive-year__title"><?php echo htmlspecialchars($parentStatuteDocument['title'] ?: ($parentDocumentsSection['content']['statute_label'] ?? 'Καταστατικό Συνδέσμου')); ?></span>
-                                        <span class="parents-archive-year__icon" aria-hidden="true">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </span>
-                                    </summary>
-
-                                    <div class="parents-archive-year__content">
-                                        <a class="parents-document-link"
-                                           href="<?php echo htmlspecialchars($parentStatuteDocument['file_path']); ?>"
-                                           target="_blank"
-                                           rel="noopener noreferrer">
-                                            <i class="fas fa-file-pdf"></i>
-                                            <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
-                                        </a>
+                            <?php if (!empty($parentStatuteDocuments)): ?>
+                                <section class="parents-document-group parents-document-group--statutes">
+                                    <div class="parents-document-group__heading">
+                                        <span class="parents-document-group__icon"><i class="fas fa-file-contract"></i></span>
+                                        <div>
+                                            <p>Καταστατικό</p>
+                                            <h3><?php echo htmlspecialchars($parentDocumentsSection['content']['statute_label'] ?? 'Καταστατικό Συνδέσμου'); ?></h3>
+                                        </div>
                                     </div>
-                                </details>
+                                    <?php foreach ($parentStatuteDocuments as $index => $document): ?>
+                                        <?php if ($document['file_path'] === '') { continue; } ?>
+                                        <details class="parents-archive-year parents-document-panel mb-3" <?php echo $index === 0 ? 'open' : ''; ?>>
+                                            <summary class="parents-archive-year__summary">
+                                                <span class="parents-archive-year__title"><?php echo htmlspecialchars($document['title'] ?: ($parentDocumentsSection['content']['statute_label'] ?? 'Καταστατικό Συνδέσμου')); ?></span>
+                                                <span class="parents-archive-year__icon" aria-hidden="true">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </span>
+                                            </summary>
+
+                                            <div class="parents-archive-year__content">
+                                                <a class="parents-document-link"
+                                                   href="<?php echo htmlspecialchars($document['file_path']); ?>"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
+                                                </a>
+                                            </div>
+                                        </details>
+                                    <?php endforeach; ?>
+                                </section>
                             <?php endif; ?>
 
-                            <?php foreach ($parentMinutesDocuments as $document): ?>
-                                <?php if ($document['file_path'] === '') { continue; } ?>
-                                <details class="parents-archive-year parents-document-panel mb-3">
-                                    <summary class="parents-archive-year__summary">
-                                        <span class="parents-archive-year__title"><?php echo htmlspecialchars($document['title'] ?: ($parentDocumentsSection['content']['minutes_label'] ?? 'Πρακτικά Συνεδρίασης')); ?></span>
-                                        <span class="parents-archive-year__icon" aria-hidden="true">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </span>
-                                    </summary>
-
-                                    <div class="parents-archive-year__content">
-                                        <a class="parents-document-link"
-                                           href="<?php echo htmlspecialchars($document['file_path']); ?>"
-                                           target="_blank"
-                                           rel="noopener noreferrer">
-                                            <i class="fas fa-file-pdf"></i>
-                                            <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
-                                        </a>
+                            <?php if (!empty($parentMinutesDocuments)): ?>
+                                <section class="parents-document-group parents-document-group--minutes">
+                                    <div class="parents-document-group__heading">
+                                        <span class="parents-document-group__icon"><i class="fas fa-clipboard-list"></i></span>
+                                        <div>
+                                            <p>Συνεδριάσεις</p>
+                                            <h3><?php echo htmlspecialchars($parentDocumentsSection['content']['minutes_label'] ?? 'Πρακτικά Συνεδριάσεων'); ?></h3>
+                                        </div>
                                     </div>
-                                </details>
-                            <?php endforeach; ?>
+                                    <?php foreach ($parentMinutesDocuments as $document): ?>
+                                        <?php if ($document['file_path'] === '') { continue; } ?>
+                                        <details class="parents-archive-year parents-document-panel mb-3">
+                                            <summary class="parents-archive-year__summary">
+                                                <span class="parents-archive-year__title"><?php echo htmlspecialchars($document['title'] ?: ($parentDocumentsSection['content']['minutes_label'] ?? 'Πρακτικά Συνεδρίασης')); ?></span>
+                                                <span class="parents-archive-year__icon" aria-hidden="true">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </span>
+                                            </summary>
+
+                                            <div class="parents-archive-year__content">
+                                                <a class="parents-document-link"
+                                                   href="<?php echo htmlspecialchars($document['file_path']); ?>"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <span><?php echo htmlspecialchars($parentDocumentsSection['content']['open_label'] ?? 'Άνοιγμα PDF'); ?></span>
+                                                </a>
+                                            </div>
+                                        </details>
+                                    <?php endforeach; ?>
+                                </section>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
