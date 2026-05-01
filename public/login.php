@@ -38,7 +38,7 @@ require_once __DIR__ . '/../app/includes/site_context.php';
     <body class="body">
     <script src="assets/js/login-page.js" defer></script>
         <div class="page-content">
-            <a href="index.php">
+            <a href="<?php echo site_public_url('home.php'); ?>">
                 <button id="back-button"><i class="fas fa-arrow-left"></i></button>
             </a>
             <h1 id="login-title">Σύνδεση</h1>

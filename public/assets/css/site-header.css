@@ -643,8 +643,21 @@
                 overflow-y: visible;
             }
 
+            .navbar-collapse.site-navbar-collapsing {
+                display: flex;
+                max-height: 0;
+                opacity: 0;
+                pointer-events: none;
+                overflow: hidden;
+                transition:
+                    max-height .26s cubic-bezier(.4, 0, .2, 1),
+                    opacity .18s ease;
+                will-change: max-height, opacity;
+            }
+
             .navbar-collapse.show {
                 display: flex;
+                pointer-events: auto;
             }
 
             .navbar-nav {
