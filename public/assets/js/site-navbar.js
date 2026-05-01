@@ -17,8 +17,6 @@
         function setOpen(shouldOpen) {
             if (!isMobileMenu()) {
                 menu.classList.remove('site-navbar-collapsing');
-                menu.style.maxHeight = '';
-                menu.style.opacity = '';
                 menu.style.pointerEvents = '';
                 toggler.setAttribute('aria-expanded', 'false');
                 return;
@@ -30,39 +28,14 @@
 
             if (shouldOpen) {
                 menu.classList.add('show');
-                menu.style.maxHeight = '0px';
-                menu.style.opacity = '0';
                 menu.style.pointerEvents = 'auto';
-
-                window.requestAnimationFrame(function () {
-                    menu.style.maxHeight = menu.scrollHeight + 'px';
-                    menu.style.opacity = '1';
-                });
                 return;
             }
 
-            menu.style.maxHeight = menu.scrollHeight + 'px';
-            menu.style.opacity = '1';
             menu.style.pointerEvents = 'none';
-
-            var closeMenuAfterTransition = function (event) {
-                if (event.target !== menu || event.propertyName !== 'max-height') {
-                    return;
-                }
-
-                menu.removeEventListener('transitionend', closeMenuAfterTransition);
-                if (menu.style.maxHeight === '0px') {
-                    menu.classList.remove('show');
-                }
-            };
-
-            menu.addEventListener('transitionend', closeMenuAfterTransition);
-
-            window.requestAnimationFrame(function () {
-                menu.style.maxHeight = '0px';
-                menu.style.opacity = '0';
-            });
+            menu.classList.remove('show');
         }
+
 
         toggler.addEventListener('click', function (event) {
             if (!isMobileMenu()) {
@@ -99,11 +72,6 @@
         });
 
         window.addEventListener('resize', function () {
-            if (isMobileMenu() && menu.classList.contains('show')) {
-                menu.style.maxHeight = menu.scrollHeight + 'px';
-                return;
-            }
-
             setOpen(false);
         });
 

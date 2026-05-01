@@ -644,20 +644,17 @@
             }
 
             .navbar-collapse.site-navbar-collapsing {
-                display: flex;
-                max-height: 0;
-                opacity: 0;
-                pointer-events: none;
-                overflow: hidden;
-                transition:
-                    max-height .26s cubic-bezier(.4, 0, .2, 1),
-                    opacity .18s ease;
-                will-change: max-height, opacity;
+                display: none;
+                transform: translateY(-6px);
+                transition: opacity .18s ease, transform .22s ease;
+                will-change: opacity, transform;
             }
 
             .navbar-collapse.show {
                 display: flex;
+                opacity: 1;
                 pointer-events: auto;
+                transform: translateY(0);
             }
 
             .navbar-nav {
