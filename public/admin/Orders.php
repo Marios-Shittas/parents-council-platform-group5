@@ -6,13 +6,15 @@ if (session_status() === PHP_SESSION_NONE) {
 	session_start();
 }
 
+require_once __DIR__ . '/../../app/includes/site_context.php';
+
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
 header("Pragma: no-cache");
 header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-	header('Location: /parents-council-platform-group5/public/login.php');
+	header('Location: ' . site_login_url());
 	exit;
 }
 

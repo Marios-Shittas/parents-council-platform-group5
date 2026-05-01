@@ -49,7 +49,7 @@
 
     function resetPassword(newPassword) {
         // Stelnei sto backend email/token/password gia na oloklirothei i allagi.
-        const serviceUrl = window.RESET_PASSWORD_SERVICE_URL || '/parents-council-platform-group5/app/services/ResetPasswordService.php';
+        const serviceUrl = window.RESET_PASSWORD_SERVICE_URL || window.appServiceUrl('ResetPasswordService.php');
 
         fetch(serviceUrl, {
             method: 'POST',

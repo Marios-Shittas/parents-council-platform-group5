@@ -4,6 +4,7 @@
 // Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 // Ftiaxnei to admin sidebar kai pernaei ta links pou vlepoun oi diaxeiristes.
 // To viewmodel mazevei trexousa selida kai metrites badge, oste to HTML na meinei katharo.
+require_once __DIR__ . '/site_context.php';
 require_once __DIR__ . '/../viewmodels/AdminSidebarViewModel.php';
 
 // An yparxei mysqli connection apo tin selida, to dinoume sto viewmodel gia zontanes metriseis.
@@ -17,7 +18,8 @@ $usersBadgeText = $adminSidebarData['users_badge_text'];
 $applicationsBadgeText = $adminSidebarData['applications_badge_text'];
 $ordersBadgeText = $adminSidebarData['orders_badge_text'];
 ?>
-<script src="../assets/js/site-favicon.js" data-favicon-href="/parents-council-platform-group5/public/assets/img/logo-icon.png" data-favicon-shape="direct" defer></script>
+<script src="<?php echo site_asset_url('js/app-page-config.js'); ?>" data-config="<?php echo htmlspecialchars(json_encode(['APP_PROJECT_URL' => site_project_url(), 'APP_PUBLIC_URL' => site_base_url()], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
+<script src="<?php echo site_asset_url('js/site-favicon.js'); ?>" data-favicon-href="<?php echo site_asset_url('img/logo-icon.png'); ?>" data-favicon-shape="direct" defer></script>
 
 <button class="admin-sidebar-toggle" type="button" data-admin-sidebar-toggle aria-controls="adminSidebar" aria-expanded="false" aria-label="Άνοιγμα ή κλείσιμο admin menu">
     <i class="fas fa-bars"></i>

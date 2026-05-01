@@ -5,7 +5,7 @@
 function handleForgotPassword() {
   const email = document.getElementById("email-input").value;
   const errorMessage = document.getElementById("error-message");
-  const serviceUrl = window.FORGOT_PASSWORD_SERVICE_URL || '/parents-council-platform-group5/app/services/ForgotPasswordService.php';
+  const serviceUrl = window.FORGOT_PASSWORD_SERVICE_URL || window.appServiceUrl('ForgotPasswordService.php');
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

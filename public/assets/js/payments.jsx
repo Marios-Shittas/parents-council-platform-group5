@@ -19,9 +19,9 @@ function Payments() {
     });
 
     // Kentrika endpoints tis selidas gia na allazoun eykola an metakinithei kapoio service.
-    const productsUrl = "/parents-council-platform-group5/app/services/ProductFetch.php";
-    const cartUrl = "/parents-council-platform-group5/public/cart.php";
-    const checkoutUrl = "/parents-council-platform-group5/app/services/EshopJCC.php";
+    const productsUrl = window.appServiceUrl('ProductFetch.php');
+    const cartUrl = window.appPublicUrl('cart.php');
+    const checkoutUrl = window.appServiceUrl('EshopJCC.php');
     const sizeLabels = {
         'x-small': 'X-Small',
         'small': 'Small',

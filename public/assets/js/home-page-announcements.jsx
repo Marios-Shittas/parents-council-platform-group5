@@ -22,7 +22,7 @@ function Announcements() {
 
     React.useEffect(() => {
         // Fortonei tis anakoinoseis otan anoigei i arxiki selida.
-        fetch('/parents-council-platform-group5/app/services/AnnouncementsService.php')
+        fetch(window.appServiceUrl('AnnouncementsService.php'))
         .then(result => result.json())
         .then(data => {
             setAnnouncements(Array.isArray(data) ? data : []);
@@ -53,7 +53,7 @@ function Announcements() {
             {announcements.map((item, index) => (
                 <a
                     key={item.announcement_id || index}
-                    href={`/parents-council-platform-group5/public/announcements.php?open=${encodeURIComponent(item.announcement_id)}`}
+                    href={window.appPublicUrl(`announcements.php?open=${encodeURIComponent(item.announcement_id)}`)}
                     className="home-feed-link"
                     aria-label={`Άνοιγμα ανακοίνωσης: ${item.announcement_title || 'Ανακοίνωση'}`}
                 >

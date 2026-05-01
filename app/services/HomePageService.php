@@ -175,15 +175,15 @@ class HomePageService
                 'content' => [
                     'slides' => [
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png',
+                            'src' => 'assets/img/home-school-banner.png',
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1',
                         ],
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png',
+                            'src' => 'assets/img/home-school-banner-2.png',
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2',
                         ],
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png',
+                            'src' => 'assets/img/home-school-banner-3.png',
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3',
                         ],
                     ],

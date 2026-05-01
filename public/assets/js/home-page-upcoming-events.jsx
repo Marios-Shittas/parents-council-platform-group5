@@ -22,7 +22,7 @@ function UpcomingEvents() {
 
     React.useEffect(() => {
         // Pairnoume ta ekdiloseis apo to service kai krataoume mono osa xreiazontai gia tin arxiki.
-        fetch('/parents-council-platform-group5/app/services/EventsService.php')
+        fetch(window.appServiceUrl('EventsService.php'))
         .then(result => result.json())
         .then(data => {
             setEvents(Array.isArray(data) ? data : []);
@@ -52,7 +52,7 @@ function UpcomingEvents() {
             {events.map((item, index) => (
                 <a
                     key={item.event_id || index}
-                    href={`/parents-council-platform-group5/public/events.php?open=${encodeURIComponent(item.event_id)}`}
+                    href={window.appPublicUrl(`events.php?open=${encodeURIComponent(item.event_id)}`)}
                     className="home-feed-link"
                     aria-label={`Άνοιγμα εκδήλωσης: ${item.event_title || 'Εκδήλωση'}`}
                 >

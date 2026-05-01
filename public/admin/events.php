@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/../../app/services/EventsService.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -19,7 +20,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -37,7 +38,7 @@ function getEventImageUploadDir() {
 
 // Leitourgia buildEventImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function buildEventImageWebPath($fileName) {
-    return '/parents-council-platform-group5/public/assets/Events_img/' . $fileName;
+    return site_asset_url('Events_img/' . $fileName);
 }
 
 // Leitourgia resolveEventImageFilePath: xeirizetai to antistoixo kommati tis selidas i tou service.

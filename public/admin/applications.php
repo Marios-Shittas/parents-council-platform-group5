@@ -12,6 +12,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../../app/includes/site_context.php';
+
 // No-cache gia na min emfanizontai admin dedomena apo browser history meta logout.
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private");
 header("Pragma: no-cache");
@@ -20,7 +22,7 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     // Mono admin mporoun na allaksoun aitiseis/templates, alliws redirect sto login.
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -144,7 +146,7 @@ function uploadApplicationFiles(ApplicationsService $applicationsService, int $a
 
             $newFileName = 'application_' . $applicationId . '_' . $fieldName . '_' . uniqid('', true) . '.' . $extension;
             $targetPath = $uploadDir . $newFileName;
-            $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+            $dbPath = site_asset_url('Applications_docs/' . $newFileName);
 
             if (!move_uploaded_file((string)$file['tmp_name'], $targetPath)) {
                 $errors[] = 'Δεν ήταν δυνατή η αποθήκευση του αρχείου ' . htmlspecialchars((string)$file['name']) . '.';
@@ -194,12 +196,13 @@ function getDocumentPublicUrl(string $storedPath): string {
         return '#';
     }
 
-    if (strpos($storedPath, '/parents-council-platform-group5/public/') === 0) {
-        return $storedPath;
+    $publicPosition = strpos($storedPath, '/public/');
+    if ($publicPosition !== false) {
+        return site_public_url(substr($storedPath, $publicPosition + strlen('/public/')));
     }
 
     if (strpos($storedPath, 'storage/') === 0) {
-        return '/parents-council-platform-group5/' . ltrim($storedPath, '/');
+        return site_project_url() . '/' . ltrim($storedPath, '/');
     }
 
     return $storedPath;
@@ -217,8 +220,17 @@ function getDocumentAbsolutePath(string $storedPath): string {
         return '';
     }
 
-    if (strpos($storedPath, '/parents-council-platform-group5/public/') === 0 && $publicRoot !== false) {
-        $relative = substr($storedPath, strlen('/parents-council-platform-group5/public/'));
+    $publicUrlPath = rtrim((string)parse_url(site_public_url(), PHP_URL_PATH), '/') . '/';
+    $storedUrlPath = (string)parse_url($storedPath, PHP_URL_PATH);
+
+    if ($storedUrlPath !== '' && strpos($storedUrlPath, $publicUrlPath) === 0 && $publicRoot !== false) {
+        $relative = substr($storedUrlPath, strlen($publicUrlPath));
+        return $publicRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, ltrim($relative, '/'));
+    }
+
+    $legacyPublicPosition = strpos($storedPath, '/public/');
+    if ($legacyPublicPosition !== false && $publicRoot !== false) {
+        $relative = substr($storedPath, $legacyPublicPosition + strlen('/public/'));
         return $publicRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, ltrim($relative, '/'));
     }
 
@@ -375,7 +387,7 @@ function uploadTemplateInstructionFiles(int $templateId, string $uploadDir): arr
 
         $newFileName = 'template_' . $templateId . '_instruction_file_' . uniqid('', true) . '.' . $extension;
         $targetPath = $uploadDir . $newFileName;
-        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+        $dbPath = site_asset_url('Applications_docs/' . $newFileName);
 
         if (!move_uploaded_file((string)($file['tmp_name'] ?? ''), $targetPath)) {
             $result['errors'][] = 'Δεν ήταν δυνατή η αποθήκευση του αρχείου οδηγιών.';
@@ -585,7 +597,7 @@ function cloneTemplateInstructionFilesToApplication(
 
         $newFileName = 'application_' . $applicationId . '_instruction_file_' . uniqid('', true) . '.' . $extension;
         $targetPath = $uploadDir . $newFileName;
-        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+        $dbPath = site_asset_url('Applications_docs/' . $newFileName);
 
         if (!copy($sourceAbsolutePath, $targetPath)) {
             $result['errors'][] = 'Δεν ήταν δυνατή η αντιγραφή αποθηκευμένου αρχείου οδηγιών προτύπου.';
@@ -1444,7 +1456,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $newFileName = 'application_doc_' . $application_id . '_' . time() . '.' . $ext;
                 $targetPath = $documentsUploadDir . $newFileName;
-                $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+                $dbPath = site_asset_url('Applications_docs/' . $newFileName);
 
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
                     if ($applicationsService->addDocument($application_id, $dbPath)) {
@@ -1520,7 +1532,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $fieldToken = strpos($currentPath, '_instruction_file_') !== false ? 'instruction_file' : 'document_file';
                         $newFileName = 'application_' . $application_id . '_' . $fieldToken . '_' . uniqid('', true) . '.' . $extension;
                         $targetPath = $documentsUploadDir . $newFileName;
-                        $dbPath = '/parents-council-platform-group5/public/assets/Applications_docs/' . $newFileName;
+                        $dbPath = site_asset_url('Applications_docs/' . $newFileName);
 
                         if (!move_uploaded_file((string)$replacementFile['tmp_name'], $targetPath)) {
                             $message = 'Αποτυχία ανεβάσματος νέου αρχείου.';

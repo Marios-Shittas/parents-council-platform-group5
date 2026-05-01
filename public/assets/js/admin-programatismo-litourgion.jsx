@@ -61,7 +61,7 @@ function AdminProgramatismoLitourgionLogSearch() {
         setError('');
 
         try {
-            const endpoint = '/parents-council-platform-group5/app/services/AdminLogsService.php?email=' + encodeURIComponent(normalizedEmail);
+            const endpoint = window.appServiceUrl('AdminLogsService.php?email=' + encodeURIComponent(normalizedEmail));
             const response = await fetch(endpoint, {
                 credentials: 'include'
             });

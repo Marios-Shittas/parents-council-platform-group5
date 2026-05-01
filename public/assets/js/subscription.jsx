@@ -14,7 +14,7 @@ function SubscriptionPage() {
         variant: 'warning'
     });
     const token = window.APPROVAL_TOKEN || "";
-    const baseServiceUrl = "/parents-council-platform-group5/app/services";
+    const baseServiceUrl = window.appServiceUrl();
 
     const showNotice = React.useCallback((message, options = {}) => {
         setNotice({

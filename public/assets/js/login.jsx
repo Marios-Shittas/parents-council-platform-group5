@@ -41,7 +41,7 @@ function handleLogin() {
     errorMessage.textContent = "Παρακαλώ εισάγετε έγκυρη διεύθυνση email.";
     return;
   }
-  fetch ('/parents-council-platform-group5/app/services/LoginService.php', {
+  fetch (window.appServiceUrl('LoginService.php'), {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       credentials: 'include',

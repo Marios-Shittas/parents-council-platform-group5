@@ -11,6 +11,8 @@ $successMessage = '';
 if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     $successMessage = 'Η επαναφορά κωδικού ολοκληρώθηκε επιτυχώς! Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.';
 }
+
+require_once __DIR__ . '/../app/includes/site_context.php';
 ?>
 
 <!DOCTYPE html>
@@ -70,6 +72,7 @@ if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+        <script src="assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['APP_PROJECT_URL' => site_project_url(), 'APP_PUBLIC_URL' => site_base_url()], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
         <script type="text/babel" src="assets/js/login.jsx"></script>
 
     </body>

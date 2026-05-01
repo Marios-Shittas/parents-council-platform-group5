@@ -7,6 +7,7 @@
  */
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/site_context.php';
 
 class EventsService {
     private $conn;

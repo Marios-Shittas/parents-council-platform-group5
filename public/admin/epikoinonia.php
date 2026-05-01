@@ -4,6 +4,7 @@
 // Simeiosi: Prosoxi: einai gia admin, opote kratame elegxous rolou kai feedback kathara gia ton diaxeiristi.
 require_once __DIR__ . '/../../app/services/EpikoinoniaService.php';
 require_once __DIR__ . '/../../app/services/EpikoinoniaPageService.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -15,7 +16,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 

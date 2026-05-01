@@ -8,6 +8,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../../app/services/ProductsService.php';
 require_once __DIR__ . '/../../app/services/EshopSettingsService.php';
 require_once __DIR__ . '/../../app/includes/product_sizes.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -19,7 +20,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -87,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['flash_message_type'] = 'warning';
                     } else {
                         if (move_uploaded_file($fileTmp, $targetPath)) {
-                            $dbImagePath = '/parents-council-platform-group5/public/assets/Products_img/' . $newFileName;
+                            $dbImagePath = site_asset_url('Products_img/' . $newFileName);
                             $imageSaved = $productsService->addProductImage($productId, $dbImagePath);
 
                             if ($imageSaved) {
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['flash_message_type'] = 'warning';
                     } else {
                         if (move_uploaded_file($fileTmp, $targetPath)) {
-                            $dbImagePath = '/parents-council-platform-group5/public/assets/Products_img/' . $newFileName;
+                            $dbImagePath = site_asset_url('Products_img/' . $newFileName);
                             $imageSaved = $productsService->replaceProductImage($id, $dbImagePath);
 
                             if ($imageSaved) {

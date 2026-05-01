@@ -16,7 +16,7 @@ function SubscriptionResultPage() {
         // Meta to redirect apo JCC, stelnei ta params sto backend gia epivevaiosi.
         const params = window.SUBSCRIPTION_RESULT_PARAMS || {};
         const query = new URLSearchParams(params).toString();
-        const endpoint = "/parents-council-platform-group5/app/services/SubscriptionJcc.php?" + query;
+        const endpoint = window.appServiceUrl("SubscriptionJcc.php") + "?" + query;
 
         fetch(endpoint)
             .then(function (res) {
@@ -109,7 +109,7 @@ function SubscriptionResultPage() {
                             ) : null}
 
                             <div className="mt-4">
-                                <a className="btn btn-primary" href="/parents-council-platform-group5/public/login.php">
+                                <a className="btn btn-primary" href={window.appPublicUrl("login.php")}>
                                     Μετάβαση στη Σύνδεση
                                 </a>
                             </div>

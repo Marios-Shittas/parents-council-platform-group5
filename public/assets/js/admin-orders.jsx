@@ -35,7 +35,7 @@ function markOrderAsSeenOnHover(row, updateCallback) {
     payload.append('action', 'mark_order_seen');
     payload.append('order_id', orderId);
 
-    fetch('/parents-council-platform-group5/public/admin/Orders.php', {
+    fetch(window.appPublicUrl('admin/Orders.php'), {
         method: 'POST',
         credentials: 'include',
         body: payload
@@ -106,7 +106,7 @@ function AdminOrdersPage() {
     }, []);
 
     const loadOrders = React.useCallback(() => {
-        const endpoint = '/parents-council-platform-group5/app/api/get-orders.php';
+        const endpoint = window.appProjectUrl('app/api/get-orders.php');
 
         setLoading(true);
 
@@ -170,7 +170,7 @@ function AdminOrdersPage() {
         setClearLoading(true);
         setFeedback(null);
 
-        fetch('/parents-council-platform-group5/public/admin/Orders.php', {
+        fetch(window.appPublicUrl('admin/Orders.php'), {
             method: 'POST',
             credentials: 'include',
             body: formData

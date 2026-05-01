@@ -1,0 +1,10 @@
+DirectoryIndex under-construction.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_URI} !/under-construction\.php$ [NC]
+    RewriteCond %{REQUEST_URI} !/assets/ [NC]
+    RewriteCond %{QUERY_STRING} !(^|&)preview=devDeployment(&|$) [NC]
+    RewriteRule ^.*$ under-construction.php [L]
+</IfModule>

@@ -26,6 +26,7 @@ $portal_label = $headerData['portal_label'];
 $profile_item = $headerData['profile_item'];
 $nav_items = $headerData['nav_items'];
 ?>
+<script src="<?php echo site_asset_url('js/app-page-config.js'); ?>" data-config="<?php echo htmlspecialchars(json_encode(['APP_PROJECT_URL' => site_project_url(), 'APP_PUBLIC_URL' => site_base_url()], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
 <script src="<?php echo site_asset_url('js/site-favicon.js'); ?>" data-favicon-href="<?php echo site_asset_url('img/logo-icon.png'); ?>" data-favicon-shape="circle" defer></script>
 <link rel="stylesheet" href="<?php echo site_asset_url('css/site-header.css'); ?>">
 

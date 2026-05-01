@@ -49,7 +49,7 @@ class Calendar extends React.Component {
 
   componentDidMount() {
     // Fortonei to enopoihmeno calendar feed apo PHP service.
-    fetch('/parents-council-platform-group5/app/services/CalendarEventsService.php')
+    fetch(window.appServiceUrl('CalendarEventsService.php'))
       .then(result => result.json())
       .then(data => this.setState({ events: data }))
       .catch(error => console.error('Error fetching events:', error));

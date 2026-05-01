@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -20,7 +21,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -38,7 +39,7 @@ function getAnnouncementImageUploadDir() {
 
 // Leitourgia buildAnnouncementImageWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function buildAnnouncementImageWebPath($fileName) {
-    return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
+    return site_asset_url('Announcements_img/' . $fileName);
 }
 
 // Leitourgia getAnnouncementAttachmentUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.
@@ -48,7 +49,7 @@ function getAnnouncementAttachmentUploadDir() {
 
 // Leitourgia buildAnnouncementAttachmentWebPath: xeirizetai to antistoixo kommati tis selidas i tou service.
 function buildAnnouncementAttachmentWebPath($fileName) {
-    return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
+    return site_asset_url('Announcements_docs/' . $fileName);
 }
 
 // Leitourgia ensureAnnouncementUploadDir: xeirizetai to antistoixo kommati tis selidas i tou service.

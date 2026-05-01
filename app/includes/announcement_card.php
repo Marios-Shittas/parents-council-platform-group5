@@ -20,11 +20,11 @@ if (!function_exists('announcementCardLocalAttachmentExists')) {
         }
 
         $projectRoot = dirname(__DIR__, 2);
-        $projectPrefix = '/parents-council-platform-group5';
         $localPath = $filePath;
 
-        if (strpos($localPath, $projectPrefix) === 0) {
-            $localPath = substr($localPath, strlen($projectPrefix));
+        $publicPosition = strpos($localPath, '/public/');
+        if ($publicPosition !== false) {
+            $localPath = substr($localPath, $publicPosition);
         }
 
         if (strpos($localPath, '/public/') === 0) {

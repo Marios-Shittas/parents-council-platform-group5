@@ -5,6 +5,7 @@
 // Admin selida gia epexergasia tou periexomenou "Syndesmos Goneon".
 // Apo edo o admin allazei text, lista, board archive kai stoixeia pou fainontai sto public/goneas view.
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -18,7 +19,7 @@ header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     // An den einai admin, gyrnaei sto login kai stamataei i selida.
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -249,13 +250,13 @@ function parentsAdminDocumentsUploadDir()
 
 function parentsAdminDocumentsWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Parents_docs/' . $fileName;
+    return site_asset_url('Parents_docs/' . $fileName);
 }
 
 function parentsAdminDeleteUploadedDocument($webPath)
 {
     $webPath = parentsAdminTrim($webPath);
-    $webPrefix = '/parents-council-platform-group5/public/assets/Parents_docs/';
+    $webPrefix = site_asset_url('Parents_docs/');
 
     if ($webPath === '' || strpos($webPath, $webPrefix) !== 0) {
         return;

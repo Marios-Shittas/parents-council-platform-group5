@@ -38,7 +38,7 @@ if (!function_exists('home_public_content_url_exists')) {
             return true;
         }
 
-        $publicPrefix = '/parents-council-platform-group5/public/';
+        $publicPrefix = rtrim((string)parse_url(site_public_url(), PHP_URL_PATH), '/') . '/';
         if (strpos($path, $publicPrefix) !== 0) {
             return true;
         }

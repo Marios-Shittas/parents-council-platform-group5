@@ -4,6 +4,7 @@
 // Simeiosi: Prosoxi: afora agora/paraggelies, ara ta data prepei na menoun synced me cart/orders services.
 
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/site_context.php';
 
 class ProductsService
 {
@@ -586,7 +587,7 @@ class ProductsService
 
         return $publicRelativePath === ''
             ? $this->getDefaultProductImagePath()
-            : '/parents-council-platform-group5/public/' . $publicRelativePath;
+            : site_public_url($publicRelativePath);
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -624,6 +625,6 @@ class ProductsService
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function getDefaultProductImagePath(): string
     {
-        return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
+        return site_asset_url('Products_img/default-product.svg');
     }
 }

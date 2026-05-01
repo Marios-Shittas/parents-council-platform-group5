@@ -738,13 +738,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function normalizeDocPath(rawPath) {
-        var prefix = '/parents-council-platform-group5/public/assets/Applications_docs/';
+        var prefix = window.appAssetUrl('Applications_docs/');
         if (!rawPath) return '';
         if (String(rawPath).indexOf('storage/') === 0) {
-            return '/parents-council-platform-group5/' + String(rawPath).replace(/^\/+/, '');
+            return window.appProjectUrl(String(rawPath).replace(/^\/+/, ''));
         }
         if (String(rawPath).indexOf('/storage/') === 0) {
-            return '/parents-council-platform-group5' + String(rawPath);
+            return window.appProjectUrl(String(rawPath).replace(/^\/+/, ''));
         }
         var idx = String(rawPath).indexOf(prefix);
         if (idx !== -1) {

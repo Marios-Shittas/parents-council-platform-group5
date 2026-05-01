@@ -19,7 +19,7 @@ function TwoFactorForm() {
     setIsResending(true);
 
     try {
-      const response = await fetch('/parents-council-platform-group5/app/services/TwoFactorAuthService.php', {
+      const response = await fetch(window.appServiceUrl('TwoFactorAuthService.php'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -53,7 +53,7 @@ function TwoFactorForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/parents-council-platform-group5/app/services/TwoFactorAuthService.php', {
+      const response = await fetch(window.appServiceUrl('TwoFactorAuthService.php'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -65,7 +65,7 @@ function TwoFactorForm() {
       if (data.success) {
         setSuccessMessage('Η επαλήθευση ολοκληρώθηκε επιτυχώς. Μεταφορά...');
         setTimeout(() => {
-          fetch('/parents-council-platform-group5/app/services/SessionCheck.php', {
+          fetch(window.appServiceUrl('SessionCheck.php'), {
             credentials: 'include'
           })
             .then((res) => res.json())

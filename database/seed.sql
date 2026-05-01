@@ -62,9 +62,9 @@ INSERT INTO `Announcements` (`announcement_id`, `announcement_title`, `announcem
 -- ========================================================
 
 INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file_path`, `original_name`, `created_at`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c55ce801f9.73448830.pdf', 'Arxeio 1.pdf', '2026-04-29 11:46:20'),
-(2, 2, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c580c2a946.91698533.pdf', 'Arxeio 2.pdf', '2026-04-29 11:46:56'),
-(3, 3, '/parents-council-platform-group5/public/assets/Announcements_docs/announcement_attachment_69f1c5a47c9422.26992142.pdf', 'Arxeio 3.pdf', '2026-04-29 11:47:32');
+(1, 1, 'assets/Announcements_docs/announcement_attachment_69f1c55ce801f9.73448830.pdf', 'Arxeio 1.pdf', '2026-04-29 11:46:20'),
+(2, 2, 'assets/Announcements_docs/announcement_attachment_69f1c580c2a946.91698533.pdf', 'Arxeio 2.pdf', '2026-04-29 11:46:56'),
+(3, 3, 'assets/Announcements_docs/announcement_attachment_69f1c5a47c9422.26992142.pdf', 'Arxeio 3.pdf', '2026-04-29 11:47:32');
 
 --
 -- ========================================================
@@ -73,10 +73,10 @@ INSERT INTO `AnnouncementAttachments` (`attachment_id`, `announcement_id`, `file
 -- ========================================================
 
 INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Announcements_img/69de2fd660c6a_1776168918.jpg'),
-(2, 3, '/parents-council-platform-group5/public/assets/Announcements_img/69de32711d583_1776169585.png'),
-(3, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639bd60_1776170851.png'),
-(4, 2, '/parents-council-platform-group5/public/assets/Announcements_img/69de37639c39c_1776170851.png');
+(1, 1, 'assets/Announcements_img/69de2fd660c6a_1776168918.jpg'),
+(2, 3, 'assets/Announcements_img/69de32711d583_1776169585.png'),
+(3, 2, 'assets/Announcements_img/69de37639bd60_1776170851.png'),
+(4, 2, 'assets/Announcements_img/69de37639c39c_1776170851.png');
 
 --
 -- ========================================================
@@ -105,8 +105,8 @@ INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`
 -- ========================================================
 
 INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
-(2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
+(1, 1, 'assets/Applications_docs/feedback.pdf'),
+(2, 2, 'assets/Applications_docs/questionnaire.pdf');
 
 --
 -- ========================================================
@@ -159,11 +159,11 @@ INSERT INTO `Events` (`event_id`, `event_title`, `event_description`, `gdpr_noti
 -- ========================================================
 
 INSERT INTO `EventsImages` (`ev_image_id`, `event_id`, `image_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg'),
-(2, 2, '/parents-council-platform-group5/public/assets/Events_img/69f1c777b1888_1777452919.jpg'),
-(3, 2, '/parents-council-platform-group5/public/assets/Events_img/69f1c777b1be3_1777452919.jpeg'),
-(4, 3, '/parents-council-platform-group5/public/assets/Events_img/69f1c7c1a30cd_1777452993.jpg'),
-(5, 3, '/parents-council-platform-group5/public/assets/Events_img/69f1c7c1a37cc_1777452993.jpg');
+(1, 1, 'assets/Events_img/d99679d4-0f91-406b-adee-8d1590850f82.jpg'),
+(2, 2, 'assets/Events_img/69f1c777b1888_1777452919.jpg'),
+(3, 2, 'assets/Events_img/69f1c777b1be3_1777452919.jpeg'),
+(4, 3, 'assets/Events_img/69f1c7c1a30cd_1777452993.jpg'),
+(5, 3, 'assets/Events_img/69f1c7c1a37cc_1777452993.jpg');
 
 --
 -- ========================================================
@@ -172,9 +172,9 @@ INSERT INTO `EventsImages` (`ev_image_id`, `event_id`, `image_path`) VALUES
 -- ========================================================
 
 INSERT INTO `HomeBannerSlides` (`slide_id`, `image_path`, `alt_text`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 1', 1, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27'),
-(2, '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 2', 2, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27'),
-(3, '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 3', 3, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27');
+(1, 'assets/img/home-school-banner.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 1', 1, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27'),
+(2, 'assets/img/home-school-banner-2.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 2', 2, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27'),
+(3, 'assets/img/home-school-banner-3.png', 'Γυμνάσιο Αγίου Αθανασίου - Banner 3', 3, 1, '2026-04-13 18:33:27', '2026-04-13 18:33:27');
 
 --
 -- ========================================================
@@ -187,7 +187,7 @@ INSERT INTO `HomePageSections` (`section_id`, `section_key`, `section_title`, `s
 (2, 'calendar_section', 'Ημερολόγιο', '', '[]', '2026-04-14 13:07:01'),
 (3, 'announcements_section', 'Τελευταίες Ανακοινώσεις', '', '{\"button_label\":\"Όλες οι Ανακοινώσεις\"}', '2026-04-14 13:06:00'),
 (4, 'events_section', 'Τελευταίες Εκδηλώσεις', '', '{\"button_label\":\"Όλες οι Εκδηλώσεις\"}', '2026-04-14 13:06:00'),
-(5, 'banner_section', 'Banner Αρχικής', '', '{\"slides\":[{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de461935c6e8.55358859.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 1\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de49201f29e2.96931567.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 2\",\"hidden\":false},{\"src\":\"/parents-council-platform-group5/public/assets/Home_img/home_banner_69de47d4c95ee6.67743613.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 3\",\"hidden\":false}]}', '2026-04-14 14:03:12');
+(5, 'banner_section', 'Banner Αρχικής', '', '{\"slides\":[{\"src\":\"assets/Home_img/home_banner_69de461935c6e8.55358859.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 1\",\"hidden\":false},{\"src\":\"assets/Home_img/home_banner_69de49201f29e2.96931567.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 2\",\"hidden\":false},{\"src\":\"assets/Home_img/home_banner_69de47d4c95ee6.67743613.png\",\"alt\":\"Γυμνάσιο Αγίου Αθανασίου - Banner 3\",\"hidden\":false}]}', '2026-04-14 14:03:12');
 
 --
 -- ========================================================
@@ -264,7 +264,7 @@ INSERT INTO `ParentsPageSections` (`section_id`, `section_key`, `section_title`,
 (8, 'association_section', 'Σύνδεσμος Γονέων', 'Η ενότητα αυτή συγκεντρώνει τον χαιρετισμό, τον σκοπό και βασικά στοιχεία για τη δράση του Συνδεσμου Γωνεων.', '{\"eyebrow\":\"Συνεργασία Οικογένειας Και Σχολείου\",\"greeting_title\":\"Χαιρετισμός\",\"greeting_body\":\"Ο Σύνδεσμος Γονέων και Κηδεμόνων καλωσορίζει τις οικογένειες της σχολικής κοινότητας του Γυμνασίου Αγίου Αθανασίου.\\nΣτόχος μας είναι η στενή συνεργασία με τη Διεύθυνση, το προσωπικό και τους γονείς, ώστε να στηρίζονται έμπρακτα οι μαθητές και οι δράσεις του σχολείου.\",\"purpose_title\":\"Σκοπός του Σ.Γ.\",\"purpose_body\":\"Ο Σύνδεσμος λειτουργεί υποστηρικτικά προς το σχολείο και επιδιώκει την ενίσχυση της επικοινωνίας ανάμεσα στους γονείς, τη σχολική μονάδα και τους μαθητές.\\nΜέσα από δράσεις, ενημερώσεις και οργανωμένη συμμετοχή συμβάλλει στη βελτίωση της σχολικής ζωής και στην προώθηση πρωτοβουλιών που ωφελούν τα παιδιά.\",\"history_title\":\"Ιστορικό του Συνδέσμου\",\"history_body\":\"Ο Σύνδεσμος Γονέων και Κηδεμόνων δρα διαχρονικά ως βασικός πυλώνας συνεργασίας ανάμεσα στην οικογένεια και το σχολείο.\\nΜε την ετήσια συμμετοχή των γονέων και τη στήριξη των μελών του, ενισχύει δράσεις, εκδηλώσεις και ανάγκες της σχολικής κοινότητας, διατηρώντας ενεργό ρόλο στην καθημερινότητα του σχολείου.\",\"contact_label\":\"Email Συνδέσμου\",\"contact_value\":\"sg.ag.athanasiou@gmail.com\"}', '2026-04-27 20:08:27'),
 (9, 'board_archive_section', 'Συμβούλια ανά Σχολική Χρονιά', 'Αρχείο προηγούμενων και τρεχουσών συνθέσεων του Διοικητικού Συμβουλίου.', '{\"eyebrow\":\"Αρχείο Συμβουλίων\",\"year_label\":\"Σχολική Χρονιά\",\"position_label\":\"Θέση\",\"name_label\":\"Ονοματεπώνυμο\",\"rows\":[{\"year\":\"2025-2026\",\"role\":\"ΠΡΟΕΔΡΟΣ\",\"name\":\"Μιχάλης Αριστείδου\"},{\"year\":\"2025-2026\",\"role\":\"ΑΝΤΙΠΡΟΕΔΡΟΣ\",\"name\":\"Μάριος Γαβριηλίδης\"},{\"year\":\"2025-2026\",\"role\":\"ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Βάσια Μέζου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΓΡΑΜΜΑΤΕΑΣ\",\"name\":\"Σπυρούλα Χαραλάμπους\"},{\"year\":\"2025-2026\",\"role\":\"ΤΑΜΙΑΣ\",\"name\":\"Γιάννα Παπαϊωάννου\"},{\"year\":\"2025-2026\",\"role\":\"ΒΟΗΘΟΣ ΤΑΜΙΑΣ\",\"name\":\"Αρίστη Θεοδοσίου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χαρά Χριστοδούλου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Χρίστος Αριστοδήμου\"},{\"year\":\"2025-2026\",\"role\":\"ΜΕΛΟΣ\",\"name\":\"Πέτρος Κοντογιάννης\"}]}', '2026-04-11 19:03:11'),
 (10, 'attendance_portal_section', '', '', '{\"eyebrow\":\"\",\"link_label\":\"\",\"link_url\":\"\"}', '2026-04-27 20:09:02'),
-(11, 'parent_documents_section', 'Πρακτικά Συνεδριάσεων και Καταστατικό', 'Αρχεία διαθέσιμα μόνο για συνδεδεμένους γονείς.', '{\"eyebrow\":\"Έγγραφα Συνδέσμου\",\"statute_label\":\"Καταστατικό Συνδέσμου\",\"minutes_label\":\"Πρακτικά Συνεδριάσεων\",\"open_label\":\"Άνοιγμα PDF\",\"empty_message\":\"Δεν έχουν προστεθεί ακόμη έγγραφα.\",\"statutes\":[{\"title\":\"Καταστατικό Συνδέσμου\",\"file_path\":\"/parents-council-platform-group5/public/assets/Parents_docs/parents_doc_69f1ca2cd7b082.81544280_1777453612.pdf\",\"original_name\":\"pdf-sample_0.pdf\"},{\"title\":\"Καταστατικό Συνδέσμου 2.0\",\"file_path\":\"/parents-council-platform-group5/public/assets/Parents_docs/parents_doc_69f1cc02001c90.46161766_1777454082.pdf\",\"original_name\":\"pdf-sample_3.pdf\"}],\"statute\":{\"title\":\"Καταστατικό Συνδέσμου\",\"file_path\":\"/parents-council-platform-group5/public/assets/Parents_docs/parents_doc_69f1ca2cd7b082.81544280_1777453612.pdf\",\"original_name\":\"pdf-sample_0.pdf\"},\"minutes\":[{\"title\":\"1η Συνεδρίαση 2025-2026\",\"file_path\":\"/parents-council-platform-group5/public/assets/Parents_docs/parents_doc_69f1caacdea8c8.30130272_1777453740.pdf\",\"original_name\":\"pdf-sample_1.pdf\"},{\"title\":\"2η Συνεδρίαση 2025-2026\",\"file_path\":\"/parents-council-platform-group5/public/assets/Parents_docs/parents_doc_69f1cac6846ec9.81600460_1777453766.pdf\",\"original_name\":\"pdf-sample_2.pdf\"}]}', '2026-04-29 12:14:42');
+(11, 'parent_documents_section', 'Πρακτικά Συνεδριάσεων και Καταστατικό', 'Αρχεία διαθέσιμα μόνο για συνδεδεμένους γονείς.', '{\"eyebrow\":\"Έγγραφα Συνδέσμου\",\"statute_label\":\"Καταστατικό Συνδέσμου\",\"minutes_label\":\"Πρακτικά Συνεδριάσεων\",\"open_label\":\"Άνοιγμα PDF\",\"empty_message\":\"Δεν έχουν προστεθεί ακόμη έγγραφα.\",\"statutes\":[{\"title\":\"Καταστατικό Συνδέσμου\",\"file_path\":\"assets/Parents_docs/parents_doc_69f1ca2cd7b082.81544280_1777453612.pdf\",\"original_name\":\"pdf-sample_0.pdf\"},{\"title\":\"Καταστατικό Συνδέσμου 2.0\",\"file_path\":\"assets/Parents_docs/parents_doc_69f1cc02001c90.46161766_1777454082.pdf\",\"original_name\":\"pdf-sample_3.pdf\"}],\"statute\":{\"title\":\"Καταστατικό Συνδέσμου\",\"file_path\":\"assets/Parents_docs/parents_doc_69f1ca2cd7b082.81544280_1777453612.pdf\",\"original_name\":\"pdf-sample_0.pdf\"},\"minutes\":[{\"title\":\"1η Συνεδρίαση 2025-2026\",\"file_path\":\"assets/Parents_docs/parents_doc_69f1caacdea8c8.30130272_1777453740.pdf\",\"original_name\":\"pdf-sample_1.pdf\"},{\"title\":\"2η Συνεδρίαση 2025-2026\",\"file_path\":\"assets/Parents_docs/parents_doc_69f1cac6846ec9.81600460_1777453766.pdf\",\"original_name\":\"pdf-sample_2.pdf\"}]}', '2026-04-29 12:14:42');
 
 --
 -- ========================================================
@@ -304,9 +304,9 @@ INSERT INTO `Products` (`product_id`, `product_name`, `product_description`, `pr
 -- ========================================================
 
 INSERT INTO `ProductsImages` (`pro_image_id`, `product_id`, `image_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Products_img/tshirt.jpg'),
-(2, 2, '/parents-council-platform-group5/public/assets/Products_img/product_69c4ffe67280e6.61595091.jpg'),
-(3, 3, '/parents-council-platform-group5/public/assets/Products_img/default-product.svg');
+(1, 1, 'assets/Products_img/tshirt.jpg'),
+(2, 2, 'assets/Products_img/product_69c4ffe67280e6.61595091.jpg'),
+(3, 3, 'assets/Products_img/default-product.svg');
 
 --
 -- ========================================================
@@ -330,8 +330,8 @@ INSERT INTO `ProductSizeOptions` (`size_option_id`, `product_id`, `size_value`, 
 -- ========================================================
 
 INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `admin_seen_at`, `sub_status`) VALUES
-(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'approved'),
-(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'waiting');
+(1, 2, 'assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'approved'),
+(2, 3, 'assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'waiting');
 
 --
 -- ========================================================
