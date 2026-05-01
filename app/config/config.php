@@ -23,10 +23,10 @@ if (!function_exists('app_detect_base_url')) {
     }
 }
 
-define('DB_HOST', 'localhost');        // Server
-define('DB_NAME', 'parents_council');  // Όνομα βάσης
-define('DB_USER', 'root');             // XAMPP default user
-define('DB_PASS', '');                  // XAMPP default password
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');        // Server
+define('DB_NAME', getenv('DB_NAME') ?: 'parents_council');  // Όνομα βάσης
+define('DB_USER', getenv('DB_USER') ?: 'root');             // XAMPP default user
+define('DB_PASS', getenv('DB_PASS') ?: '');                  // XAMPP default password
 define('DB_CHARSET', 'utf8mb4');       // Κωδικοποίηση
 define('APP_BASE_URL', app_detect_base_url());
 

@@ -44,7 +44,7 @@ class AppConfig
         }
 
         $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
-        $basePath = '/parents-council-platform-group5';
+        $basePath = '';
 
         if (preg_match('#^(.*?)/public(?:/|$)#', $scriptName, $matches)) {
             $basePath = $matches[1] !== '' ? $matches[1] : '';
