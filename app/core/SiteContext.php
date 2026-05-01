@@ -5,8 +5,58 @@
 
 class SiteContext
 {
-    private const BASE_PUBLIC_URL = '/parents-council-platform-group5/public';
-    private const PROJECT_URL = '/parents-council-platform-group5';
+    private function detectBaseUrl(): string
+    {
+        $configuredBaseUrl = trim((string) getenv('APP_BASE_URL'));
+        if ($configuredBaseUrl !== '') {
+            return rtrim($configuredBaseUrl, '/');
+        }
+
+        $scheme = $this->detectRequestValue('HTTP_X_FORWARDED_PROTO');
+        if ($scheme === '') {
+            $https = strtolower((string) ($_SERVER['HTTPS'] ?? ''));
+            $scheme = ($https !== '' && $https !== 'off') ? 'https' : 'http';
+        }
+
+        $host = $this->detectRequestValue('HTTP_X_FORWARDED_HOST', 'HTTP_HOST');
+        if ($host === '') {
+            $host = trim((string) ($_SERVER['SERVER_NAME'] ?? 'localhost'));
+        }
+
+        return rtrim($scheme . '://' . $host . $this->detectProjectPath(), '/');
+    }
+
+    private function detectProjectPath(): string
+    {
+        $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+
+        if (preg_match('#^(.*?)/public(?:/|$)#', $scriptName, $matches)) {
+            return $matches[1] !== '' ? $matches[1] : '';
+        }
+
+        if (preg_match('#^(.*?)/app(?:/|$)#', $scriptName, $matches)) {
+            return $matches[1] !== '' ? $matches[1] : '';
+        }
+
+        return '';
+    }
+
+    private function detectRequestValue(string $primaryKey, string $fallbackKey = ''): string
+    {
+        $value = trim((string) ($_SERVER[$primaryKey] ?? ''));
+        if ($value !== '') {
+            return explode(',', $value)[0];
+        }
+
+        if ($fallbackKey !== '') {
+            $fallbackValue = trim((string) ($_SERVER[$fallbackKey] ?? ''));
+            if ($fallbackValue !== '') {
+                return explode(',', $fallbackValue)[0];
+            }
+        }
+
+        return '';
+    }
 // Prosdiorizei to runtime context (public i parent) apo global override i apo to request path.
     public function context(): string
     {
@@ -28,12 +78,12 @@ class SiteContext
 // Epistrefei to stathero public base URL prefix pou xrisimopoieitai apo ola ta builders.
     public function baseUrl(): string
     {
-        return self::BASE_PUBLIC_URL;
+        return $this->detectBaseUrl() . '/public';
     }
 // Epistrefei to root project URL prefix gia links ektos public (px storage/public mapping).
     public function projectUrl(): string
     {
-        return self::PROJECT_URL;
+        return $this->detectBaseUrl();
     }
 // Ftiaxnei URLs ana section kai vazei automatic prefix /parent otan to context einai parent.
     public function sectionUrl(string $path = ''): string
@@ -89,12 +139,13 @@ class SiteContext
     public function resolveContentUrl(string $path): string
     {
         $trimmed = trim($path);
+        $projectUrl = $this->projectUrl();
 
         if ($trimmed === '' || strpos($trimmed, 'data:') === 0 || preg_match('#^https?://#i', $trimmed)) {
             return $trimmed;
         }
 
-        if (strpos($trimmed, self::PROJECT_URL . '/') === 0) {
+        if (strpos($trimmed, $projectUrl . '/') === 0) {
             return $trimmed;
         }
 
