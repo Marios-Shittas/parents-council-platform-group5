@@ -90,21 +90,12 @@ INSERT INTO `AnnouncementsImages` (`an_image_id`, `announcement_id`, `image_path
 -- Edw mpainei to arxiko periexomeno tou pinaka
 -- ========================================================
 
-INSERT INTO `Applications` (`application_id`, `template_id`, `application_title`, `title`, `application_description`, `description`, `submission_type`, `academic_year`, `open_date`, `due_date`, `status`, `allow_online_submission`, `allow_file_submission`, `require_signature`, `form_schema`, `target_audience`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, NULL, 'Field Trip Permission', 'Field Trip Permission', 'Form to allow your child to attend field trip', 'Form to allow your child to attend field trip', 'file', '2025-2026', '2026-03-01', '2026-06-15', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11'),
-(2, NULL, 'Library Membership', 'Library Membership', 'Sign up for school library access', 'Sign up for school library access', 'file', '2025-2026', '2026-03-01', '2026-06-30', 'published', 1, 1, 0, NULL, NULL, 1, '2026-04-11 19:03:11', '2026-04-11 19:03:11');
-
 --
 -- ========================================================
 -- Dedomena gia ton pinaka: `ApplicationsDocuments`
 -- Edw mpainei to arxiko periexomeno tou pinaka
 -- ========================================================
 
-INSERT INTO `ApplicationsDocuments` (`ap_document_id`, `application_id`, `file_path`) VALUES
-(1, 1, '/parents-council-platform-group5/public/assets/Applications_docs/feedback.pdf'),
-(2, 2, '/parents-council-platform-group5/public/assets/Applications_docs/questionnaire.pdf');
-
---
 -- ========================================================
 -- Dedomena gia ton pinaka: `Children`
 -- Edw mpainei to arxiko periexomeno tou pinaka
@@ -324,10 +315,6 @@ INSERT INTO `ProductSizeOptions` (`size_option_id`, `product_id`, `size_value`, 
 -- Dedomena gia ton pinaka: `Submissions`
 -- Edw mpainei to arxiko periexomeno tou pinaka
 -- ========================================================
-
-INSERT INTO `Submissions` (`application_id`, `user_id`, `file_path`, `text_content`, `submission_data`, `submitted_at`, `admin_seen_at`, `sub_status`) VALUES
-(1, 2, '/parents-council-platform-group5/public/assets/Submissions_docs/feedback.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'approved'),
-(2, 3, '/parents-council-platform-group5/public/assets/Submissions_docs/questionnaire.pdf', NULL, NULL, '2026-04-11 19:03:11', NULL, 'waiting');
 
 --
 -- ========================================================
