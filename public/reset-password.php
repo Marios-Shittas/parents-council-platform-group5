@@ -44,7 +44,7 @@ $resetConfig = [
 
         <!-- Costom CSS -->
         <link rel="stylesheet" href="assets/css/main.css">
-        <link rel="stylesheet" href="assets/css/reset-password.css">
+        <link rel="stylesheet" href="assets/css/reset-password.css?v=<?php echo filemtime(__DIR__ . '/assets/css/reset-password.css'); ?>">
         
         <title>Επαναφορά Κωδικού</title>
     </head>
