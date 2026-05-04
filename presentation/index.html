@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύνδεσμος Γονέων - Παρουσίαση Group 5</title>
+    <link rel="stylesheet" href="styles.css?v=25">
+</head>
+<body>
+    <div class="deck-shell">
+        <header class="deck-topbar">
+            <div class="brand-strip">
+                <img src="assets/gymnasio-logo.png" alt="Λογότυπο Γυμνασίου">
+                <span>Σύνδεσμος Γονέων - Group 5</span>
+            </div>
+            <div class="deck-actions">
+                <span id="slideCounter">1 / 23</span>
+                <button type="button" id="overviewBtn">Επισκόπηση</button>
+                <button type="button" id="fullscreenBtn">Πλήρης οθόνη</button>
+                <button type="button" id="printBtn">Εκτύπωση</button>
+            </div>
+        </header>
+
+        <main class="slides" id="slides">
+            <section class="slide title-slide is-active" data-title="Τίτλος">
+                <div class="hero-panel">
+                    <div class="logo-pair">
+                        <img src="assets/gymnasio-logo.png" alt="Λογότυπο Συνδέσμου Γονέων Γυμνασίου">
+                        <img src="assets/dimotiko-logo.png" alt="Λογότυπο Συνδέσμου Γονέων Δημοτικού">
+                    </div>
+                    <p class="eyebrow">Τελική παρουσίαση εργασίας</p>
+                    <h1>Σύνδεσμος Γονέων</h1>
+                    <p class="subtitle">Υλοποίηση ιστοσελίδας για τον Σύνδεσμο Γονέων του Γυμνασίου Αγίου Αθανασίου και προσαρμογή για τον Σύνδεσμο Γονέων Δημοτικού.</p>
+                    <div class="meta-grid">
+                        <div><strong>Εργασία</strong><span>Σύνδεσμος Γονέων - Group 5</span></div>
+                        <div><strong>Διδάσκων</strong><span>κ. Ανδρέας Ανδρέου</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide team-slide" data-title="Ομάδα">
+                <div class="content-split">
+                    <div>
+                        <p class="eyebrow">Ομάδα έργου</p>
+                        <h2>Τα μέλη του Group 5</h2>
+                        <p class="lead">Η εργασία υλοποιήθηκε ομαδικά με Git workflow, pull requests και έλεγχο πριν από κάθε merge στο βασικό branch ανάπτυξης.</p>
+                        <div class="team-summary">
+                            <strong>Σύνδεσμος Γονέων</strong>
+                            <span>Υλοποίηση Γυμνασίου, προσαρμογή Δημοτικού και deployment preview.</span>
+                        </div>
+                    </div>
+                    <div class="team-list">
+                        <div><strong>Μάριος Σιήττας</strong><span>ΑΦΤ: 27432</span></div>
+                        <div><strong>Μιχάλης Τσαδιώτης</strong><span>ΑΦΤ: 28053</span></div>
+                        <div><strong>Σοφία Κυριακού</strong><span>ΑΦΤ: 30288</span></div>
+                        <div><strong>Κωνσταντίνος Αβραμίδης</strong><span>ΑΦΤ: 27779</span></div>
+                        <div><strong>Ράσσελλ Βικραμασίγκαμ</strong><span>ΑΦΤ: 30713</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Πεδίο">
+                <p class="eyebrow">Τι παραδίδουμε</p>
+                <h2>Δύο ιστοσελίδες πάνω στην ίδια βάση</h2>
+                <div class="site-grid">
+                    <article class="site-card">
+                        <img src="assets/gymnasio-logo.png" alt="Λογότυπο Γυμνασίου">
+                        <h3>Γυμνάσιο Αγίου Αθανασίου</h3>
+                        <p>Κύρια υλοποίηση στο branch <code>dev</code>.</p>
+                        <span>Public, parent και admin περιβάλλον.</span>
+                    </article>
+                    <article class="site-card">
+                        <img src="assets/dimotiko-logo.png" alt="Λογότυπο Δημοτικού">
+                        <h3>Δημοτικό</h3>
+                        <p>Προσαρμοσμένη έκδοση στο branch <code>DevDimotiko</code>.</p>
+                        <span>Αλλαγμένο header, όνομα, logo και checkout ανάγκες.</span>
+                    </article>
+                    <article class="site-card accent">
+                        <div class="domain-mark">ΣΓ</div>
+                        <h3>Deployment</h3>
+                        <p>Το branch <code>devDeployment</code> το διαχειρίζεται ο Μάριος Σιήττας.</p>
+                        <span>Domain: sg-gym-ag-athanasios.com</span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Branches">
+                <p class="eyebrow">Δομή branches</p>
+                <h2>Πώς οργανώθηκε η ανάπτυξη</h2>
+                <div class="branch-map">
+                    <div class="branch-node root"><strong>dev</strong><span>Κύρια ιστοσελίδα Γυμνασίου και βάση λειτουργιών</span></div>
+                    <div class="branch-line"></div>
+                    <div class="branch-row">
+                        <div class="branch-node"><strong>DevDimotiko</strong><span>Έκδοση Δημοτικού, βασισμένη στο dev</span></div>
+                        <div class="branch-node"><strong>devDeployment</strong><span>Hosted έκδοση και προσωρινή δημόσια κατάσταση</span></div>
+                        <div class="branch-node"><strong>feature/*</strong><span>Ανεξάρτητες αλλαγές ανά εργασία μέλους</span></div>
+                    </div>
+                </div>
+                <p class="note">Τα επιμέρους branches εξαρτώνται από το <code>dev</code>, ώστε οι κοινές λειτουργίες, η βάση και η δομή ρόλων να μένουν συνεπείς.</p>
+            </section>
+
+            <section class="slide" data-title="Git">
+                <p class="eyebrow">Ομαδική συνεργασία</p>
+                <h2>Git workflow που ακολουθήσαμε</h2>
+                <div class="code-and-steps">
+                    <pre><code>git checkout dev
+git pull origin dev
+git checkout -b feature/Name
+
+# υλοποίηση αλλαγών
+git add .
+git commit -m "Feature description"
+git push origin feature/Name
+
+# Pull Request προς dev
+# Έγκριση από τουλάχιστον 1 μέλος
+# Merge στο dev</code></pre>
+                    <div class="step-stack">
+                        <div><strong>1.</strong><span>Ξεκινούσαμε πάντα από ενημερωμένο <code>dev</code>.</span></div>
+                        <div><strong>2.</strong><span>Κάθε αλλαγή γινόταν σε ξεχωριστό feature branch.</span></div>
+                        <div><strong>3.</strong><span>Γινόταν push και άνοιγε Pull Request.</span></div>
+                        <div><strong>4.</strong><span>Ένα άτομο από την ομάδα έπρεπε να εγκρίνει πριν το merge.</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Deployment">
+                <p class="eyebrow">Hosted περιβάλλον</p>
+                <h2>Το branch <code>devDeployment</code></h2>
+                <div class="deployment-layout">
+                    <div class="under-construction">
+                        <div class="uc-mark">ΣΓ</div>
+                        <p>Σύνδεσμος Γονέων &amp; Κηδεμόνων</p>
+                        <h3>Η ιστοσελίδα ετοιμάζεται.</h3>
+                        <span>Κάνουμε τις τελευταίες ρυθμίσεις πριν ανοίξει επίσημα.</span>
+                        <div class="uc-status"><i></i>Προσωρινά μη διαθέσιμη για το κοινό.</div>
+                    </div>
+                    <div class="deployment-points">
+                        <h3>Τρέχουσα κατάσταση πελάτη</h3>
+                        <ul>
+                            <li>Το δημόσιο domain δείχνει προσωρινή σελίδα ενημέρωσης.</li>
+                            <li>Ο πελάτης βλέπει την πραγματική ιστοσελίδα από <code>/public/home.php</code>.</li>
+                            <li>Domain: <code>https://sg-gym-ag-athanasios.com/</code></li>
+                            <li>Preview: <code>https://sg-gym-ag-athanasios.com/public/home.php</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Ρόλοι">
+                <p class="eyebrow">Εμπειρίες χρηστών</p>
+                <h2>Public, Parent και Admin view</h2>
+                <div class="role-grid">
+                    <article><strong>Public</strong><span>Βλέπει αρχική, ανακοινώσεις, εκδηλώσεις, επικοινωνία, χρήσιμες πληροφορίες και e-shop όπου επιτρέπεται.</span></article>
+                    <article><strong>Parent</strong><span>Έχει τις κοινές public σελίδες μαζί με πρόσθετα προστατευμένα στοιχεία όπως έγγραφα, καταστατικό, πρακτικά και προσωπικό προφίλ.</span></article>
+                    <article><strong>Admin</strong><span>Διαχειρίζεται χρήστες, περιεχόμενο, προϊόντα, αιτήσεις, παραγγελίες, ημερολόγιο, banner και προβολές σελίδων.</span></article>
+                </div>
+                <p class="note">Δεν είναι όλα hardcoded: σημαντικό περιεχόμενο σελίδων αποθηκεύεται στη βάση και αλλάζει από το admin panel.</p>
+            </section>
+
+            <section class="slide" data-title="Admin Content">
+                <p class="eyebrow">Δυναμικό περιεχόμενο</p>
+                <h2>Ο admin αλλάζει το περιεχόμενο χωρίς αλλαγή κώδικα</h2>
+                <div class="admin-flow">
+                    <div><strong>HomePageSections</strong><span>Hero, τίτλοι, κουμπιά, banner αρχικής</span></div>
+                    <div><strong>ParentsPageSections</strong><span>Συμβούλιο, ιστορικό, καταστατικό, πρακτικά</span></div>
+                    <div><strong>UsefulInformationSections</strong><span>Ημερολόγιο σχολικής χρονιάς, αργίες, στολή, οδηγίες</span></div>
+                    <div><strong>EpikoinoniaPageSections</strong><span>Στοιχεία επικοινωνίας και πληροφορίες φόρμας</span></div>
+                </div>
+                <div class="mini-browser">
+                    <span></span><span></span><span></span>
+                    <div class="browser-content">
+                        <h3>Admin panel</h3>
+                        <p>Επεξεργασία τίτλων, κειμένων, εικόνων, PDF, κουμπιών και labels ανά σελίδα.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide image-slide" data-title="Αρχική">
+                <div>
+                    <p class="eyebrow">Αρχική σελίδα</p>
+                    <h2>Banner, ημερολόγιο και πρόσφατες ενημερώσεις</h2>
+                    <ul class="feature-list">
+                        <li>Ο admin ορίζει πόσες φωτογραφίες θα εμφανίζονται στο banner.</li>
+                        <li>Μπορεί να αφαιρέσει πλήρως το banner χωρίς να μένει κενό στη σελίδα.</li>
+                        <li>Το ημερολόγιο δείχνει εκδηλώσεις, αργίες, σχολικές ημερομηνίες και ανακοινώσεις.</li>
+                    </ul>
+                </div>
+                <div class="banner-preview-pair">
+                    <figure>
+                        <img src="assets/gymnasio-banner.png" alt="Banner Γυμνασίου">
+                        <figcaption>Public banner στην αρχική</figcaption>
+                    </figure>
+                    <figure class="admin-banner-preview">
+                        <img src="assets/AdminBanner.png" alt="Admin banner settings">
+                        <figcaption>Admin διαχείριση banner</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="slide features-slide" data-title="Λειτουργίες">
+                <p class="eyebrow">Βασικές λειτουργίες ιστοσελίδας</p>
+                <h2>Τι μπορεί να κάνει η πλατφόρμα</h2>
+                <div class="feature-showcase">
+                    <article>
+                        <strong>Ενημέρωση</strong>
+                        <span>Ανακοινώσεις με εικόνες/PDF, εκδηλώσεις με gallery και φωτογραφικό υλικό.</span>
+                    </article>
+                    <article>
+                        <strong>Εξυπηρέτηση γονέα</strong>
+                        <span>Εγγραφή, προφίλ γονέα, στοιχεία παιδιών, αιτήσεις και υποβολές αρχείων.</span>
+                    </article>
+                    <article>
+                        <strong>Οικονομικές λειτουργίες</strong>
+                        <span>Ετήσια συνδρομή, προαιρετική ασφάλεια ανά παιδί, JCC payments και αποδείξεις.</span>
+                    </article>
+                    <article>
+                        <strong>Admin panel</strong>
+                        <span>Διαχείριση περιεχομένου, χρηστών, προϊόντων, παραγγελιών, banner και εγγράφων.</span>
+                    </article>
+                    <article>
+                        <strong>Σχολικό ημερολόγιο</strong>
+                        <span>Αργίες, εκδηλώσεις, ανακοινώσεις και ημερομηνίες σχολικής χρονιάς στην αρχική.</span>
+                    </article>
+                    <article>
+                        <strong>Ασφάλεια και έλεγχος</strong>
+                        <span>Sessions, role-based pages, reset password, logs ενεργειών και responsive UI.</span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="slide mobile-parent-slide" data-title="Mobile και γονέας">
+                <p class="eyebrow">Parent-only περιεχόμενο</p>
+                <h2>Mobile view και προστατευμένη προβολή γονέα</h2>
+                <div class="mobile-parent-layout">
+                    <div class="phone-preview" aria-label="Mobile preview αρχικής σελίδας">
+                        <img src="assets/MobileView.jpeg" alt="Πραγματικό mobile view της ιστοσελίδας">
+                    </div>
+                    <div>
+                        <h3>Πρακτικά και Καταστατικό</h3>
+                        <p>Στη σελίδα του Συνδέσμου Γονέων υπάρχουν δημόσιες πληροφορίες, αλλά οι συνδεδεμένοι γονείς βλέπουν επιπλέον έγγραφα όπως καταστατικό και πρακτικά συνεδριάσεων.</p>
+                        <div class="pdf-row">
+                            <span>PDF</span>
+                            <strong>Καταστατικό Συνδέσμου</strong>
+                            <em>Ορατό μόνο σε parent role</em>
+                        </div>
+                        <div class="pdf-row">
+                            <span>PDF</span>
+                            <strong>Πρακτικά Συνεδριάσεων</strong>
+                            <em>Διαχειρίσιμα από admin panel</em>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide screenshots-slide" data-title="E-shop Coming Soon">
+                <p class="eyebrow">Screenshots από το assets</p>
+                <h2>Coming soon λειτουργία για το E-shop</h2>
+                <div class="eshop-screenshots">
+                    <figure class="eshop-shot">
+                        <img src="assets/Eshop.png" alt="E-shop view πριν το coming soon">
+                        <figcaption>E-shop view πριν το coming soon</figcaption>
+                    </figure>
+                    <figure class="admin-toggle-shot">
+                        <img src="assets/ComingSoonEshop.png" alt="Admin toggle coming soon">
+                        <figcaption>Admin toggle coming soon</figcaption>
+                    </figure>
+                    <figure class="coming-soon-shot">
+                        <img src="assets/ComingSoonParentView.png" alt="Coming soon δημόσια προβολή">
+                        <figcaption>Coming soon προβολή</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Εγγραφή">
+                <p class="eyebrow">Εγγραφή και πληρωμές</p>
+                <h2>Ροή εγγραφής γονέα</h2>
+                <div class="flow-strip">
+                    <div>Υποβολή στοιχείων γονέα</div>
+                    <div>Προσθήκη παιδιών</div>
+                    <div>Έγκριση από admin</div>
+                    <div>Email με token πληρωμής</div>
+                    <div>Συνδρομή + προαιρετική ασφάλεια</div>
+                    <div>Ενεργοποίηση λογαριασμού</div>
+                </div>
+                <div class="pricing-boxes">
+                    <div><strong>20 ευρώ</strong><span>Ετήσια συνδρομή γονέα για τη σχολική χρονιά.</span></div>
+                    <div><strong>Ασφάλεια ανά παιδί</strong><span>Προαιρετική επιλογή, με υπολογισμό ανά αριθμό παιδιών.</span></div>
+                    <div><strong>JCC</strong><span>Online checkout, callback, status update και αποστολή απόδειξης.</span></div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Eshop">
+                <p class="eyebrow">E-shop</p>
+                <h2>Προϊόντα, μεγέθη και παραγγελίες</h2>
+                <div class="eshop-grid">
+                    <div>
+                        <h3>Λειτουργίες</h3>
+                        <ul>
+                            <li>Προϊόντα με εικόνες, περιγραφή και τιμή.</li>
+                            <li>Custom size options ανά προϊόν.</li>
+                            <li>Καλάθι, order items και πληρωμές προϊόντων.</li>
+                            <li>Διαχείριση παραγγελιών από admin.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Coming soon</h3>
+                        <p>Ο admin μπορεί με ένα κουμπί να κρύψει προσωρινά το e-shop. Ο χρήστης βλέπει μήνυμα τύπου coming soon αντί για σπασμένη ή άδεια σελίδα.</p>
+                    </div>
+                    <div>
+                        <h3>Export</h3>
+                        <p>Στο admin users υπάρχει export σε Excel με στοιχεία χρηστών, παιδιών, ασφαλειών, συνδρομών, orders και payments.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide dimotiko-slide" data-title="Δημοτικό">
+                <p class="eyebrow">Branch DevDimotiko</p>
+                <h2>Τι αλλάξαμε για το Δημοτικό</h2>
+                <div class="dimotiko-layout">
+                    <img src="assets/dimotiko-logo.png" alt="Λογότυπο Δημοτικού">
+                    <ul class="feature-list">
+                        <li>Αλλαγή λογότυπου, header και ονομασίας branch/σελίδας για την έκδοση Δημοτικού.</li>
+                        <li>Δυνατότητα υποβολής παραγγελίας από μη συνδεδεμένους χρήστες.</li>
+                        <li>Προσθήκη πεδίων στη φόρμα παραγγελίας: όνομα, επώνυμο, email, τηλέφωνο, μαθητής/μαθήτρια και τμήμα.</li>
+                        <li>Ξεχωριστό public cart με session, ώστε ο επισκέπτης να αγοράζει χωρίς parent account.</li>
+                        <li>Η πληρωμή συνεχίζει να περνά από JCC και να δημιουργεί order/payment records.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Admin Panel">
+                <p class="eyebrow">Admin panel</p>
+                <h2>Διαχείριση λειτουργιών</h2>
+                <div class="admin-modules">
+                    <div><strong>Users</strong><span>Έγκριση, απόρριψη, ρόλοι, status, παιδιά, πληρωμές.</span></div>
+                    <div><strong>Applications</strong><span>Templates, πεδία φόρμας, υποβολές, αρχεία και review status.</span></div>
+                    <div><strong>Orders</strong><span>Προϊόντα, ποσότητες, sizes, statuses και admin seen state.</span></div>
+                    <div><strong>Calendar</strong><span>Εκδηλώσεις, αργίες, ανακοινώσεις και ημερομηνίες σχολικής χρονιάς.</span></div>
+                    <div><strong>Content</strong><span>Αρχική, Σύνδεσμος Γονέων, επικοινωνία, χρήσιμες πληροφορίες.</span></div>
+                    <div><strong>Media</strong><span>Εικόνες, PDF attachments, gallery και documents.</span></div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Βάση">
+                <p class="eyebrow">Database design</p>
+                <h2>34 πίνακες στη βάση του <code>dev</code></h2>
+                <div class="db-layout">
+                    <div class="db-core">
+                        <div class="db-table center">Users</div>
+                        <div class="db-table">Children</div>
+                        <div class="db-table">Payments</div>
+                        <div class="db-table">Orders</div>
+                        <div class="db-table">Applications</div>
+                        <div class="db-table">Logs</div>
+                    </div>
+                    <div class="db-notes">
+                        <p>Ο πίνακας <code>Users</code> είναι κεντρικός: συνδέεται με παιδιά, πληρωμές, παραγγελίες, submissions και logs.</p>
+                        <p>Οι content πίνακες έχουν σχέσεις 1 προς πολλά: <code>Announcements</code> με images/attachments, <code>Events</code> με images, <code>Products</code> με images/sizes.</p>
+                        <p>Οι πληρωμές συνδέονται με <code>PaymentsDetails</code>, <code>InsurancePayments</code> και JCC transaction data.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Στατιστικά">
+                <p class="eyebrow">Στατιστικά κώδικα</p>
+                <h2>Μέγεθος υλοποίησης</h2>
+                <div class="stats-grid">
+                    <div><strong>47,117</strong><span>Source code lines</span><i style="--w:81.7%"></i></div>
+                    <div><strong>8,227</strong><span>Blank lines</span><i style="--w:14.3%"></i></div>
+                    <div><strong>2,096</strong><span>Comment lines</span><i style="--w:3.6%"></i></div>
+                    <div><strong>224</strong><span>Mixed lines</span><i style="--w:0.4%"></i></div>
+                    <div><strong>34</strong><span>Database tables</span><i style="--w:100%"></i></div>
+                </div>
+                <p class="note">Η εργασία δεν είναι μόνο frontend: περιλαμβάνει backend services, admin tools, database relationships, payments και deployment handling.</p>
+            </section>
+
+            <section class="slide" data-title="Ασφάλεια">
+                <p class="eyebrow">Ασφάλεια</p>
+                <h2>Μέτρα που υλοποιήθηκαν</h2>
+                <div class="security-grid">
+                    <div><strong>Password hashing</strong><span>Χρήση <code>password_hash</code> και <code>password_verify</code>.</span></div>
+                    <div><strong>Sessions</strong><span>Role-based πρόσβαση για admin και parent μέσω session guards.</span></div>
+                    <div><strong>Prepared statements</strong><span>Χρήση <code>prepare()</code> και bind parameters για queries.</span></div>
+                    <div><strong>Tokens με λήξη</strong><span>Approval, reset password και payment flows με <code>token_expiry</code>.</span></div>
+                    <div><strong>Validation</strong><span>Email, τηλέφωνο +357, required fields, παιδιά και checkout payload.</span></div>
+                    <div><strong>Audit logs</strong><span>Καταγραφή login, πληρωμών, αλλαγών χρήστη και admin ενεργειών.</span></div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="2FA">
+                <p class="eyebrow">Πρόσθετη ασφάλεια</p>
+                <h2>Υλοποιήθηκε 2FA, αλλά δεν ενεργοποιήθηκε τελικά</h2>
+                <div class="twofa-flow">
+                    <div>Login</div>
+                    <div>Προσωρινό session</div>
+                    <div>Κωδικός 2FA με email</div>
+                    <div>Έλεγχος λήξης</div>
+                    <div>Κανονική σύνδεση</div>
+                </div>
+                <p class="lead">Η λειτουργία υλοποιήθηκε τεχνικά με κωδικό δύο παραγόντων και λήξη 10 λεπτών, όμως μετά από συμφωνία με τον πελάτη αποφασίστηκε να μην χρησιμοποιηθεί προς το παρόν.</p>
+            </section>
+
+            <section class="slide" data-title="Πελάτης">
+                <p class="eyebrow">Συνεργασία με πελάτη</p>
+                <h2>Ανάπτυξη με πραγματικό feedback</h2>
+                <div class="client-timeline">
+                    <div><strong>Συζητήσεις</strong><span>Καταγραφή αναγκών για περιεχόμενο, εγγραφές, πληρωμές και δημόσια προβολή.</span></div>
+                    <div><strong>Συναντήσεις</strong><span>Έλεγχος προόδου και προσαρμογές σύμφωνα με σχόλια του Συνδέσμου Γονέων.</span></div>
+                    <div><strong>Βίντεο</strong><span>Αποστολή demo videos ώστε ο πελάτης να βλέπει τη λειτουργία πριν μπει στο site.</span></div>
+                    <div><strong>Cloudflare preview</strong><span>Άνοιγμα server από προσωπικό υπολογιστή για να δοκιμάσει ο πελάτης μαζί με άλλους γονείς.</span></div>
+                </div>
+            </section>
+
+            <section class="slide" data-title="Demo">
+                <p class="eyebrow">Live demo</p>
+                <h2>Τι θα δείξω στον καθηγητή</h2>
+                <div class="demo-grid">
+                    <div><strong>1</strong><span>Αρχική: banner, ημερολόγιο, ανακοινώσεις, εκδηλώσεις.</span></div>
+                    <div><strong>2</strong><span>Admin: αλλαγή περιεχομένου χωρίς hardcoded edits.</span></div>
+                    <div><strong>3</strong><span>Users: έγκριση γονέα, export Excel και payments overview.</span></div>
+                    <div><strong>4</strong><span>Parent view: καταστατικό, πρακτικά και στοιχεία παιδιών.</span></div>
+                    <div><strong>5</strong><span>E-shop: προϊόντα, sizes, cart, orders και coming soon toggle.</span></div>
+                    <div><strong>6</strong><span>Branches: dev, DevDimotiko και devDeployment.</span></div>
+                </div>
+                <p class="demo-url">Preview πελάτη: <code>https://sg-gym-ag-athanasios.com/public/home.php</code></p>
+            </section>
+
+            <section class="slide closing-slide" data-title="Κλείσιμο">
+                <div>
+                    <p class="eyebrow">Συμπέρασμα</p>
+                    <h2>Μια ολοκληρωμένη πλατφόρμα για Σύνδεσμο Γονέων</h2>
+                    <p class="lead">Η εργασία καλύπτει πραγματικές ανάγκες πελάτη: ενημέρωση, εγγραφές, πληρωμές, e-shop, admin διαχείριση, δυναμικό περιεχόμενο και deployment preview.</p>
+                    <div class="final-tags">
+                        <span>PHP</span>
+                        <span>MySQL</span>
+                        <span>JavaScript</span>
+                        <span>React components</span>
+                        <span>JCC payments</span>
+                        <span>Git workflow</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="deck-footer">
+            <button type="button" id="prevBtn">Προηγούμενο</button>
+            <div class="progress-track"><span id="progressBar"></span></div>
+            <button type="button" id="nextBtn">Επόμενο</button>
+        </footer>
+    </div>
+
+    <div class="overview-panel" id="overviewPanel" aria-hidden="true">
+        <div class="overview-inner">
+            <div class="overview-head">
+                <h2>Επισκόπηση slides</h2>
+                <button type="button" id="closeOverview">Κλείσιμο</button>
+            </div>
+            <div class="overview-grid" id="overviewGrid"></div>
+        </div>
+    </div>
+
+    <script src="script.js?v=25"></script>
+</body>
+</html>
