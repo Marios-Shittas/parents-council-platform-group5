@@ -14,7 +14,7 @@
                 <span>Σύνδεσμος Γονέων - Group 5</span>
             </div>
             <div class="deck-actions">
-                <span id="slideCounter">1 / 23</span>
+                <span id="slideCounter">1 / 24</span>
                 <button type="button" id="overviewBtn">Επισκόπηση</button>
                 <button type="button" id="fullscreenBtn">Πλήρης οθόνη</button>
                 <button type="button" id="printBtn">Εκτύπωση</button>
@@ -124,6 +124,24 @@ git push origin feature/Name
                 </div>
             </section>
 
+            <section class="slide architecture-slide" data-title="Αρχιτεκτονική">
+                <figure class="architecture-figure">
+                    <img src="assets/architecture-structure.png" alt="Διάγραμμα object-oriented δομής project">
+                </figure>
+                <div class="architecture-bullets">
+                    <ul>
+                        <li><code>public/</code>: entry points, από εδώ ξεκινά κάθε request.</li>
+                        <li><code>controllers/</code>: ελέγχουν τη ροή και καλούν services.</li>
+                        <li><code>services/</code>: business logic ανά λειτουργία.</li>
+                        <li><code>core/</code>: κοινή υποδομή (DB, auth, config).</li>
+                        <li><code>views/viewmodels/</code>: rendering του UI με καθαρά data objects.</li>
+                        <li><code>database/storage/</code>: schema, seed, uploads και metadata.</li>
+                    </ul>
+                    <p>Flow: <code>public/*.php → controller → service → core(Database) → view</code></p>
+                    <p>Δηλαδή ο χρήστης ανοίγει μία σελίδα από το <code>public</code>, ο controller αποφασίζει τι χρειάζεται, ο service φέρνει/επεξεργάζεται τα δεδομένα μέσω <code>core/Database</code>, και στο τέλος γίνεται render το τελικό view.</p>
+                </div>
+            </section>
+
             <section class="slide" data-title="Deployment">
                 <p class="eyebrow">Hosted περιβάλλον</p>
                 <h2>Το branch <code>devDeployment</code></h2>
@@ -156,6 +174,7 @@ git push origin feature/Name
                     <article><strong>Admin</strong><span>Διαχειρίζεται χρήστες, περιεχόμενο, προϊόντα, αιτήσεις, παραγγελίες, ημερολόγιο, banner και προβολές σελίδων.</span></article>
                 </div>
                 <p class="note">Δεν είναι όλα hardcoded: σημαντικό περιεχόμενο σελίδων αποθηκεύεται στη βάση και αλλάζει από το admin panel.</p>
+                <p class="note">Λογική πρόσβασης: ο επισκέπτης (public) βλέπει μόνο γενικό, μη ευαίσθητο περιεχόμενο, ενώ ο συνδεδεμένος γονέας (parent) ξεκλειδώνει επιπλέον ενότητες και αρχεία. Ο έλεγχος γίνεται στο auth/session layer (<code>AuthSession</code>, <code>SessionCheck</code>) και μετά τα αντίστοιχα page services (π.χ. <code>HomePageService</code>, <code>ParentsPageService</code>, <code>UsefulInformationService</code>) επιστρέφουν το σωστό περιεχόμενο ανά ρόλο.</p>
             </section>
 
             <section class="slide" data-title="Admin Content">
@@ -174,6 +193,7 @@ git push origin feature/Name
                         <p>Επεξεργασία τίτλων, κειμένων, εικόνων, PDF, κουμπιών και labels ανά σελίδα.</p>
                     </div>
                 </div>
+                <p class="note">Τεχνικά υλοποιείται με page services όπως <code>HomePageService</code>, <code>ParentsPageService</code>, <code>UsefulInformationService</code> και <code>EpikoinoniaPageService</code>: διαβάζουν/ενημερώνουν τα αντίστοιχα section tables στη βάση και το UI κάνει render τα νέα δεδομένα χωρίς αλλαγή κώδικα.</p>
             </section>
 
             <section class="slide image-slide" data-title="Αρχική">
@@ -367,9 +387,6 @@ git push origin feature/Name
                 <h2>Μέγεθος υλοποίησης</h2>
                 <div class="stats-grid">
                     <div><strong>47,117</strong><span>Source code lines</span><i style="--w:81.7%"></i></div>
-                    <div><strong>8,227</strong><span>Blank lines</span><i style="--w:14.3%"></i></div>
-                    <div><strong>2,096</strong><span>Comment lines</span><i style="--w:3.6%"></i></div>
-                    <div><strong>224</strong><span>Mixed lines</span><i style="--w:0.4%"></i></div>
                     <div><strong>34</strong><span>Database tables</span><i style="--w:100%"></i></div>
                 </div>
                 <p class="note">Η εργασία δεν είναι μόνο frontend: περιλαμβάνει backend services, admin tools, database relationships, payments και deployment handling.</p>
@@ -412,18 +429,20 @@ git push origin feature/Name
                 </div>
             </section>
 
-            <section class="slide" data-title="Demo">
-                <p class="eyebrow">Live demo</p>
-                <h2>Τι θα δείξω στον καθηγητή</h2>
-                <div class="demo-grid">
-                    <div><strong>1</strong><span>Αρχική: banner, ημερολόγιο, ανακοινώσεις, εκδηλώσεις.</span></div>
-                    <div><strong>2</strong><span>Admin: αλλαγή περιεχομένου χωρίς hardcoded edits.</span></div>
-                    <div><strong>3</strong><span>Users: έγκριση γονέα, export Excel και payments overview.</span></div>
-                    <div><strong>4</strong><span>Parent view: καταστατικό, πρακτικά και στοιχεία παιδιών.</span></div>
-                    <div><strong>5</strong><span>E-shop: προϊόντα, sizes, cart, orders και coming soon toggle.</span></div>
-                    <div><strong>6</strong><span>Branches: dev, DevDimotiko και devDeployment.</span></div>
+            <section class="slide" data-title="Τεχνολογίες">
+                <p class="eyebrow">Τι χρησιμοποιήσαμε</p>
+                <h2>Βασικές τεχνολογίες και λειτουργίες</h2>
+                <div class="admin-modules">
+                    <div><strong>PHP + OOP Services</strong><span>Backend λογική με services/controllers για καθαρή αρχιτεκτονική.</span></div>
+                    <div><strong>MySQL</strong><span>Αποθήκευση χρηστών, περιεχομένου, πληρωμών, παραγγελιών και logs.</span></div>
+                    <div><strong>JavaScript + Fetch API</strong><span>Δυναμικό UI, forms, validations και async επικοινωνία με services.</span></div>
+                    <div><strong>React JSX Components</strong><span>Σελίδες όπως login, register, subscription και payments με πιο interactive ροές.</span></div>
+                    <div><strong>Bootstrap 4/5</strong><span>Responsive layout, modals και γρήγορο UI styling στο public/admin.</span></div>
+                    <div><strong>JCC Payments</strong><span>Online πληρωμές για συνδρομές και e-shop με callback/redirect ροή.</span></div>
+                    <div><strong>PHPMailer + Mailtrap</strong><span>Αποστολή email για εγκρίσεις, ειδοποιήσεις και reset flows.</span></div>
+                    <div><strong>Git Workflow</strong><span>Feature branches, pull requests και review πριν από κάθε merge.</span></div>
+                    <div><strong>Role-Based Access</strong><span>Ξεχωριστή εμπειρία για public, parent και admin με session checks.</span></div>
                 </div>
-                <p class="demo-url">Preview πελάτη: <code>https://sg-gym-ag-athanasios.com/public/home.php</code></p>
             </section>
 
             <section class="slide closing-slide" data-title="Κλείσιμο">
@@ -431,16 +450,9 @@ git push origin feature/Name
                     <p class="eyebrow">Συμπέρασμα</p>
                     <h2>Μια ολοκληρωμένη πλατφόρμα για Σύνδεσμο Γονέων</h2>
                     <p class="lead">Η εργασία καλύπτει πραγματικές ανάγκες πελάτη: ενημέρωση, εγγραφές, πληρωμές, e-shop, admin διαχείριση, δυναμικό περιεχόμενο και deployment preview.</p>
-                    <div class="final-tags">
-                        <span>PHP</span>
-                        <span>MySQL</span>
-                        <span>JavaScript</span>
-                        <span>React components</span>
-                        <span>JCC payments</span>
-                        <span>Git workflow</span>
-                    </div>
                 </div>
             </section>
+
         </main>
 
         <footer class="deck-footer">
