@@ -69,6 +69,9 @@ $resetConfig = [
                         <input type="password" id="new-password" placeholder="Νέος κωδικός" minlength="8" required>
                         <span id="new-password-toggle"></span>
                     </div>
+                    <p class="password-format-help">
+                        8+ χαρακτήρες με γράμμα, αριθμό και ειδικό χαρακτήρα. Χωρίς κενά.
+                    </p>
 
                     <p id="confirm-password-label">Επιβεβαίωση νέου κωδικού:</p>
                     <div class="password-input-wrapper">
