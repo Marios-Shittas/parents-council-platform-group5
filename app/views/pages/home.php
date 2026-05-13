@@ -111,7 +111,7 @@ if (!function_exists('home_public_content_url_exists')) {
 
         foreach ($defaultHomeBannerSlides as $index => $defaultSlide) {
             $storedSlide = is_array($storedHomeBannerSlides[$index] ?? null) ? $storedHomeBannerSlides[$index] : [];
-            if (!empty($storedSlide['hidden'])) {
+            if (!empty($storedSlide['hidden']) || !empty($storedSlide['deleted'])) {
                 continue;
             }
 
