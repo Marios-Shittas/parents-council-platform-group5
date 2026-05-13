@@ -28,6 +28,7 @@ const APP_META = [
 ];
 
 var MAX_SUBMISSION_FILES = 4;
+var MAX_SUBMISSION_FILE_SIZE = 12 * 1024 * 1024;
 var ALLOWED_SUBMISSION_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
 var SUBMISSION_MODE_LABELS = {
     manual: 'Online Συμπλήρωση',
@@ -679,10 +680,49 @@ document.addEventListener('DOMContentLoaded', function () {
     var viewManualPanel = document.getElementById('application-view-manual-panel');
     var viewUploadPanel = document.getElementById('application-view-upload-panel');
     var unavailableMessageEl = document.getElementById('application-unavailable-message');
-    var applicationNoticeBox = null;
-    var applicationNoticeBackdrop = null;
-    var applicationNoticeMessage = null;
-    var applicationNoticeClose = null;
+    var applicationNoticeBox = document.getElementById('application-notice-modal');
+    var applicationNoticeMessage = document.getElementById('application-notice-message');
+    var applicationNoticeClose = document.getElementById('application-notice-close');
+
+    function ensureApplicationNoticeModal() {
+        applicationNoticeBox = document.getElementById('application-notice-modal');
+        applicationNoticeMessage = document.getElementById('application-notice-message');
+        applicationNoticeClose = document.getElementById('application-notice-close');
+
+        if (applicationNoticeBox && applicationNoticeMessage) {
+            return true;
+        }
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'modal fade';
+        wrapper.id = 'application-notice-modal';
+        wrapper.setAttribute('tabindex', '-1');
+        wrapper.setAttribute('role', 'dialog');
+        wrapper.setAttribute('aria-hidden', 'true');
+        wrapper.innerHTML = '' +
+            '<div class="modal-dialog modal-dialog-centered" role="document">' +
+                '<div class="modal-content application-notice-modal-content">' +
+                    '<div class="modal-body text-center">' +
+                        '<div class="application-notice-icon"><i class="fas fa-info-circle" aria-hidden="true"></i></div>' +
+                        '<p class="mb-0" id="application-notice-message">Σφάλμα.</p>' +
+                    '</div>' +
+                    '<div class="modal-footer">' +
+                        '<button type="button" class="btn btn-primary btn-sm px-4" id="application-notice-close" data-dismiss="modal">OK</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(wrapper);
+
+        applicationNoticeBox = wrapper;
+        applicationNoticeMessage = document.getElementById('application-notice-message');
+        applicationNoticeClose = document.getElementById('application-notice-close');
+
+        if (applicationNoticeClose) {
+            applicationNoticeClose.addEventListener('click', hideCenterNotice);
+        }
+
+        return Boolean(applicationNoticeBox && applicationNoticeMessage);
+    }
 
     document.addEventListener('input', function (event) {
         var target = event.target;
@@ -696,21 +736,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function hideCenterNotice() {}
+    function hideCenterNotice() {
+        if (typeof window.hideApplicationNotice === 'function') {
+            window.hideApplicationNotice();
+            return;
+        }
+
+        if (applicationNoticeBox && window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+            window.jQuery(applicationNoticeBox).modal('hide');
+        }
+    }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function showCenterNotice(messageText) {
-        if (!applicationNoticeBox || !applicationNoticeMessage || !applicationNoticeBackdrop) {
-            window.alert(messageText || 'Σφάλμα.');
+        if (typeof window.showApplicationNotice === 'function') {
+            window.showApplicationNotice(messageText || 'Σφάλμα.');
+            return;
+        }
+
+        if (!ensureApplicationNoticeModal()) {
             return;
         }
 
         applicationNoticeMessage.textContent = messageText || 'Σφάλμα.';
-        applicationNoticeBackdrop.classList.add('is-visible');
-        applicationNoticeBox.classList.add('is-visible');
-
-        if (applicationNoticeClose) {
-            applicationNoticeClose.focus();
+        if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+            window.jQuery(applicationNoticeBox).modal('show');
         }
     }
 
@@ -718,12 +768,8 @@ document.addEventListener('DOMContentLoaded', function () {
         applicationNoticeClose.addEventListener('click', hideCenterNotice);
     }
 
-    if (applicationNoticeBackdrop) {
-        applicationNoticeBackdrop.addEventListener('click', hideCenterNotice);
-    }
-
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && applicationNoticeBox && applicationNoticeBox.classList.contains('is-visible')) {
+        if (event.key === 'Escape' && applicationNoticeBox && applicationNoticeBox.classList.contains('show')) {
             hideCenterNotice();
         }
     });
@@ -841,6 +887,10 @@ document.addEventListener('DOMContentLoaded', function () {
             var ext = fileName.indexOf('.') !== -1 ? fileName.split('.').pop().toLowerCase() : '';
             if (ALLOWED_SUBMISSION_EXTENSIONS.indexOf(ext) === -1) {
                 return 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.';
+            }
+
+            if (Number(selectedFiles[i].size || 0) > MAX_SUBMISSION_FILE_SIZE) {
+                return 'Το αρχείο "' + fileName + '" είναι πολύ μεγάλο. Μέγιστο μέγεθος: 12MB.';
             }
         }
 
@@ -1243,11 +1293,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: body
             })
             .then(function (res) {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + String(res.status));
+                }
+
                 return res.text().then(function (text) {
                     try {
                         return JSON.parse(text);
                     } catch (parseError) {
-                        throw new Error(text ? text.slice(0, 260) : 'Empty response');
+                        throw new Error('Invalid JSON response');
                     }
                 });
             })
@@ -1281,10 +1335,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                 });
             })
-            .catch(function () {
+            .catch(function (error) {
                 viewModalSubmitBtn.disabled = false;
                 setApplicationSubmitButtonText(selectedMode);
-                showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
+                var message = error && error.message === 'Invalid JSON response'
+                    ? 'Η υποβολή απέτυχε. Ελέγξτε ότι το αρχείο δεν ξεπερνά τα 12MB και δοκιμάστε ξανά.'
+                    : 'Η υποβολή απέτυχε. Παρακαλώ δοκιμάστε ξανά.';
+                showCenterNotice(message);
             });
         });
     }
@@ -1450,11 +1507,15 @@ document.addEventListener('DOMContentLoaded', function () {
             body:    body
         })
         .then(function (res) {
+            if (!res.ok) {
+                throw new Error('HTTP ' + String(res.status));
+            }
+
             return res.text().then(function (text) {
                 try {
                     return JSON.parse(text);
                 } catch (parseError) {
-                    throw new Error(text ? text.slice(0, 260) : 'Empty response');
+                    throw new Error('Invalid JSON response');
                 }
             });
         })
@@ -1490,7 +1551,10 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(function (err) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i> Υποβολή';
-            showCenterNotice('Σφάλμα δικτύου. Βεβαιωθείτε ότι ο διακομιστής τρέχει και δοκιμάστε ξανά.');
+            var message = err && err.message === 'Invalid JSON response'
+                ? 'Η υποβολή απέτυχε. Ελέγξτε ότι το αρχείο δεν ξεπερνά τα 12MB και δοκιμάστε ξανά.'
+                : 'Η υποβολή απέτυχε. Παρακαλώ δοκιμάστε ξανά.';
+            showCenterNotice(message);
         });
     });
 

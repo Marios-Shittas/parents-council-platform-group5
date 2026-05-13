@@ -854,24 +854,44 @@
             overflow-y: auto;
         }
 
-        #aitisi-unavailable-modal .modal-content {
+        #application-unavailable-modal .modal-content,
+        #application-notice-modal .modal-content {
             border: 0;
             border-radius: 14px;
             box-shadow: 0 14px 40px rgba(15, 31, 50, 0.2);
         }
 
-        #aitisi-unavailable-modal .modal-body {
+        #application-unavailable-modal .modal-body,
+        #application-notice-modal .modal-body {
             padding: 1.4rem 1.2rem 1rem;
             text-align: center;
             color: #1f3550;
             font-weight: 700;
         }
 
-        #aitisi-unavailable-modal .modal-footer {
+        #application-unavailable-modal .modal-footer,
+        #application-notice-modal .modal-footer {
             border-top: 0;
             justify-content: center;
             padding-top: 0;
             padding-bottom: 1rem;
+        }
+
+        .application-notice-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e8f2ff;
+            color: #1f7aec;
+            font-size: 1.25rem;
+        }
+
+        #application-notice-modal.application-notice-fallback.show {
+            background: rgba(0, 0, 0, 0.55);
         }
 
         #modal-submission-file {
