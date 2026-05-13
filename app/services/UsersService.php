@@ -223,8 +223,65 @@ class UsersService
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function runScheduledSubmissionsCleanup(): int
     {
-        // System actions were intentionally disabled.
-        return 0;
+        $stmt = $this->conn->prepare(
+            "SELECT ss_id, feature, start_date, end_date, ss_status
+             FROM SystemSchedule
+             WHERE feature = 'cleanup_submissions'
+             ORDER BY start_date ASC, ss_id ASC"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $schedules = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        if (empty($schedules)) {
+            return 0;
+        }
+
+        $now = time();
+        $deletedCount = 0;
+
+        foreach ($schedules as $schedule) {
+            $status = (string)($schedule['ss_status'] ?? 'inactive');
+            if ($status !== 'active') {
+                continue;
+            }
+
+            $startTs = !empty($schedule['start_date']) ? strtotime((string)$schedule['start_date']) : false;
+            $endTs = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : false;
+
+            if ($startTs === false || $endTs === false) {
+                continue;
+            }
+
+            // Add grace period to handle multiple cron runs
+            $endTs = $endTs + 600;
+
+            if ($now >= $startTs && $now <= $endTs) {
+                // Within the scheduled window, proceed with cleanup
+                // Delete old or incomplete submissions (submitted before the end date)
+                $cleanupStmt = $this->conn->prepare(
+                    "DELETE FROM ApplicationSubmissions 
+                     WHERE submitted_at < DATE_SUB(?, INTERVAL 1 DAY)
+                     OR status IN ('draft', 'incomplete', 'rejected')"
+                );
+
+                if ($cleanupStmt) {
+                    $endDate = date('Y-m-d H:i:s', $endTs);
+                    $cleanupStmt->bind_param("s", $endDate);
+                    $cleanupStmt->execute();
+                    $deletedCount += $cleanupStmt->affected_rows;
+                    $cleanupStmt->close();
+                }
+            }
+        }
+
+        return $deletedCount;
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
