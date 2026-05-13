@@ -220,7 +220,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                     <div class="col-md-6 mb-3">
                         <div class="mb-2">
                             <strong>🗑️ Διαγραφή Χρηστών:</strong>
-                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών για καθαρισμό του συστήματος.</p>
+                            <p class="mb-0 text-muted small">Ορίστε χρονικό παράθυρο για αυτόματη διαγραφή χρηστών. <strong>Απαιτείται cron job</strong> για ενεργοποίηση.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -237,7 +237,7 @@ $registrationSchedules = $usersService->getSystemSchedules();
                     <thead>
                     <tr>
                         <th>Λειτουργία</th>
-                        <th>Έναρξη</th>
+                        <th></th>Έναρξη</th>
                         <th>Λήξη</th>
                         <th>Κατάσταση</th>
                         <th>Ενέργεια</th>
@@ -374,11 +374,150 @@ $registrationSchedules = $usersService->getSystemSchedules();
     </div>
 </div>
 
+<div class="modal fade" id="deleteUsersWarningModal" tabindex="-1" aria-labelledby="deleteUsersWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="deleteUsersWarningModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i><span id="modalTitle">ΕΠΙΒΕΒΑΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΥ</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Κλείσιμο"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3" role="alert">
+                    <strong>⚠️ Σίγουρος/η;</strong><br>
+                    <span id="modalDescription">Πρόκειται να αποθηκεύσετε ένα πρόγραμμα.</span>
+                </div>
+                <p class="mb-2"><strong>Τι θα συμβεί:</strong></p>
+                <ul class="mb-3" id="modalDetails">
+                    <li>Το πρόγραμμα θα ενεργοποιηθεί</li>
+                </ul>
+                <label class="form-check">
+                    <input type="checkbox" class="form-check-input" id="deleteUsersConfirmCheckbox">
+                    <span class="form-check-label" id="checkboxLabel">Κατανοώ τις συνέπειες και θέλω να αποθηκεύσω αυτό το πρόγραμμα</span>
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteUsersButton" disabled>
+                    <i class="fas fa-save me-1"></i>Ναι, Αποθήκευση Προγράμματος
+                </button>
+                <input type="hidden" id="pendingFormToSubmit" value="">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel" src="../assets/js/admin-programatismo-litourgion.jsx"></script>
 <script src="../assets/js/admin-programatismo-litourgion-page.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteUsersWarningModal = new bootstrap.Modal(document.getElementById('deleteUsersWarningModal'));
+    const deleteUsersConfirmCheckbox = document.getElementById('deleteUsersConfirmCheckbox');
+    const confirmDeleteUsersButton = document.getElementById('confirmDeleteUsersButton');
+    let pendingForm = null;
+    
+    // Feature-specific content for modal
+    const featureContent = {
+        'registration': {
+            title: 'ΕΠΙΒΕΒΑΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΥ ΕΓΓΡΑΦΩΝ',
+            description: 'Πρόκειται να αποθηκεύσετε ένα πρόγραμμα για <strong>χρονικό παράθυρο εγγραφών</strong>.',
+            details: [
+                'Το πρόγραμμα θα ενεργοποιηθεί όταν φτάσει η προκαθορισμένη ημερομηνία/ώρα',
+                'Γονείς θα μπορούν να κάνουν εγγραφή/ενημέρωση ΜΟΝΟ κατά τη διάρκεια του χρονικού παραθύρου',
+                'Εξωτερικά του παραθύρου, η εγγραφή θα είναι απενεργοποιημένη'
+            ]
+        },
+        'delete_users': {
+            title: 'ΕΠΙΒΕΒΑΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΥ ΔΙΑΓΡΑΦΗΣ',
+            description: 'Πρόκειται να αποθηκεύσετε ένα πρόγραμμα για <strong>αυτόματη διαγραφή χρηστών</strong>.',
+            details: [
+                'Το πρόγραμμα θα ενεργοποιηθεί όταν φτάσει η προκαθορισμένη ημερομηνία/ώρα',                'Ως την ημερομηνία λήξης που ορίσατε θα πραγματοποιηθεί καθαρισμός των χρηστών <strong style="color: red;">(SOS!)</strong>',                'Θα διαγραφούν όλοι οι ανενεργοί γονείς (non-active status)',
+                'Θα διαγραφούν όλα τα σχετικά δεδομένα: παιδιά',
+                'Η διαγραφή είναι <strong>μη αναστρέψιμη</strong> ⚠️'
+            ]
+        },
+        'cleanup_submissions': {
+            title: 'ΕΠΙΒΕΒΑΙΩΣΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΥ ΚΑΘΑΡΙΣΜΟΥ',
+            description: 'Πρόκειται να αποθηκεύσετε ένα πρόγραμμα για <strong>αυτόματο καθαρισμό υποβολών</strong>.',
+            details: [
+                'Το πρόγραμμα θα ενεργοποιηθεί όταν φτάσει η προκαθορισμένη ημερομηνία/ώρα',
+                'Θα διαγραφούν <strong>παλαιές υποβολές</strong> που υποβλήθηκαν πριν από την ημερομηνία λήξης',
+                'Θα διαγραφούν <strong>ημιτελές υποβολές</strong> (status: draft, incomplete, rejected)',
+                'Ο καθαρισμός είναι <strong>μη αναστρέψιμος</strong> ⚠️',
+                'Συνιστάται μετά την περίοδο εγγραφών για τον καθαρισμό του συστήματος'
+            ]
+        }
+    };
+    
+    // Update button state based on checkbox
+    deleteUsersConfirmCheckbox.addEventListener('change', function() {
+        confirmDeleteUsersButton.disabled = !this.checked;
+    });
+    
+    // Handle confirmation button click - actually submit the form
+    confirmDeleteUsersButton.addEventListener('click', function() {
+        if (pendingForm) {
+            deleteUsersWarningModal.hide();
+            pendingForm.dataset.bypassModal = 'true';
+            pendingForm.submit();
+        }
+    });
+    
+    // Use event delegation to catch ALL form submissions
+    document.addEventListener('submit', function(e) {
+        const form = e.target;
+        
+        // Only process registration-schedule-form
+        if (!form.classList.contains('registration-schedule-form')) {
+            return;
+        }
+        
+        // If already confirmed, allow submission
+        if (form.dataset.bypassModal === 'true') {
+            form.dataset.bypassModal = '';
+            return;
+        }
+        
+        // Find the select using the form attribute
+        const featureSelect = document.querySelector(`select[name="schedule_feature"][form="${form.id}"]`);
+        if (!featureSelect) {
+            return;
+        }
+        
+        const selectedFeature = featureSelect.value;
+        
+        // BLOCK ALL submissions and show feature-specific modal
+        if (featureContent[selectedFeature]) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            // Update modal with feature-specific content
+            const content = featureContent[selectedFeature];
+            document.getElementById('modalTitle').textContent = content.title;
+            document.getElementById('modalDescription').innerHTML = content.description;
+            
+            const detailsList = document.getElementById('modalDetails');
+            detailsList.innerHTML = content.details.map(detail => `<li>${detail}</li>`).join('');
+            
+            // Reset checkbox and button
+            deleteUsersConfirmCheckbox.checked = false;
+            confirmDeleteUsersButton.disabled = true;
+            
+            // Store form and show modal
+            pendingForm = form;
+            deleteUsersWarningModal.show();
+            
+            return false;
+        }
+    }, true); // Capture phase
+});
+</script>
 </body>
 </html>
