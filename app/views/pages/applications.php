@@ -109,6 +109,18 @@ function getUploadedSubmissionDisplayName(string $fileName): string {
     return basename(str_replace('\\', '/', $fileName));
 }
 
+function getSubmissionUploadErrorMessage(int $errorCode): string {
+    if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+        return 'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 12MB.';
+    }
+
+    if ($errorCode === UPLOAD_ERR_PARTIAL) {
+        return 'Το αρχείο ανέβηκε μόνο μερικώς. Παρακαλώ δοκιμάστε ξανά.';
+    }
+
+    return 'Σφάλμα ανεβάσματος αρχείου. Παρακαλώ δοκιμάστε ξανά.';
+}
+
 // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
 function getApplicationDocumentDisplayNamesPathPublic(): string {
     return __DIR__ . '/../../../storage/application_document_display_names.json';
@@ -335,8 +347,10 @@ $messageType = 'info';
 
 $uploadDir = __DIR__ . '/../../../storage/uploads/submissions/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    @mkdir($uploadDir, 0777, true);
 }
+@chmod($uploadDir, 0777);
+$maxSubmissionFileBytes = 12 * 1024 * 1024;
 
 /*
  |------------------------------------------------------------
@@ -483,7 +497,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
 
                 ob_end_clean();
                 header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['success' => false, 'message' => 'Σφάλμα ανεβάσματος αρχείου.']);
+                echo json_encode(['success' => false, 'message' => getSubmissionUploadErrorMessage($fileError)]);
                 exit;
             }
 
@@ -498,6 +512,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit_v2'])) {
                 ob_end_clean();
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['success' => false, 'message' => 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.']);
+                exit;
+            }
+
+            if ((int)($file['size'] ?? 0) > $maxSubmissionFileBytes) {
+                foreach ($uploadedAbsPaths as $path) {
+                    if (is_file($path)) {
+                        unlink($path);
+                    }
+                }
+
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 12MB.']);
+                exit;
+            }
+
+            if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
+                foreach ($uploadedAbsPaths as $path) {
+                    if (is_file($path)) {
+                        unlink($path);
+                    }
+                }
+
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Ο φάκελος αποθήκευσης δεν είναι διαθέσιμος. Παρακαλώ δοκιμάστε ξανά αργότερα.']);
                 exit;
             }
 
@@ -653,7 +693,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
             if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
                 ob_end_clean();
                 header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['success' => false, 'message' => 'Σφάλμα ανεβάσματος αρχείου.']);
+                echo json_encode(['success' => false, 'message' => getSubmissionUploadErrorMessage((int)($file['error'] ?? UPLOAD_ERR_NO_FILE))]);
                 exit;
             }
 
@@ -663,6 +703,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_submit'])) {
                 ob_end_clean();
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['success' => false, 'message' => 'Επιτρεπόμενοι τύποι αρχείων: pdf, doc, docx, jpg, jpeg, png.']);
+                exit;
+            }
+
+            if ((int)($file['size'] ?? 0) > $maxSubmissionFileBytes) {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Το αρχείο είναι πολύ μεγάλο. Μέγιστο μέγεθος: 12MB.']);
+                exit;
+            }
+
+            if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
+                ob_end_clean();
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['success' => false, 'message' => 'Ο φάκελος αποθήκευσης δεν είναι διαθέσιμος. Παρακαλώ δοκιμάστε ξανά αργότερα.']);
                 exit;
             }
 
@@ -814,7 +868,100 @@ $appliedIds = array_map('intval', array_column($mySubmissions, 'application_id')
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/public-page-header.css'); ?>">
     <link rel="stylesheet" href="<?php echo site_asset_url('css/user_css/applications.css'); ?>?v=<?php echo (int)(@filemtime(__DIR__ . '/../../../public/assets/css/user_css/applications.css') ?: time()); ?>">
 
-    
+    <script>
+        (function () {
+            function ensureNoticeModal() {
+                var modal = document.getElementById('application-notice-modal');
+                if (modal) {
+                    return modal;
+                }
+
+                if (!document.body) {
+                    return null;
+                }
+
+                modal = document.createElement('div');
+                modal.className = 'modal fade application-notice-fallback';
+                modal.id = 'application-notice-modal';
+                modal.setAttribute('tabindex', '-1');
+                modal.setAttribute('role', 'dialog');
+                modal.setAttribute('aria-hidden', 'true');
+                modal.innerHTML = '' +
+                    '<div class="modal-dialog modal-dialog-centered" role="document">' +
+                        '<div class="modal-content application-notice-modal-content">' +
+                            '<div class="modal-body text-center">' +
+                                '<div class="application-notice-icon"><i class="fas fa-info-circle" aria-hidden="true"></i></div>' +
+                                '<p class="mb-0" id="application-notice-message">Σφάλμα.</p>' +
+                            '</div>' +
+                            '<div class="modal-footer">' +
+                                '<button type="button" class="btn btn-primary btn-sm px-4" id="application-notice-close">OK</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(modal);
+                return modal;
+            }
+
+            window.showApplicationNotice = function (message) {
+                var modal = ensureNoticeModal();
+                if (!modal) {
+                    window.__pendingApplicationNotice = message || 'Σφάλμα.';
+                    return;
+                }
+
+                var messageEl = document.getElementById('application-notice-message');
+                if (messageEl) {
+                    messageEl.textContent = message || 'Σφάλμα.';
+                }
+
+                if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+                    window.jQuery(modal).modal('show');
+                    return;
+                }
+
+                modal.classList.add('show');
+                modal.style.display = 'block';
+                modal.removeAttribute('aria-hidden');
+                modal.setAttribute('aria-modal', 'true');
+                document.body.classList.add('modal-open');
+            };
+
+            window.hideApplicationNotice = function () {
+                var modal = document.getElementById('application-notice-modal');
+                if (!modal) {
+                    return;
+                }
+
+                if (window.jQuery && typeof window.jQuery.fn.modal === 'function') {
+                    window.jQuery(modal).modal('hide');
+                    return;
+                }
+
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                modal.removeAttribute('aria-modal');
+                document.body.classList.remove('modal-open');
+            };
+
+            window.alert = function (message) {
+                window.showApplicationNotice(message || 'Σφάλμα.');
+            };
+
+            document.addEventListener('click', function (event) {
+                if (event.target && event.target.id === 'application-notice-close') {
+                    window.hideApplicationNotice();
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.__pendingApplicationNotice) {
+                    window.showApplicationNotice(window.__pendingApplicationNotice);
+                    window.__pendingApplicationNotice = '';
+                }
+            });
+        })();
+    </script>
 
     <title>Αιτήσεις - Γυμνάσιο Αγίου Αθανασίου</title>
 </head>
@@ -1225,6 +1372,22 @@ include __DIR__ . '/../../includes/public_page_header.php';
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary btn-sm px-4" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="application-notice-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content application-notice-modal-content">
+            <div class="modal-body text-center">
+                <div class="application-notice-icon">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                </div>
+                <p class="mb-0" id="application-notice-message">Σφάλμα.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm px-4" id="application-notice-close" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
