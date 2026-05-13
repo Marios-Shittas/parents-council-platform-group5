@@ -102,6 +102,20 @@ body {
     object-fit: cover;
 }
 
+.home-banner-admin-preview__empty {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    color: #63758d;
+    font-weight: 700;
+}
+
+.home-banner-admin-preview__empty i {
+    color: #8fa3ba;
+}
+
 .home-banner-remove-check {
     display: inline-flex;
     align-items: center;
