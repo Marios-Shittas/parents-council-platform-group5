@@ -142,12 +142,17 @@ class UsersService
     public function runScheduledMaintenanceWithReport(): array
     {
         $deletedUsers = $this->runScheduledUsersCleanup();
-        $deletedSubmissions = $this->runScheduledSubmissionsCleanup();
 
         return [
             'deleted_users' => $deletedUsers,
-            'deleted_submissions' => $deletedSubmissions,
+            'deleted_submissions' => 0,
         ];
+    }
+
+    // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
+    public function runScheduledSubmissionCleanup(): int
+    {
+        return $this->runScheduledSubmissionsCleanup();
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -264,16 +269,13 @@ class UsersService
 
             if ($now >= $startTs && $now <= $endTs) {
                 // Within the scheduled window, proceed with cleanup
-                // Delete old or incomplete submissions (submitted before the end date)
+                // Delete incomplete submissions (waiting or rejected)
                 $cleanupStmt = $this->conn->prepare(
-                    "DELETE FROM ApplicationSubmissions 
-                     WHERE submitted_at < DATE_SUB(?, INTERVAL 1 DAY)
-                     OR status IN ('draft', 'incomplete', 'rejected')"
+                    "DELETE FROM Submissions 
+                     WHERE sub_status IN ('waiting', 'rejected')"
                 );
 
                 if ($cleanupStmt) {
-                    $endDate = date('Y-m-d H:i:s', $endTs);
-                    $cleanupStmt->bind_param("s", $endDate);
                     $cleanupStmt->execute();
                     $deletedCount += $cleanupStmt->affected_rows;
                     $cleanupStmt->close();

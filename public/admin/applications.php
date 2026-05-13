@@ -26,7 +26,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 require_once __DIR__ . '/../../app/services/ApplicationsService.php';
 require_once __DIR__ . '/../../app/services/ApplicationTemplateService.php';
+require_once __DIR__ . '/../../app/services/UsersService.php';
 require_once __DIR__ . '/../../app/config/db.php';
+
+// Trexei to cleanup submissions otan anigei i applications page
+$usersService = new UsersService();
+$usersService->runScheduledSubmissionCleanup();
 
 // Arxikopoiei ta services
 // ApplicationsService kanei CRUD stis aitiseis, ApplicationTemplateService xeirizetai ta reusable templates.
