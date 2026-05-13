@@ -591,6 +591,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hideSlide = isset($_POST["banner_{$i}_hide"]) && $_POST["banner_{$i}_hide"] === '1';
                     $deleteSlide = isset($_POST["banner_{$i}_delete"]) && $_POST["banner_{$i}_delete"] === '1';
                     [$uploadedPath, $uploadError] = adminHomeUploadBannerImage("banner_{$i}_image", $existingPath);
+                    $hasNewUpload = $uploadedPath !== $existingPath && $uploadedPath !== '';
 
                     if ($uploadError !== '') {
                         $bannerErrors[] = $uploadError;
@@ -603,7 +604,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'alt' => trim((string)($existingSlide['alt'] ?? '')) !== ''
                                 ? (string)$existingSlide['alt']
                                 : 'Εικόνα αρχικής σελίδας ' . $i,
-                            'hidden' => false,
+                            'hidden' => true,
+                            'deleted' => true,
                         ];
                         continue;
                     }
@@ -614,6 +616,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ? (string)$existingSlide['alt']
                             : 'Εικόνα αρχικής σελίδας ' . $i,
                         'hidden' => $hideSlide,
+                        'deleted' => !$hasNewUpload && $uploadedPath === '' && !empty($existingSlide['deleted']),
                     ];
                 }
 
@@ -823,8 +826,9 @@ $bannerSlidesForEditor = [];
 for ($i = 0; $i < 3; $i++) {
     $storedSlide = is_array($bannerContentSection['content']['slides'][$i] ?? null) ? $bannerContentSection['content']['slides'][$i] : [];
     $defaultSlide = $defaultBannerSlides[$i];
-    $slideSrc = trim((string)($storedSlide['src'] ?? $defaultSlide['src']));
-    if ($slideSrc === '' || !adminHomePublicContentUrlExists($slideSrc)) {
+    $isDeleted = !empty($storedSlide['deleted']);
+    $slideSrc = $isDeleted ? '' : trim((string)($storedSlide['src'] ?? $defaultSlide['src']));
+    if (!$isDeleted && ($slideSrc === '' || !adminHomePublicContentUrlExists($slideSrc))) {
         $slideSrc = $defaultSlide['src'];
     }
 
@@ -832,6 +836,7 @@ for ($i = 0; $i < 3; $i++) {
         'src' => $slideSrc,
         'alt' => trim((string)($storedSlide['alt'] ?? $defaultSlide['alt'])),
         'hidden' => !empty($storedSlide['hidden']),
+        'deleted' => $isDeleted,
     ];
 }
 
@@ -967,7 +972,14 @@ $calendarPayload = [
                                     <input type="hidden" name="current_banner_<?php echo $index + 1; ?>_src" value="<?php echo htmlspecialchars($slide['src']); ?>">
 
                                     <div class="home-banner-admin-preview">
-                                        <img src="<?php echo htmlspecialchars($slide['src']); ?>" alt="<?php echo htmlspecialchars($slide['alt']); ?>">
+                                        <?php if (trim((string)$slide['src']) !== ''): ?>
+                                            <img src="<?php echo htmlspecialchars($slide['src']); ?>" alt="<?php echo htmlspecialchars($slide['alt']); ?>">
+                                        <?php else: ?>
+                                            <div class="home-banner-admin-preview__empty">
+                                                <i class="fas fa-image"></i>
+                                                <span>Δεν υπάρχει εικόνα</span>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
 
                                     <div class="form-group mb-3">

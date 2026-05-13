@@ -16,6 +16,39 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 	exit;
 }
 
+// Xeirizetai AJAX request gia fortosi orders apo tin idia selida, oste na douleuei se localhost kai deployed paths.
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'get_orders') {
+	require_once __DIR__ . '/../../app/config/db.php';
+	require_once __DIR__ . '/../../app/services/OrdersService.php';
+
+	header('Content-Type: application/json; charset=utf-8');
+
+	try {
+		$testResult = $conn->query("SHOW COLUMNS FROM Orders LIKE 'admin_seen_at'");
+		if (!$testResult || $testResult->num_rows === 0) {
+			if (!$conn->query("ALTER TABLE Orders ADD COLUMN admin_seen_at datetime DEFAULT NULL")) {
+				throw new RuntimeException('Failed to create admin_seen_at column: ' . $conn->error);
+			}
+		}
+
+		$ordersService = new OrdersService($conn);
+		$ordersService->handleRequest();
+	} catch (Throwable $e) {
+		http_response_code(500);
+		echo json_encode([
+			'success' => false,
+			'message' => $e->getMessage(),
+		], JSON_UNESCAPED_UNICODE);
+		error_log('Orders page API error: ' . $e->getMessage());
+	}
+
+	if (isset($conn) && $conn instanceof mysqli) {
+		$conn->close();
+	}
+
+	exit;
+}
+
 // Xeirizetai AJAX requests gia mark_order_seen
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 	$action = $_POST['action'];
@@ -134,6 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-	<script type="text/babel" src="../assets/js/admin-orders.jsx?v=7"></script>
+	<script type="text/babel" src="../assets/js/admin-orders.jsx?v=9"></script>
 </body>
 </html>
