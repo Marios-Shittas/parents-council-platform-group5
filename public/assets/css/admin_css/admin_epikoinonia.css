@@ -1364,3 +1364,8 @@ textarea.form-control {
     min-width: 100px;
     padding: 8px 16px;
 }
+
+#cancelBtn {
+    justify-content: center;
+    text-align: center;
+}
