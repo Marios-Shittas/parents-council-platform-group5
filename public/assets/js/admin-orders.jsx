@@ -28,6 +28,21 @@ function formatDateTime(dateValue) {
     }).format(date);
 }
 
+function getOrdersPageUrl() {
+    return window.location.pathname;
+}
+
+async function readJsonResponse(response) {
+    const text = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+
+    if (!contentType.includes('application/json')) {
+        throw new Error('Το server επέστρεψε HTML αντί για JSON. Ελέγξτε ότι είστε συνδεδεμένοι ως admin και ότι το Orders.php είναι σωστά ανεβασμένο στο deployed.');
+    }
+
+    return text ? JSON.parse(text) : {};
+}
+
 function markOrderAsSeenOnHover(row, updateCallback) {
     const orderId = row.order_id;
     
@@ -35,7 +50,7 @@ function markOrderAsSeenOnHover(row, updateCallback) {
     payload.append('action', 'mark_order_seen');
     payload.append('order_id', orderId);
 
-    fetch('/parents-council-platform-group5/public/admin/Orders.php', {
+    fetch(getOrdersPageUrl(), {
         method: 'POST',
         credentials: 'include',
         body: payload
@@ -106,7 +121,7 @@ function AdminOrdersPage() {
     }, []);
 
     const loadOrders = React.useCallback(() => {
-        const endpoint = '/parents-council-platform-group5/app/api/get-orders.php';
+        const endpoint = `${getOrdersPageUrl()}?action=get_orders`;
 
         setLoading(true);
 
@@ -114,8 +129,7 @@ function AdminOrdersPage() {
             credentials: 'include'
         })
             .then(async (response) => {
-                const text = await response.text();
-                const data = text ? JSON.parse(text) : {};
+                const data = await readJsonResponse(response);
 
                 if (!response.ok || !data.success) {
                     throw new Error(data.message || 'Αποτυχία φόρτωσης πληρωμένων παραγγελιών.');
@@ -170,13 +184,13 @@ function AdminOrdersPage() {
         setClearLoading(true);
         setFeedback(null);
 
-        fetch('/parents-council-platform-group5/public/admin/Orders.php', {
+        fetch(getOrdersPageUrl(), {
             method: 'POST',
             credentials: 'include',
             body: formData
         })
             .then(async (response) => {
-                const data = await response.json();
+                const data = await readJsonResponse(response);
 
                 if (!response.ok || !data.success) {
                     throw new Error(data.message || 'Αποτυχία καθαρισμού ιστορικού.');
@@ -347,7 +361,7 @@ function AdminOrdersPage() {
                                                 <i className={`fas fa-chevron-${expandedOrderId === order.order_id ? 'down' : 'right'}`}></i>
                                             </td>
                                             <td>
-                                                #{paraggelia.order_id}
+                                                #{order.order_id}
                                                 {order.is_unseen && (
                                                     <span className="order-new-badge" style={{marginLeft: '8px', fontSize: '11px', backgroundColor: '#dc3545', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold'}}>
                                                         ΝΕΑ
