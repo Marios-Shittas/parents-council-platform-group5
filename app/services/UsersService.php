@@ -153,8 +153,71 @@ class UsersService
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     private function runScheduledUsersCleanup(): int
     {
-        // System actions were intentionally disabled.
-        return 0;
+        $stmt = $this->conn->prepare(
+            "SELECT ss_id, feature, start_date, end_date, ss_status
+             FROM SystemSchedule
+             WHERE feature = 'delete_users'
+             ORDER BY start_date ASC, ss_id ASC"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $schedules = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+
+        if (empty($schedules)) {
+            return 0;
+        }
+
+        $now = time();
+        $deletedCount = 0;
+
+        foreach ($schedules as $schedule) {
+            $status = (string)($schedule['ss_status'] ?? 'inactive');
+            if ($status !== 'active') {
+                continue;
+            }
+
+            $startTs = !empty($schedule['start_date']) ? strtotime((string)$schedule['start_date']) : false;
+            $endTs = !empty($schedule['end_date']) ? strtotime((string)$schedule['end_date']) : false;
+
+            if ($startTs === false || $endTs === false) {
+                continue;
+            }
+
+            // For delete_users, add grace period to handle multiple cron runs
+            $endTs = $endTs + 600;
+
+            if ($now >= $startTs && $now <= $endTs) {
+                // Within the scheduled window, proceed with deletion
+                $deleteStmt = $this->conn->prepare(
+                    "SELECT user_id, email FROM Users WHERE role = 'parent' AND account_status != 'active'"
+                );
+
+                if (!$deleteStmt) {
+                    continue;
+                }
+
+                $deleteStmt->execute();
+                $deleteResult = $deleteStmt->get_result();
+                $usersToDelete = $deleteResult ? $deleteResult->fetch_all(MYSQLI_ASSOC) : [];
+                $deleteStmt->close();
+
+                foreach ($usersToDelete as $userToDelete) {
+                    $userId = (int)($userToDelete['user_id'] ?? 0);
+                    if ($userId > 0) {
+                        $this->deleteUserByAdmin($userId, null);
+                        $deletedCount++;
+                    }
+                }
+            }
+        }
+
+        return $deletedCount;
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
