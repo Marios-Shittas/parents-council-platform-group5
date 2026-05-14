@@ -813,7 +813,7 @@ $announcements = $announcementsService->getAllAnnouncements();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="../assets/js/app-page-config.js" data-config="<?php echo htmlspecialchars(json_encode(['ADMIN_ANNOUNCEMENT_IMAGE_LIMIT' => ANNOUNCEMENT_IMAGE_LIMIT], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></script>
-<script src="../assets/js/admin-announcements.js"></script>
+<script src="../assets/js/admin-announcements.js?v=<?php echo (int)(@filemtime(__DIR__ . '/../assets/js/admin-announcements.js') ?: time()); ?>"></script>
 
 </body>
 </html>
