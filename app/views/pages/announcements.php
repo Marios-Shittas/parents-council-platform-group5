@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
 
 $announcementsService = new AnnouncementsService();
 $announcements = $announcementsService->getAllAnnouncements();
-$defaultImage = site_asset_url('img/placeholder.jpg');
+$defaultImage = site_asset_url('img/content-placeholder.svg');
 ?>
 <!DOCTYPE html>
 <html lang="el">

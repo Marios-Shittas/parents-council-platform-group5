@@ -22,7 +22,7 @@ $isPast        = $eventDateTime < new DateTime();
                     <div class="carousel-inner">
                         <?php foreach ($images as $i => $img): ?>
                             <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
-                                <img src="<?php echo htmlspecialchars($img); ?>"
+                                <img src="<?php echo htmlspecialchars($img !== '' ? $img : $defaultImage); ?>"
                                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
                                      onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                             </div>
@@ -36,7 +36,7 @@ $isPast        = $eventDateTime < new DateTime();
                     </a>
                 </div>
             <?php else: ?>
-                <img src="<?php echo htmlspecialchars($images[0]); ?>"
+                <img src="<?php echo htmlspecialchars($images[0] !== '' ? $images[0] : $defaultImage); ?>"
                      alt="<?php echo htmlspecialchars($event['event_title']); ?>"
                      onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
             <?php endif; ?>
@@ -125,8 +125,9 @@ $isPast        = $eventDateTime < new DateTime();
                             <div class="carousel-inner">
                                 <?php foreach ($event['images'] as $index => $img): ?>
                                     <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                                        <img src="<?php echo htmlspecialchars($img); ?>" class="d-block w-100"
-                                             alt="Φωτογραφία <?php echo $index + 1; ?>">
+                                        <img src="<?php echo htmlspecialchars($img !== '' ? $img : $defaultImage); ?>" class="d-block w-100"
+                                             alt="Φωτογραφία <?php echo $index + 1; ?>"
+                                             onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -138,9 +139,10 @@ $isPast        = $eventDateTime < new DateTime();
                             </a>
                         </div>
                     <?php else: ?>
-                        <img src="<?php echo htmlspecialchars($event['images'][0]); ?>"
+                        <img src="<?php echo htmlspecialchars($event['images'][0] !== '' ? $event['images'][0] : $defaultImage); ?>"
                              class="img-fluid mb-4 w-100 modal-preview-image"
-                             alt="<?php echo htmlspecialchars($event['event_title']); ?>">
+                             alt="<?php echo htmlspecialchars($event['event_title']); ?>"
+                             onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                     <?php endif; ?>
                 <?php endif; ?>
 
