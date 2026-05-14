@@ -91,9 +91,9 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                     <div class="carousel-inner">
                         <?php foreach ($annImages as $i => $img): ?>
                             <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
-                                <img src="<?php echo htmlspecialchars($img); ?>"
+                                <img src="<?php echo htmlspecialchars($img !== '' ? $img : $defaultImage); ?>"
                                      alt="<?php echo htmlspecialchars($announcement['announcement_title']); ?>"
-                                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -105,9 +105,9 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                     </a>
                 </div>
             <?php else: ?>
-                <img src="<?php echo htmlspecialchars($annImages[0]); ?>"
+                <img src="<?php echo htmlspecialchars($annImages[0] !== '' ? $annImages[0] : $defaultImage); ?>"
                      alt="<?php echo htmlspecialchars($announcement['announcement_title']); ?>"
-                     onerror="this.src='<?php echo $defaultImage; ?>'">
+                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
             <?php endif; ?>
 
             <!-- Sxolio: voithitiko HTML tmima gia tin parakato provoli. -->
@@ -192,8 +192,9 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                             <div class="carousel-inner">
                                 <?php foreach ($announcement['images'] as $index => $img): ?>
                                     <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                                        <img src="<?php echo htmlspecialchars($img); ?>" class="d-block w-100"
-                                             alt="Φωτογραφία <?php echo $index + 1; ?>">
+                                        <img src="<?php echo htmlspecialchars($img !== '' ? $img : $defaultImage); ?>" class="d-block w-100"
+                                             alt="Φωτογραφία <?php echo $index + 1; ?>"
+                                             onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -205,9 +206,10 @@ if ($attachmentCount === 1 && $pdfAttachmentCount === 1) {
                             </a>
                         </div>
                     <?php else: ?>
-                        <img src="<?php echo htmlspecialchars($announcement['images'][0]); ?>"
+                        <img src="<?php echo htmlspecialchars($announcement['images'][0] !== '' ? $announcement['images'][0] : $defaultImage); ?>"
                              class="img-fluid mb-4 w-100 modal-preview-image"
-                             alt="<?php echo htmlspecialchars($announcement['announcement_title']); ?>">
+                             alt="<?php echo htmlspecialchars($announcement['announcement_title']); ?>"
+                             onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultImage, ENT_QUOTES, 'UTF-8'); ?>';">
                     <?php endif; ?>
                 <?php endif; ?>
 

@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/site_context.php';
 $eventsService = new EventsService();
 $upcomingEvents = $eventsService->getUpcomingEvents();
 $pastEvents = $eventsService->getPastEvents();
-$defaultImage = site_asset_url('img/placeholder.jpg');
+$defaultImage = site_asset_url('img/content-placeholder.svg');
 ?>
 <!DOCTYPE html>
 <html lang="el">
