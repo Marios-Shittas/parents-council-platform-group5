@@ -280,11 +280,12 @@ function setupAnnouncementImageInput(input, previewId) {
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
     function updateInputState() {
-        if (existingCount + stagedFiles.length >= announcementImageLimit) {
+        if (existingCount >= announcementImageLimit) {
             input.disabled = true;
-        } else if (existingCount < announcementImageLimit) {
-            input.disabled = false;
+            return;
         }
+
+        input.disabled = false;
     }
 
     // Perigrafei ti leitourgia tou antistoixou tmimatos me emfasi sti statherotita kai tin egkyrotita dedomenon.
@@ -329,8 +330,7 @@ function setupAnnouncementImageInput(input, previewId) {
 
                 if (existingCount + stagedFiles.length >= announcementImageLimit) {
                     if (!reachedLimit) {
-                        const remainingSlots = Math.max(0, announcementImageLimit - existingCount - stagedFiles.length);
-                        warnings.push(`Μπορείτε να προσθέσετε μόνο ${remainingSlots} ακόμη εικόνα/ες σε αυτή την ανακοίνωση.`);
+                        warnings.push(`Το όριο είναι ${announcementImageLimit} εικόνες ανά ανακοίνωση. Κρατήθηκαν οι πρώτες ${announcementImageLimit - existingCount} διαθέσιμες εικόνες και οι επιπλέον δεν θα ανέβουν.`);
                         reachedLimit = true;
                     }
                     return;

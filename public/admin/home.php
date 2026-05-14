@@ -1330,6 +1330,6 @@ $calendarPayload = [
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/admin-home-calendar.js"></script>
-<script src="../assets/js/admin-home-dashboard.js"></script>
+<script src="../assets/js/admin-home-dashboard.js?v=<?php echo (int)(@filemtime(__DIR__ . '/../assets/js/admin-home-dashboard.js') ?: time()); ?>"></script>
 </body>
 </html>
