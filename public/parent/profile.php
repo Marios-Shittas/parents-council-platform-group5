@@ -103,7 +103,7 @@ $parentUserId = (int)($_SESSION['user_id'] ?? 0);
 $parentUser = $usersService->getUserById($parentUserId);
 
 if (!$parentUser || ($parentUser['role'] ?? '') !== 'parent') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 

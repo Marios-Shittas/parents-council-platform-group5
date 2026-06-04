@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/site_context.php';
 $currentPage = basename($_SERVER['PHP_SELF']);
 
 $unreadContactMessages = 0;
@@ -62,7 +63,7 @@ if ($pendingPaidOrders > 0) {
 ?>
 <script>
     (function () {
-        var faviconHref = '/parents-council-platform-group5/public/assets/img/primary-school-logo.png';
+        var faviconHref = '<?php echo site_asset_url('img/primary-school-logo.png'); ?>';
         var head = document.head || document.getElementsByTagName('head')[0];
         if (!head) return;
 
