@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../app/services/ParentsPageService.php';
+require_once __DIR__ . '/../../app/includes/site_context.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -11,7 +12,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -27,12 +28,12 @@ function getPhotosGalleryUploadDir()
 
 function buildPhotosGalleryWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Parents_img/' . $fileName;
+    return site_asset_url('Parents_img/' . $fileName);
 }
 
 function isLocalPhotosGalleryPath($imagePath)
 {
-    return str_starts_with((string)$imagePath, '/parents-council-platform-group5/public/assets/Parents_img/');
+    return str_starts_with((string)$imagePath, site_asset_url('Parents_img/'));
 }
 
 function resolvePhotosGalleryFilePath($imagePath)

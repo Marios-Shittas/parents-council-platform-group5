@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/site_context.php';
 
 class HomePageService
 {
@@ -170,15 +171,15 @@ class HomePageService
                 'content' => [
                     'slides' => [
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png',
+                            'src' => site_asset_url('img/home-school-banner.png'),
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1',
                         ],
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png',
+                            'src' => site_asset_url('img/home-school-banner-2.png'),
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2',
                         ],
                         [
-                            'src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png',
+                            'src' => site_asset_url('img/home-school-banner-3.png'),
                             'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3',
                         ],
                     ],

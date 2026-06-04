@@ -1,3 +1,4 @@
 <?php
-header('Location: /parents-council-platform-group5/public/admin/home.php');
+require_once __DIR__ . '/../../app/includes/site_context.php';
+header('Location: ' . site_public_url('admin/home.php'));
 exit;

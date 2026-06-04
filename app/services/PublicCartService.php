@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/site_context.php';
 require_once __DIR__ . '/../includes/product_sizes.php';
 
 class PublicCartService
@@ -293,7 +294,7 @@ class PublicCartService
 
     private function getDefaultProductImagePath(): string
     {
-        return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
+        return site_asset_url('Products_img/default-product.svg');
     }
 
     private function resolveProductImagePath(string $imagePath): string
@@ -324,7 +325,7 @@ class PublicCartService
 
         return $publicRelativePath === ''
             ? $this->getDefaultProductImagePath()
-            : '/parents-council-platform-group5/public/' . $publicRelativePath;
+            : site_public_url() . '/' . $publicRelativePath;
     }
 
     private function resolveProductImagePublicRelativePath(string $imagePath): string

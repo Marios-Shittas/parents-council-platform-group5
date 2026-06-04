@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../app/includes/site_context.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -30,13 +31,13 @@ if ($logoutUserId !== null && $logoutUserId > 0 && strtolower((string)$role) ===
 // Determine redirect URL based on role
 switch ($role) {
     case 'admin':
-        $redirectUrl = '/parents-council-platform-group5/public/home.php';
+        $redirectUrl = site_public_url('home.php');
         break;
     case 'parent':
-        $redirectUrl = '/parents-council-platform-group5/public/home.php';
+        $redirectUrl = site_public_url('home.php');
         break;
     default:
-        $redirectUrl = '/parents-council-platform-group5/public/home.php';
+        $redirectUrl = site_public_url('home.php');
         break;
 }
 

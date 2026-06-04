@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/site_context.php';
+
 if (!function_exists('auth_start_session')) {
     function auth_start_session(): void
     {
@@ -31,14 +33,14 @@ if (!function_exists('auth_redirect_url_for_current_role')) {
         $role = auth_user_role();
 
         if ($role === 'admin') {
-            return '/parents-council-platform-group5/public/admin/home.php';
+            return site_public_url('admin/home.php');
         }
 
         if ($role === 'parent') {
-            return '/parents-council-platform-group5/public/parent/home.php';
+            return site_public_url('parent/home.php');
         }
 
-        return '/parents-council-platform-group5/public/login.php';
+        return site_login_url();
     }
 }
 

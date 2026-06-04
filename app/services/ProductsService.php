@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/site_context.php';
 
 class ProductsService
 {
@@ -564,7 +565,7 @@ class ProductsService
 
         return $publicRelativePath === ''
             ? $this->getDefaultProductImagePath()
-            : '/parents-council-platform-group5/public/' . $publicRelativePath;
+            : site_public_url() . '/' . $publicRelativePath;
     }
 
     private function resolveProductImagePublicRelativePath(string $imagePath): string
@@ -600,6 +601,6 @@ class ProductsService
 
     private function getDefaultProductImagePath(): string
     {
-        return '/parents-council-platform-group5/public/assets/Products_img/default-product.svg';
+        return site_asset_url('Products_img/default-product.svg');
     }
 }

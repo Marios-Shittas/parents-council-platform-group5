@@ -153,7 +153,7 @@ include __DIR__ . '/../../includes/public_page_header.php';
                     </div>
                 </div>
                 <div class="insurance-cta-actions">
-                    <a class="insurance-cta-btn" href="/parents-council-platform-group5/app/services/InsuranceJCC.php?action=checkout">
+                    <a class="insurance-cta-btn" href="<?php echo site_project_url(); ?>/app/services/InsuranceJCC.php?action=checkout">
                         Πληρωμή Ασφάλειας μέσω JCC
                     </a>
                 </div>

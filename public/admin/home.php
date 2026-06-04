@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../app/includes/site_context.php';
 require_once __DIR__ . '/../../app/services/EventsService.php';
 require_once __DIR__ . '/../../app/services/AnnouncementsService.php';
 require_once __DIR__ . '/../../app/services/HomePageService.php';
@@ -14,7 +15,7 @@ header("Expires: 0");
 header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-    header('Location: /parents-council-platform-group5/public/login.php');
+    header('Location: ' . site_login_url());
     exit;
 }
 
@@ -47,13 +48,13 @@ function adminHomeGetBannerUploadDir()
 
 function adminHomeBuildBannerWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Home_img/' . $fileName;
+    return site_asset_url('Home_img/' . $fileName);
 }
 
 function adminHomeDeleteManagedBannerImage($path)
 {
     $trimmed = trim((string)$path);
-    $managedPrefix = '/parents-council-platform-group5/public/assets/Home_img/';
+    $managedPrefix = site_asset_url('Home_img/');
 
     if ($trimmed === '' || strpos($trimmed, $managedPrefix) !== 0) {
         return;
@@ -72,7 +73,7 @@ function adminHomePublicContentUrlExists($url)
         return true;
     }
 
-    $publicPrefix = '/parents-council-platform-group5/public/';
+    $publicPrefix = site_public_url() . '/';
     if (strpos($path, $publicPrefix) !== 0) {
         return true;
     }
@@ -157,7 +158,7 @@ function adminCalendarGetEventImageUploadDir()
 
 function adminCalendarBuildEventImageWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Events_img/' . $fileName;
+    return site_asset_url('Events_img/' . $fileName);
 }
 
 function adminCalendarGetAnnouncementImageUploadDir()
@@ -167,7 +168,7 @@ function adminCalendarGetAnnouncementImageUploadDir()
 
 function adminCalendarBuildAnnouncementImageWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Announcements_img/' . $fileName;
+    return site_asset_url('Announcements_img/' . $fileName);
 }
 
 function adminCalendarGetAnnouncementAttachmentUploadDir()
@@ -177,7 +178,7 @@ function adminCalendarGetAnnouncementAttachmentUploadDir()
 
 function adminCalendarBuildAnnouncementAttachmentWebPath($fileName)
 {
-    return '/parents-council-platform-group5/public/assets/Announcements_docs/' . $fileName;
+    return site_asset_url('Announcements_docs/' . $fileName);
 }
 
 function adminCalendarGetDefaultAnnouncementGdprNotice()
@@ -792,9 +793,9 @@ $announcementsContentSection = $homeSections['announcements_section'] ?? ['title
 $eventsContentSection = $homeSections['events_section'] ?? ['title' => '', 'subtitle' => '', 'content' => []];
 
 $defaultBannerSlides = [
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-2.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2'],
-    ['src' => '/parents-council-platform-group5/public/assets/img/home-school-banner-3.png', 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3'],
+    ['src' => site_asset_url('img/home-school-banner.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 1'],
+    ['src' => site_asset_url('img/home-school-banner-2.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 2'],
+    ['src' => site_asset_url('img/home-school-banner-3.png'), 'alt' => 'Γυμνάσιο Αγίου Αθανασίου - Εικόνα 3'],
 ];
 $bannerSlidesForEditor = [];
 for ($i = 0; $i < 3; $i++) {
